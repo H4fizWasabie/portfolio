@@ -116,3 +116,19 @@
   .mc *, .mc *::before, .mc *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
 @keyframes mc-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+/* ── /resume page: embedded PDF viewer ─────────────────────────────────────
+   Chrome for Android and most mobile webviews cannot preview PDFs inline, so
+   the /resume route renders the PDF through Google Docs Viewer. The direct
+   download link stays available for desktop viewers. */
+.mc-pdf-frame {
+  position: relative;
+  margin-top: 26px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(3, 8, 15, .45);
+}
+.mc-pdf-frame iframe { display: block; width: 100%; height: min(78vh, 900px); border: 0; }
+.mc-pdf-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+.mc-pdf-actions .mc-cta { margin-top: 0; }
