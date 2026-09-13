@@ -1,14 +1,14 @@
 /* ── Mission-control case studies ───────────────────────────────────────────
    Restyles the React-rendered routes (/work/:slug, /resume, 404) to match the
    delta landing's design language (navy panels, cyan accent, Plex Mono
-   labels / Inter body). Namespaced under .mc-* so the legacy lime landing
+   labels / Archivo body). Namespaced under .mc-* so the legacy lime landing
    styles in styles.css are untouched. Landing (/) itself is static delta
    HTML and does not use this file. */
 
 .mc {
   --bg: #0b0e14; --bg-deep: #080b10; --panel: #11151d; --panel-2: #0e1219;
   --line: #1e2531; --line-bright: #2b3546;
-  --ink: #e8ecf4; --ink-dim: #8b94a7; --ink-faint: #5a6376;
+  --ink: #e8ecf4; --ink-dim: #8b94a7; --ink-faint: #7e8899;
   --cyan: #39c0f0; --cyan-deep: #1a7fb8; --cyan-glow: rgba(57, 192, 240, .35);
   --green: #34d399; --green-glow: rgba(52, 211, 153, .25);
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
@@ -18,7 +18,7 @@
   flex-direction: column;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
 }
@@ -78,7 +78,7 @@
 /* ---- screenshot ---- */
 .mc-media { margin: 34px 0 0; background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .mc-media img { display: block; width: 100%; max-height: 480px; object-fit: cover; filter: saturate(.92); }
-.mc-caption { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); padding: 10px 16px; }
+.mc-caption { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding: 10px 16px; }
 
 /* ---- narrative blocks (numbered panels) ---- */
 .mc-blocks { counter-reset: mc-block; margin-top: 6px; }
@@ -103,7 +103,7 @@
 .mc-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .mc-footer a { font-family: var(--mono); font-size: 12px; color: var(--ink-dim); text-decoration: none; }
 .mc-footer a:hover { color: var(--cyan); }
-.mc-note { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); }
+.mc-note { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
 .mc-note b { color: var(--amber); font-weight: 500; }
 
 /* ---- entry motion (delta-style, honors reduced motion) ---- */
