@@ -1,5 +1,37 @@
-@import 'tailwindcss';
-@theme { --color-bg:#0B0C0A; --color-raised:#101208; --color-fg:#E8E8E4; --color-dim:#8A8A84; --color-rule:#2A2C24; --color-signal:#C6FF4A; --font-mono:'IBM Plex Mono',monospace; }
+/* ── Base reset ────────────────────────────────────────────────────────────
+   Vendored from the Tailwind CSS v4 preflight this stylesheet used to pull in
+   via `@import 'tailwindcss'`, so that dropping the Tailwind build plugin
+   changes no computed style.
+
+   Load-bearing rules kept, and why:
+     * margin/padding:0      paragraphs, headings, figures and the thumb/media
+                             wrappers set margins only where they want them, so
+                             they rely on a zeroed default.
+     * heading font-size /   sizes are set below, but h1 relies on inheriting
+       font-weight: inherit  its weight; the UA default would be bold.
+     * img/svg/canvas        the hero canvas and case-study images depend on
+       display: block        display:block; img also needs max-width:100%.
+     * small font-size:80%   .work-row small sets no size of its own.
+     * b/strong, a, [hidden] as Tailwind shipped them.
+
+   Rules for element types this app never renders are omitted deliberately:
+   form controls, tables, lists, code/pre, sub/sup, abbr, hr, progress, summary,
+   and the ::placeholder / date-input / file-selector pseudo-elements.
+
+   This reset is unlayered, where the preflight was in `@layer base`. That is
+   equivalent: unlayered styles already beat layered ones, and this block sits
+   above every other rule in the file, so any same-or-higher-specificity rule
+   below still wins exactly as it did before. */
+*, ::before, ::after, ::backdrop { box-sizing: border-box; border: 0 solid; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; tab-size: 4; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; text-decoration: inherit; }
+b, strong { font-weight: bolder; }
+small { font-size: 80%; }
+img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
+img, video { max-width: 100%; height: auto; }
+:-moz-focusring { outline: auto; }
+[hidden]:where(:not([hidden="until-found"])) { display: none !important; }
 
 :root {
   color-scheme: dark;
