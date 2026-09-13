@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="AI Content Lab — a self-directed campaign concept for a Hill’s pet-food range, built with Theoses.">
+<title>AI Content Lab — Mohammad Hafiz Bin Jamali</title>
+<style>
+:root{--paper:#FFFFFF;--alt:#F7F7F8;--ink:#111111;--rule:#E1E1E6;--line:#111111;--muted:#6B6B70;--red:#E4002B;--max:1200px;--sans:"Helvetica Neue",Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}.shell{max-width:var(--max);margin:auto;padding:0 28px}
+h1,h2,h3{font-weight:700;letter-spacing:-.045em;margin:0}
+/* top nav */
+.topbar{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:22px 0}
+.topbar a{text-decoration:none;color:var(--muted);font-size:.85rem}
+.topbar a:hover{color:var(--red);text-decoration:underline;text-underline-offset:4px}
+.topbar .brand{color:var(--ink);font-weight:700;font-size:1.05rem;letter-spacing:-.03em}
+.topbar .brand i{font-style:normal;color:var(--red)}
+.topbar .links{display:flex;gap:28px}
+/* hero */
+.hero{padding:72px 0 56px;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--red);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.hero h1{font-size:clamp(2.6rem,6vw,5rem);line-height:.98;max-width:900px;margin:20px 0 24px}
+.hero p{color:var(--muted);max-width:62ch;margin:0 0 18px}
+.hero .note{display:block;color:var(--muted);font-size:.82rem;border-top:1px solid var(--rule);padding-top:12px;max-width:62ch}
+/* sections */
+.section{padding:72px 0 0}
+.section h2{font-size:clamp(1.9rem,3.6vw,3rem);border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:26px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.panel{background:var(--paper);padding:26px}
+.panel h3{font-size:1.1rem;margin-bottom:8px}
+.panel p{margin:0;color:var(--muted);font-size:.92rem}
+/* mockup */
+.mockup{border:1px solid var(--line)}
+.mock-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:14px 22px;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.mock-head span:last-child{color:var(--red)}
+.carousel-window{min-height:220px}
+.carousel-slide{padding:34px 22px}
+.carousel-slide small{display:block;color:var(--muted);font-size:.78rem;margin-bottom:12px}
+.carousel-slide h3{font-size:clamp(1.4rem,2.6vw,2rem);max-width:26ch}
+.carousel-slide p{color:var(--muted);max-width:56ch}
+.mock-cta{display:inline-block;margin-top:16px;color:var(--red);font-weight:700;font-size:.88rem;border-bottom:2px solid var(--red);padding-bottom:2px}
+.carousel-controls{display:flex;border-top:1px solid var(--line)}
+.carousel-controls button{flex:1;background:var(--paper);border:0;border-right:1px solid var(--rule);padding:13px;font:700 .82rem var(--sans);letter-spacing:.04em;color:var(--muted);cursor:pointer}
+.carousel-controls button:last-child{border-right:0}
+.carousel-controls button[aria-selected="true"]{background:var(--ink);color:#fff}
+.carousel-controls button:hover{color:var(--red)}
+.mock-foot{display:flex;gap:20px;border-top:1px solid var(--rule);padding:12px 22px;color:var(--muted);font-size:.78rem}
+/* campaign outputs */
+.campaign-board-intro{max-width:60ch;color:var(--muted);margin-bottom:22px}
+.campaign-board-intro strong{display:block;color:var(--ink);margin-bottom:6px}
+.campaign-outputs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.campaign-output{background:var(--paper);display:flex;flex-direction:column}
+.campaign-output.featured{grid-row:span 1}
+.campaign-output-label{display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:12px 16px;font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.campaign-output-label span:last-child{color:var(--red)}
+.campaign-art{border-bottom:1px solid var(--rule)}
+.campaign-art img{display:block;width:100%;height:170px;object-fit:cover}
+.campaign-art-copy{padding:16px}
+.campaign-art-copy small{display:block;color:var(--muted);font-size:.76rem;margin-bottom:4px}
+.campaign-art-copy strong{display:block;font-size:1rem;letter-spacing:-.02em;margin-bottom:4px}
+.campaign-art-copy em{font-style:normal;color:var(--red);font-size:.8rem;font-weight:700}
+.campaign-output-body{padding:16px;color:var(--muted);font-size:.86rem;margin-top:auto}
+.campaign-output-body strong{color:var(--ink);display:block;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.campaign-board-note{color:var(--muted);font-size:.84rem;border-left:3px solid var(--red);padding:10px 16px;margin:20px 0 0}
+.campaign-board-note b{color:var(--ink)}
+/* strategy */
+.strategy{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.strategy-board{background:var(--paper);padding:26px}
+.strategy-board h3{font-size:1.1rem;margin-bottom:14px}
+.strategy-row{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:10px 0;border-top:1px solid var(--rule);font-size:.9rem}
+.strategy-row:first-of-type{border-top:0}
+.strategy-row b{font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red)}
+.strategy-copy{background:var(--paper);padding:26px}
+.strategy-copy p{color:var(--muted);font-size:.92rem;margin:12px 0 0}
+.strategy-copy strong{display:block;font-size:1.05rem;letter-spacing:-.02em}
+/* desk */
+.desk{display:grid;grid-template-columns:1.3fr .7fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.desk-canvas{background:var(--paper);display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule)}
+.desk-card{background:var(--paper);padding:22px}
+.desk-card small{display:block;color:var(--red);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.desk-card strong{display:block;font-size:1rem;letter-spacing:-.02em;margin-bottom:6px}
+.desk-card p{margin:0 0 12px;color:var(--muted);font-size:.86rem}
+.desk-card span{display:inline-block;border:1px solid var(--ink);padding:3px 8px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.desk-aside{background:var(--paper);padding:26px}
+.desk-aside h3{font-size:1.3rem;margin:12px 0 10px;max-width:20ch}
+.desk-aside p{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+.desk-list{list-style:none;margin:0;padding:0}
+.desk-list li{border-top:1px solid var(--rule);padding:9px 0;font-size:.86rem}
+.desk-list b{color:var(--red);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;margin-right:8px}
+/* products */
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.products figure{margin:0;background:var(--paper)}
+.products img{display:block;width:100%;height:170px;object-fit:cover}
+.products figcaption{padding:10px 12px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--rule)}
+/* flip cards */
+.copy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.flip-card{background:var(--paper);padding:24px;cursor:pointer}
+.flip-card small{display:block;color:var(--red);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.flip-card .quote{font-size:1.05rem;letter-spacing:-.02em;margin:0 0 14px;min-height:4.4em}
+.flip-card .why{color:var(--muted);font-size:.86rem;margin:0;border-top:1px solid var(--rule);padding-top:12px}
+.flip-hint{display:block;color:var(--muted);font-size:.76rem;margin-top:10px}
+.motion-note{display:block;margin-top:14px;color:var(--muted);font-size:.78rem}
+/* workflow */
+.workflow-editorial{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-bottom:0}
+.wf-tab{background:var(--paper);border:0;padding:18px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--ink)}
+.wf-tab b{display:block;color:var(--red);font-size:1.3rem;letter-spacing:-.04em;margin-bottom:6px}
+.wf-tab h3{font-size:.95rem;margin-bottom:4px}
+.wf-tab p{margin:0;color:var(--muted);font-size:.76rem;line-height:1.4}
+.wf-tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.wf-tab[aria-selected="true"] p{color:#bbb}
+.wf-tab[aria-selected="true"] b{color:#fff}
+.wf-tab:hover{outline:2px solid var(--red);outline-offset:-2px}
+.workflow-stage{display:grid;grid-template-columns:1.2fr .8fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.workflow-stage>div{background:var(--paper);padding:24px}
+.stage-label{display:block;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.workflow-stage h3{font-size:1.3rem;margin-bottom:8px}
+.workflow-stage p{color:var(--muted);margin:0;font-size:.92rem}
+.stage-output strong{display:block;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.stage-output span{display:block;color:var(--ink);font-size:.9rem;margin-bottom:10px}
+.stage-output em{font-style:normal;color:var(--muted);font-size:.8rem;border-top:1px solid var(--rule);display:block;padding-top:10px}
+.closing-panel{border:1px solid var(--rule);border-top:0;padding:26px}
+.closing-panel p{margin:0 0 14px;max-width:70ch;color:var(--ink)}
+.tags{display:flex;gap:0;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.tags span{padding:4px 12px;border:1px solid var(--rule);border-left:0}
+.tags span:first-child{border-left:1px solid var(--rule)}
+footer{border-top:1px solid var(--line);margin-top:72px;padding:20px 0 30px;color:var(--muted);font-size:.8rem;display:flex;justify-content:space-between;gap:16px}
+@media(max-width:900px){
+.grid,.strategy,.desk,.copy-grid{grid-template-columns:1fr}
+.campaign-outputs{grid-template-columns:1fr}
+.products{grid-template-columns:repeat(2,1fr)}
+.workflow-editorial{grid-template-columns:repeat(2,1fr)}
+.workflow-stage{grid-template-columns:1fr}
+.desk-canvas{grid-template-columns:1fr}
+.hero{padding:52px 0 40px}
+}
+@media(max-width:560px){.shell{padding:0 18px}.products{grid-template-columns:1fr}.workflow-editorial{grid-template-columns:1fr}footer{display:block}footer span{display:block;margin-top:6px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="topbar"><a class="brand" href="/">Hafiz <i>Jamali</i></a><div class="links"><a href="/">Back to portfolio</a><a href="resume.html">Resume ↗</a><a href="mailto:kisame350@gmail.com">Email ↗</a></div></nav>
+
+  <header class="hero">
+    <div class="eyebrow">Theoses / AI Content Lab</div>
+    <h1>From product facts to a conversation people want to join.</h1>
+    <p>A self-directed campaign concept for a Hill’s pet-food range: using research, AI-assisted generation, structured checkpoints, and content management to shape a clear product-education story.</p>
+    <span class="note">Mock campaign · personal project · not client work</span>
+  </header>
+
+  <section class="section">
+    <h2>The brief</h2>
+    <div class="grid">
+      <div class="panel"><h3>Audience</h3><p>Cat and dog owners looking for a clearer way to compare everyday nutrition options for their pets.</p></div>
+      <div class="panel"><h3>Objective</h3><p>Turn a broad product range into an approachable post that helps owners start a conversation about their pet’s needs.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Campaign mockup</h2>
+    <div class="mockup" aria-label="Sample pet product social post">
+      <div class="mock-head"><span>Paw / Daily — sample brand</span><span>Practical care</span></div>
+      <div class="carousel-window" id="campaign-carousel"><div class="carousel-slide" data-kind="education"><small>Hill’s Science Diet · range spotlight</small><h3>One range. Different needs. Start with the right question.</h3><p>Adult, small-breed, sensitive-stomach, and urinary-care options each speak to a different conversation.</p><span class="mock-cta">Find your starting point</span></div></div>
+      <div class="carousel-controls" role="tablist" aria-label="Campaign post slides"><button type="button" data-slide="0" aria-selected="true">01 Hook</button><button type="button" data-slide="1" aria-selected="false">02 Educate</button><button type="button" data-slide="2" aria-selected="false">03 Action</button></div>
+      <div class="mock-foot"><span>Product education</span><span>Conversation-led</span><span>AI-assisted concept</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Campaign outputs</h2>
+    <div class="campaign-board">
+      <div class="campaign-board-intro"><strong>One idea, three formats.</strong>“Start with the clue” turns a broad product range into a conversation-led content set: one message, adapted for different moments in a pet owner’s feed.</div>
+      <div class="campaign-outputs">
+        <article class="campaign-output"><div class="campaign-output-label"><span>01 / Instagram post</span><span>Hook</span></div><div class="campaign-art"><img src="img/hills-range.jpg" alt="Hill’s Science Diet product range"><div class="campaign-art-copy"><small>Every pet has a clue</small><strong>Start with the question, not the product.</strong><em>Save this for your next feeding conversation</em></div></div><div class="campaign-output-body"><strong>Role in the campaign</strong>Earn attention with a simple question before introducing product choices.</div></article>
+        <article class="campaign-output"><div class="campaign-output-label"><span>02 / Carousel</span><span>Educate</span></div><div class="campaign-art"><img src="img/hills-sensitive-stomach.jpg" alt="Hill’s Science Diet Sensitive Stomach and Skin product bag"><div class="campaign-art-copy"><small>Look for the clue</small><strong>Age. Size. Lifestyle. Concern.</strong><em>Swipe to explore</em></div></div><div class="campaign-output-body"><strong>Role in the campaign</strong>Break a product range into clear, useful decision points.</div></article>
+        <article class="campaign-output"><div class="campaign-output-label"><span>03 / Story</span><span>Invite</span></div><div class="campaign-art"><img src="img/hills-urinary-care.jpg" alt="Hill’s Prescription Diet c/d Urinary Care product bag"><div class="campaign-art-copy"><small>Tell us the clue</small><strong>What question do you have?</strong><em>Reply to start</em></div></div><div class="campaign-output-body"><strong>Role in the campaign</strong>Turn content attention into a useful customer signal.</div></article>
+      </div>
+      <p class="campaign-board-note"><b>Self-directed practice project.</b> Product imagery supplied for concept development; no client campaign results are claimed.</p>
+    </div>
+  </section>
+
+  <section id="strategy" class="section">
+    <h2>Strategy milestones</h2>
+    <div class="strategy">
+      <div class="strategy-board">
+        <h3>Campaign control notes</h3>
+        <div class="strategy-row"><b>Target</b><span>Help pet owners begin a more informed nutrition conversation.</span></div>
+        <div class="strategy-row"><b>Milestone</b><span>Turn one product range into a clear educational content set.</span></div>
+        <div class="strategy-row"><b>Checkpoint</b><span>Review product wording, tone, audience fit, and next action.</span></div>
+        <div class="strategy-row"><b>Next</b><span>Adapt the strongest idea into a short-video script and carousel.</span></div>
+      </div>
+      <div class="strategy-copy"><strong>The working principle</strong><p>Marketing content becomes easier to manage when every idea has a target, a next step, and a review point. This is the structure Theoses is being upgraded to support across the full digital content lifecycle.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Campaign desk</h2>
+    <div class="desk">
+      <div class="desk-canvas" aria-label="Campaign desk mockup">
+        <article class="desk-card"><small>Audience note</small><strong>What question is the owner asking?</strong><p>Begin with the need, not the product name.</p><span>Researched</span></article>
+        <article class="desk-card"><small>Content brief</small><strong>Range spotlight</strong><p>One clear message, adapted into multiple formats.</p><span>In progress</span></article>
+        <article class="desk-card"><small>Review checkpoint</small><strong>Claims + tone check</strong><p>Keep education useful, careful, and easy to understand.</p><span>Ready to review</span></article>
+        <article class="desk-card"><small>Next action</small><strong>Adapt to short video</strong><p>Use the strongest hook as the opening question.</p><span>Queued</span></article>
+      </div>
+      <div class="desk-aside"><div class="eyebrow">The working system</div><h3>Ideas become manageable when they leave a trail.</h3><p>This mock desk shows how a campaign can move from a question to a reviewed content asset, with every next action visible.</p><ul class="desk-list"><li><b>Input</b>Product and audience signals</li><li><b>Decision</b>One message worth developing</li><li><b>Output</b>Content asset plus next action</li></ul></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Product material</h2>
+    <div class="products">
+      <figure><img src="img/hills-sensitive-stomach.jpg" alt="Hill’s Science Diet Sensitive Stomach and Skin product bag"><figcaption>Science Diet · Sensitive Stomach &amp; Skin</figcaption></figure>
+      <figure><img src="img/hills-range.jpg" alt="Hill’s Science Diet cat and dog product range"><figcaption>Science Diet · cat and dog range</figcaption></figure>
+      <figure><img src="img/hills-urinary-care.jpg" alt="Hill’s Prescription Diet c/d Urinary Care product bag"><figcaption>Prescription Diet · c/d Urinary Care</figcaption></figure>
+      <figure><img src="img/hills-featured-range.jpeg" alt="Hill’s product range promotional artwork"><figcaption>Supplied promotional artwork</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="content" class="section">
+    <h2>Content set</h2>
+    <div class="copy-grid">
+      <article class="flip-card" tabindex="0"><small>Hook 01</small><p class="quote">“Adult, small breed, sensitive stomach — which clue describes your pet?”</p><p class="why">It starts with recognisable pet-owner clues and invites self-identification before mentioning a product.</p><span class="flip-hint">Click on mobile to swap angle</span></article>
+      <article class="flip-card" tabindex="0"><small>Hook 02</small><p class="quote">“The right pet food conversation starts before the product recommendation.”</p><p class="why">It positions education and listening as the first step, keeping the communication useful rather than overly sales-led.</p><span class="flip-hint">Click on mobile to swap angle</span></article>
+      <article class="flip-card" tabindex="0"><small>Call to action</small><p class="quote">“Tell us your pet’s age, size, and biggest feeding question.”</p><p class="why">It creates a clear next action and gives the content team useful signals for the next campaign idea.</p><span class="flip-hint">Click on mobile to swap angle</span></article>
+    </div>
+    <span class="motion-note">Each card pairs the content choice with the reasoning behind it.</span>
+  </section>
+
+  <section class="section">
+    <h2>Theoses content workflow</h2>
+    <div class="workflow-editorial" role="tablist" aria-label="Theoses content workflow">
+      <button class="wf-tab" role="tab" aria-selected="true" data-stage="research"><b>01</b><h3>Research</h3><p>Gather product, audience, and market signals.</p></button>
+      <button class="wf-tab" role="tab" aria-selected="false" data-stage="generate"><b>02</b><h3>Generate</h3><p>Produce hooks, captions, angles, and visual concepts.</p></button>
+      <button class="wf-tab" role="tab" aria-selected="false" data-stage="automate"><b>03</b><h3>Automate</h3><p>Turn repeatable work into structured workflows.</p></button>
+      <button class="wf-tab" role="tab" aria-selected="false" data-stage="manage"><b>04</b><h3>Manage</h3><p>Organise assets, drafts, stages, and next actions.</p></button>
+      <button class="wf-tab" role="tab" aria-selected="false" data-stage="review"><b>05</b><h3>Review</h3><p>Check clarity, tone, accuracy, and audience fit.</p></button>
+      <button class="wf-tab" role="tab" aria-selected="false" data-stage="learn"><b>06</b><h3>Learn</h3><p>Capture responses and improve the next content idea.</p></button>
+    </div>
+    <div class="workflow-stage" id="workflow-stage" role="tabpanel" aria-live="polite"><div><span class="stage-label">Selected stage</span><h3>Research</h3><p>Turn a broad product range into a focused audience question before creating anything.</p></div><div class="stage-output"><strong>Working output</strong><span>Audience signals · product facts · competitor angles · content opportunities</span><em>Checkpoint → define one useful customer question</em></div></div>
+    <div class="closing-panel">
+      <p>Theoses currently supports research, content ideation, drafting, workflow structure, and digital organisation. The next development stage is to manage more of the content lifecycle, including generation, automation, scheduling, and campaign tracking. I select and edit the final direction myself.</p>
+      <div class="tags"><span>Research</span><span>Content generation</span><span>Workflow automation</span><span>Digital organisation</span><span>Review checkpoints</span><span>Campaign learning</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>What I would measure</h2>
+    <div class="grid">
+      <div class="panel"><h3>Conversation quality</h3><p>Relevant comments, questions, replies, and recurring customer concerns.</p></div>
+      <div class="panel"><h3>Content learning</h3><p>Which hook, format, and product angle earns the clearest response.</p></div>
+    </div>
+  </section>
+
+  <footer><span>Built as an honest demonstration of AI-assisted marketing practice. Replace the sample brand and copy with a real product brief when available.</span><span>© Mohammad Hafiz Bin Jamali</span></footer>
+<script>
+const workflow={
+ research:['Research','Turn a broad product range into a focused audience question before creating anything.','Audience signals · product facts · competitor angles · content opportunities','Checkpoint → define one useful customer question'],
+ generate:['Generate','Use the selected question to create several possible hooks, captions, visual directions, and formats.','Hook options · caption drafts · carousel outline · short-video angle','Checkpoint → choose the clearest message'],
+ automate:['Automate','Make repeatable research, drafting, and review steps easier to run consistently.','Prompt sequence · review checklist · reusable content workflow','Roadmap → expand Theoses’s automation layer'],
+ manage:['Manage','Keep campaign assets, stages, owners, next actions, and content variants visible in one place.','Content inventory · milestone board · next-action queue','Roadmap → manage the full content lifecycle'],
+ review:['Review','Check whether the content is clear, responsible, audience-appropriate, and ready for adaptation.','Tone check · claim check · CTA check · format check','Checkpoint → approve, revise, or hold'],
+ learn:['Learn','Capture useful responses and turn them into a better next content decision.','Questions · comments · format signals · next experiment','Next cycle → feed the learning back into research']
+};
+document.querySelectorAll('.wf-tab').forEach(tab=>tab.addEventListener('click',()=>{const d=workflow[tab.dataset.stage],stage=document.getElementById('workflow-stage');document.querySelectorAll('.wf-tab').forEach(t=>t.setAttribute('aria-selected',t===tab));stage.innerHTML=`<div><span class="stage-label">Selected stage</span><h3>${d[0]}</h3><p>${d[1]}</p></div><div class="stage-output"><strong>Working output</strong><span>${d[2]}</span><em>${d[3]}</em></div>`}));
+const slides=[['education','Hill’s Science Diet · range spotlight','One range. Different needs. Start with the right question.','Adult, small-breed, sensitive-stomach, and urinary-care options each speak to a different conversation.','Find your starting point'],['question','Product education · owner question','What is your pet telling you about their everyday needs?','Use age, size, lifestyle, and recurring concerns as a starting point for a more useful nutrition conversation.','Explore the question'],['action','Conversation-led · next step','Tell us the clue. Start the conversation.','Invite pet owners to share the context behind their question so the next piece of content can be more relevant.','Share your question']];
+document.querySelectorAll('[data-slide]').forEach(button=>button.addEventListener('click',()=>{const s=slides[Number(button.dataset.slide)],target=document.getElementById('campaign-carousel');document.querySelectorAll('[data-slide]').forEach(b=>b.setAttribute('aria-selected',b===button));target.innerHTML=`<div class="carousel-slide" data-kind="${s[0]}"><small>${s[1]}</small><h3>${s[2]}</h3><p>${s[3]}</p><span class="mock-cta">${s[4]}</span></div>`}));
+</script>
+</main>
+</body>
+</html>

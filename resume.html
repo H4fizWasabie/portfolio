@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Resume — Mohammad Hafiz Jamali, Marketing Executive · AI automation &amp; content operations.">
+<title>Mohammad Hafiz Jamali — Marketing Executive</title>
+<style>
+/* Swiss anchor: white, Helvetica, hairlines, one red accent. Numerals are the spine.
+   The sheet IS the document: screen shows the A4 page; print emits it verbatim. */
+:root{
+  --paper:#FFFFFF; --ink:#111111; --muted:#6B6B70; --rule:#E1E1E6;
+  --line:#111111; --red:#E4002B;
+  --sans:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#3a3a3e}
+body{
+  width:210mm;min-height:297mm;margin:34px auto 60px;background:var(--paper);color:var(--ink);
+  font:9.4pt/1.5 var(--sans);-webkit-font-smoothing:antialiased;
+  padding:11mm 15mm 10mm;
+  box-shadow:0 2px 22px rgba(0,0,0,.35);
+  display:flex;flex-direction:column;
+}
+@page{size:A4;margin:0}
+h1,h2,h3{font-weight:700}
+a{color:inherit}
+
+/* ---------- site topbar (screen only) ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:24px}
+.brand{text-decoration:none;font-weight:700;font-size:1.05rem;letter-spacing:-.03em}
+.brand i{font-style:normal;color:var(--red)}
+.nav{display:flex;gap:22px;font-size:.8rem}
+.nav a{text-decoration:none;color:var(--muted)}
+.nav a:hover{color:var(--red);text-decoration:underline;text-underline-offset:4px}
+.nav a.pdf{color:var(--red);font-weight:700}
+
+/* ---------- header ---------- */
+.masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--line);padding-bottom:10pt}
+h1{font-size:23pt;letter-spacing:-.045em;line-height:1}
+.title{margin-top:5pt;color:var(--red);font-size:7.6pt;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.folio{font-size:7.2pt;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;padding-bottom:2pt}
+.contact{display:flex;flex-wrap:wrap;gap:3pt 0;border-bottom:1px solid var(--line);padding:6pt 0;font-size:8.4pt}
+.contact span{white-space:nowrap}
+.contact .sep{color:var(--red);margin:0 7pt;font-weight:700}
+
+/* ---------- impact spine ---------- */
+.impact{display:flex;border-bottom:1px solid var(--line)}
+.impact div{flex:1;padding:9pt 12pt 8pt;border-right:1px solid var(--rule)}
+.impact div:first-child{padding-left:0}
+.impact div:last-child{border-right:0}
+.impact strong{display:block;color:var(--red);font-size:21pt;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.impact em{display:block;font-style:normal;color:var(--muted);font-size:7.4pt;line-height:1.3;margin-top:3pt}
+
+/* ---------- sections ---------- */
+.section{margin-top:9pt}
+h2{font-size:7.6pt;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:3.5pt;margin-bottom:7pt}
+.profile{font-size:9.6pt;line-height:1.55}
+
+.role{display:flex;justify-content:space-between;align-items:baseline;gap:12pt;margin-bottom:3pt}
+.role h3{font-size:10pt;letter-spacing:-.015em}
+.role .meta{font-size:8.2pt;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.entry{margin-bottom:6.5pt}
+.entry:last-child{margin-bottom:0}
+.entry ul{margin:2pt 0 0;padding-left:13pt}
+.entry li{margin-bottom:2.4pt}
+.entry p{margin-top:2pt}
+
+/* ---------- skills ---------- */
+.skills{font-size:9.2pt}
+.skills .sep{color:var(--red);margin:0 4.5pt;font-weight:700}
+
+/* ---------- bottom band ---------- */
+.band{display:flex;gap:18pt;margin-top:2pt}
+.band > div{flex:1}
+.band h2{margin-bottom:5pt}
+.band p,.band li{font-size:8.4pt;line-height:1.45}
+.band ul{list-style:none}
+.band li{padding:2.6pt 0;border-bottom:1px solid var(--rule)}
+.band li:last-child{border-bottom:0}
+.band .yrs{color:var(--muted);font-variant-numeric:tabular-nums}
+.footer{margin-top:auto;border-top:2px solid var(--line);padding-top:5pt;display:flex;justify-content:space-between;font-size:7.2pt;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.footer b{color:var(--red)}
+
+/* ---------- print ---------- */
+@media print{
+  html{background:none}
+  body{margin:0;box-shadow:none;min-height:auto}
+  .topbar{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar" aria-label="Primary navigation">
+  <a class="brand" href="/">Hafiz <i>Jamali</i></a>
+  <div class="nav">
+    <a href="/#work">Selected work</a>
+    <a href="/#method">How I work</a>
+    <a href="ai-content-lab.html">AI Lab ↗</a>
+    <a class="pdf" href="resume/Resume-Hafiz-Jamali.pdf">Download PDF ↗</a>
+    <a href="mailto:kisame350@gmail.com">Email ↗</a>
+  </div>
+</nav>
+
+<div class="masthead">
+  <div>
+    <h1>Mohammad Hafiz Jamali</h1>
+    <p class="title">Marketing Executive · AI Automation &amp; Content Operations</p>
+  </div>
+  <div class="folio">CV · 2026</div>
+</div>
+
+<p class="contact">
+  <span>Selayang, Malaysia (willing to relocate)</span><span class="sep">·</span>
+  <span>+60 17 278 6373</span><span class="sep">·</span>
+  <span>kisame350@gmail.com</span><span class="sep">·</span>
+  <span>portfolio.wasabietech.com</span>
+</p>
+
+<div class="impact">
+  <div><strong>76.5%</strong><em>less manual PRF creation after Procure Pilot &amp; PIMS</em></div>
+  <div><strong>90%</strong><em>automated pharmacy ordering accuracy</em></div>
+  <div><strong>71%</strong><em>fewer critical stock incidents</em></div>
+</div>
+
+<div class="section">
+  <p class="profile">AI automation and digital operations professional in the veterinary and pet-product space. Built and operate <b>Theoses</b>, a self-hosted AI agent that runs research, content drafting and repeatable workflows on a VPS. Turns operational needs into practical systems: connected web apps, structured supplier coordination, data-based reporting.</p>
+</div>
+
+<div class="section">
+  <h2>Experience</h2>
+  <div class="entry">
+    <div class="role"><h3>Procurement Officer — STARLiGHT Veterinary Medical Centre, Ampang</h3><span class="meta">Dec 2025 – Present</span></div>
+    <ul>
+      <li>Research veterinary products, suppliers, pricing and market alternatives to support purchasing decisions; reduced active supplier dependency from 73 to 25 through structured evaluation.</li>
+      <li>Built Procure Pilot and PIMS, replacing paper-based workflows with connected web applications — manual PRF creation down 76.5%.</li>
+      <li>Automated the pharmacy ordering workflow to 90% accuracy; prepare data-based reports for management.</li>
+    </ul>
+  </div>
+  <div class="entry">
+    <div class="role"><h3>Procurement / Operations Officer — IMAM Response &amp; Relief Team (IMARET), Selayang</h3><span class="meta">Dec 2022 – Dec 2025</span></div>
+    <ul>
+      <li>Created a procurement cycle system adopted as the organisation's standard operating procedure.</li>
+      <li>Produced inventory-usage, asset-performance and projection insights for project decisions.</li>
+      <li>Ran quotation enquiries, supplier comparisons and relationships across static clinics and field projects.</li>
+    </ul>
+  </div>
+  <div class="entry">
+    <div class="role"><h3>Assistant Pharmacist — BIG Pharmacy Healthcare, Kuala Lumpur</h3><span class="meta">Dec 2021 – Nov 2022</span></div>
+    <p>Customer product enquiries, stock intake, inventory control and sales reconciliation in daily pharmacy operations.</p>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Selected AI Project</h2>
+  <div class="entry">
+    <div class="role"><h3>Theoses — Self-Hosted AI Work Agent</h3><span class="meta">Personal project · Ongoing</span></div>
+    <p>Built and operate a VPS-hosted AI agent for research, planning, documentation and workflow automation — hands-on experience with agents, APIs, databases, web apps, Linux deployment and troubleshooting.</p>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Skills</h2>
+  <p class="skills">AI automation<span class="sep">·</span>Content ideation &amp; drafting<span class="sep">·</span>Product &amp; competitor research<span class="sep">·</span>Reports &amp; data storytelling<span class="sep">·</span>Supplier coordination<span class="sep">·</span>Customer communication<span class="sep">·</span>Microsoft Office &amp; Excel<span class="sep">·</span>AutoCount<span class="sep">·</span>Web systems &amp; dashboards<span class="sep">·</span>Linux VPS &amp; deployment</p>
+</div>
+
+<div class="band">
+  <div>
+    <h2>Education</h2>
+    <ul>
+      <li>Medical Assistant Advanced Diploma<br><span class="yrs">Institut Latihan Kementerian Kesihatan Malaysia · 2013</span></li>
+      <li>Biology (STM)<br><span class="yrs">SMK Dato Patinggi Haji Abdul Gafur · 2009</span></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Certifications</h2>
+    <ul>
+      <li>CIPS Level 3 — Certified Humanitarian Procurement Professional</li>
+      <li>AutoCount System Training</li>
+      <li>Certified Medical Assistant</li>
+    </ul>
+  </div>
+  <div>
+    <h2>Languages</h2>
+    <ul>
+      <li>English — Fluent</li>
+      <li>Bahasa Melayu — Fluent</li>
+      <li>Bahasa Iban — Expert</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Mohammad Hafiz Jamali</span>
+  <span><b>portfolio.wasabietech.com</b></span>
+</div>
+
+</body>
+</html>
