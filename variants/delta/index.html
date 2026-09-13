@@ -342,7 +342,7 @@ footer a:hover{color:var(--cyan)}
   var cv=document.getElementById("wavefield"), ctx=cv.getContext("2d");
   var W,H,DPR,mouse={x:-9999,y:-9999}, waves=[], t=0;
   function resize(){
-    DPR=Math.min(devicePixelRatio||1,2);
+    DPR=Math.min(devicePixelRatio||1,1.5);
     var r=cv.parentElement.getBoundingClientRect();
     W=r.width; H=r.height;
     cv.width=W*DPR; cv.height=H*DPR;
@@ -354,69 +354,95 @@ footer a:hover{color:var(--cyan)}
   hero.addEventListener("pointermove",function(e){ var r=hero.getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; });
   hero.addEventListener("pointerleave",function(){ mouse.x=-9999; mouse.y=-9999; });
 
-  /* ---------- perspective particle mesh (the "body" of the wave) ----------
-     Rows of dots recede toward a horizon; amplitude, speed and dot size grow
-     toward the front, giving the surface depth and volume like a 3D mesh. */
-  var ROWS=26;
-  /* precomputed color ramp: deep blue -> bright cyan (indexed by crest height) */
-  var RAMP=[], SHADES=24;
+  /* ---------- dense particle wavefield (matched to the mission-control mockup) ----------
+     ~15k tiny dots in tightly-spaced receding rows; amplitude, speed, spacing and
+     dot size grow toward the viewer. Brightest crest dots get an additive glow-
+     sprite bloom pass, and thin filament lines weave through the mesh. */
+  var ROWS=56, ROWS0=55, SHADES=24;
+  /* color ramp: deep navy trough -> bright cyan-white crest */
+  var RAMP=[];
   for(var s=0;s<SHADES;s++){
     var k=s/(SHADES-1);
-    var rC=Math.round(26+k*(159-26)), gC=Math.round(127+k*(224-127)), bC=Math.round(184+k*(255-184));
+    var rC=Math.round(16+k*(190-16)), gC=Math.round(60+k*(242-60)), bC=Math.round(110+k*(255-110));
     RAMP.push("rgb("+rC+","+gC+","+bC+")");
   }
+  /* pre-rendered soft glow sprite for crest bloom */
+  var glow=document.createElement("canvas"); glow.width=glow.height=32;
+  (function(){
+    var g=glow.getContext("2d"), rg=g.createRadialGradient(16,16,0,16,16,16);
+    rg.addColorStop(0,"rgba(220,250,255,.9)");
+    rg.addColorStop(.25,"rgba(125,216,255,.5)");
+    rg.addColorStop(.6,"rgba(57,192,240,.16)");
+    rg.addColorStop(1,"rgba(57,192,240,0)");
+    g.fillStyle=rg; g.fillRect(0,0,32,32);
+  })();
+  var bright=[], ft=0, fn=0;
 
   function draw(){
+    var ts=performance.now();
     t+=0.016;
     ctx.clearRect(0,0,W,H);
-    var horizon=H*0.34;
-    var floor=H*1.02;
+    var horizon=H*0.38, floor=H*1.05;
+    bright.length=0;
     for(var r=0;r<ROWS;r++){
-      var p=r/(ROWS-1);              /* 0 = far back, 1 = front */
+      var p=r/ROWS0;                 /* 0 = far back, 1 = front */
       var pers=Math.pow(p,1.35);     /* perspective compression */
       var yBase=horizon+pers*(floor-horizon);
-      var amp=12+pers*74;            /* swell grows toward viewer */
+      var amp=10+pers*95;            /* swell grows toward viewer */
       var speed=0.22+pers*0.5;
-      var stepX=7+pers*9;
-      var radBase=0.55+pers*1.8;
+      var stepX=2.2+pers*4.5;        /* tight spacing = dense mesh */
+      var rad=0.35+pers*1.25;
       for(var x=-24;x<=W+24;x+=stepX){
-        /* layered sines: long swell + medium drift + shimmer */
+        /* four octaves: long swell + drift + secondary + shimmer */
         var y=Math.sin(x*0.0058 + t*speed*2.1 + r*0.33)*amp
             + Math.sin(x*0.0021 - t*speed*1.15 + r*0.19)*amp*0.55
-            + Math.cos(x*0.011  + t*speed*3.0)*amp*0.16;
-        /* cursor: swell toward pointer, brighten nearby dots */
+            + Math.sin(x*0.0094 + t*speed*2.7 - r*0.19)*amp*0.22
+            + Math.cos(x*0.016  + t*speed*3.4)*amp*0.1;
         var sy=yBase+y;
+        /* cursor: swell toward pointer, brighten nearby dots */
         var dx=x-mouse.x, dy=sy-mouse.y;
         var md2=dx*dx+dy*dy;
         var boost=md2<57600 ? (1-Math.sqrt(md2)/240) : 0;
         y-=boost*46; sy=yBase+y;
         /* crest brightness: dots near the top of the swell glow brightest */
-        var crest=1-Math.min(Math.max((y+amp*1.75)/(amp*3.5),0),1);
-        var a=(0.08+pers*0.5)*(0.3+0.7*crest)+boost*0.35;
-        if(a<=0.02) continue;
-        var rad=radBase+boost*1.4;
+        var crest=1-Math.min(Math.max((y+amp*1.9)/(amp*3.8),0),1);
+        var a=(0.14+pers*0.55)*(0.25+0.75*crest)+boost*0.35;
+        if(a<=0.03) continue;
+        if(crest>0.82 && pers>0.3){ bright.push(x,sy,rad+boost*1.6); continue; }
         ctx.globalAlpha=Math.min(a,0.95);
-        ctx.fillStyle=RAMP[Math.round(crest*(SHADES-1))];
-        ctx.beginPath(); ctx.arc(x,sy,rad,0,6.284); ctx.fill();
+        ctx.fillStyle=RAMP[(crest*(SHADES-1))|0];
+        ctx.fillRect(x-rad,sy-rad,rad*2,rad*2);
       }
     }
-    /* two glowing crest lines threading the mesh */
-    for(var L=0;L<2;L++){
-      var pL=0.55+L*0.3, persL=Math.pow(pL,1.35);
-      var yB=horizon+persL*(floor-horizon), aL=12+persL*74;
-      var spL=0.22+persL*0.5;
+    /* additive bloom pass for the brightest crest dots */
+    ctx.globalCompositeOperation="lighter";
+    for(var i=0;i<bright.length;i+=3){
+      var sz=bright[i+2]*7;
+      ctx.globalAlpha=0.55;
+      ctx.drawImage(glow,bright[i]-sz/2,bright[i+1]-sz/2,sz,sz);
+    }
+    ctx.globalCompositeOperation="source-over";
+    ctx.globalAlpha=1;
+    /* filament lines weaving through the mesh */
+    var PS=[0.25,0.4,0.52,0.64,0.76,0.88];
+    for(var L=0;L<PS.length;L++){
+      var pL=PS[L], persL=Math.pow(pL,1.35);
+      var yB=horizon+persL*(floor-horizon), aL=10+persL*95, spL=0.22+persL*0.5;
       ctx.beginPath();
       for(var x2=-24;x2<=W+24;x2+=8){
-        var y2=yB + Math.sin(x2*0.0058+t*spL*2.1+(0.55+L*0.3)*25*0.33)*aL
-                 + Math.sin(x2*0.0021-t*spL*1.15+(0.55+L*0.3)*25*0.19)*aL*0.55;
+        var y2=yB + Math.sin(x2*0.0058+t*spL*2.1+pL*ROWS0*0.33)*aL
+                 + Math.sin(x2*0.0021-t*spL*1.15+pL*ROWS0*0.19)*aL*0.55
+                 + Math.sin(x2*0.0094+t*spL*2.7-pL*ROWS0*0.19)*aL*0.22;
         x2===-24?ctx.moveTo(x2,y2):ctx.lineTo(x2,y2);
       }
-      ctx.strokeStyle="rgba(125,216,255,"+(0.28-L*0.09)+")";
-      ctx.lineWidth=1.4;
-      ctx.shadowColor="rgba(57,192,240,.9)"; ctx.shadowBlur=10;
+      ctx.strokeStyle="rgba(150,225,255,"+(0.10+persL*0.16)+")";
+      ctx.lineWidth=0.8+persL*0.9;
+      ctx.shadowColor="rgba(57,192,240,.9)"; ctx.shadowBlur=8;
       ctx.stroke(); ctx.shadowBlur=0;
     }
-    ctx.globalAlpha=1;
+    /* adaptive quality: if frames run long, thin out rows (never below 32) */
+    ft+=performance.now()-ts; fn++;
+    if(fn>=60){ if(ft/fn>24 && ROWS>32) ROWS-=8; ft=0; fn=0; }
     requestAnimationFrame(draw);
   }
   /* reduced motion: canvas hidden via CSS, static gradient fallback applies */
