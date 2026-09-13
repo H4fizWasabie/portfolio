@@ -319,7 +319,7 @@ footer a:hover{color:var(--cyan)}
 
 <footer>
   <div class="wrap">
-    <div class="demo-note">variant Δ · mission control · <b>telemetry below hero = sample data</b> (live wiring: PR step 2)</div>
+    <div class="demo-note">variant Δ · mission control · build <b>32f5587-r2</b> · <b>telemetry below hero = sample data</b> (live wiring: PR step 2)</div>
     <div>
       <a href="https://github.com/H4fizWasabie">github</a> &nbsp;·&nbsp;
       <a href="/resume">résumé</a> &nbsp;·&nbsp;
@@ -331,6 +331,7 @@ footer a:hover{color:var(--cyan)}
 <script>
 (function(){
   "use strict";
+  console.log("[variant-delta] build 32f5587-r2 · deepfield active = " + !matchMedia("(prefers-reduced-motion: reduce)").matches);
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- reveal on scroll ---------- */
