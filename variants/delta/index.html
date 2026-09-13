@@ -126,10 +126,36 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;line-hei
 .st.live{color:var(--green);border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.07)}
 .st.building{color:var(--amber);border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.07)}
 .sys .desc{margin-top:10px;color:var(--ink-dim);font-size:14px;line-height:1.55}
-.ubar{margin-top:16px;height:5px;border-radius:3px;background:var(--bg-deep);overflow:hidden;display:flex;gap:2px}
-.ubar i{flex:1;border-radius:2px;background:var(--green);opacity:.85;transform-origin:left;animation:grow 1s ease both}
+/* ---- uptime bars: build on scroll, with scan cursor ---- */
+.ubar{margin-top:16px;height:5px;border-radius:3px;background:var(--bg-deep);overflow:hidden;display:flex;gap:2px;position:relative}
+.ubar i{flex:1;border-radius:2px;background:var(--green);opacity:0;transform-origin:left}
+.ubar.run i{animation:grow .9s cubic-bezier(.2,.7,.3,1) both}
+.ubar.run i:last-child{box-shadow:0 0 8px var(--green-glow)}
 .ubar i.degraded{background:var(--amber)}
-@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.ubar::after{content:"";position:absolute;top:-2px;bottom:-2px;left:0;width:2px;border-radius:2px;
+  background:var(--cyan);box-shadow:0 0 10px var(--cyan-glow);opacity:0;pointer-events:none}
+.ubar.run::after{animation:scan 2.6s ease both}
+@keyframes grow{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.85}}
+@keyframes scan{0%{opacity:0;left:0}8%{opacity:.9}92%{opacity:.9}100%{opacity:0;left:calc(100% - 2px)}}
+
+/* ---- staggered LED heartbeat + self-check line ---- */
+.sysgrid .sys:nth-child(2) .led{animation-delay:.4s}
+.sysgrid .sys:nth-child(3) .led{animation-delay:.8s}
+.sysgrid .sys:nth-child(4) .led{animation-delay:1.2s}
+.chk{margin-top:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
+.chk b{color:var(--ink-dim);font-weight:500}
+
+/* ---- work cards: console-style hover ---- */
+.work::before,.work::after{content:"";position:absolute;width:16px;height:16px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+.work::before{top:10px;left:10px;border-top:1.5px solid var(--cyan);border-left:1.5px solid var(--cyan);transform:translate(6px,6px)}
+.work::after{bottom:10px;right:10px;border-bottom:1.5px solid var(--cyan);border-right:1.5px solid var(--cyan);transform:translate(-6px,-6px)}
+.work:hover::before,.work:hover::after{opacity:.85;transform:translate(0,0)}
+.work .sweep{position:absolute;top:0;left:-45%;width:35%;height:100%;background:linear-gradient(100deg,transparent,rgba(57,192,240,.07),transparent);transform:skewX(-14deg);pointer-events:none}
+.work:hover .sweep{animation:sweep .9s ease}
+@keyframes sweep{from{left:-45%}to{left:110%}}
+
+/* ---- deep field: constellation drift behind lower sections ---- */
+#deepfield{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s}
 .sys .ufoot{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .sys .ufoot b{color:var(--ink-dim);font-weight:500}
 
@@ -158,7 +184,9 @@ footer a:hover{color:var(--cyan)}
 /* ---- reduced motion ---- */
 @media (prefers-reduced-motion: reduce){
   .led,.badge::before{animation:none}
-  .ubar i{animation:none}
+  .ubar i{opacity:.85;animation:none}
+  .work::before,.work::after,.work .sweep{display:none}
+  #deepfield{display:none}
   html{scroll-behavior:auto}
   #wavefield{display:none}
   .hero{background:radial-gradient(900px 400px at 75% 20%, rgba(57,192,240,.12), transparent 65%)}
@@ -327,16 +355,124 @@ footer a:hover{color:var(--cyan)}
   },{threshold:.4});
   document.querySelectorAll("[data-count]").forEach(function(el){ nio.observe(el); });
 
-  /* ---------- uptime bars (30 ticks, last = "now") ---------- */
+  /* ---------- uptime bars: build column-by-column on scroll ---------- */
   document.querySelectorAll(".ubar").forEach(function(bar){
     var n=30;
     for(var i=0;i<n;i++){
       var t=document.createElement("i");
       if(i===n-4) t.className="degraded"; /* one visible blip = honest */
-      t.style.animationDelay=(i*28)+"ms";
+      t.style.animationDelay=(i*55)+"ms";
       bar.appendChild(t);
     }
   });
+  var bio=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      bio.unobserve(e.target);
+      var bar=e.target;
+      bar.classList.add("run");
+      var pct=bar.parentElement.querySelector(".ufoot b");
+      if(!pct) return;
+      if(reduced){ pct.textContent="100.0%"; return; }
+      var t0=performance.now(), dur=2500;
+      (function step(now){
+        var k=Math.min((now-t0)/dur,1); k=1-Math.pow(1-k,3);
+        pct.textContent=(100*k).toFixed(1)+"%";
+        if(k<1) requestAnimationFrame(step);
+      })(t0);
+    });
+  },{threshold:.5});
+  document.querySelectorAll(".ubar").forEach(function(b){ bio.observe(b); });
+
+  /* ---------- self-check ticker: "last check Ns ago" ---------- */
+  var checks=[];
+  document.querySelectorAll(".sys").forEach(function(card){
+    var line=document.createElement("div"); line.className="chk";
+    line.innerHTML="self-check · <b>—</b>";
+    card.querySelector(".ufoot").after(line);
+    checks.push({el:line.querySelector("b"),age:(Math.random()*35)|0,reset:45+(Math.random()*45|0)});
+  });
+  if(reduced){ checks.forEach(function(c){ c.el.textContent="ok"; }); }
+  else setInterval(function(){
+    checks.forEach(function(c){
+      if(++c.age>=c.reset){ c.age=0; c.reset=45+(Math.random()*45|0); }
+      c.el.textContent=c.age+"s ago";
+    });
+  },1000);
+
+  /* ---------- work cards: light sweep + type-in label ---------- */
+  document.querySelectorAll(".work").forEach(function(card){
+    var sweep=document.createElement("span"); sweep.className="sweep"; card.appendChild(sweep);
+    var num=card.querySelector(".num");
+    num.dataset.txt=num.textContent;
+    card.addEventListener("mouseenter",function(){
+      if(reduced) return;
+      var txt=num.dataset.txt,i=0;
+      clearInterval(num._ti); num.textContent="";
+      num._ti=setInterval(function(){
+        num.textContent=txt.slice(0,++i);
+        if(i>=txt.length) clearInterval(num._ti);
+      },18);
+    });
+  });
+
+  /* ---------- deep field: constellation drift behind lower sections ----------
+     Sparse nodes drifting slowly, faint connective lines at close range, and
+     bright "packet" pulses that travel between nodes — a network-of-systems
+     motif, deliberately different from the hero's wave. Paused while the hero
+     fills the viewport, skipped under reduced motion. */
+  var df=document.createElement("canvas"); df.id="deepfield"; document.body.appendChild(df);
+  var dfx=df.getContext("2d"), dw,dh, nodes=[], packets=[], heroEl=document.querySelector(".hero"), lastSpawn=0;
+  function dfSize(){
+    var d=Math.min(devicePixelRatio||1,1.5);
+    dw=innerWidth; dh=innerHeight;
+    df.width=dw*d; df.height=dh*d; dfx.setTransform(d,0,0,d,0,0);
+    nodes=[];
+    var n=Math.min(64,Math.round(dw/22));
+    for(var i=0;i<n;i++) nodes.push({x:Math.random()*dw,y:Math.random()*dh,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18});
+  }
+  dfSize(); addEventListener("resize",dfSize);
+  function dfDraw(now){
+    requestAnimationFrame(dfDraw);
+    if(document.hidden) return;
+    if(heroEl.getBoundingClientRect().bottom>=innerHeight*0.96){ df.style.opacity=0; return; }
+    df.style.opacity=1;
+    dfx.clearRect(0,0,dw,dh);
+    var i,j,p;
+    for(i=0;i<nodes.length;i++){
+      p=nodes[i]; p.x+=p.vx; p.y+=p.vy;
+      if(p.x<-20)p.x=dw+20; if(p.x>dw+20)p.x=-20;
+      if(p.y<-20)p.y=dh+20; if(p.y>dh+20)p.y=-20;
+    }
+    dfx.lineWidth=1;
+    for(i=0;i<nodes.length;i++) for(j=i+1;j<nodes.length;j++){
+      var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y, d2=dx*dx+dy*dy;
+      if(d2<16900){
+        dfx.strokeStyle="rgba(57,192,240,"+(0.10*(1-Math.sqrt(d2)/130)).toFixed(3)+")";
+        dfx.beginPath(); dfx.moveTo(nodes[i].x,nodes[i].y); dfx.lineTo(nodes[j].x,nodes[j].y); dfx.stroke();
+      }
+    }
+    dfx.fillStyle="rgba(125,200,240,.5)";
+    for(i=0;i<nodes.length;i++){ p=nodes[i]; dfx.fillRect(p.x-1,p.y-1,2,2); }
+    /* packet pulses travelling along links */
+    if(now-lastSpawn>1400 && nodes.length>1){
+      var a=nodes[(Math.random()*nodes.length)|0];
+      for(var tries=0;tries<6;tries++){
+        var b2=nodes[(Math.random()*nodes.length)|0];
+        if(b2===a) continue;
+        var ddx=a.x-b2.x, ddy=a.y-b2.y, dist=Math.sqrt(ddx*ddx+ddy*ddy);
+        if(dist<220&&dist>40){ packets.push({a:a,b:b2,t0:now,dur:900+dist*6}); break; }
+      }
+      lastSpawn=now;
+    }
+    for(i=packets.length-1;i>=0;i--){
+      var pk=packets[i], k=(now-pk.t0)/pk.dur;
+      if(k>=1||k<0){ packets.splice(i,1); continue; }
+      dfx.fillStyle="rgba(190,240,255,.9)";
+      dfx.beginPath(); dfx.arc(pk.a.x+(pk.b.x-pk.a.x)*k,pk.a.y+(pk.b.y-pk.a.y)*k,1.6,0,6.284); dfx.fill();
+    }
+  }
+  if(!reduced) requestAnimationFrame(dfDraw);
 
   /* ---------- moving wave field ---------- */
   var cv=document.getElementById("wavefield"), ctx=cv.getContext("2d");
