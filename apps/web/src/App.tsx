@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router';
 import type { CaseStudy, Metric } from '@portfolio/shared';
 import { loadCaseStudy, loadMetrics, loadWork } from './api';
@@ -20,6 +21,39 @@ const workVisuals: Record<string, { src: string; alt: string }> = {
   procura: { src: '/img/procura-dash.png', alt: 'Procura procurement workspace overview' },
   pims: { src: '/img/pims-dash.png', alt: 'PIMS inventory workspace overview' },
 };
+
+const HERO_WORDS = ['I', 'make', 'useful', 'things', 'move.'];
+const tickerItems = ['systems', 'content operations', 'automation', 'procurement', 'AI-assisted workflows', 'research'];
+
+// Counts a numeric metric ("76.5%", "90%") up from 0 when it scrolls into
+// view. Non-numeric values ("24/7") and reduced-motion users get the static
+// value; the final string is also the initial render, so no-JS stays correct.
+function CountUp({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [display, setDisplay] = useState(value);
+  useEffect(() => {
+    const el = ref.current;
+    const match = value.match(/^(\d+(?:\.\d+)?)(%?)$/);
+    if (!el || !match || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const target = parseFloat(match[1]);
+    const decimals = (match[1].split('.')[1] || '').length;
+    let raf = 0;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      const dur = 1300, t0 = performance.now();
+      const tick = (now: number) => {
+        const p = Math.min((now - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
+        setDisplay((target * eased).toFixed(decimals) + match[2]);
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, { threshold: 0.5 });
+    observer.observe(el);
+    return () => { observer.disconnect(); cancelAnimationFrame(raf); };
+  }, [value]);
+  return <span ref={ref}>{display}</span>;
+}
 
 function Rail({ progress, section }: { progress: number; section: string }) {
   const [elapsed, setElapsed] = useState(0);
@@ -57,7 +91,7 @@ function Landing() {
     addEventListener('scroll', onScroll, { passive: true }); onScroll();
     return () => { observer.disconnect(); removeEventListener('scroll', onScroll); };
   }, []);
-  return <><a className="skip-link" href="#main">Skip to content</a><Rail progress={progress} section={section}/><main id="main"><header className="topbar"><Link to="/">HJ / PORTFOLIO</Link><nav><a href="#work">Work</a><a href="#contact">Contact</a><Link to="/resume">Resume</Link></nav></header><section className="hero section-grid" data-folio="01"><div className="hero-copy"><p className="kicker">AI-assisted marketing / systems / operations</p><h1>I make useful things move.</h1><p className="lede">I turn messy product information, operational problems, and half-formed ideas into clear content, practical systems, and workflows that people can actually use.</p><div className="actions"><a className="button" href="#work">See the work</a><Link className="button" to="/resume">View resume</Link><a className="button" href="mailto:kisame350@gmail.com">Start a conversation</a></div><p className="footline">Based in Malaysia · building with AI every day</p></div><div className="hero-visual"><HeroVisual/></div></section><section className="section" data-folio="02"><p className="folio">02 / METRICS</p><h2>Useful work leaves a trace.</h2><div className="metrics">{metrics.map(metric => <div className="metric" key={metric.label}><strong>{metric.value}</strong><span>{metric.label}</span>{metric.basis && <small>{metric.basis}</small>}</div>)}</div></section><section className="section" id="work" data-folio="03"><p className="folio">03 / SELECTED WORK</p><h2>Work that has a pulse.</h2><p className="section-intro">Real systems and honest practice projects, showing how I think, make, test, and improve.</p><div className="work-list">{work.map((item, index) => { const visual = workVisuals[item.slug]; return <Link className="work-row" to={`/work/${item.slug}`} key={item.slug}><span>0{index + 1}</span>{visual ? <figure className="work-thumb"><img src={visual.src} alt={visual.alt} loading="lazy" /></figure> : <span className="work-thumb work-thumb-empty" aria-hidden="true">TH</span>}<div><h3>{item.title}</h3><p>{item.summary}</p><small>{item.kind}</small><div className="tags">{item.tags.map(tag => <em key={tag}>{tag}</em>)}</div></div><b>OPEN</b></Link>; })}</div><div className="bridge"><h3>One idea, packaged for action.</h3><p>The same thinking travels from a live business system to a marketing concept: understand the signal, make it clear, then decide what to do next.</p></div></section><section className="section loop" data-folio="04"><div><p className="folio">04 / WORKING LOOP</p><h2>My working loop.</h2><p className="section-intro">The same habits carry from procurement to marketing: get close to the facts, make the work visible, and learn from the response.</p></div><div className="steps">{steps.map(([title, body], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section><section className="section contact" id="contact" data-folio="05"><p className="folio">05 / CONTACT</p><h2>Bring me a messy problem. I'll help make it legible.</h2><p>Marketing support, content operations, AI-assisted workflows, or a practical system that saves a team time.</p><div className="contact-actions"><a className="contact-link" href="mailto:kisame350@gmail.com">kisame350@gmail.com</a><Link className="contact-link" to="/resume">View resume</Link></div><footer>© Mohammad Hafiz Bin Jamali</footer></section></main></>;
+  return <><a className="skip-link" href="#main">Skip to content</a><Rail progress={progress} section={section}/><main id="main"><header className="topbar"><Link to="/">HJ / PORTFOLIO</Link><nav><a href="#work">Work</a><a href="#contact">Contact</a><Link to="/resume">Resume</Link></nav></header><section className="hero section-grid" data-folio="01"><div className="hero-copy"><p className="kicker">AI-assisted marketing / systems / operations</p><h1>{HERO_WORDS.map((word, i) => <Fragment key={word}>{i > 0 && ' '}<span className="w" style={{ '--i': i } as CSSProperties}>{word}</span></Fragment>)}</h1><p className="lede">I turn messy product information, operational problems, and half-formed ideas into clear content, practical systems, and workflows that people can actually use.</p><div className="actions"><a className="button" href="#work">See the work</a><Link className="button" to="/resume">View resume</Link><a className="button" href="mailto:kisame350@gmail.com">Start a conversation</a></div><p className="footline">Based in Malaysia · building with AI every day</p></div><div className="hero-visual"><HeroVisual/></div></section><div className="ticker" aria-hidden="true"><div className="ticker-track">{[0, 1].map(run => <div className="ticker-run" key={run}>{tickerItems.map(item => <span key={item}>{item}</span>)}</div>)}</div></div><section className="section" data-folio="02"><p className="folio">02 / METRICS</p><h2>Useful work leaves a trace.</h2><div className="metrics">{metrics.map(metric => <div className="metric" key={metric.label}><strong><CountUp value={metric.value}/></strong><span>{metric.label}</span>{metric.basis && <small>{metric.basis}</small>}</div>)}</div></section><section className="section" id="work" data-folio="03"><p className="folio">03 / SELECTED WORK</p><h2>Work that has a pulse.</h2><p className="section-intro">Real systems and honest practice projects, showing how I think, make, test, and improve.</p><div className="work-list">{work.map((item, index) => { const visual = workVisuals[item.slug]; return <Link className="work-row" to={`/work/${item.slug}`} key={item.slug}><span>0{index + 1}</span>{visual ? <figure className="work-thumb"><img src={visual.src} alt={visual.alt} loading="lazy" /></figure> : <span className="work-thumb work-thumb-empty" aria-hidden="true">TH</span>}<div><h3>{item.title}</h3><p>{item.summary}</p><small>{item.kind}</small><div className="tags">{item.tags.map(tag => <em key={tag}>{tag}</em>)}</div></div><b>OPEN</b></Link>; })}</div><div className="bridge"><h3>One idea, packaged for action.</h3><p>The same thinking travels from a live business system to a marketing concept: understand the signal, make it clear, then decide what to do next.</p></div></section><section className="section loop" data-folio="04"><div><p className="folio">04 / WORKING LOOP</p><h2>My working loop.</h2><p className="section-intro">The same habits carry from procurement to marketing: get close to the facts, make the work visible, and learn from the response.</p></div><div className="steps">{steps.map(([title, body], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section><section className="section contact" id="contact" data-folio="05"><p className="folio">05 / CONTACT</p><h2>Bring me a messy problem. I'll help make it legible.</h2><p>Marketing support, content operations, AI-assisted workflows, or a practical system that saves a team time.</p><div className="contact-actions"><a className="contact-link" href="mailto:kisame350@gmail.com">kisame350@gmail.com</a><Link className="contact-link" to="/resume">View resume</Link></div><footer>© Mohammad Hafiz Bin Jamali</footer></section></main></>;
 }
 
 function Detail() {
