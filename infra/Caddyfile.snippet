@@ -2,6 +2,9 @@ portfolio.wasabietech.com {
   bind 149.28.146.30
   root * /var/www/portfolio/dist
   reverse_proxy /api/* 127.0.0.1:8085
+  redir /ai-content-lab.html /work/hills-ai-content-lab 301
+  redir /resume.html /resume 301
+  redir /ai-lab-prototypes.html / 301
   try_files {path} /index.html
   @hashedAssets path_regexp hashed "/assets/.*-[A-Za-z0-9_-]+\\.(js|css|woff2?|png|jpe?g|svg)$"
   header @hashedAssets Cache-Control "public, max-age=31536000, immutable"

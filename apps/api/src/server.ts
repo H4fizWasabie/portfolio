@@ -17,7 +17,7 @@ app.get('/api/case-studies/:slug', async (req, res) => {
   return { ...result.rows[0], blocks: blocks.rows };
 });
 app.post('/api/analytics', async (req, res) => { const { event, slug } = req.body as { event?: string; slug?: string }; if (!event) return res.code(400).send({ error: 'Event is required' }); await pool.query('insert into analytics_events(event,slug) values($1,$2)', [event, slug || null]); return { ok: true }; });
-app.get('/api/admin/analytics', async (req, res) => { if (req.headers['x-admin-token'] !== process.env.ADMIN_TOKEN) return res.code(404).send(); return (await pool.query('select event,slug,count(*)::int as count from analytics_events group by event,slug order by count desc')).rows; });
+app.get('/api/admin/analytics', async (req, res) => { const token = process.env.ADMIN_TOKEN; if (!token || req.headers['x-admin-token'] !== token) return res.code(404).send(); return (await pool.query('select event,slug,count(*)::int as count from analytics_events group by event,slug order by count desc')).rows; });
 app.post('/api/contact', async (req, res) => {
   const body = req.body as ContactPayload;
   if (body?.website) return { ok: true };
