@@ -1,0 +1,7 @@
+portfolio.wasabietech.com {
+  bind 149.28.146.30
+  root * /var/www/portfolio/dist
+  reverse_proxy /api/* 127.0.0.1:8085
+  try_files {path} /index.html
+  file_server
+}
