@@ -416,20 +416,27 @@ footer a:hover{color:var(--cyan)}
     });
   });
 
-  /* ---------- deep field: constellation drift behind lower sections ----------
-     Sparse nodes drifting slowly, faint connective lines at close range, and
-     bright "packet" pulses that travel between nodes — a network-of-systems
-     motif, deliberately different from the hero's wave. Paused while the hero
-     fills the viewport, skipped under reduced motion. */
+  /* ---------- deep field: living background behind lower sections ----------
+     Three layers, deliberately different from the hero wave:
+       1. aurora — 3 large soft radial sheens drifting/pulsing slowly
+       2. constellation — ~90 drifting nodes with proximity links
+       3. packets — bright pulses travelling node-to-node + occasional scan sweep
+     Paused while the hero fills the viewport; skipped under reduced motion. */
   var df=document.createElement("canvas"); df.id="deepfield"; document.body.appendChild(df);
-  var dfx=df.getContext("2d"), dw,dh, nodes=[], packets=[], heroEl=document.querySelector(".hero"), lastSpawn=0;
+  var dfx=df.getContext("2d"), dw,dh, nodes=[], packets=[], heroEl=document.querySelector(".hero"), lastSpawn=0, lastSweep=-1e4;
+  var sheens=[];
   function dfSize(){
     var d=Math.min(devicePixelRatio||1,1.5);
     dw=innerWidth; dh=innerHeight;
     df.width=dw*d; df.height=dh*d; dfx.setTransform(d,0,0,d,0,0);
     nodes=[];
-    var n=Math.min(64,Math.round(dw/22));
-    for(var i=0;i<n;i++) nodes.push({x:Math.random()*dw,y:Math.random()*dh,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18});
+    var n=Math.min(96,Math.round(dw/16));
+    for(var i=0;i<n;i++) nodes.push({x:Math.random()*dw,y:Math.random()*dh,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:Math.random()*6.28});
+    sheens=[
+      {x:dw*.2,y:dh*.3,r:Math.max(dw,dh)*.45,hue:"57,192,240",ph:0,          sx:.10,sy:.06},
+      {x:dw*.75,y:dh*.6,r:Math.max(dw,dh)*.5,hue:"34,150,220",ph:2.1,        sx:-.07,sy:.05},
+      {x:dw*.5,y:dh*.9,r:Math.max(dw,dh)*.45,hue:"90,200,255",ph:4.2,        sx:.05,sy:-.08}
+    ];
   }
   dfSize(); addEventListener("resize",dfSize);
   function dfDraw(now){
@@ -437,39 +444,81 @@ footer a:hover{color:var(--cyan)}
     if(document.hidden) return;
     if(heroEl.getBoundingClientRect().bottom>=innerHeight*0.96){ df.style.opacity=0; return; }
     df.style.opacity=1;
+    var s=Math.max(now/1000,0), i, j, p;
     dfx.clearRect(0,0,dw,dh);
-    var i,j,p;
+    /* layer 1: aurora sheens */
+    dfx.globalCompositeOperation="lighter";
+    for(i=0;i<sheens.length;i++){
+      var sh=sheens[i];
+      var sx=sh.x+Math.sin(s*.13*sh.sx+sh.ph)*dw*.16;
+      var sy=sh.y+Math.cos(s*.11*sh.sy+sh.ph)*dh*.12;
+      var pulse=.75+.25*Math.sin(s*.5+sh.ph);
+      var g=dfx.createRadialGradient(sx,sy,0,sx,sy,sh.r);
+      g.addColorStop(0,"rgba("+sh.hue+","+(0.055*pulse).toFixed(3)+")");
+      g.addColorStop(1,"rgba("+sh.hue+",0)");
+      dfx.fillStyle=g;
+      dfx.fillRect(0,0,dw,dh);
+    }
+    dfx.globalCompositeOperation="source-over";
+    /* drift nodes (gentle bob too) */
     for(i=0;i<nodes.length;i++){
       p=nodes[i]; p.x+=p.vx; p.y+=p.vy;
       if(p.x<-20)p.x=dw+20; if(p.x>dw+20)p.x=-20;
       if(p.y<-20)p.y=dh+20; if(p.y>dh+20)p.y=-20;
     }
+    /* layer 2: links */
     dfx.lineWidth=1;
     for(i=0;i<nodes.length;i++) for(j=i+1;j<nodes.length;j++){
       var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y, d2=dx*dx+dy*dy;
-      if(d2<16900){
-        dfx.strokeStyle="rgba(57,192,240,"+(0.10*(1-Math.sqrt(d2)/130)).toFixed(3)+")";
+      if(d2<19600){
+        dfx.strokeStyle="rgba(57,192,240,"+(0.22*(1-Math.sqrt(d2)/140)).toFixed(3)+")";
         dfx.beginPath(); dfx.moveTo(nodes[i].x,nodes[i].y); dfx.lineTo(nodes[j].x,nodes[j].y); dfx.stroke();
       }
     }
-    dfx.fillStyle="rgba(125,200,240,.5)";
-    for(i=0;i<nodes.length;i++){ p=nodes[i]; dfx.fillRect(p.x-1,p.y-1,2,2); }
-    /* packet pulses travelling along links */
-    if(now-lastSpawn>1400 && nodes.length>1){
+    /* layer 2b: nodes with soft glow + twinkle */
+    for(i=0;i<nodes.length;i++){
+      p=nodes[i];
+      var tw=.55+.45*Math.sin(s*2.2+p.r);
+      dfx.fillStyle="rgba(140,215,250,"+(0.35+0.45*tw).toFixed(3)+")";
+      dfx.fillRect(p.x-1.2,p.y-1.2,2.4,2.4);
+      dfx.globalAlpha=0.18*tw;
+      dfx.drawImage(glow,p.x-7,p.y-7,14,14);
+      dfx.globalAlpha=1;
+    }
+    /* layer 3: packet pulses travelling along links */
+    if(now-lastSpawn>900 && nodes.length>1){
       var a=nodes[(Math.random()*nodes.length)|0];
       for(var tries=0;tries<6;tries++){
         var b2=nodes[(Math.random()*nodes.length)|0];
         if(b2===a) continue;
         var ddx=a.x-b2.x, ddy=a.y-b2.y, dist=Math.sqrt(ddx*ddx+ddy*ddy);
-        if(dist<220&&dist>40){ packets.push({a:a,b:b2,t0:now,dur:900+dist*6}); break; }
+        if(dist<260&&dist>40){ packets.push({a:a,b:b2,t0:now,dur:900+dist*5}); break; }
       }
       lastSpawn=now;
     }
     for(i=packets.length-1;i>=0;i--){
       var pk=packets[i], k=(now-pk.t0)/pk.dur;
       if(k>=1||k<0){ packets.splice(i,1); continue; }
-      dfx.fillStyle="rgba(190,240,255,.9)";
-      dfx.beginPath(); dfx.arc(pk.a.x+(pk.b.x-pk.a.x)*k,pk.a.y+(pk.b.y-pk.a.y)*k,1.6,0,6.284); dfx.fill();
+      var px=pk.a.x+(pk.b.x-pk.a.x)*k, py=pk.a.y+(pk.b.y-pk.a.y)*k;
+      dfx.globalCompositeOperation="lighter";
+      dfx.globalAlpha=0.9;
+      dfx.drawImage(glow,px-9,py-9,18,18);
+      dfx.globalAlpha=1;
+      dfx.globalCompositeOperation="source-over";
+    }
+    /* occasional scan sweep drifting down the viewport */
+    if(s-lastSweep>9){ lastSweep=s+Math.random()*4; }
+    var ph2=((s-lastSweep)%9)/9;
+    if(ph2<0.45){
+      var ysw=ph2/0.45;
+      var gy=ysw*(dh+220)-110;
+      var lg=dfx.createLinearGradient(0,gy-90,0,gy+90);
+      lg.addColorStop(0,"rgba(57,192,240,0)");
+      lg.addColorStop(.5,"rgba(57,192,240,0.05)");
+      lg.addColorStop(1,"rgba(57,192,240,0)");
+      dfx.fillStyle=lg; dfx.globalCompositeOperation="lighter";
+      dfx.fillRect(0,gy-90,dw,180);
+      dfx.globalCompositeOperation="source-over";
     }
   }
   if(!reduced) requestAnimationFrame(dfDraw);
