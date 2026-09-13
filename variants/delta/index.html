@@ -8,16 +8,16 @@
 <link rel="icon" href="/img/logo-256.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0b0e14; --bg-deep:#080b10; --panel:#11151d; --panel-2:#0e1219;
   --line:#1e2531; --line-bright:#2b3546;
-  --ink:#e8ecf4; --ink-dim:#8b94a7; --ink-faint:#5a6376;
+  --ink:#e8ecf4; --ink-dim:#8b94a7; --ink-faint:#7e8899;
   --cyan:#39c0f0; --cyan-deep:#1a7fb8; --cyan-glow:rgba(57,192,240,.35);
   --green:#34d399; --green-glow:rgba(52,211,153,.25);
   --amber:#fbbf24; --red:#f87171;
-  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'Archivo',system-ui,sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -54,7 +54,9 @@ body{
 .top-right{display:flex;align-items:center;gap:12px}
 .live-chip{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--green);
   border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.08);padding:5px 10px;border-radius:999px}
-.led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 var(--green-glow);animation:pulse 2s infinite}
+/* LED: steady green + soft glow by default. The pulse is data-driven —
+   JS fires one ripple of pulses each time /api/status completes a real check. */
+.led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green-glow)}
 @keyframes pulse{0%{box-shadow:0 0 0 0 var(--green-glow)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
 
 /* ---- hero ---- */
@@ -65,7 +67,7 @@ body{
   text-transform:uppercase;letter-spacing:.12em;margin-bottom:22px}
 .sysline span::before{content:"▸ "}
 h1{font-size:clamp(42px,7vw,78px);font-weight:800;line-height:1.02;letter-spacing:-.035em;max-width:14ch}
-h1 .hl{background:linear-gradient(120deg,#7dd8ff,#39c0f0 55%,#1a7fb8);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 .hl{color:#7dd8ff}
 .lede{margin-top:22px;font-size:17.5px;line-height:1.6;color:var(--ink-dim);max-width:54ch}
 .lede b{color:var(--ink);font-weight:600}
 .hero-cta{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap}
@@ -81,7 +83,7 @@ h1 .hl{background:linear-gradient(120deg,#7dd8ff,#39c0f0 55%,#1a7fb8);-webkit-ba
   border:1px solid var(--line);border-radius:12px;overflow:hidden;max-width:760px}
 .hstat{background:var(--panel-2);padding:18px 20px;display:flex;gap:12px;align-items:flex-start}
 .hstat .ic{color:var(--cyan);margin-top:2px}
-.hstat .k{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint)}
+.hstat .k{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint)}
 .hstat .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
 .hstat .v small{font-size:12px;color:var(--ink-dim);font-weight:400}
 @media(max-width:719px){.hero-stats{margin-top:40px}.hstat{padding:14px 10px;flex-direction:column;gap:6px}.hstat .ic{margin-top:0}.hstat .v{font-size:16px}}
@@ -95,7 +97,7 @@ h1 .hl{background:linear-gradient(120deg,#7dd8ff,#39c0f0 55%,#1a7fb8);-webkit-ba
   background:linear-gradient(90deg,transparent,rgba(57,192,240,.5),transparent)}
 .thead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .thead h3{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--cyan);text-transform:uppercase}
-.tmeta{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-align:right}
+.tmeta{font-family:var(--mono);font-size:12px;color:var(--ink-faint);text-align:right}
 .tbig{font-family:var(--mono);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
 .tbig .delta{font-size:13px;color:var(--green);margin-left:8px}
 .spark{width:100%;height:64px;display:block;margin-top:10px}
@@ -104,7 +106,7 @@ h1 .hl{background:linear-gradient(120deg,#7dd8ff,#39c0f0 55%,#1a7fb8);-webkit-ba
 .kv .k{color:var(--ink-dim)}
 .kv .v{color:var(--ink)}
 .kv .v.ok{color:var(--green)}
-.badge{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--green);
+.badge{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--green);
   border:1px solid rgba(52,211,153,.35);padding:3px 8px;border-radius:999px}
 .badge::before{content:"● ";animation:blink 1.6s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
@@ -123,7 +125,7 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;line-hei
 .sys:hover{border-color:var(--cyan-deep);transform:translateY(-3px)}
 .sys .head{display:flex;justify-content:space-between;align-items:center}
 .sys h3{font-size:16.5px;font-weight:600;display:flex;align-items:center;gap:10px}
-.sys .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:3px 9px;border-radius:999px}
+.sys .st{font-family:var(--mono);font-size:12px;letter-spacing:.08em;padding:3px 9px;border-radius:999px}
 .st.live{color:var(--green);border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.07)}
 .st.building{color:var(--amber);border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.07)}
 .sys .desc{margin-top:10px;color:var(--ink-dim);font-size:14px;line-height:1.55}
@@ -139,11 +141,9 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;line-hei
 @keyframes grow{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.85}}
 @keyframes scan{0%{opacity:0;left:0}8%{opacity:.9}92%{opacity:.9}100%{opacity:0;left:calc(100% - 2px)}}
 
-/* ---- staggered LED heartbeat + self-check line ---- */
-.sysgrid .sys:nth-child(2) .led{animation-delay:.4s}
-.sysgrid .sys:nth-child(3) .led{animation-delay:.8s}
-.sysgrid .sys:nth-child(4) .led{animation-delay:1.2s}
-.chk{margin-top:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
+/* ---- self-check line ---- */
+.sr-h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.chk{margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
 .chk .cert{color:var(--ink-faint)}
 .chk b{color:var(--ink-dim);font-weight:500}
 
@@ -171,7 +171,7 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;line-hei
 .work h3{font-size:17px;font-weight:600;line-height:1.3}
 .work p{color:var(--ink-dim);font-size:13.5px;line-height:1.55;flex:1}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);border:1px solid var(--line-bright);padding:3px 8px;border-radius:6px}
+.tag{font-family:var(--mono);font-size:12px;color:var(--ink-dim);border:1px solid var(--line-bright);padding:3px 8px;border-radius:6px}
 .work .go{font-family:var(--mono);font-size:12px;color:var(--cyan);text-decoration:none}
 .work .go:hover{text-decoration:underline}
 .work .links{display:flex;gap:18px;flex-wrap:wrap}
@@ -182,7 +182,7 @@ footer{padding:56px 0;color:var(--ink-faint)}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px;align-items:center}
 footer a{color:var(--ink-dim);text-decoration:none;font-family:var(--mono);font-size:12.5px}
 footer a:hover{color:var(--cyan)}
-.demo-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
+.demo-note{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
 .demo-note b{color:var(--amber);font-weight:500}
 
 /* ---- reduced motion ---- */
@@ -217,8 +217,9 @@ footer a:hover{color:var(--cyan)}
     <div class="wrap hero-grid">
       <div>
         <div class="sysline"><span>systems operator</span><span>content ops</span><span>ai workflows</span></div>
-        <h1>I ship <span class="hl">useful systems</span> — and run them in production.</h1>
-        <p class="lede">Not a portfolio of screenshots. Every project below runs on <b>a real server</b> — the telemetry beside this text is sampled from the same machine serving this page.</p>
+        <h1>I ship <span class="hl">useful systems</span>, and run them in production.</h1>
+        <h2 class="sr-h2">Systems on this server</h2>
+        <p class="lede">Not a portfolio of screenshots. Every project below runs on <b>a real server</b>. The telemetry beside this text is sampled from the same machine serving this page.</p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#systems">View Systems ↓</a>
           <a class="btn btn-ghost" href="/resume">Open Résumé</a>
@@ -246,7 +247,7 @@ footer a:hover{color:var(--cyan)}
           <div class="tmeta" style="text-align:left;margin-top:8px">P95 · last 24h · 5-min samples</div>
         </div>
         <div class="tcard">
-          <div class="thead"><h3>System health</h3><span class="mono" style="font-size:10.5px;color:var(--ink-faint)">vps-01</span></div>
+          <div class="thead"><h3>System health</h3><span class="mono" style="font-size:12px;color:var(--ink-faint)">vps-01</span></div>
           <div class="kv"><span class="k">CPU</span><span class="v ok" id="cpuV">—</span></div>
           <div class="kv"><span class="k">Memory</span><span class="v" id="memV">—</span></div>
           <div class="kv"><span class="k">Nodes</span><span class="v ok">1/1 ONLINE</span></div>
@@ -264,19 +265,19 @@ footer a:hover{color:var(--cyan)}
       <div class="sysgrid">
         <div class="sys rv" data-sys="procura">
           <div class="head"><h3><span class="led"></span>Procura</h3><span class="st live">LIVE</span></div>
-          <p class="desc">Procurement workflow system — demo deployment on :8082 behind its own subdomain.</p>
+          <p class="desc">Procurement workflow system. Demo deployment on :8082, behind its own subdomain.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
         <div class="sys rv" data-sys="pims">
           <div class="head"><h3><span class="led"></span>PIMS</h3><span class="st live">LIVE</span></div>
-          <p class="desc">Property information management system — :8083, subdomain-fronted, always-on.</p>
+          <p class="desc">Property information management system. :8083, subdomain-fronted, always-on.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
         <div class="sys rv" data-sys="portfolio-api">
           <div class="head"><h3><span class="led"></span>Portfolio API</h3><span class="st live">LIVE</span></div>
-          <p class="desc">Node service backing this site at /api/* — health-checked every minute.</p>
+          <p class="desc">Node service backing this site at /api/*. Health-checked every minute.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
@@ -298,7 +299,7 @@ footer a:hover{color:var(--cyan)}
         <div class="work rv">
           <div class="num">01 — PLATFORM</div>
           <h3>Procura</h3>
-          <p>Procurement as a single-binary Go system: inventory with reorder points, supplier scorecards, purchase orders, RFQs, planning, and reporting — in weekly production use.</p>
+          <p>Procurement as a single-binary Go system: inventory with reorder points, supplier scorecards, purchase orders, RFQs, planning, and reporting, all in weekly production use.</p>
           <div class="tags"><span class="tag">go</span><span class="tag">sqlite</span><span class="tag">ops</span></div>
           <div class="links"><a class="go" href="/work/procura">case study →</a><a class="go dim" href="https://procura.wasabietech.com">live app →</a></div>
         </div>
@@ -311,7 +312,7 @@ footer a:hover{color:var(--cyan)}
         </div>
         <div class="work rv">
           <div class="num">03 — CONTENT LAB</div>
-          <h3>Hills — AI content pipeline</h3>
+          <h3>Hills: AI content pipeline</h3>
           <p>AI-assisted content operations lab: briefs, drafts, and review flows built around real editorial workflows.</p>
           <div class="tags"><span class="tag">ai</span><span class="tag">editorial</span><span class="tag">tooling</span></div>
           <a class="go" href="/work/hills-ai-content-lab">case study →</a>
@@ -679,18 +680,27 @@ footer a:hover{color:var(--cyan)}
   /* ---------- live telemetry: poll /api/status ---------- */
   var cpuV=document.getElementById("cpuV"), memV=document.getElementById("memV");
   function setCount(el,val,dec){ if(!el||val==null||isNaN(val)) return; el._live=true; el.dataset.count=val; el.dataset.dec=dec; el.textContent=Number(val).toFixed(dec); }
-  function setStatus(id,ok){
+  var RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function pulseLed(led,delay){
+    if(RM||!led) return;
+    led.style.animation="none"; void led.offsetWidth;
+    led.style.animation="pulse 1.4s ease-out "+(delay||0)+"s backwards";
+  }
+  function setStatus(id,ok,seq){
     var card=document.querySelector('.sys[data-sys="'+id+'"]'); if(!card) return;
     var led=card.querySelector(".led"), st=card.querySelector(".st");
     if(!ok){
       if(led){ led.style.background="var(--amber)"; led.style.animation="none"; }
       if(st){ st.textContent="DEGRADED"; st.style.background="rgba(251,191,36,.08)"; st.style.color="var(--amber)"; st.style.borderColor="rgba(251,191,36,.35)"; }
+    } else if(led){
+      led.style.background="var(--green)";
+      pulseLed(led,.3+.35*(seq||0));
     }
   }
   function applyStatus(s){
     if(!s||!s.systems) return;
     var order=["procura","pims","portfolio-api","edge"];
-    order.forEach(function(id){
+    order.forEach(function(id,seq){
       var st=s.systems[id]; if(!st) return;
       var card=document.querySelector('.sys[data-sys="'+id+'"]'); if(!card) return;
       var av=(s.availability||{})[id];
@@ -699,9 +709,10 @@ footer a:hover{color:var(--cyan)}
         setCount(card.querySelector(".ufoot b"), av.pct, 1);
         if(bar.dataset.pct==null){ bar.dataset.pct=av.pct; buildUbar(bar,av.days); }
       }
-      setStatus(id, st.ok);
+      setStatus(id, st.ok, seq);
       if(st.at) chkAge[id]=Math.max(0,Math.round((Date.now()-new Date(st.at).getTime())/1000));
     });
+    pulseLed(document.querySelector(".live-chip .led"),0);
     setCount(document.getElementById("uptimeStat"), s.uptimePct, 2);
     var edge=s.systems["edge"];
     if(edge){ setCount(document.getElementById("p95Stat"), edge.ms, 0); setCount(document.getElementById("tbigMs"), edge.ms, 0); }
