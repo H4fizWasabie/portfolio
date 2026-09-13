@@ -1,0 +1,118 @@
+/* ── Mission-control case studies ───────────────────────────────────────────
+   Restyles the React-rendered routes (/work/:slug, /resume, 404) to match the
+   delta landing's design language (navy panels, cyan accent, Plex Mono
+   labels / Inter body). Namespaced under .mc-* so the legacy lime landing
+   styles in styles.css are untouched. Landing (/) itself is static delta
+   HTML and does not use this file. */
+
+.mc {
+  --bg: #0b0e14; --bg-deep: #080b10; --panel: #11151d; --panel-2: #0e1219;
+  --line: #1e2531; --line-bright: #2b3546;
+  --ink: #e8ecf4; --ink-dim: #8b94a7; --ink-faint: #5a6376;
+  --cyan: #39c0f0; --cyan-deep: #1a7fb8; --cyan-glow: rgba(57, 192, 240, .35);
+  --green: #34d399; --green-glow: rgba(52, 211, 153, .25);
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.mc ::selection { background: var(--cyan); color: #03222f; }
+.mc .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+/* ---- topbar / footer (mirror delta landing) ---- */
+.mc-topbar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+  background: rgba(8, 11, 16, .72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.mc-topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; }
+.mc-brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px;
+  font-weight: 600; letter-spacing: .04em; color: var(--ink); text-decoration: none; }
+.mc-brand .mark { width: 26px; height: 26px; border: 1px solid var(--line-bright); border-radius: 7px;
+  display: grid; place-items: center; background: linear-gradient(135deg, #0d1420, #111a29);
+  color: var(--cyan); font-size: 13px; }
+.mc-brand small { color: var(--ink-faint); font-weight: 400; display: none; }
+@media (min-width: 720px) { .mc-brand small { display: inline; } }
+.mc-nav { display: flex; align-items: center; gap: 22px; font-size: 13.5px; font-weight: 500; color: var(--ink-dim); }
+.mc-nav a { color: inherit; text-decoration: none; transition: color .2s; }
+.mc-nav a:hover { color: var(--cyan); }
+.mc-chip { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px;
+  color: var(--green); border: 1px solid rgba(52, 211, 153, .35); background: rgba(52, 211, 153, .08);
+  padding: 5px 10px; border-radius: 999px; }
+.mc .led { width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 0 0 var(--green-glow); animation: mc-pulse 2s infinite; flex: none; }
+@keyframes mc-pulse { 0% { box-shadow: 0 0 0 0 var(--green-glow); } 70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; } }
+
+.mc-main { flex: 1; padding: 72px 0 88px; }
+@media (max-width: 639px) { .mc-main { padding: 44px 0 64px; } }
+
+/* ---- case header ---- */
+.mc-back { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); text-decoration: none; }
+.mc-back:hover { color: var(--cyan); }
+.mc-eyebrow { display: flex; align-items: center; gap: 14px; margin: 34px 0 0;
+  font-family: var(--mono); font-size: 11.5px; color: var(--cyan); text-transform: uppercase; letter-spacing: .12em; }
+.mc-eyebrow::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(57, 192, 240, .4), transparent); }
+.mc h1 { margin: 18px 0 14px; font-size: clamp(38px, 5.5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; }
+.mc-lede { max-width: 64ch; font-size: 17.5px; line-height: 1.6; color: var(--ink-dim); }
+.mc-lede b { color: var(--ink); font-weight: 600; }
+
+/* ---- meta panel: tags + links ---- */
+.mc-metapanel { margin-top: 28px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mc-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.mc-tag { font-family: var(--mono); font-size: 11px; color: var(--ink-dim);
+  border: 1px solid var(--line-bright); border-radius: 999px; padding: 4px 10px; }
+.mc-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.mc-link { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px;
+  color: var(--cyan); text-decoration: none; border: 1px solid rgba(57, 192, 240, .25); border-radius: 999px;
+  padding: 6px 14px; transition: border-color .2s, box-shadow .2s; }
+.mc-link:hover { border-color: var(--cyan); box-shadow: 0 0 16px var(--cyan-glow); }
+.mc-link.dim { color: var(--ink-dim); border-color: var(--line-bright); }
+.mc-link.dim:hover { color: var(--cyan); border-color: var(--cyan); box-shadow: none; }
+@media (max-width: 639px) { .mc-metapanel { flex-direction: column; align-items: flex-start; } }
+
+/* ---- screenshot ---- */
+.mc-media { margin: 34px 0 0; background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.mc-media img { display: block; width: 100%; max-height: 480px; object-fit: cover; filter: saturate(.92); }
+.mc-caption { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); padding: 10px 16px; }
+
+/* ---- narrative blocks (numbered panels) ---- */
+.mc-blocks { counter-reset: mc-block; margin-top: 6px; }
+.mc-block { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 24px 26px; margin-top: 18px; }
+.mc-block h2 { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 12px;
+  font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); }
+.mc-block h2::before { content: counter(mc-block, decimal-leading-zero); counter-increment: mc-block;
+  color: var(--ink-faint); font-weight: 400; }
+.mc-block p { max-width: 70ch; margin: 12px 0 0; color: var(--ink-dim); font-size: 15px; line-height: 1.65; }
+
+/* ---- CTA ---- */
+.mc-cta { display: inline-block; margin-top: 30px; font-family: var(--mono); font-size: 13.5px; font-weight: 500;
+  padding: 13px 24px; border-radius: 10px; background: var(--cyan); color: #04222e; text-decoration: none;
+  transition: transform .2s, box-shadow .2s; }
+.mc-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--cyan-glow); }
+.mc-cta.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-bright); }
+.mc-cta.ghost:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: none; }
+
+/* ---- footer ---- */
+.mc-footer { border-top: 1px solid var(--line); padding: 28px 0; }
+.mc-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mc-footer a { font-family: var(--mono); font-size: 12px; color: var(--ink-dim); text-decoration: none; }
+.mc-footer a:hover { color: var(--cyan); }
+.mc-note { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); }
+.mc-note b { color: var(--amber); font-weight: 500; }
+
+/* ---- entry motion (delta-style, honors reduced motion) ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .mc-block, .mc-media, .mc-metapanel { animation: mc-enter 700ms cubic-bezier(.2, 0, 0, 1) both;
+    animation-timeline: view(); animation-range: entry 0% cover 22%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc .led { animation: none; }
+  .mc *, .mc *::before, .mc *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+@keyframes mc-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
