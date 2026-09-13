@@ -347,8 +347,9 @@ footer a:hover{color:var(--cyan)}
       if(!e.isIntersecting) return;
       nio.unobserve(e.target);
       var el=e.target, target=parseFloat(el.dataset.count), dec=+(el.dataset.dec||0), t0=performance.now(), dur=1400;
-      if(reduced){ el.textContent = target.toFixed(dec); return; }
+      if(reduced||el._live){ el.textContent=target.toFixed(dec); return; }
       (function tick(t){
+        if(el._live) return; /* live telemetry overrode this */
         var p=Math.min((t-t0)/dur,1); p=1-Math.pow(1-p,3);
         el.textContent=(target*p).toFixed(dec);
         if(p<1) requestAnimationFrame(tick);
@@ -675,7 +676,7 @@ footer a:hover{color:var(--cyan)}
 
   /* ---------- live telemetry: poll /api/status ---------- */
   var cpuV=document.getElementById("cpuV"), memV=document.getElementById("memV");
-  function setCount(el,val,dec){ if(!el||val==null||isNaN(val)) return; el.dataset.count=val; el.dataset.dec=dec; el.textContent=Number(val).toFixed(dec); }
+  function setCount(el,val,dec){ if(!el||val==null||isNaN(val)) return; el._live=true; el.dataset.count=val; el.dataset.dec=dec; el.textContent=Number(val).toFixed(dec); }
   function setStatus(id,ok){
     var card=document.querySelector('.sys[data-sys="'+id+'"]'); if(!card) return;
     var led=card.querySelector(".led"), st=card.querySelector(".st");
