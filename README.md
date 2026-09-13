@@ -15,7 +15,7 @@ the live `/var/www/portfolio` remains the static baseline.
 
 Run `npm install`, then `npm run dev`. The web app runs on `5173`; the API runs on `8085`.
 Create the `portfolio` Postgres database and apply `infra/schema.sql` before using live API data.
-`npm run build` and `npm run typecheck` are the CI checks. Nothing in `infra/` is applied by this repo.
+`npm run build` and `npm run typecheck` are run by `.github/workflows/ci.yml`. Nothing in `infra/` is applied by this repo.
 
 ## Current site (baseline)
 

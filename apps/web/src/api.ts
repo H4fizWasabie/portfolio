@@ -11,3 +11,4 @@ const fallbackWork: CaseStudy[] = [
 async function get<T>(path: string, fallback: T): Promise<T> { try { const res = await fetch(`/api${path}`); if (!res.ok) throw new Error(); return await res.json(); } catch { return fallback; } }
 export const loadMetrics = () => get('/metrics', fallbackMetrics);
 export const loadWork = () => get('/case-studies', fallbackWork);
+export const loadCaseStudy = (slug: string) => get(`/case-studies/${slug}`, fallbackWork.find(item => item.slug === slug) || null);

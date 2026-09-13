@@ -3,5 +3,9 @@ portfolio.wasabietech.com {
   root * /var/www/portfolio/dist
   reverse_proxy /api/* 127.0.0.1:8085
   try_files {path} /index.html
+  @hashedAssets path_regexp hashed "/assets/.*-[A-Za-z0-9_-]+\\.(js|css|woff2?|png|jpe?g|svg)$"
+  header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
+  @index path /index.html
+  header @index Cache-Control "no-cache"
   file_server
 }
