@@ -431,7 +431,7 @@ footer a:hover{color:var(--cyan)}
     dw=innerWidth; dh=innerHeight;
     df.width=dw*d; df.height=dh*d; dfx.setTransform(d,0,0,d,0,0);
     nodes=[];
-    var n=Math.min(96,Math.round(dw/16));
+    var n=Math.min(150,Math.round(dw/10));
     for(var i=0;i<n;i++) nodes.push({x:Math.random()*dw,y:Math.random()*dh,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:Math.random()*6.28});
     sheens=[
       {x:dw*.2,y:dh*.3,r:Math.max(dw,dh)*.45,hue:"57,192,240",ph:0,          sx:.10,sy:.06},
