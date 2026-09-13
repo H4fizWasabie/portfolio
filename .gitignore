@@ -21,3 +21,6 @@ build/
 node_modules
 dist
 *.env
+
+# old resume archive — local only
+resume/archive/

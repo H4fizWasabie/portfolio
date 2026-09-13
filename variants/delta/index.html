@@ -174,6 +174,8 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;line-hei
 .tag{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);border:1px solid var(--line-bright);padding:3px 8px;border-radius:6px}
 .work .go{font-family:var(--mono);font-size:12px;color:var(--cyan);text-decoration:none}
 .work .go:hover{text-decoration:underline}
+.work .links{display:flex;gap:18px;flex-wrap:wrap}
+.work .go.dim{color:var(--ink-dim)}
 
 /* ---- footer ---- */
 footer{padding:56px 0;color:var(--ink-faint)}
@@ -201,7 +203,7 @@ footer a:hover{color:var(--cyan)}
   <div class="wrap">
     <div class="brand"><span class="mark">◈</span> HAFIZ JAMALI <small>/ systems</small></div>
     <nav class="topnav">
-      <a href="#systems">Systems</a><a href="#work">Work</a><a href="/resume">Resume</a>
+      <a href="#systems">Systems</a><a href="#work">Work</a><a href="/resume/Resume-Hafiz-Jamali.pdf">Resume</a>
     </nav>
     <div class="top-right">
       <span class="live-chip"><span class="led"></span>LIVE</span>
@@ -219,7 +221,7 @@ footer a:hover{color:var(--cyan)}
         <p class="lede">Not a portfolio of screenshots. Every project below runs on <b>a real server</b> — the telemetry beside this text is sampled from the same machine serving this page.</p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#systems">View Systems ↓</a>
-          <a class="btn btn-ghost" href="/resume">Open Résumé</a>
+          <a class="btn btn-ghost" href="/resume/Resume-Hafiz-Jamali.pdf">Open Résumé</a>
         </div>
         <div class="hero-stats">
           <div class="hstat">
@@ -296,16 +298,16 @@ footer a:hover{color:var(--cyan)}
         <div class="work rv">
           <div class="num">01 — PLATFORM</div>
           <h3>Procura</h3>
-          <p>Full procurement flow: requests, approvals, vendors, audit trail. Served as a standalone demo on the production VPS.</p>
-          <div class="tags"><span class="tag">node</span><span class="tag">workflow</span><span class="tag">ops</span></div>
-          <a class="go" href="https://procura.wasabietech.com">procura.wasabietech.com →</a>
+          <p>Procurement as a single-binary Go system: inventory with reorder points, supplier scorecards, purchase orders, RFQs, planning, and reporting — in weekly production use.</p>
+          <div class="tags"><span class="tag">go</span><span class="tag">sqlite</span><span class="tag">ops</span></div>
+          <div class="links"><a class="go" href="/work/procura">case study →</a><a class="go dim" href="https://procura.wasabietech.com">live app →</a></div>
         </div>
         <div class="work rv">
           <div class="num">02 — PLATFORM</div>
           <h3>PIMS</h3>
-          <p>Property information management: structured data in, searchable records out. Running 24/7 on the same infrastructure.</p>
-          <div class="tags"><span class="tag">data</span><span class="tag">search</span><span class="tag">ops</span></div>
-          <a class="go" href="https://pims.wasabietech.com">pims.wasabietech.com →</a>
+          <p>Veterinary inventory system rewritten from Google Sheets to Go + PostgreSQL — stocktake, goods received notes, expiry alerts, and ordering at full feature parity.</p>
+          <div class="tags"><span class="tag">go</span><span class="tag">postgresql</span><span class="tag">ops</span></div>
+          <div class="links"><a class="go" href="/work/pims">case study →</a><a class="go dim" href="https://pims.wasabietech.com">live app →</a></div>
         </div>
         <div class="work rv">
           <div class="num">03 — CONTENT LAB</div>
@@ -321,11 +323,10 @@ footer a:hover{color:var(--cyan)}
 
 <footer>
   <div class="wrap">
-    <div class="demo-note">variant Δ · mission control · build <b>32f5587-r2</b> · live telemetry from <b>vps-01</b> · checks every 60s</div>
+    <div class="demo-note">mission control · build <b>bc06301</b> · live telemetry from <b>vps-01</b> · checks every 60s</div>
     <div>
       <a href="https://github.com/H4fizWasabie">github</a> &nbsp;·&nbsp;
-      <a href="/resume">résumé</a> &nbsp;·&nbsp;
-      <a href="/">main site</a>
+      <a href="/resume/Resume-Hafiz-Jamali.pdf">résumé</a>
     </div>
   </div>
 </footer>
@@ -333,7 +334,7 @@ footer a:hover{color:var(--cyan)}
 <script>
 (function(){
   "use strict";
-  console.log("[variant-delta] build 32f5587-r2 · live telemetry = on · deepfield active = " + !matchMedia("(prefers-reduced-motion: reduce)").matches);
+  console.log("[mission-control] build bc06301 · live telemetry = on · deepfield active = " + !matchMedia("(prefers-reduced-motion: reduce)").matches);
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- reveal on scroll ---------- */

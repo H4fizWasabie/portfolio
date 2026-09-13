@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hafiz Jamali — Resume (Datasheet Mockup A)</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Inter", "DejaVu Sans", Arial, sans-serif;
+    font-size: 9.5pt; line-height: 1.42; color: #17190f; background: #ffffff;
+  }
+  .mono { font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace; }
+  .page { padding: 34px 40px 30px 40px; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- header ---------- */
+  .idtop { border-top: 4px solid #17190f; padding-top: 12px; }
+  .idrow { width: 100%; }
+  h1 { font-size: 23pt; letter-spacing: 1px; font-weight: 700; }
+  .role { font-size: 10.5pt; color: #4a4d3a; margin-top: 2px; }
+  .meta { text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
+  .meta span { display: block; }
+  .certline {
+    margin-top: 10px; padding: 5px 8px; border-top: 1px solid #17190f; border-bottom: 1px solid #17190f;
+    font-size: 8pt; color: #17190f; letter-spacing: 0.5px;
+  }
+  .certline b { color: #5a7a22; }
+
+  /* ---------- section header ---------- */
+  .sec { margin-top: 14px; }
+  .sechead { border-bottom: 2px solid #17190f; padding-bottom: 3px; margin-bottom: 8px; }
+  .secno { font-size: 8pt; font-weight: 700; color: #5a7a22; letter-spacing: 1px; }
+  .sectitle { font-size: 8pt; font-weight: 700; letter-spacing: 3px; color: #17190f; }
+
+  /* ---------- profile ---------- */
+  .profile { font-size: 9.5pt; text-align: justify; }
+
+  /* ---------- systems (spec-table) ---------- */
+  table.sys { width: 100%; border-collapse: collapse; }
+  td.sysname { padding: 3px 0 1px 0; font-weight: 700; font-size: 10pt; }
+  td.sysname .kind { font-weight: 400; font-size: 7.5pt; color: #5a7a22; letter-spacing: 1px; }
+  td.sysurl { text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
+  .tags { font-size: 7.2pt; color: #4a4d3a; letter-spacing: 0.5px; padding-bottom: 3px; }
+  .sysdesc { margin: 0 0 4px 0; font-size: 9.3pt; }
+  ul.sysul { margin: 0 0 8px 0; padding-left: 14px; }
+  ul.sysul li { margin-bottom: 2px; }
+  .metric-inline { font-weight: 700; }
+
+  /* ---------- experience ---------- */
+  .job { margin-bottom: 9px; }
+  table.jobrow { width: 100%; border-collapse: collapse; }
+  td.jt { font-weight: 700; font-size: 9.8pt; }
+  td.jd { text-align: right; font-size: 7.8pt; color: #4a4d3a; vertical-align: bottom; }
+  .jloc { font-size: 8.2pt; color: #4a4d3a; }
+  .jdesc { font-size: 9.2pt; }
+
+  /* ---------- skills ---------- */
+  table.skills { width: 100%; border-collapse: collapse; }
+  td.sk { padding: 1.5px 0; vertical-align: top; font-size: 9.2pt; }
+  td.sklabel { width: 92px; font-size: 7.6pt; font-weight: 700; letter-spacing: 1px; color: #5a7a22; padding-top: 3px; }
+
+  /* ---------- footer ---------- */
+  .foot { margin-top: 14px; border-top: 1px solid #17190f; padding-top: 5px;
+          font-size: 7.2pt; color: #4a4d3a; display: block; }
+  .foot .ref { letter-spacing: 1px; color: #5a7a22; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ================= HEADER ================= -->
+  <div class="idtop">
+    <table class="idrow"><tr>
+      <td>
+        <h1 class="mono">MOHAMMAD HAFIZ JAMALI</h1>
+        <div class="role mono">SYSTEMS BUILDER · OPERATIONS, PROCUREMENT &amp; AI-ASSISTED WORKFLOWS</div>
+      </td>
+      <td class="meta mono">
+        <span>Selayang 68100, Malaysia</span>
+        <span>kisame350@gmail.com</span>
+        <span>portfolio.wasabietech.com</span>
+        <span>github.com/H4fizWasabie</span>
+      </td>
+    </tr></table>
+    <div class="certline mono">
+      <b>CIPS CERTIFIED</b> — HUMANITARIAN PROCUREMENT PROFESSIONAL (LEVEL 3, 2025) &nbsp;·&nbsp; LANGUAGES: ENGLISH / BAHASA MALAYSIA / IBAN
+    </div>
+  </div>
+
+  <!-- ================= 01 PROFILE ================= -->
+  <div class="sec">
+    <div class="sechead"><span class="secno mono">01 /</span> <span class="sectitle mono">PROFILE</span></div>
+    <p class="profile">I design and build the systems a business runs on. At a working veterinary hospital, I took a paper-based procurement and inventory operation and replaced it with web applications I designed, built, and deployed myself — then measured the result: <b>76.5% less manual paperwork, 90% automated ordering accuracy, 71% fewer critical stock incidents</b>. I work from the problem down: map the workflow, model the data, build the tool, watch the metrics, refine.</p>
+  </div>
+
+  <!-- ================= 02 SYSTEMS ================= -->
+  <div class="sec">
+    <div class="sechead"><span class="secno mono">02 /</span> <span class="sectitle mono">SYSTEMS DESIGNED &amp; BUILT</span></div>
+
+    <table class="sys"><tr>
+      <td class="sysname">PIMS — Procurement &amp; Inventory Management System <span class="kind mono">· PRODUCTION · LIVE</span></td>
+      <td class="sysurl mono">pims.wasabietech.com</td>
+    </tr></table>
+    <div class="tags mono">INVENTORY · ALERTING · LIVE DATA · VET CLINIC OPS</div>
+    <p class="sysdesc">Centralized system replacing legacy paper workflows for procurement, inventory, and stock control at a veterinary hospital.</p>
+    <ul class="sysul">
+      <li>Designed the data model around the real workflow: PRFs, POs, GRNs, stock movement, expiry and critical-item tracking.</li>
+      <li>Built digital tracking modules that raised stock-checking efficiency 50%.</li>
+      <li><b>71% fewer critical stock incidents (310 → 90)</b> after replacing paper stock checks with system-tracked counts.</li>
+      <li>Auto Pilot ordering module: <b>90% accuracy</b> on pharmacy requirement ordering, cutting manual workload for operations.</li>
+      <li><b>Impact: 76.5% reduction</b> in manual PRF creation within 3 months of launch.</li>
+    </ul>
+
+    <table class="sys"><tr>
+      <td class="sysname">Procure Pilot <span class="kind mono">· PRODUCTION · LIVE</span></td>
+      <td class="sysurl mono">&nbsp;</td>
+    </tr></table>
+    <div class="tags mono">PROCUREMENT · VENDOR MANAGEMENT · REPORTING</div>
+    <p class="sysdesc">Procurement-side system covering sourcing, supplier records, and purchasing workflow.</p>
+    <ul class="sysul">
+      <li>Consolidated <b>73 → 25 active suppliers (65% reduction)</b>&nbsp;using spend analysis run through the system.</li>
+      <li>Converted key suppliers from pay-in-advance to credit terms — negotiated from data the system surfaced.</li>
+      <li>Standardized SRM protocols and supplier KPI tracking for reliable delivery on critical medical supplies.</li>
+    </ul>
+
+    <table class="sys"><tr>
+      <td class="sysname">Procura <span class="kind mono">· PRODUCTION · LIVE</span></td>
+      <td class="sysurl mono">procura.wasabietech.com</td>
+    </tr></table>
+    <div class="tags mono">GO · REPORTING · PRODUCT &amp; SUPPLIER INTELLIGENCE</div>
+    <p class="sysdesc">Turns product, supplier, and purchasing information into a connected workflow for sourcing decisions.</p>
+
+    <table class="sys"><tr>
+      <td class="sysname">Theoses — Personal AI Operating System <span class="kind mono">· ALWAYS ON · SELF-HOSTED</span></td>
+      <td class="sysurl mono">github.com/H4fizWasabie/theoses2</td>
+    </tr></table>
+    <div class="tags mono">AI AGENTS · AUTOMATION · VPS</div>
+    <p class="sysdesc">Self-hosted AI agent handling research, planning, content drafts, repeatable workflows, documentation, and daily digital operations. The system behind this portfolio.</p>
+  </div>
+
+  <!-- ================= 03 EXPERIENCE ================= -->
+  <div class="sec">
+    <div class="sechead"><span class="secno mono">03 /</span> <span class="sectitle mono">EXPERIENCE</span></div>
+
+    <div class="job">
+      <table class="jobrow"><tr>
+        <td class="jt">Procurement Officer <span class="jloc">— Starlight Veterinary Medical Centre, Ampang</span></td>
+        <td class="jd mono">DEC 2025 – PRESENT</td>
+      </tr></table>
+      <p class="jdesc">Owner of the full procurement-to-inventory operation; designed and shipped PIMS and Procure Pilot above. Digitized the entire procurement lifecycle; negotiated payment terms; run supplier consolidation and KPI programs.</p>
+    </div>
+
+    <div class="job">
+      <table class="jobrow"><tr>
+        <td class="jt">Procurement / Operations Officer <span class="jloc">— IMARET (IMAM Response &amp; Relief Team), Selayang</span></td>
+        <td class="jd mono">DEC 2022 – DEC 2025</td>
+      </tr></table>
+      <p class="jdesc">Humanitarian procurement for clinics and field projects. Designed a Procurement Cycle System adopted as the organization's SOP. Built periodic reporting on inventory usage, assets, and projections for management decisions. Maintained 100% PRF/PO compliance across medicine stock and asset management for 2 static clinics + field missions.</p>
+    </div>
+
+    <div class="job">
+      <table class="jobrow"><tr>
+        <td class="jt">Assistant Pharmacist <span class="jloc">— Big Pharmacy Healthcare, Kuala Lumpur</span></td>
+        <td class="jd mono">DEC 2021 – NOV 2022</td>
+      </tr></table>
+      <p class="jdesc">Stock intake, inventory control, controlled-drug (Poisons Act 1952) handling, audits, daily reconciliation.</p>
+    </div>
+
+    <div class="job">
+      <table class="jobrow"><tr>
+        <td class="jt">Earlier roles</td>
+        <td class="jd mono">2012 – 2021</td>
+      </tr></table>
+      <p class="jdesc"><b>Flavorist, Raw Factory Flavour (2019–2021)</b> — inventory of new product lines; member of a government hand-sanitizer production contract during MCO. <b>Medical Assistant, Ministry of Health Malaysia (2012–2015)</b> — emergency and trauma care, triage, ambulance coordination; certified Advanced CPR.</p>
+    </div>
+  </div>
+
+  <!-- ================= 04 SKILLS ================= -->
+  <div class="sec">
+    <div class="sechead"><span class="secno mono">04 /</span> <span class="sectitle mono">SKILLS</span></div>
+    <table class="skills">
+      <tr><td class="sklabel mono">SYSTEMS</td><td class="sk">Workflow design · Data modeling · Requirements → build → measure loop · Automation</td></tr>
+      <tr><td class="sklabel mono">TECHNICAL</td><td class="sk">Go · JavaScript/React · Self-hosting (VPS, Caddy) · AutoCount (trained, incl. e-invoicing) · Excel · Data visualization · AI-assisted development</td></tr>
+      <tr><td class="sklabel mono">DOMAIN</td><td class="sk">Procurement &amp; sourcing · Inventory management · SRM · Supplier negotiation · Healthcare operations</td></tr>
+    </table>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div class="foot mono"><span class="ref">REF: HJ-CV-2026-A</span> &nbsp;·&nbsp; Live systems, code, and case studies at portfolio.wasabietech.com &nbsp;·&nbsp; Latest version of this document always available at /resume</div>
+
+</div>
+</body>
+</html>
