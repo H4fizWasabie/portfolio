@@ -6,7 +6,7 @@ portfolio.wasabietech.com {
   redir /resume.html /resume 301
   redir /ai-lab-prototypes.html / 301
   try_files {path} /index.html
-  @hashedAssets path_regexp hashed "/assets/.*-[A-Za-z0-9_-]+\\.(js|css|woff2?|png|jpe?g|svg)$"
+  @hashedAssets path_regexp hashed "/assets/.*-[A-Za-z0-9_-]+\.(js|css|woff2?|png|jpe?g|svg)$"
   header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
   @index path /index.html
   header @index Cache-Control "no-cache"
