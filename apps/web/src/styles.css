@@ -150,12 +150,32 @@ footer { margin-top: 8rem; padding-top: 1rem; border-top: 1px solid var(--rule);
 @media (prefers-reduced-motion: no-preference) {
   .hero-copy, .hero-visual { animation: enter 800ms var(--ease-mechanical) both; }
   .hero-visual { animation-delay: 100ms; }
-  .section > * { animation: enter 700ms var(--ease-mechanical) both; animation-timeline: view(); animation-range: entry 0% cover 24%; }
+  /* Headline builds in word by word; "move." slides in from the right. */
+  .hero h1 .w { display: inline-block; animation: word-rise 650ms var(--ease-mechanical) both; animation-delay: calc(90ms * var(--i) + 100ms); }
+  .hero h1 .w:last-child { animation-name: word-rise-last; }
+  /* Whole sections still rise on entry — except list containers whose rows
+     animate individually below (avoids double motion). */
+  .section > *:not(.work-list):not(.steps) { animation: enter 700ms var(--ease-mechanical) both; animation-timeline: view(); animation-range: entry 0% cover 24%; }
+  /* Work rows and loop steps cascade in one by one as each enters view. */
+  .work-list .work-row, .steps article { animation: enter 700ms var(--ease-mechanical) both; animation-timeline: view(); animation-range: entry 0% cover 22%; }
+  .ticker-track { animation: ticker 28s linear infinite; }
+  .ticker:hover .ticker-track { animation-play-state: paused; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
 @keyframes enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes word-rise { from { opacity: 0; transform: translateY(.55em); } to { opacity: 1; transform: translateY(0); } }
+@keyframes word-rise-last { from { opacity: 0; transform: translateX(.3em); } to { opacity: 1; transform: translateX(0); } }
+@keyframes ticker { to { transform: translateX(-50%); } }
+
+/* Capability ticker between hero and metrics. Two identical runs; the track
+   shifts -50% for a seamless loop. aria-hidden — purely decorative. */
+.ticker { overflow: hidden; border-bottom: 1px solid var(--rule); }
+.ticker-track { display: flex; width: max-content; }
+.ticker-run { display: flex; gap: 2.5rem; padding: .8rem 1.25rem; }
+.ticker-run span { color: var(--fg-dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.ticker-run span + span::before { margin-right: 2.5rem; color: var(--signal-dim); content: '/'; }
 
 @media (max-width: 899px) {
   .rail { display: none; }
