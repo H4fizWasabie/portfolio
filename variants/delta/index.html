@@ -143,6 +143,7 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.02em;line-hei
 .sysgrid .sys:nth-child(3) .led{animation-delay:.8s}
 .sysgrid .sys:nth-child(4) .led{animation-delay:1.2s}
 .chk{margin-top:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint)}
+.chk .cert{color:var(--ink-faint)}
 .chk b{color:var(--ink-dim);font-weight:500}
 
 /* ---- work cards: console-style hover ---- */
@@ -222,22 +223,22 @@ footer a:hover{color:var(--cyan)}
         <div class="hero-stats">
           <div class="hstat">
             <span class="ic">⏱</span>
-            <div><div class="k">Uptime</div><div class="v"><span data-count="99.97" data-dec="2">0</span>%</div></div>
+            <div><div class="k">Uptime</div><div class="v"><span id="uptimeStat" data-count="99.97" data-dec="2">0</span>%</div></div>
           </div>
           <div class="hstat">
             <span class="ic">◎</span>
-            <div><div class="k">p95 latency</div><div class="v"><span data-count="12" data-dec="0">0</span><small> ms</small></div></div>
+            <div><div class="k">p95 latency</div><div class="v"><span id="p95Stat" data-count="12" data-dec="0">0</span><small> ms</small></div></div>
           </div>
           <div class="hstat">
             <span class="ic">▦</span>
-            <div><div class="k">Services online</div><div class="v"><span data-count="3" data-dec="0">0</span><small>/3</small></div></div>
+            <div><div class="k">Services online</div><div class="v"><span id="svcStat" data-count="3" data-dec="0">0</span><small id="svcTotal">/3</small></div></div>
           </div>
         </div>
       </div>
       <div>
         <div class="tcard">
           <div class="thead"><h3>Live telemetry</h3><span class="badge">REAL-TIME</span></div>
-          <div class="tbig"><span data-count="12" data-dec="0">0</span> ms <span class="delta">↓ 3.2%</span></div>
+          <div class="tbig"><span id="tbigMs" data-count="12" data-dec="0">0</span> ms <span class="delta" id="tbigDelta">↓ 3.2%</span></div>
           <canvas class="spark" id="spark1"></canvas>
           <div class="tmeta" style="text-align:left;margin-top:8px">P95 · last 24h · 5-min samples</div>
         </div>
@@ -258,25 +259,25 @@ footer a:hover{color:var(--cyan)}
       <h2 class="rv">A status page, not a list of claims.</h2>
       <p class="sub rv">Each block is a real deployment on this VPS, fronted by Caddy with TLS. If a light here turns amber, the site itself will show it.</p>
       <div class="sysgrid">
-        <div class="sys rv">
+        <div class="sys rv" data-sys="procura">
           <div class="head"><h3><span class="led"></span>Procura</h3><span class="st live">LIVE</span></div>
           <p class="desc">Procurement workflow system — demo deployment on :8082 behind its own subdomain.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
-        <div class="sys rv">
+        <div class="sys rv" data-sys="pims">
           <div class="head"><h3><span class="led"></span>PIMS</h3><span class="st live">LIVE</span></div>
           <p class="desc">Property information management system — :8083, subdomain-fronted, always-on.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
-        <div class="sys rv">
+        <div class="sys rv" data-sys="portfolio-api">
           <div class="head"><h3><span class="led"></span>Portfolio API</h3><span class="st live">LIVE</span></div>
           <p class="desc">Node service backing this site at /api/* — health-checked every minute.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
-        <div class="sys rv">
+        <div class="sys rv" data-sys="edge">
           <div class="head"><h3><span class="led"></span>Edge / Caddy</h3><span class="st live">LIVE</span></div>
           <p class="desc">Reverse proxy + automatic TLS for all domains served from this box.</p>
           <div class="ubar" data-uptime="30"></div>
@@ -319,7 +320,7 @@ footer a:hover{color:var(--cyan)}
 
 <footer>
   <div class="wrap">
-    <div class="demo-note">variant Δ · mission control · build <b>32f5587-r2</b> · <b>telemetry below hero = sample data</b> (live wiring: PR step 2)</div>
+    <div class="demo-note">variant Δ · mission control · build <b>32f5587-r2</b> · live telemetry from <b>vps-01</b> · checks every 60s</div>
     <div>
       <a href="https://github.com/H4fizWasabie">github</a> &nbsp;·&nbsp;
       <a href="/resume">résumé</a> &nbsp;·&nbsp;
@@ -331,7 +332,7 @@ footer a:hover{color:var(--cyan)}
 <script>
 (function(){
   "use strict";
-  console.log("[variant-delta] build 32f5587-r2 · deepfield active = " + !matchMedia("(prefers-reduced-motion: reduce)").matches);
+  console.log("[variant-delta] build 32f5587-r2 · live telemetry = on · deepfield active = " + !matchMedia("(prefers-reduced-motion: reduce)").matches);
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- reveal on scroll ---------- */
@@ -356,16 +357,22 @@ footer a:hover{color:var(--cyan)}
   },{threshold:.4});
   document.querySelectorAll("[data-count]").forEach(function(el){ nio.observe(el); });
 
-  /* ---------- uptime bars: build column-by-column on scroll ---------- */
-  document.querySelectorAll(".ubar").forEach(function(bar){
-    var n=30;
+  /* ---------- uptime bars: 30 columns; rebuilt from live data when it arrives ---------- */
+  function buildUbar(bar, days){
+    bar.innerHTML="";
+    var n=30, dd=days&&days.length?days:null;
     for(var i=0;i<n;i++){
-      var t=document.createElement("i");
-      if(i===n-4) t.className="degraded"; /* one visible blip = honest */
+      var t=document.createElement("i"), v;
+      if(dd){ v=(i<n-dd.length)?null:dd[i-(n-dd.length)]; }
+      else { v=100; }
+      if(v===null){ t.classList.add("nodata"); t.style.background="rgba(148,163,184,.16)"; t.style.opacity=1; }
+      else if(v<100){ t.className="degraded"; }
       t.style.animationDelay=(i*55)+"ms";
       bar.appendChild(t);
     }
-  });
+    return bar;
+  }
+  document.querySelectorAll(".ubar").forEach(function(bar){ buildUbar(bar,null); });
   var bio=new IntersectionObserver(function(es){
     es.forEach(function(e){
       if(!e.isIntersecting) return;
@@ -374,30 +381,31 @@ footer a:hover{color:var(--cyan)}
       bar.classList.add("run");
       var pct=bar.parentElement.querySelector(".ufoot b");
       if(!pct) return;
-      if(reduced){ pct.textContent="100.0%"; return; }
+      var target=parseFloat(bar.dataset.pct||"100")||100;
+      if(reduced){ pct.textContent=target.toFixed(1)+"%"; return; }
       var t0=performance.now(), dur=2500;
       (function step(now){
         var k=Math.min((now-t0)/dur,1); k=1-Math.pow(1-k,3);
-        pct.textContent=(100*k).toFixed(1)+"%";
+        pct.textContent=(target*k).toFixed(1)+"%";
         if(k<1) requestAnimationFrame(step);
       })(t0);
     });
   },{threshold:.5});
   document.querySelectorAll(".ubar").forEach(function(b){ bio.observe(b); });
 
-  /* ---------- self-check ticker: "last check Ns ago" ---------- */
-  var checks=[];
+  /* ---------- self-check ticker: real "last check Ns ago" from /api/status ---------- */
+  var chkAge={};
   document.querySelectorAll(".sys").forEach(function(card){
     var line=document.createElement("div"); line.className="chk";
     line.innerHTML="self-check · <b>—</b>";
+    if(card.dataset.sys==="edge") line.innerHTML+=" <span class=\"cert\" id=\"edgeCert\"></span>";
     card.querySelector(".ufoot").after(line);
-    checks.push({el:line.querySelector("b"),age:(Math.random()*35)|0,reset:45+(Math.random()*45|0)});
   });
-  if(reduced){ checks.forEach(function(c){ c.el.textContent="ok"; }); }
+  if(reduced){ document.querySelectorAll(".chk b").forEach(function(b){ b.textContent="ok"; }); }
   else setInterval(function(){
-    checks.forEach(function(c){
-      if(++c.age>=c.reset){ c.age=0; c.reset=45+(Math.random()*45|0); }
-      c.el.textContent=c.age+"s ago";
+    document.querySelectorAll(".sys").forEach(function(card){
+      var id=card.dataset.sys, b=card.querySelector(".chk b"); if(!b) return;
+      if(chkAge[id]!=null){ chkAge[id]++; b.textContent=chkAge[id]+"s ago"; }
     });
   },1000);
 
@@ -634,13 +642,12 @@ footer a:hover{color:var(--cyan)}
   /* reduced motion: canvas hidden via CSS, static gradient fallback applies */
   if(!reduced) requestAnimationFrame(draw);
 
-  /* ---------- sparklines (sample data, subtly shifting) ---------- */
-  function makeSpark(id, base, jitter, color){
-    var c=document.getElementById(id); if(!c) return;
-    var cx=c.getContext("2d"), data=[], N=40;
-    for(var i=0;i<N;i++) data.push(base+ (Math.random()-0.5)*jitter);
+  /* ---------- sparklines: real samples from /api/status ---------- */
+  function makeSpark(id, seed, color){
+    var c=document.getElementById(id); if(!c) return null;
+    var cx=c.getContext("2d"), data=seed.slice(), N=40;
     function size(){ var r=c.getBoundingClientRect(); c.width=r.width*DPR; c.height=64*DPR; cx.setTransform(DPR,0,0,DPR,0,0); }
-    size(); addEventListener("resize",size);
+    size(); addEventListener("resize",function(){ size(); render(); });
     function render(){
       cx.clearRect(0,0,c.getBoundingClientRect().width,64);
       var w=c.getBoundingClientRect().width, min=Math.min.apply(null,data), max=Math.max.apply(null,data), span=(max-min)||1;
@@ -650,34 +657,68 @@ footer a:hover{color:var(--cyan)}
         i===0?cx.moveTo(x,y):cx.lineTo(x,y);
       });
       cx.strokeStyle=color; cx.lineWidth=1.5; cx.stroke();
-      /* fill under curve */
       cx.lineTo(w,64); cx.lineTo(0,64); cx.closePath();
       cx.fillStyle=color.replace("1)",".08)"); cx.fill();
-      /* last point marker */
-      var lx=w, ly=58-((data[N-1]-min)/span)*48;
+      var lx=w, ly=58-((data[data.length-1]-min)/span)*48;
       cx.fillStyle=color; cx.beginPath(); cx.arc(lx-2,ly,2.5,0,6.284); cx.fill();
     }
-    if(!reduced){
-      setInterval(function(){
-        var last=data[N-1], next=base+(Math.random()-0.5)*jitter;
-        next=Math.max(base-jitter*0.8,Math.min(base+jitter*0.8,next));
-        data.push(next); data.shift(); render();
-      },2200);
-    }
-    render();
+    function pad(){ while(data.length<N&&data.length>0) data.unshift(data[0]); }
+    function set(arr){ var a=arr.slice(-N).map(Number).filter(function(v){ return !isNaN(v); }); if(!a.length) return; data=a; pad(); render(); }
+    function push(v){ v=Number(v); if(isNaN(v)) return; data.push(v); if(data.length>N) data.shift(); render(); }
+    pad(); render();
+    return { set:set, push:push };
   }
-  makeSpark("spark1", 12, 4, "rgba(57,192,240,1)");
-  makeSpark("spark2", 34, 10, "rgba(52,211,153,1)");
+  var seed1=[]; for(var si=0;si<40;si++) seed1.push(12+(Math.random()-.5)*4);
+  var spark1=makeSpark("spark1", seed1, "rgba(57,192,240,1)");
+  var seed2=[]; for(var sj=0;sj<40;sj++) seed2.push(34+(Math.random()-.5)*10);
+  var spark2=makeSpark("spark2", seed2, "rgba(52,211,153,1)");
 
-  /* fake-but-plausible readout ticking on the health card (sample data) */
-  if(!reduced){
-    var cpu=document.getElementById("cpuV"), mem=document.getElementById("memV");
-    setInterval(function(){
-      cpu.textContent=(30+Math.random()*10).toFixed(0)+"%";
-      mem.textContent=(7.8+Math.random()*0.8).toFixed(1)+" GB / 16 GB";
-    },2400);
-    cpu.textContent="34%"; mem.textContent="8.2 GB / 16 GB";
+  /* ---------- live telemetry: poll /api/status ---------- */
+  var cpuV=document.getElementById("cpuV"), memV=document.getElementById("memV");
+  function setCount(el,val,dec){ if(!el||val==null||isNaN(val)) return; el.dataset.count=val; el.dataset.dec=dec; el.textContent=Number(val).toFixed(dec); }
+  function setStatus(id,ok){
+    var card=document.querySelector('.sys[data-sys="'+id+'"]'); if(!card) return;
+    var led=card.querySelector(".led"), st=card.querySelector(".st");
+    if(!ok){
+      if(led){ led.style.background="var(--amber)"; led.style.animation="none"; }
+      if(st){ st.textContent="DEGRADED"; st.style.background="rgba(251,191,36,.08)"; st.style.color="var(--amber)"; st.style.borderColor="rgba(251,191,36,.35)"; }
+    }
   }
+  function applyStatus(s){
+    if(!s||!s.systems) return;
+    var order=["procura","pims","portfolio-api","edge"];
+    order.forEach(function(id){
+      var st=s.systems[id]; if(!st) return;
+      var card=document.querySelector('.sys[data-sys="'+id+'"]'); if(!card) return;
+      var av=(s.availability||{})[id];
+      var bar=card.querySelector(".ubar");
+      if(bar&&av&&av.days&&av.days.length){
+        setCount(card.querySelector(".ufoot b"), av.pct, 1);
+        if(bar.dataset.pct==null){ bar.dataset.pct=av.pct; buildUbar(bar,av.days); }
+      }
+      setStatus(id, st.ok);
+      if(st.at) chkAge[id]=Math.max(0,Math.round((Date.now()-new Date(st.at).getTime())/1000));
+    });
+    setCount(document.getElementById("uptimeStat"), s.uptimePct, 2);
+    var edge=s.systems["edge"];
+    if(edge){ setCount(document.getElementById("p95Stat"), edge.ms, 0); setCount(document.getElementById("tbigMs"), edge.ms, 0); }
+    var hist=s.p95Samples||[];
+    if(spark1){ if(hist.length) spark1.set(hist); else if(edge) spark1.push(edge.ms); }
+    if(spark1&&hist.length>6&&edge){
+      var prev=hist[hist.length-7], d=(edge.ms-prev)/(prev||1)*100;
+      var dl=document.getElementById("tbigDelta"); if(dl) dl.textContent=(d<=0?"↓ ":"↑ ")+Math.abs(d).toFixed(1)+"%";
+    }
+    var online=order.filter(function(id){ return s.systems[id]&&s.systems[id].ok; }).length;
+    setCount(document.getElementById("svcStat"), online, 0);
+    var sm=document.getElementById("svcTotal"); if(sm) sm.textContent="/4";
+    if(cpuV&&s.cpu!=null) cpuV.textContent=s.cpu.toFixed(0)+"%";
+    if(memV&&s.mem) memV.textContent=s.mem.used.toFixed(1)+" GB / "+s.mem.total.toFixed(1)+" GB";
+    if(spark2&&s.cpu!=null) spark2.push(s.cpu);
+    var ec=document.getElementById("edgeCert");
+    if(ec&&s.cert&&s.cert.ok) ec.textContent="· TLS "+Math.round(s.cert.days)+"d";
+  }
+  fetch("/api/status").then(function(r){ return r.json(); }).then(applyStatus).catch(function(){});
+  setInterval(function(){ fetch("/api/status").then(function(r){ return r.json(); }).then(applyStatus).catch(function(){}); },30000);
 })();
 </script>
 </body>
