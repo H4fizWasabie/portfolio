@@ -1,0 +1,13 @@
+[Unit]
+Description=Portfolio API
+After=network.target postgresql.service
+[Service]
+User=theoses
+WorkingDirectory=/var/www/portfolio
+EnvironmentFile=/var/www/portfolio/apps/api/.env
+ExecStart=/usr/bin/node /var/www/portfolio/apps/api/dist/server.js
+Restart=always
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

@@ -8,8 +8,14 @@ This repo currently holds the **deployed static site as a baseline**, committed 
 site has version history and a rollback point. It was previously unversioned: the live
 files existed only at `/var/www/portfolio` on the VPS, with no way to revert a change.
 
-A rebuild is planned — Vite + React + TypeScript + Three.js front end, with a small
-API backend. See open issues for the design direction.
+The React/Three.js rebuild scaffold follows `docs/DESIGN-SPEC.md`. It is not deployed;
+the live `/var/www/portfolio` remains the static baseline.
+
+## Development
+
+Run `npm install`, then `npm run dev`. The web app runs on `5173`; the API runs on `8085`.
+Create the `portfolio` Postgres database and apply `infra/schema.sql` before using live API data.
+`npm run build` and `npm run typecheck` are run by `.github/workflows/ci.yml`. Nothing in `infra/` is applied by this repo.
 
 ## Current site (baseline)
 
