@@ -436,7 +436,7 @@ footer a:hover{color:var(--cyan)}
        3. packets — bright pulses travelling node-to-node + occasional scan sweep
      Paused while the hero fills the viewport; skipped under reduced motion. */
   var df=document.createElement("canvas"); df.id="deepfield"; document.body.appendChild(df);
-  var dfx=df.getContext("2d"), dw,dh, nodes=[], packets=[], heroEl=document.querySelector(".hero"), lastSpawn=0, lastSweep=-1e4;
+  var dfx=df.getContext("2d"), dw,dh, nodes=[], packets=[], heroEl=document.querySelector(".hero"), lastMin=null, lastSweep=-1e4;
   var sheens=[];
   function dfSize(){
     var d=Math.min(devicePixelRatio||1,1.5);
@@ -498,20 +498,13 @@ footer a:hover{color:var(--cyan)}
       dfx.drawImage(glow,p.x-7,p.y-7,14,14);
       dfx.globalAlpha=1;
     }
-    /* layer 3: packet pulses travelling along links */
-    if(now-lastSpawn>900 && nodes.length>1){
-      var a=nodes[(Math.random()*nodes.length)|0];
-      for(var tries=0;tries<6;tries++){
-        var b2=nodes[(Math.random()*nodes.length)|0];
-        if(b2===a) continue;
-        var ddx=a.x-b2.x, ddy=a.y-b2.y, dist=Math.sqrt(ddx*ddx+ddy*ddy);
-        if(dist<260&&dist>40){ packets.push({a:a,b:b2,t0:now,dur:900+dist*5}); break; }
-      }
-      lastSpawn=now;
-    }
+    /* layer 3: packet pulses travelling along links.
+       No spawn timer — packets fire only from window.dfPulse(), which the
+       telemetry loop calls each time a real /api/status check completes. */
     for(i=packets.length-1;i>=0;i--){
       var pk=packets[i], k=(now-pk.t0)/pk.dur;
-      if(k>=1||k<0){ packets.splice(i,1); continue; }
+      if(k>=1){ packets.splice(i,1); continue; }
+      if(k<0) continue; /* queued for a staggered start */
       var px=pk.a.x+(pk.b.x-pk.a.x)*k, py=pk.a.y+(pk.b.y-pk.a.y)*k;
       dfx.globalCompositeOperation="lighter";
       dfx.globalAlpha=0.9;
@@ -519,8 +512,9 @@ footer a:hover{color:var(--cyan)}
       dfx.globalAlpha=1;
       dfx.globalCompositeOperation="source-over";
     }
-    /* occasional scan sweep drifting down the viewport */
-    if(s-lastSweep>9){ lastSweep=s+Math.random()*4; }
+    /* scan sweep: once per minute, matching the server-side self-check cadence */
+    var min=Math.floor(s/60);
+    if(min!==lastMin){ lastMin=min; lastSweep=s; }
     var ph2=((s-lastSweep)%9)/9;
     if(ph2<0.45){
       var ysw=ph2/0.45;
@@ -535,6 +529,20 @@ footer a:hover{color:var(--cyan)}
     }
   }
   if(!reduced) requestAnimationFrame(dfDraw);
+  /* one staggered packet burst across the field, fired per real status check */
+  window.dfPulse=function(n){
+    if(reduced||document.hidden||nodes.length<2) return;
+    var now0=performance.now();
+    for(var i=0;i<(n||6);i++){
+      var a=nodes[(Math.random()*nodes.length)|0];
+      for(var tries=0;tries<6;tries++){
+        var b=nodes[(Math.random()*nodes.length)|0];
+        if(b===a) continue;
+        var dx=a.x-b.x, dy=a.y-b.y, dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<260&&dist>40){ packets.push({a:a,b:b,t0:now0+i*140,dur:900+dist*5}); break; }
+      }
+    }
+  };
 
   /* ---------- moving wave field ---------- */
   var cv=document.getElementById("wavefield"), ctx=cv.getContext("2d");
@@ -730,6 +738,7 @@ footer a:hover{color:var(--cyan)}
     if(spark2&&s.cpu!=null) spark2.push(s.cpu);
     var ec=document.getElementById("edgeCert");
     if(ec&&s.cert&&s.cert.ok) ec.textContent="· TLS "+Math.round(s.cert.days)+"d";
+    if(window.dfPulse) dfPulse(6); /* background packets = one real check just landed */
   }
   fetch("/api/status").then(function(r){ return r.json(); }).then(applyStatus).catch(function(){});
   setInterval(function(){ fetch("/api/status").then(function(r){ return r.json(); }).then(applyStatus).catch(function(){}); },30000);
