@@ -86,7 +86,7 @@ h1 .hl{background:linear-gradient(120deg,#7dd8ff,#39c0f0 55%,#1a7fb8);-webkit-ba
 .hstat .v small{font-size:12px;color:var(--ink-dim);font-weight:400}
 
 /* ---- telemetry cards (hero right, stacked below on mobile) ---- */
-.hero-grid{display:grid;gap:0}
+.hero-grid{display:grid;gap:0;grid-template-columns:minmax(0,1fr)}
 @media(min-width:1020px){.hero-grid{grid-template-columns:1.35fr .95fr;gap:64px;align-items:start}}
 .tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden}
 .tcard + .tcard{margin-top:16px}
