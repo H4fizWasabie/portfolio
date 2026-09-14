@@ -22,6 +22,7 @@ const workVisuals: Record<string, { src: string; alt: string }> = {
   procura: { src: '/img/procura-dash.png', alt: 'Procura procurement workspace overview' },
   pims: { src: '/img/pims-dash.png', alt: 'PIMS inventory workspace overview' },
   'dd-drugs-register': { src: '/img/dd-drugs-login.png', alt: 'DD Drugs Register sign-in page — ledger design, physical vs. system counts' },
+  map: { src: '/img/map-home.png', alt: 'MAP Home/Today screen — focus task, recent activity, and primary actions on a warm paper background' },
 };
 
 const HERO_WORDS = ['I', 'make', 'useful', 'things', 'move.'];
@@ -120,7 +121,7 @@ function Shell({ section, children }: { section: string; children: React.ReactNo
   </div>;
 }
 
-const linkNames: Record<string, string> = { site: 'live app', github: 'source' };
+const linkNames: Record<string, string> = { site: 'live app', github: 'source', apk: 'download apk (sideload)' };
 
 function Detail() {
   const slug = useLocation().pathname.split('/').pop()!;
