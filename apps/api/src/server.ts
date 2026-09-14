@@ -57,6 +57,7 @@ const PROBES: Record<string, () => Promise<{ ok: boolean; ms: number }>> = {
   'portfolio-api': async () => {
     const t = Date.now(); await pool.query('select 1'); return { ok: true, ms: Date.now() - t };
   },
+  'dd': () => probeHttp('http://127.0.0.1:8086/'),
   'edge': () => probeHttp('https://portfolio.wasabietech.com/api/health'),
 };
 
