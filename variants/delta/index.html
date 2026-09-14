@@ -235,7 +235,7 @@ footer a:hover{color:var(--cyan)}
           </div>
           <div class="hstat">
             <span class="ic">▦</span>
-            <div><div class="k">Services online</div><div class="v"><span id="svcStat" data-count="3" data-dec="0">0</span><small id="svcTotal">/3</small></div></div>
+            <div><div class="k">Services online</div><div class="v"><span id="svcStat" data-count="5" data-dec="0">0</span><small id="svcTotal">/5</small></div></div>
           </div>
         </div>
       </div>
@@ -272,6 +272,12 @@ footer a:hover{color:var(--cyan)}
         <div class="sys rv" data-sys="pims">
           <div class="head"><h3><span class="led"></span>PIMS</h3><span class="st live">LIVE</span></div>
           <p class="desc">Property information management system. :8083, subdomain-fronted, always-on.</p>
+          <div class="ubar" data-uptime="30"></div>
+          <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
+        </div>
+        <div class="sys rv" data-sys="dd">
+          <div class="head"><h3><span class="led"></span>DD Drugs Register</h3><span class="st live">LIVE</span></div>
+          <p class="desc">Hospital dangerous-drugs daily register: physical vs. system counts, immutable entries with audited corrections. :8086, subdomain-fronted, in daily clinical use.</p>
           <div class="ubar" data-uptime="30"></div>
           <div class="ufoot"><span>30-day availability</span><b>100.0%</b></div>
         </div>
@@ -323,6 +329,13 @@ footer a:hover{color:var(--cyan)}
           <p>The page you're reading was shipped by an AI agent over a Telegram chat: this site, its telemetry, the self-updating release pipeline underneath it. When Theoses finds a bug in its own runtime, it opens a pull request against itself and waits for my review. Same gate as everything else here.</p>
           <div class="tags"><span class="tag">agent</span><span class="tag">ops</span><span class="tag">telegram</span></div>
           <div class="links"><a class="go dim" href="https://github.com/H4fizWasabie/theoses2">the agent's source →</a></div>
+        </div>
+        <div class="work rv">
+          <div class="num">05 — HEALTHCARE OPS</div>
+          <h3>DD Drugs Register</h3>
+          <p>Hospital dangerous-drugs register: staff log physical vs. system counts per drug per day — immutable entries, corrections as linked rows with a mandatory reason, discrepancy flagging, and CSV export for audits. In daily clinical use since September 2026.</p>
+          <div class="tags"><span class="tag">go</span><span class="tag">sqlite</span><span class="tag">audit trail</span></div>
+          <div class="links"><a class="go" href="/work/dd-drugs-register">case study →</a><a class="go dim" href="https://dd.wasabietech.com">live app →</a></div>
         </div>
       </div>
     </div>
@@ -714,7 +727,7 @@ footer a:hover{color:var(--cyan)}
   }
   function applyStatus(s){
     if(!s||!s.systems) return;
-    var order=["procura","pims","portfolio-api","edge"];
+    var order=["procura","pims","dd","portfolio-api","edge"];
     order.forEach(function(id,seq){
       var st=s.systems[id]; if(!st) return;
       var card=document.querySelector('.sys[data-sys="'+id+'"]'); if(!card) return;
@@ -739,7 +752,7 @@ footer a:hover{color:var(--cyan)}
     }
     var online=order.filter(function(id){ return s.systems[id]&&s.systems[id].ok; }).length;
     setCount(document.getElementById("svcStat"), online, 0);
-    var sm=document.getElementById("svcTotal"); if(sm) sm.textContent="/4";
+    var sm=document.getElementById("svcTotal"); if(sm) sm.textContent="/5";
     if(cpuV&&s.cpu!=null) cpuV.textContent=s.cpu.toFixed(0)+"%";
     if(memV&&s.mem) memV.textContent=s.mem.used.toFixed(1)+" GB / "+s.mem.total.toFixed(1)+" GB";
     if(spark2&&s.cpu!=null) spark2.push(s.cpu);

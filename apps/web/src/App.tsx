@@ -21,6 +21,7 @@ const workVisuals: Record<string, { src: string; alt: string }> = {
   'hills-ai-content-lab': { src: '/img/hills-featured-range.jpeg', alt: "Hill's product range campaign visual" },
   procura: { src: '/img/procura-dash.png', alt: 'Procura procurement workspace overview' },
   pims: { src: '/img/pims-dash.png', alt: 'PIMS inventory workspace overview' },
+  'dd-drugs-register': { src: '/img/dd-drugs-login.png', alt: 'DD Drugs Register sign-in page — ledger design, physical vs. system counts' },
 };
 
 const HERO_WORDS = ['I', 'make', 'useful', 'things', 'move.'];
