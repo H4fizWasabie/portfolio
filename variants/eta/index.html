@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hafiz Jamali — everything here is running</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="fonts/fonts2.css">
+<style>
+:root{
+  --cream:#f4ead9; --cream-deep:#eadfc9; --ink:#33291f; --ink-soft:rgba(51,41,31,.72);
+  --clay:#9c5741; --clay-deep:#7c4433; --green:#3e5a44; --green-deep:#2f4634;
+  --white:#fffdf8;
+  --display:"Archivo Black",sans-serif; --script:"Yellowtail",cursive; --body:"Work Sans",sans-serif; --mono:ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y mandatory;background:var(--cream)}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:var(--clay);color:var(--cream)}
+a{color:inherit}
+
+/* ---------- deck ---------- */
+.slide{min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;position:relative;overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;
+  padding:96px 6vw 56px;column-gap:4vw}
+/* ledger-paper ruling + green margin line, faint on every slide */
+.slide::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0 35px,rgba(60,80,64,.075) 35px 36px);}
+.slide::after{content:"";position:absolute;top:0;bottom:0;left:clamp(14px,3vw,44px);width:2px;pointer-events:none;
+  background:rgba(62,90,68,.22)}
+/* ghost numeral, half-cropped at the right edge */
+.ghost{position:absolute;left:-.06em;top:50%;transform:translateY(-50%);z-index:0;pointer-events:none;
+  font-family:var(--display);font-size:clamp(220px,34vw,480px);line-height:1;color:transparent;
+  -webkit-text-stroke:2px rgba(156,87,65,.14);user-select:none}
+.slide>div{position:relative;z-index:1}
+/* wallpaper motion: the slide you're leaving zooms back and dims */
+.slide{animation:deck-out both linear;animation-timeline:view();animation-range:exit 0% exit 55%}
+@keyframes deck-out{from{transform:scale(1);opacity:1}to{transform:scale(.84);opacity:.25}}
+
+/* ---------- chrome ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:10px;
+  padding:16px 5vw;background:linear-gradient(180deg,rgba(244,234,217,.92),rgba(244,234,217,0))}
+nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height:1;transform:rotate(-4deg);margin-right:auto;color:var(--clay-deep);text-decoration:none}
+.pill{font-weight:600;font-size:13.5px;letter-spacing:.04em;text-decoration:none;padding:9px 18px;border-radius:999px;
+  background:var(--white);color:var(--clay-deep);box-shadow:0 1px 0 rgba(51,41,31,.14),0 2px 6px rgba(51,41,31,.12);white-space:nowrap}
+.pill.solid{background:var(--green);color:var(--white)}
+.pill:hover{transform:translateY(-1px)}
+.dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:12px}
+.dots a{width:10px;height:10px;border-radius:50%;background:rgba(51,41,31,.25);display:block;transition:.25s}
+.dots a.on{background:var(--clay);transform:scale(1.35)}
+
+/* ---------- shared slide typography ---------- */
+.idx{font-family:var(--mono);font-size:13px;letter-spacing:.18em;color:var(--green);font-weight:700}
+.slide h2{font-family:var(--display);font-weight:400;font-size:clamp(38px,5.4vw,72px);line-height:1.02;
+  letter-spacing:-.01em;margin-top:14px;text-transform:uppercase}
+.slide .line{font-family:var(--script);font-size:clamp(22px,2.9vw,32px);color:var(--clay);display:inline-block;transform:rotate(-2deg);margin-top:12px}
+.slide .desc{margin-top:16px;color:var(--ink-soft);max-width:52ch}
+.acts{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* hero shot on green mat */
+.mat{background:var(--green);padding:16px 16px 0;border-radius:4px;transform:rotate(1.4deg);
+  box-shadow:0 26px 50px -22px rgba(47,70,52,.55);position:relative;overflow:hidden}
+.mat::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,rgba(255,253,248,.18) 50%,transparent 60%);
+  background-size:250% 100%;animation:sheen 7s ease-in-out infinite}
+@keyframes sheen{0%,55%{background-position:120% 0}85%,100%{background-position:-60% 0}}
+.mat img{display:block;width:100%;background:#fff}
+.mat figcaption{background:var(--white);color:var(--green-deep);font-weight:600;font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;padding:9px 13px;margin:14px -16px 0;font-family:var(--body)}
+
+/* Slides size to their content. `height` was clipping overflow on short viewports
+   (the pinned 100dvh box cut off heading/ledger content with no way to scroll to it,
+   because .slide also sets overflow:hidden). `min-height` keeps the full-viewport
+   look while letting a taller slide grow; overflow:hidden still clips the decorative
+   .ghost watermark horizontally, which is what it was there for. */
+/* ---------- slide 1 · cover ---------- */
+.cover{grid-template-columns:1.15fr .85fr}
+.cover .big{font-family:var(--display);font-weight:400;font-size:clamp(44px,6.4vw,88px);line-height:1.0;text-transform:uppercase;letter-spacing:-.01em}
+.cover .big em{font-family:var(--script);font-style:normal;text-transform:none;color:var(--clay);font-size:.92em}
+.cover .sub{margin-top:20px;color:var(--ink-soft);max-width:46ch}
+.cover .acts{margin-top:26px}
+.burstwrap{position:relative;width:min(300px,26vw);margin:0 auto}
+.burst{width:100%;display:block;animation:spin 26s linear infinite}
+.burstwrap .badge{position:absolute;inset:0;display:grid;place-content:center;text-align:center;
+  font-family:var(--display);color:var(--green-deep);line-height:1.3}
+.burstwrap .badge b{font-size:clamp(22px,2.4vw,32px);display:block}
+.burstwrap .badge span{font-size:11px;letter-spacing:.14em}
+@keyframes spin{to{rotate:360deg}}
+
+/* ---------- signature animations ---------- */
+/* DD · the ledger that reconciles itself */
+.ledger{background:var(--white);border-radius:4px;padding:18px 20px;font-family:var(--mono);font-size:14px;line-height:2;margin-top:14px;box-shadow:0 12px 26px -14px rgba(51,41,31,.4)}
+.ledger .row{display:flex;justify-content:space-between;gap:14px;border-bottom:1px dashed rgba(51,41,31,.18)}
+.ledger .row:last-child{border-bottom:0}
+.ledger .ok{color:var(--green-deep);font-weight:700}
+.ledger .flag{color:var(--clay);font-weight:700;animation:reconcile 5s ease-in-out infinite}
+@keyframes reconcile{0%,45%{opacity:1}55%,95%{opacity:0}100%{opacity:1}}
+.ledger .fix{position:relative;color:var(--green-deep);font-weight:700;white-space:nowrap}
+.ledger .fix i{position:absolute;inset:0;font-style:normal;animation:reconcile 5s ease-in-out infinite reverse}
+.ledger .fix i.flag{position:static}
+
+/* Procura · the terminal that never sleeps */
+.term{background:#241d17;color:#e8dcc6;border-radius:4px;font-family:var(--mono);font-size:13.5px;line-height:1.7;
+  padding:16px 18px;margin-top:14px;box-shadow:0 12px 26px -14px rgba(51,41,31,.45)}
+.term .p{color:#c8e6b8}
+.term .dim{opacity:.6}
+.term .type{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;
+  animation:typing 4.5s steps(34) infinite}
+@keyframes typing{0%{width:0}70%,100%{width:34ch}}
+.term .caret{display:inline-block;width:8px;background:#c8e6b8;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* PIMS · the alert that pulses */
+.alertpill{display:inline-flex;align-items:center;gap:10px;background:var(--white);border-radius:999px;
+  padding:10px 18px;font-weight:700;font-size:14px;margin-top:16px;box-shadow:0 12px 26px -14px rgba(51,41,31,.4)}
+.alertpill .dot{width:10px;height:10px;border-radius:50%;background:var(--clay);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(156,87,65,.5)}50%{box-shadow:0 0 0 9px rgba(156,87,65,0)}}
+.alertpill .tick{font-family:var(--mono);color:var(--green-deep);animation:swapcount 3.2s steps(1) infinite}
+@keyframes swapcount{0%,49%{clip-path:inset(0 0 0 100%)}50%,100%{clip-path:inset(0)}}
+
+/* MAP trio · the sync that always lands */
+.syncrow{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+.syncchip{background:var(--white);border-radius:4px;padding:10px 14px;font-weight:600;font-size:13.5px;
+  box-shadow:0 10px 22px -12px rgba(51,41,31,.35);animation:lift 3s ease-in-out infinite}
+.syncchip:nth-child(2){animation-delay:.5s}.syncchip:nth-child(3){animation-delay:1s}
+@keyframes lift{0%,100%{transform:translateY(0)}18%{transform:translateY(-6px)}30%{transform:translateY(0)}}
+
+/* outro */
+.outro{grid-template-columns:1fr;text-align:center;align-content:center;justify-items:center}
+.outro h2{font-size:clamp(40px,6vw,80px)}
+.outro .sub{color:var(--ink-soft);max-width:52ch;margin-top:14px}
+.outro .acts{justify-content:center;margin-top:26px}
+.outro .livecheck{margin-top:26px;font-family:var(--mono);font-size:13px;color:var(--green-deep);letter-spacing:.06em}
+
+footer{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:12px;color:var(--ink-soft);z-index:5}
+footer a{text-decoration:underline}
+
+/* mobile: deck keeps snap, mat drops below text */
+@media (max-width:900px){
+  .slide{grid-template-columns:1fr;align-content:center;row-gap:26px;padding:88px 7vw 70px}
+  .slide .figwrap{justify-self:center;width:min(440px,88vw)}
+  .mat{transform:rotate(0)}
+  .cover{grid-template-columns:1fr}
+  .burstwrap{width:min(220px,52vw);margin:0}
+  .dots{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .slide,.mat::after,.burst,.ledger .flag,.ledger .fix i,.term .type,.alertpill .dot,.syncchip{animation:none}
+  html{scroll-snap-type:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#cover">Hafizwasabie</a>
+  <a class="pill" href="#dd">Systems</a>
+  <a class="pill" href="/resume">Résumé</a>
+  <a class="pill" href="https://github.com/H4fizWasabie">GitHub</a>
+</nav>
+
+<div class="dots" id="dots">
+  <a href="#cover"></a><a href="#dd"></a><a href="#procura"></a><a href="#pims"></a><a href="#dispatches"></a><a href="#outro"></a>
+</div>
+
+<main>
+
+<!-- 1 · cover -->
+<section class="slide cover" id="cover">
+  <div>
+    <span class="idx">HAFIZ JAMALI · BINARY-GRADE SYSTEMS, DAILY IN SERVICE</span>
+    <div class="big">Everything here <em>is running.</em></div>
+    <p class="sub">Five systems in daily clinical and production use. Not "shipped" — <b>running</b>: counted, reconciled, and opened by real staff on a Monday morning.</p>
+    <div class="acts"><a class="pill solid" href="#dd">See the five ↓</a><a class="pill" href="/resume">Résumé</a></div>
+  </div>
+  <div class="burstwrap">
+    <svg class="burst" viewBox="0 0 200 200" aria-hidden="true">
+      <polygon id="star" fill="#fffdf8" stroke="#e0d2b8"/>
+    </svg>
+    <div class="badge"><b id="burst-n">5/5</b><span>SYSTEMS LIVE</span></div>
+  </div>
+</section>
+
+<!-- 2 · DD Drugs Register -->
+<section class="slide" id="dd">
+  <span class="ghost" aria-hidden="true">01</span>
+  <div>
+    <span class="idx">01 · DAILY CLINICAL USE · SINCE SEP 2026</span>
+    <h2>DD Drugs Register</h2>
+    <span class="line">the register a ward counts on</span>
+    <p class="desc">Hospital dangerous drugs: physical counts vs. system counts, entries <b>immutable</b> — discrepancies flag themselves, and the ledger reconciles out loud.</p>
+    <div class="ledger" aria-hidden="true">
+      <div class="row"><span>Morphine 10mg · bin A2</span><span class="ok">132 = 132 ✓</span></div>
+      <div class="row"><span>Midazolam 5mg · bin C1</span><span class="ok">88 = 88 ✓</span></div>
+      <div class="row"><span>Fentanyl 100µg · bin B4</span><span class="fix"><i class="flag" style="position:static">46 ≠ 44 △</i><i>46 = 46 ✓</i></span></div>
+    </div>
+    <div class="acts"><a class="pill solid" href="/work/dd-drugs-register">Read the case study</a></div>
+  </div>
+  <div class="figwrap">
+    <figure class="mat"><img src="img/dd-drugs-login.png" alt="DD Drugs Register"><figcaption>The ward's entry point</figcaption></figure>
+  </div>
+</section>
+
+<!-- 3 · Procura -->
+<section class="slide" id="procura">
+  <span class="ghost" aria-hidden="true">02</span>
+  <div>
+    <span class="idx">02 · WEEKLY PRODUCTION USE</span>
+    <h2>Procura</h2>
+    <span class="line">procurement, reduced to one binary</span>
+    <p class="desc">A single <b>Go binary over SQLite</b> carrying a clinic's entire purchasing spine — reorder points, POs, RFQs, supplier scorecards. No subscription, no cloud mascot.</p>
+    <div class="term" aria-hidden="true">
+      <div><span class="p">procura</span> plan<span class="dim"> --week</span></div>
+      <div>→ 12 items below ROP · 3 POs drafted</div>
+      <div><span class="p">procura</span> <span class="type">order draft --supplier vetco</span><span class="caret">&nbsp;</span></div>
+    </div>
+    <div class="acts"><a class="pill solid" href="https://procura.wasabietech.com">Open the live app</a><a class="pill" href="/work/procura">Case study</a></div>
+  </div>
+  <div class="figwrap">
+    <figure class="mat"><img src="img/procura-dash.png" alt="Procura"><figcaption>The Monday-morning reorder view</figcaption></figure>
+  </div>
+</section>
+
+<!-- 4 · PIMS -->
+<section class="slide" id="pims">
+  <span class="ghost" aria-hidden="true">03</span>
+  <div>
+    <span class="idx">03 · ALWAYS ON</span>
+    <h2>PIMS</h2>
+    <span class="line">the spreadsheet that got a job</span>
+    <p class="desc">Veterinary inventory rewritten from Google Sheets to <b>Go + PostgreSQL</b> at full feature parity — stocktake, goods received, expiry alerts, ordering.</p>
+    <div class="alertpill" aria-hidden="true"><span class="dot"></span>3 batches expiring in 60 days<span class="tick"> · reorders queued ✓</span></div>
+    <div class="acts" style="margin-top:18px"><a class="pill solid" href="https://pims.wasabietech.com">Open the live app</a><a class="pill" href="/work/pims">Case study</a></div>
+  </div>
+  <div class="figwrap">
+    <figure class="mat"><img src="img/pims-dash.png" alt="PIMS"><figcaption>Stock &amp; expiry alerts</figcaption></figure>
+  </div>
+</section>
+
+<!-- 5 · dispatches -->
+<section class="slide" id="dispatches">
+  <span class="ghost" aria-hidden="true">04</span>
+  <div>
+    <span class="idx">04 · ALSO IN SERVICE</span>
+    <h2>MAP · Hills · Theoses</h2>
+    <span class="line">the smaller dispatches</span>
+    <p class="desc">A local-first Android field app, an AI-assisted editorial pipeline, and <b>Theoses</b> — the agent that operates this very server, under a human-merged pull-request gate.</p>
+    <div class="syncrow" aria-hidden="true">
+      <span class="syncchip">MAP · field sync ✓</span>
+      <span class="syncchip">Hills · pipeline green ✓</span>
+      <span class="syncchip">Theoses · PR gate on ✓</span>
+    </div>
+    <div class="acts"><a class="pill" href="/work/map">MAP study</a><a class="pill" href="/work/hills-ai-content-lab">Hills study</a><a class="pill" href="https://github.com/H4fizWasabie/theoses2">Theoses source</a></div>
+  </div>
+  <div class="figwrap">
+    <figure class="mat" style="max-width:340px"><img src="img/map-home.png" alt="MAP app"><figcaption>MAP — local-first field app</figcaption></figure>
+  </div>
+</section>
+
+<!-- 6 · outro -->
+<section class="slide outro" id="outro">
+  <div>
+    <h2>Counted. <span style="font-family:var(--script);text-transform:none;color:var(--clay)">Reconciled.</span> Running.</h2>
+    <p class="sub">Every claim on this page can fail — that's why it's worth reading. Check the live status, the résumé, or the source.</p>
+    <div class="acts">
+      <a class="pill solid" href="/resume">Résumé</a>
+      <a class="pill" href="https://github.com/H4fizWasabie">GitHub</a>
+      <a class="pill" href="/">Current live site</a>
+    </div>
+    <div class="livecheck" id="livecheck">CHECKING THE PRESSES…</div>
+  </div>
+  <footer>variant eta · the living deck · cream ground, green mats, clay script</footer>
+</section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  /* starburst polygon */
+  var pts=[],N=16,cx=100,cy=100,R=98,r=74;
+  for(var i=0;i<N*2;i++){var a=Math.PI*i/N-Math.PI/2,rad=i%2?r:R;
+    pts.push((cx+rad*Math.cos(a)).toFixed(1)+","+(cy+rad*Math.sin(a)).toFixed(1));}
+  document.getElementById("star").setAttribute("points",pts.join(" "));
+
+  /* live check */
+  var lc=document.getElementById("livecheck"),bn=document.getElementById("burst-n");
+  fetch("/api/status").then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+    var ks=Object.keys(d.systems||{}),up=ks.filter(function(k){return d.systems[k].ok;}).length;
+    bn.textContent=up+"/"+ks.length;
+    lc.textContent=up+"/"+ks.length+" SYSTEMS LIVE · SAMPLED JUST NOW FROM /API/STATUS";
+  }).catch(function(){bn.textContent="??";lc.textContent="LIVE CHECK DIDN'T ANSWER — A CLAIM THAT CAN FAIL BEATS A PRETTY ONE THAT CAN'T";});
+
+  /* dot tracking */
+  var dots=[].slice.call(document.querySelectorAll("#dots a"));
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){
+      dots.forEach(function(d){d.classList.toggle("on",d.getAttribute("href")==="#"+e.target.id);});
+    }});
+  },{threshold:.6});
+  document.querySelectorAll(".slide").forEach(function(s){io.observe(s);});
+})();
+</script>
+</body>
+</html>
