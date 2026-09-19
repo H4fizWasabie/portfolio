@@ -1,0 +1,12 @@
+# Hafiz Jamali — portfolio of useful systems
+
+Portfolio of Hafiz Jamali (github.com/H4fizWasabie): production systems built and operated, not demos.
+
+## Main pages
+- [Home](https://portfolio.wasabietech.com/): systems overview, live telemetry of running services
+- [Procura](https://portfolio.wasabietech.com/work/procura): veterinary clinic procurement & inventory platform
+- [PIMS](https://portfolio.wasabietech.com/work/pims): practice information management system
+- [MAP](https://portfolio.wasabietech.com/work/map): Android, local-first mapping app
+- [DD Drugs Register](https://portfolio.wasabietech.com/work/dd-drugs-register): controlled-drugs register
+- [Hills AI Content Lab](https://portfolio.wasabietech.com/work/hills-ai-content-lab): AI-assisted content operations
+- [Resume](https://portfolio.wasabietech.com/resume)
