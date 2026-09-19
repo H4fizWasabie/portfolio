@@ -45,6 +45,21 @@ nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height
   background:var(--white);color:var(--clay-deep);box-shadow:0 1px 0 rgba(51,41,31,.14),0 2px 6px rgba(51,41,31,.12);white-space:nowrap}
 .pill.solid{background:var(--green);color:var(--white)}
 .pill:hover{transform:translateY(-1px)}
+
+/* The nav is a single non-wrapping row (logo + 3 pills) with no mobile rule, so on narrow
+   phones the last pill — GitHub — ran past the right edge and was cut off (measured: right
+   edge 460px in a 390px viewport). Tighten the row in two steps instead of hiding anything:
+   pills keep a 34px tap height at both sizes, so the target size does not regress. */
+@media (max-width:560px){
+  nav{padding:11px 3.5vw;gap:6px}
+  nav .logo{font-size:20px}
+  .pill{font-size:11.5px;padding:8px 10px}
+}
+@media (max-width:379px){
+  nav{padding:10px 3vw;gap:5px}
+  nav .logo{font-size:18px}
+  .pill{font-size:11px;padding:8px 9px}
+}
 .dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:12px}
 .dots a{width:10px;height:10px;border-radius:50%;background:rgba(51,41,31,.25);display:block;transition:.25s}
 .dots a.on{background:var(--clay);transform:scale(1.35)}
