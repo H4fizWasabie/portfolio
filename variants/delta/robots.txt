@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /variant-*
+
+Sitemap: https://portfolio.wasabietech.com/sitemap.xml
