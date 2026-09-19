@@ -1,46 +1,64 @@
-/* ── Mission-control case studies ───────────────────────────────────────────
-   Restyles the React-rendered routes (/work/:slug, /resume, 404) to match the
-   delta landing's design language (navy panels, cyan accent, Plex Mono
-   labels / Archivo body). Namespaced under .mc-* so the legacy lime landing
-   styles in styles.css are untouched. Landing (/) itself is static delta
-   HTML and does not use this file. */
+/* ── Case studies (/work/:slug, /resume, 404) ───────────────────────────────
+   Restyles the React-rendered routes to match the LIVE homepage design
+   language: the cream "eta" ledger deck (warm cream paper, clay accent,
+   green for live status, Archivo Black headings, Work Sans body, system
+   mono labels).
+
+   History: this file previously matched the "delta" landing (navy panels,
+   cyan accent, Plex Mono). Delta is no longer the homepage — eta is — so the
+   deck and the case studies read as two unrelated sites. Values below are
+   taken from variants/eta/index.html's :root block, which is the source of
+   truth for the palette.
+
+   Namespaced under .mc-* so the legacy lime landing styles in styles.css are
+   untouched. Landing (/) itself is the static eta HTML and does not use this
+   file. */
+
+/* The React shell only renders the restyled routes (/work/*, /resume, 404). Without
+   this the page background behind it stays the legacy dark landing background from
+   styles.css — visible on overscroll and shorter pages. Scoped with :has() so the
+   legacy lime Landing keeps its own background if it is ever reached. */
+body:has(.mc) { background: #f4ead9; color: #33291f; font-family: 'Work Sans', system-ui, sans-serif; color-scheme: light; }
 
 .mc {
-  --bg: #0b0e14; --bg-deep: #080b10; --panel: #11151d; --panel-2: #0e1219;
-  --line: #1e2531; --line-bright: #2b3546;
-  --ink: #e8ecf4; --ink-dim: #8b94a7; --ink-faint: #7e8899;
-  --cyan: #39c0f0; --cyan-deep: #1a7fb8; --cyan-glow: rgba(57, 192, 240, .35);
-  --green: #34d399; --green-glow: rgba(52, 211, 153, .25);
-  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --bg: #f4ead9; --bg-deep: #eadfc9; --panel: #fffdf8; --panel-2: #f9f2e6;
+  --line: rgba(51, 41, 31, .16); --line-bright: rgba(51, 41, 31, .28);
+  --ink: #33291f; --ink-dim: rgba(51, 41, 31, .72); --ink-faint: rgba(51, 41, 31, .52);
+  --accent: #7c4433; --accent-deep: #9c5741; --accent-glow: rgba(124, 68, 51, .22);
+  --green: #3e5a44; --green-glow: rgba(62, 90, 68, .22);
+  --clay: #9c5741;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --display: 'Archivo Black', system-ui, sans-serif;
+  --body: 'Work Sans', system-ui, sans-serif;
 
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Archivo', system-ui, sans-serif;
-  font-size: 15px;
+  font-family: var(--body);
+  font-size: 16px;
   line-height: 1.6;
 }
-.mc ::selection { background: var(--cyan); color: #03222f; }
+.mc ::selection { background: var(--clay); color: var(--bg); }
 .mc .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 28px; }
 
-/* ---- topbar / footer (mirror delta landing) ---- */
+/* ---- topbar / footer (mirror the eta deck) ---- */
 .mc-topbar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
-  background: rgba(8, 11, 16, .72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  background: rgba(244, 234, 217, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .mc-topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; }
 .mc-brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px;
   font-weight: 600; letter-spacing: .04em; color: var(--ink); text-decoration: none; }
 .mc-brand .mark { width: 26px; height: 26px; border: 1px solid var(--line-bright); border-radius: 7px;
-  display: grid; place-items: center; background: linear-gradient(135deg, #0d1420, #111a29);
-  color: var(--cyan); font-size: 13px; }
+  display: grid; place-items: center; background: linear-gradient(135deg, #fffdf8, #f4ead9);
+  color: var(--accent); font-size: 13px; }
 .mc-brand small { color: var(--ink-faint); font-weight: 400; display: none; }
 @media (min-width: 720px) { .mc-brand small { display: inline; } }
-.mc-nav { display: flex; align-items: center; gap: 22px; font-size: 13.5px; font-weight: 500; color: var(--ink-dim); }
+.mc-nav { display: flex; align-items: center; gap: 22px; font-size: 14px; font-weight: 500; color: var(--ink-dim); }
 .mc-nav a { color: inherit; text-decoration: none; transition: color .2s; }
-.mc-nav a:hover { color: var(--cyan); }
+.mc-nav a:hover { color: var(--accent); }
 .mc-chip { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px;
-  color: var(--green); border: 1px solid rgba(52, 211, 153, .35); background: rgba(52, 211, 153, .08);
+  color: var(--green); border: 1px solid rgba(62, 90, 68, .3); background: rgba(62, 90, 68, .08);
   padding: 5px 10px; border-radius: 999px; }
 .mc .led { width: 7px; height: 7px; border-radius: 50%; background: var(--green);
   box-shadow: 0 0 0 0 var(--green-glow); animation: mc-pulse 2s infinite; flex: none; }
@@ -52,61 +70,65 @@
 
 /* ---- case header ---- */
 .mc-back { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); text-decoration: none; }
-.mc-back:hover { color: var(--cyan); }
+.mc-back:hover { color: var(--accent); }
 .mc-eyebrow { display: flex; align-items: center; gap: 14px; margin: 34px 0 0;
-  font-family: var(--mono); font-size: 11.5px; color: var(--cyan); text-transform: uppercase; letter-spacing: .12em; }
-.mc-eyebrow::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(57, 192, 240, .4), transparent); }
-.mc h1 { margin: 18px 0 14px; font-size: clamp(38px, 5.5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; }
-.mc-lede { max-width: 64ch; font-size: 17.5px; line-height: 1.6; color: var(--ink-dim); }
+  font-family: var(--mono); font-size: 11.5px; color: var(--accent); text-transform: uppercase; letter-spacing: .12em; }
+.mc-eyebrow::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(124, 68, 51, .35), transparent); }
+.mc h1 { margin: 18px 0 14px; font-family: var(--display); font-size: clamp(34px, 5vw, 52px);
+  font-weight: 400; line-height: 1.04; letter-spacing: -.02em; }
+.mc-lede { max-width: 64ch; font-size: 18px; line-height: 1.6; color: var(--ink-dim); }
 .mc-lede b { color: var(--ink); font-weight: 600; }
 
 /* ---- meta panel: tags + links ---- */
 .mc-metapanel { margin-top: 28px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-  padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  box-shadow: 0 1px 0 rgba(51, 41, 31, .06), 0 3px 12px rgba(51, 41, 31, .06); }
 .mc-tags { display: flex; gap: 8px; flex-wrap: wrap; }
 .mc-tag { font-family: var(--mono); font-size: 11px; color: var(--ink-dim);
   border: 1px solid var(--line-bright); border-radius: 999px; padding: 4px 10px; }
 .mc-links { display: flex; gap: 10px; flex-wrap: wrap; }
 .mc-link { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px;
-  color: var(--cyan); text-decoration: none; border: 1px solid rgba(57, 192, 240, .25); border-radius: 999px;
+  color: var(--accent); text-decoration: none; border: 1px solid rgba(124, 68, 51, .28); border-radius: 999px;
   padding: 6px 14px; transition: border-color .2s, box-shadow .2s; }
-.mc-link:hover { border-color: var(--cyan); box-shadow: 0 0 16px var(--cyan-glow); }
+.mc-link:hover { border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); }
 .mc-link.dim { color: var(--ink-dim); border-color: var(--line-bright); }
-.mc-link.dim:hover { color: var(--cyan); border-color: var(--cyan); box-shadow: none; }
+.mc-link.dim:hover { color: var(--accent); border-color: var(--accent); box-shadow: none; }
 @media (max-width: 639px) { .mc-metapanel { flex-direction: column; align-items: flex-start; } }
 
 /* ---- screenshot ---- */
 .mc-media { margin: 34px 0 0; background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-.mc-media img { display: block; width: 100%; max-height: 480px; object-fit: cover; filter: saturate(.92); }
+.mc-media img { display: block; width: 100%; max-height: 480px; object-fit: cover; filter: saturate(.94); }
 .mc-caption { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding: 10px 16px; }
 
 /* ---- narrative blocks (numbered panels) ---- */
 .mc-blocks { counter-reset: mc-block; margin-top: 6px; }
 .mc-block { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-  padding: 24px 26px; margin-top: 18px; }
+  padding: 24px 26px; margin-top: 18px;
+  box-shadow: 0 1px 0 rgba(51, 41, 31, .06), 0 3px 12px rgba(51, 41, 31, .06); }
 .mc-block h2 { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 12px;
-  font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); }
+  font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
 .mc-block h2::before { content: counter(mc-block, decimal-leading-zero); counter-increment: mc-block;
   color: var(--ink-faint); font-weight: 400; }
-.mc-block p { max-width: 70ch; margin: 12px 0 0; color: var(--ink-dim); font-size: 15px; line-height: 1.65; }
+.mc-block p { max-width: 70ch; margin: 12px 0 0; color: var(--ink-dim); font-size: 15.5px; line-height: 1.65; }
 
 /* ---- CTA ---- */
 .mc-cta { display: inline-block; margin-top: 30px; font-family: var(--mono); font-size: 13.5px; font-weight: 500;
-  padding: 13px 24px; border-radius: 10px; background: var(--cyan); color: #04222e; text-decoration: none;
+  padding: 13px 24px; border-radius: 999px; background: var(--accent); color: var(--bg); text-decoration: none;
   transition: transform .2s, box-shadow .2s; }
-.mc-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--cyan-glow); }
+.mc-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 26px var(--accent-glow); }
 .mc-cta.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-bright); }
-.mc-cta.ghost:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: none; }
+.mc-cta.ghost:hover { border-color: var(--accent); color: var(--accent); box-shadow: none; }
 
 /* ---- footer ---- */
 .mc-footer { border-top: 1px solid var(--line); padding: 28px 0; }
 .mc-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .mc-footer a { font-family: var(--mono); font-size: 12px; color: var(--ink-dim); text-decoration: none; }
-.mc-footer a:hover { color: var(--cyan); }
+.mc-footer a:hover { color: var(--accent); }
 .mc-note { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
-.mc-note b { color: var(--amber); font-weight: 500; }
+/* was var(--amber), which was never defined — it silently fell back to inherit */
+.mc-note b { color: var(--clay); font-weight: 500; }
 
-/* ---- entry motion (delta-style, honors reduced motion) ---- */
+/* ---- entry motion (honors reduced motion) ---- */
 @media (prefers-reduced-motion: no-preference) {
   .mc-block, .mc-media, .mc-metapanel { animation: mc-enter 700ms cubic-bezier(.2, 0, 0, 1) both;
     animation-timeline: view(); animation-range: entry 0% cover 22%; }
@@ -127,7 +149,7 @@
   border-radius: 8px;
   background: var(--panel);
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(3, 8, 15, .45);
+  box-shadow: 0 12px 36px rgba(51, 41, 31, .16);
 }
 .mc-pdf-frame iframe { display: block; width: 100%; height: min(78vh, 900px); border: 0; }
 .mc-pdf-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }

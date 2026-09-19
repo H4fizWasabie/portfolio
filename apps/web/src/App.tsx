@@ -102,20 +102,20 @@ function Landing() {
   return <><a className="skip-link" href="#main">Skip to content</a><Rail progress={progress} section={section}/><main id="main"><header className="topbar"><Link to="/">HJ / PORTFOLIO</Link><nav><a href="#work">Work</a><a href="#contact">Contact</a><a href="/resume">Resume</a></nav></header><section className="hero section-grid" data-folio="01"><div className="hero-copy"><p className="kicker">AI-assisted marketing / systems / operations</p><h1>{HERO_WORDS.map((word, i) => <Fragment key={word}>{i > 0 && ' '}<span className="w" style={{ '--i': i } as CSSProperties}>{word}</span></Fragment>)}</h1><p className="lede">I turn messy product information, operational problems, and half-formed ideas into clear content, practical systems, and workflows that people can actually use.</p><div className="actions"><a className="button" href="#work">See the work</a><a className="button" href="/resume">View resume</a><a className="button" href="mailto:kisame350@gmail.com">Start a conversation</a></div><p className="footline">Based in Malaysia · building with AI every day</p></div><div className="hero-visual"><HeroVisual/></div></section><div className="ticker" aria-hidden="true"><div className="ticker-track">{[0, 1].map(run => <div className="ticker-run" key={run}>{tickerItems.map(item => <span key={item}>{item}</span>)}</div>)}</div></div><section className="section" data-folio="02"><p className="folio">02 / METRICS</p><h2>Useful work leaves a trace.</h2><div className="metrics">{metrics.map(metric => <div className="metric" key={metric.label}><strong><CountUp value={metric.value}/></strong><span>{metric.label}</span>{metric.basis && <small>{metric.basis}</small>}</div>)}</div></section><section className="section" id="work" data-folio="03"><p className="folio">03 / SELECTED WORK</p><h2>Work that has a pulse.</h2><p className="section-intro">Real systems and honest practice projects, showing how I think, make, test, and improve.</p><div className="work-list">{work.map((item, index) => { const visual = workVisuals[item.slug]; return <Link className="work-row" to={`/work/${item.slug}`} key={item.slug}><span>0{index + 1}</span>{visual ? <figure className="work-thumb"><img src={visual.src} alt={visual.alt} loading="lazy" /></figure> : <span className="work-thumb work-thumb-empty" aria-hidden="true">TH</span>}<div><h3>{item.title}</h3><p>{item.summary}</p><small>{item.kind}</small><div className="tags">{item.tags.map(tag => <em key={tag}>{tag}</em>)}</div></div><b>OPEN</b></Link>; })}</div><div className="bridge"><h3>One idea, packaged for action.</h3><p>The same thinking travels from a live business system to a marketing concept: understand the signal, make it clear, then decide what to do next.</p></div></section><section className="section loop" data-folio="04"><div><p className="folio">04 / WORKING LOOP</p><h2>My working loop.</h2><p className="section-intro">The same habits carry from procurement to marketing: get close to the facts, make the work visible, and learn from the response.</p></div><div className="steps">{steps.map(([title, body], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section><section className="section contact" id="contact" data-folio="05"><p className="folio">05 / CONTACT</p><h2>Bring me a messy problem. I'll help make it legible.</h2><p>Marketing support, content operations, AI-assisted workflows, or a practical system that saves a team time.</p><div className="contact-actions"><a className="contact-link" href="mailto:kisame350@gmail.com">kisame350@gmail.com</a><a className="contact-link" href="/resume">View resume</a></div><footer>© Mohammad Hafiz Bin Jamali</footer></section></main></>;
 }
 
-// Shell for the non-landing routes: mirrors the delta landing's topbar and
-// footer so case studies feel like part of mission control. Back-links are
-// real anchors to "/" (full reload of the static delta homepage) — a
-// client-side Link would render the legacy lime Landing, which is dead.
+// Shell for the non-landing routes: mirrors the eta deck's topbar and footer so
+// case studies read as part of the same site. Back-links are real anchors to "/"
+// (full reload of the static eta homepage) — a client-side Link would render the
+// legacy lime Landing, which is dead.
 function Shell({ section, children }: { section: string; children: React.ReactNode }) {
   return <div className="mc">
     <header className="mc-topbar"><div className="wrap">
       <a className="mc-brand" href="/"><span className="mark">◈</span> HAFIZ JAMALI <small>/ systems</small></a>
-      <nav className="mc-nav"><a href="/">Mission control</a><a href="/resume/Resume-Hafiz-Jamali.pdf">Resume</a></nav>
+      <nav className="mc-nav"><a href="/">Portfolio</a><a href="/resume/Resume-Hafiz-Jamali.pdf">Resume</a></nav>
       <span className="mc-chip"><span className="led"/>{section}</span>
     </div></header>
     <main className="wrap mc-main">{children}</main>
     <footer className="mc-footer"><div className="wrap">
-      <span className="mc-note">mission control · case studies · <b>live systems on vps-01</b></span>
+      <span className="mc-note">case studies · <b>live systems on vps-01</b></span>
       <span><a href="https://github.com/H4fizWasabie">github</a> · <a href="/resume/Resume-Hafiz-Jamali.pdf">résumé</a></span>
     </div></footer>
   </div>;
@@ -129,7 +129,7 @@ function Detail() {
   useEffect(() => { loadCaseStudy(slug).then(setWork); }, [slug]);
   const visual = work ? workVisuals[work.slug] : undefined;
   return <Shell section="CASE FILE">{work ? <>
-    <a className="mc-back" href="/">← back to mission control</a>
+    <a className="mc-back" href="/">← back to portfolio</a>
     <p className="mc-eyebrow"><span>Case study / {work.kind}</span></p>
     <h1>{work.title}</h1>
     <p className="mc-lede">{work.summary}</p>
@@ -140,12 +140,12 @@ function Detail() {
     </div>
     {visual && <figure className="mc-media"><img src={visual.src} alt={visual.alt} loading="lazy"/><figcaption className="mc-caption">// {work.title} — running instance</figcaption></figure>}
     <div className="mc-blocks">{work.blocks?.map(block => <section className="mc-block" key={block.heading}><h2>{block.heading}</h2><p>{block.body}</p></section>)}</div>
-    <a className="mc-cta ghost" href="/">back to mission control</a>
+    <a className="mc-cta ghost" href="/">back to portfolio</a>
   </> : <>
     <p className="mc-eyebrow"><span>404 / case not found</span></p>
     <h1>Case study not found.</h1>
     <p className="mc-lede">That work page does not exist.</p>
-    <a className="mc-cta" href="/">back to mission control</a>
+    <a className="mc-cta" href="/">back to portfolio</a>
   </>}</Shell>;
 }
 function Resume() { return <Shell section="RESUME">
@@ -164,6 +164,6 @@ function NotFound() { return <Shell section="404">
   <p className="mc-eyebrow"><span>404 / not found</span></p>
   <h1>That page is not here.</h1>
   <p className="mc-lede">The portfolio route you requested does not exist.</p>
-  <a className="mc-cta" href="/">back to mission control</a>
+  <a className="mc-cta" href="/">back to portfolio</a>
 </Shell>; }
 export default function App() { return <Routes><Route path="/" element={<Landing/>}/><Route path="/work/:slug" element={<Detail/>}/><Route path="/resume" element={<Resume/>}/><Route path="*" element={<NotFound/>}/></Routes>; }

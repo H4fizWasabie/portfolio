@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hafiz Jamali">
+  <rect width="64" height="64" rx="14" fill="#f4ead9"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="#7c4433" stroke-opacity=".22" stroke-width="3"/>
+  <g fill="#7c4433">
+    <rect x="16" y="15" width="10" height="34" rx="3"/>
+    <rect x="38" y="15" width="10" height="34" rx="3"/>
+    <rect x="16" y="27" width="32" height="10" rx="3"/>
+  </g>
+</svg>
