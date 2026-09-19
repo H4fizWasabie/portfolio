@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hafiz Jamali — everything here is running</title>
-<meta name="description" content="Hafiz Jamali — production systems built and operated. Procura procurement, PIMS practice management, a local-first Android field app, and AI-assisted content pipelines. Live status, real deployments.">
+<title>Hafiz Jamali: everything here is running</title>
+<meta name="description" content="Hafiz Jamali: production systems built and operated. Procura procurement, PIMS practice management, a local-first Android field app, and AI-assisted content pipelines. Live status, real deployments.">
 <link rel="canonical" href="https://portfolio.wasabietech.com/">
 <meta name="author" content="Hafiz Jamali">
 <meta name="theme-color" content="#f4ead9">
@@ -12,21 +12,21 @@
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://portfolio.wasabietech.com/">
-<meta property="og:title" content="Hafiz Jamali — everything here is running">
-<meta property="og:description" content="Production systems built and operated — procurement, practice management, field ops and AI content pipelines. Live status, real deployments.">
+<meta property="og:title" content="Hafiz Jamali: everything here is running">
+<meta property="og:description" content="Production systems built and operated: procurement, practice management, field ops and AI content pipelines. Live status, real deployments.">
 <meta property="og:image" content="https://portfolio.wasabietech.com/img/og-portfolio.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Hafiz Jamali — everything here is running. Case studies: Procura, PIMS, MAP, Hills, Theoses.">
+<meta property="og:image:alt" content="Hafiz Jamali: everything here is running. Case studies: Procura, PIMS, MAP, Hills, Theoses.">
 <meta property="og:site_name" content="Hafiz Jamali">
 <meta property="og:locale" content="en_GB">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Hafiz Jamali — everything here is running">
-<meta name="twitter:description" content="Production systems built and operated — procurement, practice management, field ops and AI content pipelines.">
+<meta name="twitter:title" content="Hafiz Jamali: everything here is running">
+<meta name="twitter:description" content="Production systems built and operated: procurement, practice management, field ops and AI content pipelines.">
 <meta name="twitter:image" content="https://portfolio.wasabietech.com/img/og-portfolio.png">
-<meta name="twitter:image:alt" content="Hafiz Jamali — everything here is running.">
+<meta name="twitter:image:alt" content="Hafiz Jamali: everything here is running.">
 
 <!-- Icons -->
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -51,7 +51,7 @@
       "@type": "WebSite",
       "@id": "https://portfolio.wasabietech.com/#website",
       "url": "https://portfolio.wasabietech.com/",
-      "name": "Hafiz Jamali — everything here is running",
+      "name": "Hafiz Jamali: everything here is running",
       "inLanguage": "en",
       "publisher": {"@id": "https://portfolio.wasabietech.com/#person"}
     }
@@ -83,26 +83,21 @@ a{color:inherit}
   background:repeating-linear-gradient(to bottom,transparent 0 35px,rgba(60,80,64,.075) 35px 36px);}
 .slide::after{content:"";position:absolute;top:0;bottom:0;left:clamp(14px,3vw,44px);width:2px;pointer-events:none;
   background:rgba(62,90,68,.22)}
-/* ghost numeral, half-cropped at the right edge */
-.ghost{position:absolute;left:-.06em;top:50%;transform:translateY(-50%);z-index:0;pointer-events:none;
-  font-family:var(--display);font-size:clamp(220px,34vw,480px);line-height:1;color:transparent;
-  -webkit-text-stroke:2px rgba(156,87,65,.14);user-select:none}
-.slide>div{position:relative;z-index:1}
 /* wallpaper motion: the slide you're leaving zooms back and dims */
 .slide{animation:deck-out both linear;animation-timeline:view();animation-range:exit 0% exit 55%}
 @keyframes deck-out{from{transform:scale(1);opacity:1}to{transform:scale(.84);opacity:.25}}
 
 /* ---------- chrome ---------- */
 nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:10px;
-  padding:16px 5vw;background:linear-gradient(180deg,rgba(244,234,217,.92),rgba(244,234,217,0))}
+  padding:16px 5vw;background:var(--cream);border-bottom:1px solid var(--cream-deep)}
 nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height:1;transform:rotate(-4deg);margin-right:auto;color:var(--clay-deep);text-decoration:none}
-.pill{font-weight:600;font-size:13.5px;letter-spacing:.04em;text-decoration:none;padding:9px 18px;border-radius:999px;
+.pill{font-weight:600;font-size:13.5px;letter-spacing:.04em;text-decoration:none;padding:9px 18px;border-radius:4px;
   background:var(--white);color:var(--clay-deep);box-shadow:0 1px 0 rgba(51,41,31,.14),0 2px 6px rgba(51,41,31,.12);white-space:nowrap}
 .pill.solid{background:var(--green);color:var(--white)}
 .pill:hover{transform:translateY(-1px)}
 
 /* The nav is a single non-wrapping row (logo + 3 pills) with no mobile rule, so on narrow
-   phones the last pill — GitHub — ran past the right edge and was cut off (measured: right
+   phones the last pill (GitHub) ran past the right edge and was cut off (measured: right
    edge 460px in a 390px viewport). Tighten the row in two steps instead of hiding anything:
    pills keep a 34px tap height at both sizes, so the target size does not regress. */
 @media (max-width:560px){
@@ -123,13 +118,12 @@ nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height
 .idx{font-family:var(--mono);font-size:13px;letter-spacing:.18em;color:var(--green);font-weight:700}
 .slide h2{font-family:var(--display);font-weight:400;font-size:clamp(38px,5.4vw,72px);line-height:1.02;
   letter-spacing:-.01em;margin-top:14px;text-transform:uppercase}
-.slide .line{font-family:var(--script);font-size:clamp(22px,2.9vw,32px);color:var(--clay);display:inline-block;transform:rotate(-2deg);margin-top:12px}
 .slide .desc{margin-top:16px;color:var(--ink-soft);max-width:52ch}
 .acts{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}
 
 /* hero shot on green mat */
 .mat{background:var(--green);padding:16px 16px 0;border-radius:4px;transform:rotate(1.4deg);
-  box-shadow:0 26px 50px -22px rgba(47,70,52,.55);position:relative;overflow:hidden}
+  box-shadow:0 4px 10px -4px rgba(47,70,52,.35);position:relative;overflow:hidden}
 .mat::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,rgba(255,253,248,.18) 50%,transparent 60%);
   background-size:250% 100%;animation:sheen 7s ease-in-out infinite}
 @keyframes sheen{0%,55%{background-position:120% 0}85%,100%{background-position:-60% 0}}
@@ -145,7 +139,7 @@ nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height
 /* ---------- slide 1 · cover ---------- */
 .cover{grid-template-columns:1.15fr .85fr}
 .cover .big{font-family:var(--display);font-weight:400;font-size:clamp(44px,6.4vw,88px);line-height:1.0;text-transform:uppercase;letter-spacing:-.01em}
-.cover .big em{font-family:var(--script);font-style:normal;text-transform:none;color:var(--clay);font-size:.92em}
+.cover .big .hl{color:var(--clay)}
 .cover .sub{margin-top:20px;color:var(--ink-soft);max-width:46ch}
 .cover .acts{margin-top:26px}
 .burstwrap{position:relative;width:min(300px,26vw);margin:0 auto}
@@ -158,7 +152,7 @@ nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height
 
 /* ---------- signature animations ---------- */
 /* DD · the ledger that reconciles itself */
-.ledger{background:var(--white);border-radius:4px;padding:18px 20px;font-family:var(--mono);font-size:14px;line-height:2;margin-top:14px;box-shadow:0 12px 26px -14px rgba(51,41,31,.4)}
+.ledger{background:var(--white);border-radius:4px;padding:18px 20px;font-family:var(--mono);font-size:14px;line-height:2;margin-top:14px;box-shadow:0 2px 6px rgba(51,41,31,.12)}
 .ledger .row{display:flex;justify-content:space-between;gap:14px;border-bottom:1px dashed rgba(51,41,31,.18)}
 .ledger .row:last-child{border-bottom:0}
 .ledger .ok{color:var(--green-deep);font-weight:700}
@@ -170,7 +164,7 @@ nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height
 
 /* Procura · the terminal that never sleeps */
 .term{background:#241d17;color:#e8dcc6;border-radius:4px;font-family:var(--mono);font-size:13.5px;line-height:1.7;
-  padding:16px 18px;margin-top:14px;box-shadow:0 12px 26px -14px rgba(51,41,31,.45)}
+  padding:16px 18px;margin-top:14px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .term .p{color:#c8e6b8}
 .term .dim{opacity:.6}
 .term .type{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;
@@ -180,17 +174,17 @@ nav .logo{font-family:var(--script);font-size:clamp(28px,3.6vw,40px);line-height
 @keyframes blink{50%{opacity:0}}
 
 /* PIMS · the alert that pulses */
-.alertpill{display:inline-flex;align-items:center;gap:10px;background:var(--white);border-radius:999px;
-  padding:10px 18px;font-weight:700;font-size:14px;margin-top:16px;box-shadow:0 12px 26px -14px rgba(51,41,31,.4)}
+.alertpill{display:inline-flex;align-items:center;gap:10px;background:var(--white);border-radius:4px;
+  padding:10px 14px;font-weight:700;font-size:14px;margin-top:16px;box-shadow:0 2px 6px rgba(51,41,31,.12)}
 .alertpill .dot{width:10px;height:10px;border-radius:50%;background:var(--clay);animation:pulse 1.6s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(156,87,65,.5)}50%{box-shadow:0 0 0 9px rgba(156,87,65,0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .alertpill .tick{font-family:var(--mono);color:var(--green-deep);animation:swapcount 3.2s steps(1) infinite}
 @keyframes swapcount{0%,49%{clip-path:inset(0 0 0 100%)}50%,100%{clip-path:inset(0)}}
 
 /* MAP trio · the sync that always lands */
 .syncrow{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
 .syncchip{background:var(--white);border-radius:4px;padding:10px 14px;font-weight:600;font-size:13.5px;
-  box-shadow:0 10px 22px -12px rgba(51,41,31,.35);animation:lift 3s ease-in-out infinite}
+  box-shadow:0 2px 6px rgba(51,41,31,.12);animation:lift 3s ease-in-out infinite}
 .syncchip:nth-child(2){animation-delay:.5s}.syncchip:nth-child(3){animation-delay:1s}
 @keyframes lift{0%,100%{transform:translateY(0)}18%{transform:translateY(-6px)}30%{transform:translateY(0)}}
 
@@ -238,8 +232,8 @@ footer a{text-decoration:underline}
 <section class="slide cover" id="cover">
   <div>
     <span class="idx">HAFIZ JAMALI · BINARY-GRADE SYSTEMS, DAILY IN SERVICE</span>
-    <div class="big">Everything here <em>is running.</em></div>
-    <p class="sub">Five systems in daily clinical and production use. Not "shipped" — <b>running</b>: counted, reconciled, and opened by real staff on a Monday morning.</p>
+    <div class="big">For the Monday<br>morning count:<br><b class="hl">everything<br>here is running.</b></div>
+    <p class="sub">Five systems in daily clinical and production use. Not "shipped", <b>running</b>: counted, reconciled, and opened by real staff on a Monday morning.</p>
     <div class="acts"><a class="pill solid" href="#dd">See the five ↓</a><a class="pill" href="/resume">Résumé</a></div>
   </div>
   <div class="burstwrap">
@@ -252,12 +246,10 @@ footer a{text-decoration:underline}
 
 <!-- 2 · DD Drugs Register -->
 <section class="slide" id="dd">
-  <span class="ghost" aria-hidden="true">01</span>
   <div>
-    <span class="idx">01 · DAILY CLINICAL USE · SINCE SEP 2026</span>
+    <span class="idx">DAILY CLINICAL USE · SINCE SEP 2026</span>
     <h2>DD Drugs Register</h2>
-    <span class="line">the register a ward counts on</span>
-    <p class="desc">Hospital dangerous drugs: physical counts vs. system counts, entries <b>immutable</b> — discrepancies flag themselves, and the ledger reconciles out loud.</p>
+    <p class="desc">Hospital dangerous drugs: physical counts vs. system counts, entries <b>immutable</b>. Discrepancies flag themselves, and the ledger reconciles out loud.</p>
     <div class="ledger" aria-hidden="true">
       <div class="row"><span>Morphine 10mg · bin A2</span><span class="ok">132 = 132 ✓</span></div>
       <div class="row"><span>Midazolam 5mg · bin C1</span><span class="ok">88 = 88 ✓</span></div>
@@ -272,12 +264,10 @@ footer a{text-decoration:underline}
 
 <!-- 3 · Procura -->
 <section class="slide" id="procura">
-  <span class="ghost" aria-hidden="true">02</span>
   <div>
-    <span class="idx">02 · WEEKLY PRODUCTION USE</span>
+    <span class="idx">WEEKLY PRODUCTION USE</span>
     <h2>Procura</h2>
-    <span class="line">procurement, reduced to one binary</span>
-    <p class="desc">A single <b>Go binary over SQLite</b> carrying a clinic's entire purchasing spine — reorder points, POs, RFQs, supplier scorecards. No subscription, no cloud mascot.</p>
+    <p class="desc">A single <b>Go binary over SQLite</b> carrying a clinic's entire purchasing spine: reorder points, POs, RFQs, supplier scorecards. No subscription, no cloud mascot.</p>
     <div class="term" aria-hidden="true">
       <div><span class="p">procura</span> plan<span class="dim"> --week</span></div>
       <div>→ 12 items below ROP · 3 POs drafted</div>
@@ -292,12 +282,10 @@ footer a{text-decoration:underline}
 
 <!-- 4 · PIMS -->
 <section class="slide" id="pims">
-  <span class="ghost" aria-hidden="true">03</span>
   <div>
-    <span class="idx">03 · ALWAYS ON</span>
+    <span class="idx">ALWAYS ON</span>
     <h2>PIMS</h2>
-    <span class="line">the spreadsheet that got a job</span>
-    <p class="desc">Veterinary inventory rewritten from Google Sheets to <b>Go + PostgreSQL</b> at full feature parity — stocktake, goods received, expiry alerts, ordering.</p>
+    <p class="desc">Veterinary inventory rewritten from Google Sheets to <b>Go + PostgreSQL</b> at full feature parity: stocktake, goods received, expiry alerts, ordering.</p>
     <div class="alertpill" aria-hidden="true"><span class="dot"></span>3 batches expiring in 60 days<span class="tick"> · reorders queued ✓</span></div>
     <div class="acts" style="margin-top:18px"><a class="pill solid" href="https://pims.wasabietech.com">Open the live app</a><a class="pill" href="/work/pims">Case study</a></div>
   </div>
@@ -308,12 +296,10 @@ footer a{text-decoration:underline}
 
 <!-- 5 · dispatches -->
 <section class="slide" id="dispatches">
-  <span class="ghost" aria-hidden="true">04</span>
   <div>
-    <span class="idx">04 · ALSO IN SERVICE</span>
+    <span class="idx">ALSO IN SERVICE</span>
     <h2>MAP · Hills · Theoses</h2>
-    <span class="line">the smaller dispatches</span>
-    <p class="desc">A local-first Android field app, an AI-assisted editorial pipeline, and <b>Theoses</b> — the agent that operates this very server, under a human-merged pull-request gate.</p>
+    <p class="desc">A local-first Android field app, an AI-assisted editorial pipeline, and <b>Theoses</b>, the agent that operates this very server, under a human-merged pull-request gate.</p>
     <div class="syncrow" aria-hidden="true">
       <span class="syncchip">MAP · field sync ✓</span>
       <span class="syncchip">Hills · pipeline green ✓</span>
@@ -322,15 +308,15 @@ footer a{text-decoration:underline}
     <div class="acts"><a class="pill" href="/work/map">MAP study</a><a class="pill" href="/work/hills-ai-content-lab">Hills study</a><a class="pill" href="https://github.com/H4fizWasabie/theoses2">Theoses source</a></div>
   </div>
   <div class="figwrap">
-    <figure class="mat" style="max-width:340px"><img src="img/map-home.png" alt="MAP app"><figcaption>MAP — local-first field app</figcaption></figure>
+    <figure class="mat" style="max-width:340px"><img src="img/map-home.png" alt="MAP app"><figcaption>MAP: local-first field app</figcaption></figure>
   </div>
 </section>
 
 <!-- 6 · outro -->
 <section class="slide outro" id="outro">
   <div>
-    <h2>Counted. <span style="font-family:var(--script);text-transform:none;color:var(--clay)">Reconciled.</span> Running.</h2>
-    <p class="sub">Every claim on this page can fail — that's why it's worth reading. Check the live status, the résumé, or the source.</p>
+    <h2>Counted. <b style="color:var(--clay)">Reconciled.</b> Running.</h2>
+    <p class="sub">Every claim on this page can fail. That's why it's worth reading. Check the live status, the résumé, or the source.</p>
     <div class="acts">
       <a class="pill solid" href="/resume">Résumé</a>
       <a class="pill" href="https://github.com/H4fizWasabie">GitHub</a>
@@ -338,7 +324,7 @@ footer a{text-decoration:underline}
     </div>
     <div class="livecheck" id="livecheck">CHECKING THE PRESSES…</div>
   </div>
-  <footer>variant eta · the living deck · cream ground, green mats, clay script</footer>
+  <footer>variant eta · the living deck · cream ground, green mats, clay script <a href="https://madewithjev.com/free-tools/ai-slop-detector/report/portfolio.wasabietech.com" style="display:inline-block;margin-left:8px;vertical-align:middle"><img src="https://madewithjev.com/free-tools/ai-slop-detector/badge/portfolio.wasabietech.com" alt="22% AI slop, checked by Jev" height="20" loading="lazy"></a></footer>
 </section>
 
 </main>
@@ -358,7 +344,7 @@ footer a{text-decoration:underline}
     var ks=Object.keys(d.systems||{}),up=ks.filter(function(k){return d.systems[k].ok;}).length;
     bn.textContent=up+"/"+ks.length;
     lc.textContent=up+"/"+ks.length+" SYSTEMS LIVE · SAMPLED JUST NOW FROM /API/STATUS";
-  }).catch(function(){bn.textContent="??";lc.textContent="LIVE CHECK DIDN'T ANSWER — A CLAIM THAT CAN FAIL BEATS A PRETTY ONE THAT CAN'T";});
+  }).catch(function(){bn.textContent="??";lc.textContent="LIVE CHECK DIDN'T ANSWER. A CLAIM THAT CAN FAIL BEATS A PRETTY ONE THAT CAN'T";});
 
   /* dot tracking */
   var dots=[].slice.call(document.querySelectorAll("#dots a"));
