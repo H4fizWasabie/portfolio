@@ -1,18 +1,28 @@
+# portfolio.wasabietech.com — core block (variant handle_path blocks omitted).
+# Live source of truth: /etc/caddy/Caddyfile on the VPS. Mirrored here for the repo record.
 portfolio.wasabietech.com {
-  bind 149.28.146.30
-  root * /var/www/portfolio/dist
-  redir /ai-content-lab.html /work/hills-ai-content-lab 301
-  redir /resume.html /resume 301
-  redir /ai-lab-prototypes.html / 301
-  handle /api/* {
-    reverse_proxy 127.0.0.1:8085
-  }
-  handle {
-    try_files {path} /index.html
-    file_server
-  }
-  @hashedAssets path_regexp hashed "/assets/.*-[A-Za-z0-9_-]+\.(js|css|woff2?|png|jpe?g|svg)$"
-  header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
-  @index path /index.html
-  header @index Cache-Control "no-cache"
+	bind 149.28.146.30
+	root * /var/www/portfolio/apps/web/dist
+	redir /ai-content-lab.html /work/hills-ai-content-lab 301
+	redir /resume.html /resume 301
+	redir /ai-lab-prototypes.html / 301
+	redir /resume /resume/Resume-Hafiz-Jamali.pdf 302
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8085
+	}
+	@spa path /work/*
+	handle @spa {
+		root * /var/www/portfolio/apps/web/dist
+		try_files {path}/index.html {path} /react-index.html
+		file_server
+	}
+	handle {
+		try_files {path} /index.html
+		header Cache-Control "no-cache"
+		file_server
+	}
+	@hashedAssets path_regexp hashed /assets/.*-[A-Za-z0-9_-]+\.(js|css|woff2?|png|jpe?g|svg)$
+	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
+	@index path /index.html
+	header @index Cache-Control "no-cache"
 }

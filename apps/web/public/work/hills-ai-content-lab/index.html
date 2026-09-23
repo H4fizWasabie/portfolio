@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hill&#39;s AI Content Lab — case file · Hafiz Jamali</title>
+<link rel="canonical" href="https://portfolio.wasabietech.com/work/hills-ai-content-lab">
+<meta name="description" content="A self-directed pet-food promotion concept built from supplied product material.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f2f0eb;--ink:#0c0c0c;--blue:#2540e8;--acid:#e8ff3a;--pink:#ff5c8a;
+  --sans:"Archivo",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--mono);line-height:1.5;
+  background-image:linear-gradient(rgba(12,12,12,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(12,12,12,.10) 1px,transparent 1px);
+  background-size:26px 26px}
+main{max-width:1080px;margin:0 auto;padding:18px 18px 40px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border:3px solid var(--ink);background:#fff;padding:8px 12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;flex-wrap:wrap}
+.badge{background:var(--ink);color:var(--acid);padding:3px 8px;font-weight:500}
+.pill{border:3px solid var(--ink);padding:3px 8px;background:var(--acid);font-weight:500}
+.topbar a{color:var(--ink);text-decoration:none;font-weight:500;border-bottom:3px solid var(--pink)}
+.case-head{border:3px solid var(--ink);background:#fff;box-shadow:8px 8px 0 var(--ink);margin-top:26px;padding:26px 24px}
+.case-head .no{font-size:11px;letter-spacing:.2em;color:var(--blue);text-transform:uppercase}
+h1{font-family:var(--sans);font-weight:800;font-size:clamp(34px,7vw,64px);text-transform:uppercase;letter-spacing:-.03em;line-height:.95;margin:10px 0 14px}
+.lede{font-size:14.5px;max-width:640px}
+.lede b{background:var(--acid);padding:1px 6px;font-weight:500}
+.plate{border:3px solid var(--ink);background:#fff;box-shadow:8px 8px 0 var(--ink);margin-top:26px}
+.plate img{display:block;width:100%;height:auto;border-bottom:3px solid var(--ink)}
+.fig-credit{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;flex-wrap:wrap}
+.fig-credit span:first-child{color:var(--ink);font-weight:500}
+.pull{border:3px solid var(--ink);background:var(--acid);padding:20px 22px;margin-top:26px;font-family:var(--sans);font-weight:800;font-size:clamp(18px,3vw,26px);text-transform:uppercase;letter-spacing:-.01em;box-shadow:8px 8px 0 var(--ink)}
+.pull small{display:block;font-family:var(--mono);font-weight:400;font-size:13px;text-transform:none;letter-spacing:0;margin-top:10px;line-height:1.55}
+h2{font-family:var(--sans);font-weight:800;font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:-.02em;margin:44px 0 16px;display:flex;align-items:center;gap:14px}
+h2::after{content:"";flex:1;border-top:3px solid var(--ink)}
+.sec{max-width:700px;font-size:14.5px}
+.sec p+p{margin-top:12px}
+.sec ul{margin:14px 0 0 18px}
+.sec li{margin:9px 0}
+.sec code{background:var(--acid);padding:1px 5px;font-weight:500}
+.sec b{font-weight:500}
+.cmd{border:3px solid var(--ink);background:var(--ink);color:#f2f0eb;padding:16px 18px;margin-top:18px;font-size:13px;line-height:1.8;box-shadow:5px 5px 0 var(--blue);white-space:pre-wrap}
+.cmd b{color:var(--acid);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:3px;border:3px solid var(--ink);background:var(--ink);margin-top:6px}
+.stats div{background:#fff;padding:14px 16px}
+.stats b{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(22px,4vw,32px);letter-spacing:-.02em}
+.stats span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a8a}
+.stats .watch{background:var(--pink)}
+.stats .watch span{color:var(--ink)}
+.note{border:3px solid var(--ink);border-left:8px solid var(--blue);background:#fff;padding:12px 14px;margin-top:14px;font-size:12.5px;line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:3px solid var(--ink);background:#fff;padding:4px 9px;font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.chip-blue{background:var(--blue);color:#fff}
+.chip-pink{background:var(--pink)}
+.links{display:flex;flex-wrap:wrap;gap:16px}
+.links a{border:3px solid var(--ink);background:#fff;padding:12px 18px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;color:var(--ink);box-shadow:5px 5px 0 var(--ink);transition:.13s}
+.links a:hover{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink);background:var(--pink)}
+footer{margin-top:56px;border-top:3px solid var(--ink);padding-top:14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+footer a{color:var(--ink);border-bottom:3px solid var(--pink);text-decoration:none}
+</style>
+<body>
+<main>
+  <div class="topbar">
+    <span class="badge">HJ — SYSTEMS BUILDER</span>
+    <a href="/">&larr; INDEX</a>
+    <span class="pill">CASE FILE</span>
+  </div>
+
+  <header class="case-head">
+    <span class="no">CASE FILE · HILL&#39;S AI CONTENT LAB · MOCK CAMPAIGN · PERSONAL PROJECT</span>
+    <h1>Hill&#39;s AI Content Lab</h1>
+    <p class="lede"><b>Practice project</b> — A self-directed pet-food promotion concept built from supplied product material.</p>
+  </header>
+
+  <figure class="plate">
+    <img src="/img/hills-featured-range.jpeg" alt="Supplied promotional artwork for the pet-food range">
+    <figcaption class="fig-credit"><span>fig. 01 — supplied promotional artwork</span><span>mock campaign · personal project</span></figcaption>
+  </figure>
+
+  <div class="pull">From product facts to a conversation people want to join.<small>Mock campaign &middot; personal project &middot; not client work.</small></div>
+
+  <section class="sec">
+    <h2>The brief, self-written</h2>
+    <ul>
+      <li><b>Audience</b> — cat and dog owners looking for a clearer way to compare everyday nutrition options for their pets.</li>
+      <li><b>Objective</b> — turn a broad product range into an approachable post that helps owners start a conversation about their pet&#39;s needs.</li>
+    </ul>
+    <p>No client handed over this brief — I wrote it to practice what the pipelines needed: research, AI-assisted generation, structured checkpoints, and content management shaping a clear product-education story.</p>
+  </section>
+
+  <section class="sec">
+    <h2>&ldquo;Start with the clue&rdquo; — one idea, three formats</h2>
+    <ul>
+      <li><b>01 / Instagram post — hook.</b> &ldquo;Every pet has a clue.&rdquo; Start with the question, not the product. <i>CTA: save this for your next feeding conversation.</i> Role: earn attention with a simple question before introducing product choices.</li>
+      <li><b>02 / Carousel — educate.</b> &ldquo;Look for the clue.&rdquo; Age. Size. Lifestyle. Concern. <i>CTA: swipe to explore.</i> Role: break a product range into clear, useful decision points.</li>
+      <li><b>03 / Story — invite.</b> &ldquo;Tell us the clue.&rdquo; What question do you have? <i>CTA: reply to start.</i> Role: turn content attention into a useful customer signal.</li>
+    </ul>
+    <p>One message, adapted for different moments in a pet owner&#39;s feed.</p>
+  </section>
+
+  <div class="cmd">$ the clue chain &mdash; hook &rarr; educate &rarr; invite
+&rarr; 01 HOOK     <b>&ldquo;Every pet has a clue&rdquo;</b>
+&rarr; 02 EDUCATE  <b>&ldquo;Look for the clue&rdquo;</b>  &middot; age. size. lifestyle. concern.
+&rarr; 03 INVITE   <b>&ldquo;Tell us the clue&rdquo;</b>   &middot; reply to start</div>
+  <p class="fig-credit"><span>the full chain, as built in the mockup</span><span>mock campaign &middot; not client work</span></p>
+
+  <section class="sec">
+    <h2>The method</h2>
+    <ul>
+      <li><b>Four stages, on purpose.</b> Research &rarr; AI-assisted generation &rarr; structured checkpoints &rarr; content management. The checkpoints review product wording, tone, audience fit, and next action before anything counts as done.</li>
+      <li><b>The strategy board says it out loud.</b> <i>Target:</i> help pet owners begin a more informed nutrition conversation. <i>Milestone:</i> turn one product range into a clear educational content set. <i>Next:</i> adapt the strongest idea into a short-video script and carousel — stated as a plan, not a promise.</li>
+      <li><b>The concept shipped as three designs.</b> Control room, Editorial, and Content studio — the same campaign argued in three visual languages.</li>
+      <li><b>Four supplied product images.</b> Sensitive Stomach &amp; Skin, the cat and dog range, c/d Urinary Care, and one supplied promotional artwork — the material the whole concept is built from.</li>
+    </ul>
+  </section>
+
+  <figure class="plate">
+    <img src="/img/hills-range.jpg" alt="Supplied product image — the cat and dog range">
+    <figcaption class="fig-credit"><span>fig. 02 — the cat and dog range, supplied material</span><span>mock campaign &middot; personal project</span></figcaption>
+  </figure>
+
+  <section class="sec">
+    <h2>Where the method went</h2>
+    <p>The lab earns the &ldquo;farm team&rdquo; name here. The same research &rarr; generate &rarr; checkpoint &rarr; publish discipline now runs on a schedule across this server&#39;s content pipelines — the daily quote at 09:00, jokes at 19:32, workplace drama at 17:30, an Instagram capability post at 10:00, repo highlights at 11:15, explainer videos at 11:30 and 14:30. The deck&#39;s status line still holds: <b>Hills &middot; pipeline green &#10003;</b>.</p>
+    <div class="stats">
+      <div><b>3</b><span>formats per idea</span></div>
+      <div><b>3</b><span>chain steps &middot; hook educate invite</span></div>
+      <div><b>4</b><span>supplied product images</span></div>
+      <div><b>3</b><span>design variants shipped</span></div>
+      <div><b>4</b><span>strategy milestones</span></div>
+      <div><b>22</b><span>cron jobs &middot; the pipelines</span></div>
+      <div><b>1</b><span>idea &middot; one story</span></div>
+      <div class="watch"><b>0</b><span>client results claimed</span></div>
+    </div>
+    <p class="note">the 22 cron jobs are this server&#39;s live content fleet &mdash; none of them is a Hill&#39;s campaign. the lab is where the writing discipline was trained; the pipelines are where it earns its keep.</p>
+  </section>
+
+  <section class="sec">
+    <h2>The honest edges</h2>
+    <ul>
+      <li><b>Mock campaign &middot; personal project &middot; not client work.</b> That label is mine, on my own page. Hill&#39;s is a trademark of its owner; this concept is unaffiliated and uncommissioned, and no client campaign results are claimed.</li>
+      <li><b>The imagery is supplied.</b> The four product images came with the concept material &mdash; the words, hooks and strategy are the work; the photos are not mine to claim.</li>
+      <li><b>Concept, not conversion.</b> &ldquo;Start with the clue&rdquo; never ran, so there are no metrics behind it &mdash; and this page will not invent any. What is real is the method, and where the method now runs daily.</li>
+      <li><b>No roadmap claims.</b> Everything above is either on this page or in the pipelines.</li>
+    </ul>
+  </section>
+  <h2>Tags</h2>
+  <div class="tags">
+      <span class="chip">hooks</span>
+      <span class="chip">content strategy</span>
+      <span class="chip">AI-assisted</span>
+    </div>
+  <h2>Related</h2>
+  <div class="links">
+    <a href="/work/theoses">Where it went &middot; Theoses</a>
+    <a href="/variant-eta/">Dispatch deck</a>
+  </div>
+  <footer><span>case file &middot; hills ai content lab</span><span><a href="/">&larr; back to index</a></span></footer>
+</main>
+</body>
+</html>

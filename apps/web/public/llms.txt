@@ -4,6 +4,7 @@ Portfolio of Hafiz Jamali (github.com/H4fizWasabie): production systems built an
 
 ## Main pages
 - [Home](https://portfolio.wasabietech.com/): systems overview, live telemetry of running services
+- [Theoses](https://portfolio.wasabietech.com/work/theoses): self-hosted AI agent + ops harness behind this page
 - [Procura](https://portfolio.wasabietech.com/work/procura): veterinary clinic procurement & inventory platform
 - [PIMS](https://portfolio.wasabietech.com/work/pims): practice information management system
 - [MAP](https://portfolio.wasabietech.com/work/map): Android, local-first mapping app
