@@ -31,8 +31,25 @@ h1{font-family:var(--sans);font-weight:800;font-size:clamp(34px,7vw,64px);text-t
 .plate img{display:block;width:100%;height:auto;border-bottom:3px solid var(--ink)}
 .fig-credit{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;flex-wrap:wrap}
 .fig-credit span:first-child{color:var(--ink);font-weight:500}
+.pull{border:3px solid var(--ink);background:var(--acid);padding:20px 22px;margin-top:26px;font-family:var(--sans);font-weight:800;font-size:clamp(18px,3vw,26px);text-transform:uppercase;letter-spacing:-.01em;box-shadow:8px 8px 0 var(--ink)}
+.pull small{display:block;font-family:var(--mono);font-weight:400;font-size:13px;text-transform:none;letter-spacing:0;margin-top:10px;line-height:1.55}
 h2{font-family:var(--sans);font-weight:800;font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:-.02em;margin:44px 0 16px;display:flex;align-items:center;gap:14px}
 h2::after{content:"";flex:1;border-top:3px solid var(--ink)}
+.sec{max-width:700px;font-size:14.5px}
+.sec p+p{margin-top:12px}
+.sec ul{margin:14px 0 0 18px}
+.sec li{margin:9px 0}
+.sec code{background:var(--acid);padding:1px 5px;font-weight:500}
+.sec b{font-weight:500}
+.cmd{border:3px solid var(--ink);background:var(--ink);color:#f2f0eb;padding:16px 18px;margin-top:18px;font-size:13px;line-height:1.8;box-shadow:5px 5px 0 var(--blue);white-space:pre-wrap}
+.cmd b{color:var(--acid);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:3px;border:3px solid var(--ink);background:var(--ink);margin-top:6px}
+.stats div{background:#fff;padding:14px 16px}
+.stats b{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(22px,4vw,32px);letter-spacing:-.02em}
+.stats span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a8a}
+.stats .watch{background:var(--pink)}
+.stats .watch span{color:var(--ink)}
+.note{border:3px solid var(--ink);border-left:8px solid var(--blue);background:#fff;padding:12px 14px;margin-top:14px;font-size:12.5px;line-height:1.6}
 .tags{display:flex;flex-wrap:wrap;gap:10px}
 .chip{border:3px solid var(--ink);background:#fff;padding:4px 9px;font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 .chip-blue{background:var(--blue);color:#fff}
@@ -52,21 +69,87 @@ footer a{color:var(--ink);border-bottom:3px solid var(--pink);text-decoration:no
   </div>
 
   <header class="case-head">
-    <span class="no">CASE FILE · DD-DRUGS-REGISTER</span>
+    <span class="no">CASE FILE · DD DRUGS REGISTER · DAILY CLINICAL USE &middot; SINCE SEP 2026</span>
     <h1>DD Drugs Register</h1>
-    <p class="lede"><b>Production system</b> A hospital dangerous-drugs register: daily physical vs. system counts per drug, immutable records with audited corrections, and CSV export — the paper register, kept digitally.</p>
+    <p class="lede"><b>Production system</b> &mdash; A hospital dangerous-drugs register: daily physical vs. system counts per drug, immutable records with audited corrections, and CSV export &mdash; the paper register, kept digitally.</p>
   </header>
+
   <figure class="plate">
-    <img src="/img/dd-drugs-login.png" alt="DD Drugs Register — screenshot">
-    <figcaption class="fig-credit"><span>fig. 01 — dd drugs register — login</span><span>live capture, not a mock</span></figcaption>
+    <img src="/img/dd-drugs-login.png" alt="DD Drugs Register — the ward's entry point">
+    <figcaption class="fig-credit"><span>fig. 01 &mdash; the ward&rsquo;s entry point</span><span>live capture, not a mock</span></figcaption>
   </figure>
+
+  <div class="pull">The register a ward counts on.<small>Hospital dangerous drugs: physical counts vs. system counts, entries immutable &mdash; discrepancies flag themselves, and the ledger reconciles out loud.</small></div>
+
+  <section class="sec">
+    <h2>Why it exists</h2>
+    <p>A dangerous-drugs register is the book the ward is accountable for. On paper it is a ledger that drifts in silence &mdash; a count missed here, a scribbled fix there, and the discrepancy surfaces weeks later in the wrong meeting. This one makes the loop loud: <b>count the bin, compare against the system, flag the &triangle;</b>, resolve it with an audited correction or leave the flag standing.</p>
+    <p>Same idea as Procura and PIMS: no subscription, no cloud mascot &mdash; a Go binary over SQLite on a hospital server.</p>
+  </section>
+
+  <section class="sec">
+    <h2>What it handles</h2>
+    <ul>
+      <li><b>Daily counts</b> &mdash; physical vs. system, per drug, per day.</li>
+      <li><b>Immutable entries</b> &mdash; once a count is saved, it is in the book.</li>
+      <li><b>Audited corrections</b> &mdash; mistakes get fixed out loud: a new row pointing at the original, with a reason.</li>
+      <li><b>Discrepancy flags</b> &mdash; &triangle; the moment physical and system disagree.</li>
+      <li><b>CSV export</b> &mdash; when the auditor asks for the book, they get a file.</li>
+    </ul>
+  </section>
+
+  <div class="cmd">$ dd-drugs &mdash; the daily count, as the deck shows it
+&rarr; Morphine 10mg &middot; bin A213  2 = 132 &#10003;
+&rarr; Midazolam 5mg &middot; bin C1  88 = 88 &#10003;
+&rarr; Fentanyl 100&micro;g &middot; bin B4  46 &ne; 44 &#9651;
+&rarr; (flagged &rarr; corrected)  46 = 46 &#10003;</div>
+  <p class="fig-credit"><span>sample counts, from the deck</span><span>the &triangle; is the whole point</span></p>
+
+  <section class="sec">
+    <h2>Under the hood</h2>
+    <ul>
+      <li><b>Append-only by schema.</b> A unique index allows exactly one original entry per drug per day. There is no edit path &mdash; a fix is a correction row referencing the original via <code>corrects_entry_id</code>, carrying a <code>correction_reason</code>. The original stays in the book.</li>
+      <li><b>Every row has a name.</b> Each entry and each correction records who made it &mdash; the counts are attributable to a person, not a session.</li>
+      <li><b>Go over SQLite, one file.</b> 15.7MB binary, one database file, a <code>backup.sh</code> beside it. Same operating shape as the rest of the fleet.</li>
+      <li><b>It runs twice on purpose.</b> The ward&rsquo;s register and an isolated demo (<code>DEMO_MODE=true</code>, its own database and port) so a demonstration can never write in the real ledger.</li>
+    </ul>
+  </section>
+
+  <section class="sec">
+    <h2>The register, live</h2>
+    <div class="stats">
+      <div><b>440</b><span>daily counts logged</span></div>
+      <div><b>3</b><span>audited corrections</span></div>
+      <div class="watch"><b>259</b><span>&triangle; flagged</span></div>
+      <div><b>44</b><span>days covered</span></div>
+      <div><b>10</b><span>drugs tracked</span></div>
+      <div><b>3</b><span>staff accounts</span></div>
+      <div><b>1</b><span>original / drug / day</span></div>
+      <div><b>2</b><span>instances &middot; ward + demo</span></div>
+    </div>
+    <p class="note">aggregate counts from the live register, pulled 2026-09-23 &mdash; structure and volume only. a dangerous-drugs register that publishes which drug sits in which bin is a robbery plan; this case study deliberately does not, and neither does its source link below.</p>
+  </section>
+
+  <section class="sec">
+    <h2>The honest edges</h2>
+    <ul>
+      <li><b>The contents stay private.</b> Drug names, bins and stock levels appear nowhere here &mdash; and unlike the rest of this portfolio, the code is not published: the repo is private. The public door is the demo.</li>
+      <li><b>A register cannot count for you.</b> Skip the daily count and the system knows nothing. The discipline is human; the ledger just makes it impossible to fudge after the fact.</li>
+      <li><b>Corrections are not erasures.</b> Fixing a mistake leaves the mistake in the book forever, with your name on the fix. That is the feature &mdash; and the discomfort.</li>
+      <li><b>No roadmap claims.</b> Everything above is either in the binary or in the database.</li>
+    </ul>
+  </section>
   <h2>Tags</h2>
-  <div class="tags"><span class="chip">Go</span><span class="chip chip-blue">SQLite</span><span class="chip chip-pink">healthcare</span><span class="chip">audit trail</span></div>
+  <div class="tags"><span class="chip">Go</span>
+      <span class="chip">SQLite</span>
+      <span class="chip">healthcare</span>
+      <span class="chip">audit trail</span></div>
   <h2>Links</h2>
   <div class="links">
-    <a href="https://github.com/H4fizWasabie/dd-drugs-record">Source ↗</a>
+    <a href="https://dd.wasabietech.com">Live system &nearr;</a>
+    <a href="https://demo.dd.wasabietech.com">Public demo &nearr;</a>
   </div>
-  <footer><span>case file · dd-drugs-register</span><span><a href="/">&larr; back to index</a></span></footer>
+  <footer><span>case file &middot; dd drugs register</span><span><a href="/">&larr; back to index</a></span></footer>
 </main>
 </body>
 </html>
