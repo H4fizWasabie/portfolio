@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hafiz Jamali — systems that run without me</title>
+<link rel="canonical" href="https://portfolio.wasabietech.com/">
+<meta name="description" content="Hafiz Jamali builds systems that run without him — procurement, practice management, field apps and content pipelines. Shipped: Procura, PIMS, MAP, DD, Theoses.">
+<meta property="og:title" content="Hafiz Jamali — systems that run without me">
+<meta property="og:description" content="Procurement, practice and content systems that run without me. Shipped: Procura · PIMS · MAP · DD · Theoses.">
+<meta property="og:url" content="https://portfolio.wasabietech.com/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://portfolio.wasabietech.com/img/og-portfolio.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f2f0eb;--ink:#0c0c0c;--blue:#2540e8;--acid:#e8ff3a;--pink:#ff5c8a;
+  --sans:"Archivo",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--mono);line-height:1.5;
+  background-image:linear-gradient(var(--ink) 1px,transparent 1px),linear-gradient(90deg,var(--ink) 1px,transparent 1px);
+  background-size:64px 64px;background-position:-1px -1px}
+body::before{content:"";position:fixed;inset:0;background:var(--paper);opacity:.88;z-index:-0;pointer-events:none}
+main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:26px 22px 80px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;border:3px solid var(--ink);
+  background:var(--paper);padding:12px 16px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;flex-wrap:wrap}
+.badge{background:var(--ink);color:var(--acid);padding:4px 10px;font-weight:500}
+.pill{border:3px solid var(--ink);background:var(--acid);padding:4px 10px;font-weight:500;box-shadow:4px 4px 0 var(--ink)}
+.marquee{border:3px solid var(--ink);border-top:0;background:var(--blue);color:#fff;overflow:hidden;white-space:nowrap;padding:8px 0;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.marquee span{display:inline-block;animation:slide 18s linear infinite;padding-left:100%}
+@keyframes slide{to{transform:translateX(-100%)}}
+.hero{margin-top:26px}
+.card{border:3px solid var(--ink);background:#fff;box-shadow:8px 8px 0 var(--ink);padding:26px 24px}
+h1{font-family:var(--sans);font-weight:800;font-size:clamp(42px,8vw,84px);line-height:.92;letter-spacing:-.035em;text-transform:uppercase}
+h1 .hl{background:var(--acid);box-shadow:0 0 0 4px var(--acid)}
+h1 .out{color:var(--blue);-webkit-text-stroke:2px var(--ink)}
+.blurb{margin-top:18px;font-size:14.5px;max-width:520px}
+.cta{display:inline-block;margin-top:20px;background:var(--ink);color:var(--acid);padding:12px 20px;
+  font-size:13px;letter-spacing:.12em;text-transform:uppercase;border:3px solid var(--ink);
+  box-shadow:6px 6px 0 var(--pink);text-decoration:none;transition:.12s}
+.cta:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--pink)}
+.stage-card{border:3px solid var(--ink);background:#fff;box-shadow:8px 8px 0 var(--ink);margin-top:26px}
+.stage-kicker{display:flex;justify-content:space-between;gap:10px;border-bottom:3px solid var(--ink);
+  padding:10px 14px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;flex-wrap:wrap}
+.stage-kicker b{background:var(--ink);color:var(--acid);padding:2px 8px;font-weight:500}
+.stage-box{position:relative;height:470px;overflow:hidden;background:var(--paper);
+  background-image:linear-gradient(rgba(12,12,12,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(12,12,12,.14) 1px,transparent 1px);
+  background-size:32px 32px;cursor:crosshair}
+.stage-box canvas{display:none;width:100%;height:100%}
+.stage-box.live canvas{display:block}
+.stage-fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px}
+.stage-box.live .stage-fallback{display:none}
+.fb-inner b{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(34px,7vw,64px);
+  letter-spacing:-.03em;text-transform:uppercase;line-height:.95}
+.fb-inner b em{font-style:normal;background:var(--acid)}
+.fb-inner span{display:inline-block;margin-top:14px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  border:3px solid var(--ink);background:#fff;padding:5px 10px;box-shadow:4px 4px 0 var(--ink)}
+.stage-foot{display:flex;gap:10px;border-top:3px solid var(--ink);padding:10px 14px;flex-wrap:wrap;font-size:10.5px;
+  letter-spacing:.12em;text-transform:uppercase}
+.fig-credit{display:flex;justify-content:space-between;gap:10px;padding:0 14px 10px;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;flex-wrap:wrap}
+.fig-credit span:last-child{color:var(--ink);font-weight:500}
+.chip{border:3px solid var(--ink);background:#fff;padding:4px 9px;font-weight:500}
+.chip-blue{background:var(--blue);color:#fff}
+.chip-pink{background:var(--pink)}
+.chip-acid{background:var(--acid)}
+h2{font-family:var(--sans);font-weight:800;font-size:clamp(24px,4vw,38px);text-transform:uppercase;
+  letter-spacing:-.02em;margin:54px 0 18px;display:flex;align-items:center;gap:14px}
+h2::after{content:"";flex:1;border-top:3px solid var(--ink)}
+.hint{font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.1em;color:var(--blue);
+  border:3px solid var(--ink);background:var(--acid);padding:4px 9px;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink)}
+.work{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.proj{border:3px solid var(--ink);background:#fff;padding:20px;box-shadow:7px 7px 0 var(--ink);transition:.13s;position:relative}
+.proj:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+a.proj{text-decoration:none;color:inherit;display:block}
+footer a{color:inherit;text-decoration:none;border-bottom:3px solid var(--pink)}footer img{vertical-align:middle}
+.proj .no{font-size:11px;letter-spacing:.2em;color:var(--blue)}
+.proj h3{font-family:var(--sans);font-weight:800;font-size:21px;text-transform:uppercase;margin:8px 0 8px;letter-spacing:-.01em}
+.proj p{font-size:13px;color:#333}
+.proj .st{display:inline-block;margin-top:14px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--ink);color:var(--acid);padding:3px 8px}
+.proj:nth-child(2) .st{background:var(--blue)}
+.proj:nth-child(3) .st{background:var(--pink);color:var(--ink)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;border:3px solid var(--ink);background:var(--ink);gap:3px}
+.rule{background:#fff;padding:20px 18px}
+.rule b{font-family:var(--sans);font-weight:800;font-size:15px;text-transform:uppercase;display:block;margin-bottom:6px}
+.rule span{font-size:13px;color:#333}
+.about{border:3px solid var(--ink);background:var(--acid);padding:26px 24px;box-shadow:8px 8px 0 var(--ink);font-size:15px;max-width:760px}
+.links{display:flex;flex-wrap:wrap;gap:16px;margin-top:30px}
+.links a{border:3px solid var(--ink);background:#fff;padding:12px 18px;font-size:13px;text-transform:uppercase;
+  letter-spacing:.1em;text-decoration:none;color:var(--ink);box-shadow:5px 5px 0 var(--ink);transition:.13s}
+.links a:hover{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink);background:var(--pink)}
+footer{margin-top:56px;border-top:3px solid var(--ink);padding-top:14px;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+@media(max-width:760px){.stage-box{height:330px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <span class="badge">HJ — SYSTEMS BUILDER</span>
+    <span>WASABI TECH / GMT+08</span>
+    <span class="pill">STATUS: RUNNING</span>
+  </div>
+  <div class="marquee"><span>PORTFOLIO 2026 — PROCUREMENT SYSTEMS — AI CONTENT MACHINERY — AUTOMATION THAT ACTUALLY SHIPS — PORTFOLIO 2026 — PROCUREMENT SYSTEMS — AI CONTENT MACHINERY — AUTOMATION THAT ACTUALLY SHIPS —&nbsp;</span></div>
+
+  <div class="hero">
+    <div class="card">
+      <h1>Systems<br><span class="hl">that run</span><br><span class="out">without me.</span></h1>
+      <p class="blurb">Hafiz Jamali. I build the unglamorous machinery — inventory, procurement, scheduled content — and let the numbers do the talking.</p>
+      <a class="cta" href="#work">See the work ↓</a>
+    </div>
+  </div>
+
+  <div class="stage-card">
+    <div class="stage-kicker"><b>FIG·01</b><span>Hafiz Jamali — builds and runs the systems the clinic and the content run on.</span></div>
+    <div class="stage-box" id="stage">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="stage-fallback"><div class="fb-inner"><b>HAFIZ<br><em>JAMALI</em></b><span>[ 3D SCENE NEEDS WEBGL — FLAT PLATE SHOWN ]</span></div></div>
+    </div>
+    <div class="stage-foot">
+      <span class="chip chip-blue">ROLE: OPERATIONS + ENGINEERING</span>
+      <span class="chip">SHIPPED: PROCURA · PIMS · MAP · DD · THEOSES</span>
+      <span class="chip chip-pink">ALSO: AI CONTENT PIPELINES</span>
+      <span class="chip chip-acid">HOW: MEASURE → AUTOMATE → AUDIT</span>
+    </div>
+    <div class="fig-credit"><span>fig. rendered live in WebGL — not a PNG</span><span>hover a block ↑ or its card ↓</span></div>
+  </div>
+
+  <h2 id="work">Selected work <span class="hint">hover a card → block lifts</span></h2>
+  <div class="work">
+    <a class="proj" href="/work/theoses" data-v="0"><span class="no">PRJ·001</span><h3>Theoses</h3><p>Personal AI coding + ops harness on a VPS, with a human review gate on every code change.</p><span class="st">live</span></a>
+    <a class="proj" href="/work/procura" data-v="1"><span class="no">PRJ·002</span><h3>Procura</h3><p>Clinic procurement &amp; inventory: stock movements, POs, reorder points, auditable history.</p><span class="st">live</span></a>
+    <a class="proj" href="/work/pims" data-v="2"><span class="no">PRJ·003</span><h3>PIMS</h3><p>Practice management for the clinic — Go + PostgreSQL with a live inventory layer.</p><span class="st">live</span></a>
+    <a class="proj" href="/work/map" data-v="3"><span class="no">PRJ·004</span><h3>MAP</h3><p>Field work that doesn't wait for signal — a local-first Android app.</p><span class="st">field</span></a>
+    <a class="proj" href="/variant-eta/#dispatches" data-v="4"><span class="no">PRJ·005</span><h3>Content pipelines</h3><p>Daily news, quotes and social posts published by cron with their own performance ledgers.</p><span class="st">live</span></a>
+    <a class="proj" href="/work/hills-ai-content-lab" data-v="5"><span class="no">PRJ·006</span><h3>AI Content Lab</h3><p>Hook writing, short-form copy and image prompting experiments — the farm team for the pipelines.</p><span class="st">lab</span></a>
+  </div>
+
+  <h2>How I operate</h2>
+  <div class="rules">
+    <div class="rule"><b>01 · Measure first</b><span>Nothing ships without a number to compare against.</span></div>
+    <div class="rule"><b>02 · Automate the dull</b><span>Twice a week, same way? That's a cron job now.</span></div>
+    <div class="rule"><b>03 · Show the work</b><span>Ledgers, logs and git history — auditable a month later.</span></div>
+  </div>
+
+  <h2>The operator</h2>
+  <div class="about">
+    An AI enthusiast with three years of experience in app development and system design. I'm always keen to keep learning and exploring, I genuinely love automating things, and I'd rather ship the simplest solution that actually works than the fanciest one that doesn't.
+  </div>
+
+  <h2>Files &amp; links</h2>
+  <div class="links">
+    <a href="/work/dd-drugs-register">DD case file</a>
+    <a href="/resume">Résumé (PDF)</a>
+    <a href="https://github.com/H4fizWasabie">GitHub</a>
+    <a href="https://github.com/H4fizWasabie/theoses2">theoses2</a>
+    <a href="https://procura.wasabietech.com">Procura live</a>
+    <a href="https://pims.wasabietech.com">PIMS live</a>
+    <a href="/variant-eta/">Dispatch deck</a>
+  </div>
+
+  <footer><span><a href="https://madewithjev.com/free-tools/ai-slop-detector/report/portfolio.wasabietech.com"><img src="https://madewithjev.com/free-tools/ai-slop-detector/badge/portfolio.wasabietech.com" alt="AI slop detector — report" height="28"></a> · 3d: three.js r160 · rendered live</span><span>© 2026 Hafiz Jamali</span></footer>
+</main>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {FontLoader} from 'three/addons/loaders/FontLoader.js';
+import {TextGeometry} from 'three/addons/geometries/TextGeometry.js';
+
+const INK=0x0c0c0c, WHITE=0xfdfcfa, ACID=0xe8ff3a, PINK=0xff5c8a;
+const box=document.getElementById('stage');
+const canvas=document.getElementById('scene');
+
+try{
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setClearColor(0x000000,0);
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(40,1,0.1,100);
+
+  scene.add(new THREE.AmbientLight(0xffffff,0.85));
+  const dir=new THREE.DirectionalLight(0xffffff,0.5); dir.position.set(4,7,5); scene.add(dir);
+
+  scene.add(new THREE.GridHelper(14,14,INK,0xb9b5ab));
+
+  const edges=(g)=>new THREE.LineSegments(new THREE.EdgesGeometry(g,15),new THREE.LineBasicMaterial({color:INK}));
+
+  /* ---- extruded wordmark ---- */
+  const font=await new FontLoader().loadAsync('https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json');
+  const wm=new THREE.Group();
+  const line=(txt,y)=>{
+    const g=new TextGeometry(txt,{font,size:0.92,height:0.5,curveSegments:4,bevelEnabled:false});
+    g.computeBoundingBox();
+    g.translate(-(g.boundingBox.max.x-g.boundingBox.min.x)/2,0,0);
+    const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:WHITE}));
+    m.add(edges(g));
+    m.position.y=y; wm.add(m);
+  };
+  line('HAFIZ',2.55);
+  line('JAMALI',1.5);
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(3.3,0.16,0.5),new THREE.MeshLambertMaterial({color:PINK}));
+  bar.position.set(0,1.28,0.25); bar.add(edges(bar.geometry)); wm.add(bar);
+  scene.add(wm);
+
+  /* ---- voxel work grid ---- */
+  const NAMES=['THEOSES','PROCURA','PIMS','MAP','PIPELINES','CONTENT LAB'];
+  const XS=[-4.25,-2.55,-0.85,0.85,2.55,4.25];
+  const geo=new THREE.BoxGeometry(0.9,0.9,0.9);
+  const cWhite=new THREE.Color(WHITE), cAcid=new THREE.Color(ACID);
+  const cubes=NAMES.map((n,i)=>{
+    const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:WHITE}));
+    m.add(edges(geo));
+    m.position.set(XS[i],0.46,1.3);
+    m.userData={base:0.46,hover:0};
+    scene.add(m);
+    return m;
+  });
+
+  /* labels — brutalist chips */
+  try{await document.fonts.load('700 56px "IBM Plex Mono", monospace');}catch(e){}
+  NAMES.forEach((n,i)=>{
+    const c=document.createElement('canvas'); c.width=512; c.height=160;
+    const x=c.getContext('2d');
+    x.fillStyle='#fdfcfa'; x.fillRect(0,0,512,160);
+    x.lineWidth=10; x.strokeStyle='#0c0c0c'; x.strokeRect(5,5,502,150);
+    x.fillStyle='#0c0c0c'; x.font='700 54px "IBM Plex Mono",monospace';
+    x.textAlign='center'; x.textBaseline='middle';
+    x.fillText(n,256,84);
+    const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t}));
+    s.scale.set(1.5,0.47,1);
+    s.position.set(XS[i],0.14,2.45);
+    scene.add(s);
+  });
+
+  /* ---- framing ---- */
+  function resize(){
+    const w=box.clientWidth, h=box.clientHeight;
+    renderer.setSize(w,h,false);
+    cam.aspect=w/h;
+    const d=9.6*Math.max(1,1.75/Math.max(cam.aspect,0.6));
+    cam.position.set(0,2.55,Math.min(d,20));
+    cam.lookAt(0,1.65,0);
+    cam.updateProjectionMatrix();
+  }
+  resize();
+  addEventListener('resize',resize);
+
+  /* ---- input ---- */
+  const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(-2,-2);
+  let cardIdx=-1;
+  box.addEventListener('pointermove',e=>{
+    const r=box.getBoundingClientRect();
+    mouse.x=((e.clientX-r.left)/r.width)*2-1;
+    mouse.y=-((e.clientY-r.top)/r.height)*2+1;
+  });
+  box.addEventListener('pointerleave',()=>mouse.set(-2,-2));
+  document.querySelectorAll('.proj').forEach(el=>{
+    const i=+el.dataset.v;
+    el.addEventListener('mouseenter',()=>cardIdx=i);
+    el.addEventListener('mouseleave',()=>{if(cardIdx===i)cardIdx=-1;});
+  });
+
+  /* ---- loop ---- */
+  let tiltX=0,tiltY=0,firstFrame=true;
+  renderer.setAnimationLoop(()=>{
+    const t=performance.now()/1000;
+    tiltY+=((mouse.x>-1.5?mouse.x*0.12:0)-tiltY)*0.06;
+    tiltX+=((mouse.y>-1.5?-mouse.y*0.05:0)-tiltX)*0.06;
+    wm.rotation.y=tiltY; wm.rotation.x=tiltX;
+    wm.position.y=Math.sin(t*0.8)*0.03;
+
+    let target=cardIdx;
+    if(mouse.x>-1.5){
+      ray.setFromCamera(mouse,cam);
+      const hit=ray.intersectObjects(cubes,false)[0];
+      if(hit) target=cubes.indexOf(hit.object);
+    }
+    box.style.cursor=target>=0?'pointer':'crosshair';
+    cubes.forEach((m,i)=>{
+      const want=(i===target)?1:0;
+      m.userData.hover+=(want-m.userData.hover)*0.15;
+      m.position.y=m.userData.base+m.userData.hover*0.38;
+      m.material.color.copy(cWhite).lerp(cAcid,m.userData.hover);
+    });
+
+    renderer.render(scene,cam);
+    if(firstFrame){firstFrame=false;box.classList.add('live');}
+  });
+}catch(err){
+  console.warn('[stage] 3D scene unavailable, flat plate stays:',err);
+}
+</script>
+</body>
+</html>

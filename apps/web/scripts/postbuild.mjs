@@ -39,7 +39,7 @@ const dist = join(webRoot, 'dist');
 
 const REACT_ENTRY = join(dist, 'index.html');       // what vite emits
 const SPA_ENTRY = join(dist, 'react-index.html');   // what Caddy needs
-const DECK_SOURCE = join(repoRoot, 'variants', 'eta', 'index.html');
+const DECK_SOURCE = join(repoRoot, 'variants', 'raw-grid', 'index.html');
 
 const fail = (msg) => {
   console.error(`\n  ✗ postbuild: ${msg}\n`);
@@ -67,7 +67,7 @@ if (!existsSync(DECK_SOURCE)) {
 }
 copyFileSync(DECK_SOURCE, REACT_ENTRY);
 const deckBytes = statSync(DECK_SOURCE).size;
-console.log(`    · variants/eta/index.html -> index.html (${deckBytes} bytes, homepage)`);
+console.log(`    · variants/raw-grid/index.html -> index.html (${deckBytes} bytes, homepage)`);
 
 // 4. Assert the complete expected artifact set is present.
 const required = [
