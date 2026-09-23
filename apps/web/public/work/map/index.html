@@ -31,8 +31,25 @@ h1{font-family:var(--sans);font-weight:800;font-size:clamp(34px,7vw,64px);text-t
 .plate img{display:block;width:100%;height:auto;border-bottom:3px solid var(--ink)}
 .fig-credit{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;flex-wrap:wrap}
 .fig-credit span:first-child{color:var(--ink);font-weight:500}
+.pull{border:3px solid var(--ink);background:var(--acid);padding:20px 22px;margin-top:26px;font-family:var(--sans);font-weight:800;font-size:clamp(18px,3vw,26px);text-transform:uppercase;letter-spacing:-.01em;box-shadow:8px 8px 0 var(--ink)}
+.pull small{display:block;font-family:var(--mono);font-weight:400;font-size:13px;text-transform:none;letter-spacing:0;margin-top:10px;line-height:1.55}
 h2{font-family:var(--sans);font-weight:800;font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:-.02em;margin:44px 0 16px;display:flex;align-items:center;gap:14px}
 h2::after{content:"";flex:1;border-top:3px solid var(--ink)}
+.sec{max-width:700px;font-size:14.5px}
+.sec p+p{margin-top:12px}
+.sec ul{margin:14px 0 0 18px}
+.sec li{margin:9px 0}
+.sec code{background:var(--acid);padding:1px 5px;font-weight:500}
+.sec b{font-weight:500}
+.cmd{border:3px solid var(--ink);background:var(--ink);color:#f2f0eb;padding:16px 18px;margin-top:18px;font-size:13px;line-height:1.8;box-shadow:5px 5px 0 var(--blue);white-space:pre-wrap}
+.cmd b{color:var(--acid);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:3px;border:3px solid var(--ink);background:var(--ink);margin-top:6px}
+.stats div{background:#fff;padding:14px 16px}
+.stats b{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(22px,4vw,32px);letter-spacing:-.02em}
+.stats span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a8a}
+.stats .watch{background:var(--pink)}
+.stats .watch span{color:var(--ink)}
+.note{border:3px solid var(--ink);border-left:8px solid var(--blue);background:#fff;padding:12px 14px;margin-top:14px;font-size:12.5px;line-height:1.6}
 .tags{display:flex;flex-wrap:wrap;gap:10px}
 .chip{border:3px solid var(--ink);background:#fff;padding:4px 9px;font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 .chip-blue{background:var(--blue);color:#fff}
@@ -52,22 +69,90 @@ footer a{color:var(--ink);border-bottom:3px solid var(--pink);text-decoration:no
   </div>
 
   <header class="case-head">
-    <span class="no">CASE FILE · MAP</span>
+    <span class="no">CASE FILE · MAP · THE SMALLER DISPATCHES</span>
     <h1>MAP</h1>
-    <p class="lede"><b>Personal Android app · sideload APK</b> My Awesome App — a local-first Android daily utility: tasks, calendar, documents, scan-to-PDF, and a local music player in one calm Home/Today view. No account, no cloud; data stays on the device.</p>
+    <p class="lede"><b>Personal Android app &middot; sideload APK</b> — My Awesome App — a local-first Android daily utility: tasks, calendar, documents, scan-to-PDF, and a local music player in one calm Home/Today view. No account, no cloud; data stays on the device.</p>
   </header>
+
   <figure class="plate">
-    <img src="/img/map-home.png" alt="MAP — screenshot">
-    <figcaption class="fig-credit"><span>fig. 01 — map — home/today view</span><span>live capture, not a mock</span></figcaption>
+    <img src="/img/map-home.png" alt="MAP — the Home/Today view">
+    <figcaption class="fig-credit"><span>fig. 01 — the Home/Today view</span><span>from the release build, not a mockup</span></figcaption>
   </figure>
+
+  <div class="pull">Field work that doesn't wait for signal.<small>My Awesome App — a local-first Android daily utility. No account, no cloud; data stays on the device.</small></div>
+
+  <section class="sec">
+    <h2>Why it exists</h2>
+    <p>Work away from a desk doesn't wait for signal, so what's on the phone has to work at zero bars. MAP keeps five daily tools — tasks, calendar, documents, scan-to-PDF and a local music player — behind one calm Home/Today view, all of it on-device. The name is My Awesome App and it wears it.</p>
+  </section>
+
+  <section class="sec">
+    <h2>What it handles</h2>
+    <ul>
+      <li><b>Home/Today</b> — one calm surface: what's next, what's due, what's playing.</li>
+      <li><b>Tasks</b> — the day's list, offline by default.</li>
+      <li><b>Calendar</b> — the month at a glance.</li>
+      <li><b>Documents</b> — a local document shelf with a viewer.</li>
+      <li><b>Scan to PDF</b> — paper to PDF, from the field.</li>
+      <li><b>Music</b> — a local player; the files are yours, on the device.</li>
+    </ul>
+  </section>
+
+  <div class="cmd">$ gh release list -R H4fizWasabie/map-android
+&rarr; <b>v0.1.1</b> &middot; 2026-09-19 &middot; MAP-v0.1.1.apk (48.0 MB) + .sha256
+&rarr; <b>v0.1.0</b> &middot; 2026-09-14 &middot; MAP-v0.1.0.apk (48.6 MB)</div>
+  <p class="fig-credit"><span>pulled from github releases &middot; 2026-09-23</span><span>sideload builds, checksums published</span></p>
+
+  <section class="sec">
+    <h2>Under the hood</h2>
+    <ul>
+      <li><b>Kotlin, local-first by construction.</b> No account, no backend, no analytics, no cloud sync — nothing in the app phones anywhere, because there is nothing to phone to.</li>
+      <li><b>Shipped as a sideload APK.</b> GitHub Releases with published sha256 checksums. Debug-signed, and the README warns you Android will complain about installing it — expected for a personal APK outside the Play Store.</li>
+      <li><b>The release queue is a file.</b> AGENTS.md, CONTEXT.md and CHANGELOG.md keep the product vocabulary and release queue in the repo; the app builds on Android SDK 36.</li>
+      <li><b>Version numbers mean something.</b> v0.1.0 &rarr; v0.1.1 in five days, and the APK came out 0.6&nbsp;MB lighter.</li>
+    </ul>
+  </section>
+
+  <section class="sec">
+    <h2>The artifact, live</h2>
+    <div class="stats">
+      <div><b>2</b><span>releases shipped</span></div>
+      <div><b>v0.1.1</b><span>latest &middot; sep 19</span></div>
+      <div class="watch"><b>48.0</b><span>mb apk</span></div>
+      <div><b>5</b><span>modules in one apk</span></div>
+      <div><b>0</b><span>accounts</span></div>
+      <div><b>0</b><span>analytics</span></div>
+      <div><b>25</b><span>kotlin files</span></div>
+      <div><b>4</b><span>test files</span></div>
+    </div>
+    <p class="note">pulled from the github repo and the release page on 2026-09-23. these numbers are the artifact's own — there is no server behind this app, which is exactly the point.</p>
+  </section>
+
+  <section class="sec">
+    <h2>The honest edges</h2>
+    <ul>
+      <li><b>The weight.</b> 48&nbsp;MB is not a hello-world — five real modules live in one APK. It got 0.6&nbsp;MB lighter between releases; nobody is pretending it is a 2&nbsp;MB note app.</li>
+      <li><b>Sideloaded, not shelved.</b> No store listing. Installing it means trusting the GitHub release and checking the sha256 yourself — the checksum is published next to the binary for exactly that reason.</li>
+      <li><b>The audience is one.</b> A personal app at v0.1.x, built because its user wanted it. No download counts to brag about.</li>
+      <li><b>Data stays — including the risk.</b> No account, no cloud sync: no sync magic and no safety net behind the device.</li>
+      <li><b>The tests are named, not implied.</b> The repo carries 4 test files beside the Kotlin sources — that is the whole suite, stated plainly.</li>
+      <li><b>No roadmap claims.</b> Everything above is either in the APK or in the repo.</li>
+    </ul>
+  </section>
+
   <h2>Tags</h2>
-  <div class="tags"><span class="chip">Kotlin</span><span class="chip chip-blue">Android</span><span class="chip chip-pink">local-first</span><span class="chip">offline</span></div>
+  <div class="tags">
+      <span class="chip">Kotlin</span>
+      <span class="chip">Android</span>
+      <span class="chip">local-first</span>
+      <span class="chip">offline</span>
+    </div>
   <h2>Links</h2>
   <div class="links">
-    <a href="https://github.com/H4fizWasabie/map-android/releases">APK releases ↗</a>
-    <a href="https://github.com/H4fizWasabie/map-android">Source ↗</a>
+    <a href="https://github.com/H4fizWasabie/map-android/releases">APK releases &nearr;</a>
+    <a href="https://github.com/H4fizWasabie/map-android">Source &nearr;</a>
   </div>
-  <footer><span>case file · map</span><span><a href="/">&larr; back to index</a></span></footer>
+  <footer><span>case file &middot; map</span><span><a href="/">&larr; back to index</a></span></footer>
 </main>
 </body>
 </html>
