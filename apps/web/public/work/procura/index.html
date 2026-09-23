@@ -31,8 +31,25 @@ h1{font-family:var(--sans);font-weight:800;font-size:clamp(34px,7vw,64px);text-t
 .plate img{display:block;width:100%;height:auto;border-bottom:3px solid var(--ink)}
 .fig-credit{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a8a;flex-wrap:wrap}
 .fig-credit span:first-child{color:var(--ink);font-weight:500}
+.pull{border:3px solid var(--ink);background:var(--acid);padding:20px 22px;margin-top:26px;font-family:var(--sans);font-weight:800;font-size:clamp(18px,3vw,26px);text-transform:uppercase;letter-spacing:-.01em;box-shadow:8px 8px 0 var(--ink)}
+.pull small{display:block;font-family:var(--mono);font-weight:400;font-size:13px;text-transform:none;letter-spacing:0;margin-top:10px;line-height:1.55}
 h2{font-family:var(--sans);font-weight:800;font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:-.02em;margin:44px 0 16px;display:flex;align-items:center;gap:14px}
 h2::after{content:"";flex:1;border-top:3px solid var(--ink)}
+.sec{max-width:700px;font-size:14.5px}
+.sec p+p{margin-top:12px}
+.sec ul{margin:14px 0 0 18px}
+.sec li{margin:9px 0}
+.sec code{background:var(--acid);padding:1px 5px;font-weight:500}
+.sec b{font-weight:500}
+.cmd{border:3px solid var(--ink);background:var(--ink);color:#f2f0eb;padding:16px 18px;margin-top:18px;font-size:13px;line-height:1.8;box-shadow:5px 5px 0 var(--blue);white-space:pre-wrap}
+.cmd b{color:var(--acid);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:3px;border:3px solid var(--ink);background:var(--ink);margin-top:6px}
+.stats div{background:#fff;padding:14px 16px}
+.stats b{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(22px,4vw,32px);letter-spacing:-.02em}
+.stats span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a8a}
+.stats .watch{background:var(--pink)}
+.stats .watch span{color:var(--ink)}
+.note{border:3px solid var(--ink);border-left:8px solid var(--blue);background:#fff;padding:12px 14px;margin-top:14px;font-size:12.5px;line-height:1.6}
 .tags{display:flex;flex-wrap:wrap;gap:10px}
 .chip{border:3px solid var(--ink);background:#fff;padding:4px 9px;font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 .chip-blue{background:var(--blue);color:#fff}
@@ -52,22 +69,84 @@ footer a{color:var(--ink);border-bottom:3px solid var(--pink);text-decoration:no
   </div>
 
   <header class="case-head">
-    <span class="no">CASE FILE · PROCURA</span>
+    <span class="no">CASE FILE · PROCURA · WEEKLY PRODUCTION USE</span>
     <h1>Procura</h1>
     <p class="lede"><b>Production system</b> Product, supplier, and purchasing information turned into a connected workflow for better decisions — a single-binary Go system handling inventory, suppliers, purchase orders, RFQs, planning, and reporting.</p>
   </header>
+
   <figure class="plate">
-    <img src="/img/procura-dash.png" alt="Procura — screenshot">
-    <figcaption class="fig-credit"><span>fig. 01 — procura — procurement dashboard</span><span>live capture, not a mock</span></figcaption>
+    <img src="/img/procura-dash.png" alt="Procura — the Monday-morning reorder view">
+    <figcaption class="fig-credit"><span>fig. 01 — the monday-morning reorder view</span><span>live capture, not a mock</span></figcaption>
   </figure>
+
+  <div class="pull">Procurement, reduced to one binary.
+    <small>A single Go binary over SQLite carrying a clinic's entire purchasing spine &mdash; reorder points, POs, RFQs, supplier scorecards. No subscription, no cloud mascot.</small>
+  </div>
+
+  <h2>Why it exists</h2>
+  <div class="sec">
+    <p>A clinic's purchasing spine &mdash; what's below reorder, what's on order, which supplier actually delivers, what the month cost &mdash; split across notebooks, spreadsheets and supplier chat threads drifts apart quietly. Reorder points nobody trusts. POs with no state. Month-end closed by archaeology.</p>
+    <p>The usual fix rents the clinic its own purchasing data back by subscription. This one runs on a VPS and belongs to the clinic.</p>
+  </div>
+
+  <h2>What it handles</h2>
+  <div class="sec">
+    <ul>
+      <li><b>Inventory</b> &mdash; 1,142 tracked items with stock levels, reorder points and 23 months of movement history behind each one.</li>
+      <li><b>Suppliers</b> &mdash; 89 of them, each with the purchasing history scorecards are drawn from.</li>
+      <li><b>Purchasing</b> &mdash; POs and RFQs with real states (paid, pending, void), 560 POs deep and counting.</li>
+      <li><b>Planning</b> &mdash; <code>procura plan --week</code> turns the reorder list into the week's draft orders.</li>
+      <li><b>Reporting</b> &mdash; month-end numbers that reconcile, because adjustments were never hidden.</li>
+    </ul>
+    <div class="cmd">$ procura plan --week
+&rarr; <b>12 items below ROP</b> &middot; <b>3 POs drafted</b>
+
+$ procura order draft --supplier vetco</div>
+    <div class="fig-credit" style="border:3px solid var(--ink);border-top:0"><span>sample run &mdash; the planner drafts the week's orders</span><span>web app + cli &middot; one binary</span></div>
+  </div>
+
+  <h2>Under the hood</h2>
+  <div class="sec">
+    <ul>
+      <li><b>One Go binary, one SQLite file.</b> The web app and the planner CLI come from the same binary, and the whole ledger is a single file that can be copied, grepped and audited.</li>
+      <li><b>Adjustments are first-class.</b> Stock movements record receipts, issues and adjustments (adj-in / adj-out) against a monthly closing &mdash; so the ledger reconciles instead of silently drifting.</li>
+      <li><b>Nothing is rented.</b> No subscription, no cloud service in the middle. It runs on a VPS and publishes at procura.wasabietech.com.</li>
+      <li><b>Agents welcome, read-only.</b> Because the ledger is one SQLite file, my assistant answers &ldquo;where's the stock&rdquo; questions with SELECTs against the same numbers. Writes stay with me.</li>
+    </ul>
+  </div>
+
+  <h2>The ledger, live</h2>
+  <div class="sec">
+    <div class="stats">
+      <div><b>1,142</b><span>items</span></div>
+      <div><b>89</b><span>suppliers</span></div>
+      <div><b>560</b><span>purchase orders</span></div>
+      <div><b>2,130</b><span>po lines</span></div>
+      <div><b>23,335</b><span>movement rows</span></div>
+      <div><b>23</b><span>months &middot; oct 2024 &ndash; aug 2026</span></div>
+      <div><b>73</b><span>categories</span></div>
+      <div class="watch"><b>271</b><span>at/below rop now</span></div>
+    </div>
+    <div class="note">Pulled from the production database on 2026-09-23 &mdash; the same ledger the app writes to. Movement history is monthly roll-ups through the August 2026 closing; the ROP count is live from the items table today, and it is allowed to look bad. 271 is what <code>procura plan --week</code> exists to attack.</div>
+  </div>
+
+  <h2>The honest edges</h2>
+  <div class="sec">
+    <ul>
+      <li><b>Thin on invoices.</b> 560 POs and 109 direct orders raised against 8 invoices recorded &mdash; the invoice side is the thinnest part of the spine, and the counts say so.</li>
+      <li><b>The open month rolls up at close.</b> Movements post in monthly closings, so history stops at the last close while stock levels stay live.</li>
+      <li><b>No roadmap claims.</b> Everything above is either in the binary or in the database.</li>
+    </ul>
+  </div>
+
   <h2>Tags</h2>
   <div class="tags"><span class="chip">research</span><span class="chip chip-blue">reporting</span><span class="chip chip-pink">Go</span></div>
   <h2>Links</h2>
   <div class="links">
-    <a href="https://procura.wasabietech.com">Live system ↗</a>
-    <a href="https://github.com/H4fizWasabie/procura">Source ↗</a>
+    <a href="https://procura.wasabietech.com">Live system &nearr;</a>
+    <a href="https://github.com/H4fizWasabie/procura">Source &nearr;</a>
   </div>
-  <footer><span>case file · procura</span><span><a href="/">&larr; back to index</a></span></footer>
+  <footer><span>case file &middot; procura</span><span><a href="/">&larr; back to index</a></span></footer>
 </main>
 </body>
 </html>
