@@ -24,3 +24,6 @@ dist
 
 # old resume archive — local only
 resume/archive/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
