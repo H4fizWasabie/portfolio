@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Hafiz Jamali — The Systems Ledger (concept)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f0e6; --ink:#17130d; --soft:#5c5347; --rule:#c9bfa8;
+  --ox:#7a2e1f; --blue:#1f4e79;
+  --serif:"Fraunces",Georgia,serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.55;
+  background-image:radial-gradient(rgba(23,19,13,.055) 1px,transparent 1px);background-size:22px 22px}
+a{color:var(--ox);text-decoration:none;border-bottom:1px solid var(--rule)}
+a:hover{border-color:var(--ox)}
+.wrap{max-width:1020px;margin:0 auto;padding:0 26px}
+.masthead{border-bottom:3px double var(--ink);padding-top:44px}
+.masthead .kicker{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--soft);padding-bottom:12px}
+.masthead h1{font-size:clamp(40px,8vw,88px);font-weight:600;letter-spacing:-.03em;line-height:.95;text-align:center}
+.masthead h1 em{font-style:italic;font-weight:400;color:var(--ox)}
+.masthead .dek{text-align:center;font-style:italic;font-size:clamp(15px,2vw,19px);color:var(--soft);
+  padding:14px 0 16px;border-top:1px solid var(--ink);margin-top:16px}
+.grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:52px;padding:46px 0;border-bottom:1px solid var(--ink)}
+.lede{font-size:clamp(19px,2.4vw,25px);line-height:1.42}
+.lede .drop::first-letter{font-size:3.1em;float:left;line-height:.82;padding:6px 10px 0 0;color:var(--ox);font-weight:600}
+.cols{column-count:2;column-gap:32px;font-size:14.5px;color:#2c261d;margin-top:24px}
+.cols p+p{margin-top:12px;text-indent:1.4em}
+figure{border:1px solid var(--ink);padding:20px;background:rgba(255,255,255,.5);box-shadow:6px 6px 0 var(--rule)}
+.stage{height:260px;display:grid;place-items:center;perspective:820px}
+.medal{width:150px;height:150px;position:relative;transform-style:preserve-3d;animation:spin 16s linear infinite}
+@keyframes spin{from{transform:rotateX(62deg) rotateZ(0)}to{transform:rotateX(62deg) rotateZ(360deg)}}
+.ring{position:absolute;inset:0;border:1.5px solid var(--blue);border-radius:50%}
+.ring:nth-child(2){inset:16px;border-color:var(--ox);border-style:dashed}
+.ring:nth-child(3){inset:34px}
+.ring:nth-child(4){inset:52px;border-color:var(--ox)}
+.ring:nth-child(5){inset:66px;border-style:dotted}
+.tick{position:absolute;left:50%;top:0;width:1.5px;height:14px;background:var(--ink);transform-origin:75px 75px}
+figcaption{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--soft);text-align:center;margin-top:14px;border-top:1px solid var(--rule);padding-top:10px}
+.idx{padding:44px 0;border-bottom:1px solid var(--ink)}
+.idx h2,.loop h2{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--ox);margin-bottom:26px}
+.entry{display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:baseline;padding:17px 0;border-top:1px solid var(--rule)}
+.entry:last-child{border-bottom:1px solid var(--rule)}
+.entry .folio{font-family:var(--mono);font-size:12px;color:var(--soft)}
+.entry h3{font-size:clamp(20px,2.6vw,27px);font-weight:600;letter-spacing:-.01em}
+.entry h3 a{color:inherit;border:none}
+.entry h3 a:hover{color:var(--ox)}
+.entry p{font-size:14px;color:#3a332a;max-width:560px}
+.entry .meta{font-family:var(--mono);font-size:11px;color:var(--soft);text-align:right;white-space:nowrap}
+.loop{padding:44px 0 8px}
+.loop ol{counter-reset:l;list-style:none;max-width:640px}
+.loop li{counter-increment:l;padding:14px 0 14px 60px;position:relative;border-bottom:1px dotted var(--rule);font-size:16.5px}
+.loop li::before{content:counter(l,upper-roman) ".";position:absolute;left:0;top:13px;
+  font-family:var(--mono);font-size:13px;color:var(--ox)}
+.contact{display:flex;flex-wrap:wrap;gap:14px 36px;padding:34px 0;font-family:var(--mono);font-size:13.5px}
+footer{border-top:3px double var(--ink);padding:18px 0 40px;display:flex;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--soft)}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.cols{column-count:1}.entry{grid-template-columns:36px 1fr}.entry .meta{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="kicker"><span>vol. mmxxvi — no. 01</span><span>portfolio edition</span><span>gmt+08</span></div>
+  <h1>The Systems <em>Ledger</em></h1>
+  <p class="dek">Hafiz Jamali — operator of inventories, pipelines &amp; other machinery that must not stop.</p>
+</header>
+
+<div class="grid2">
+  <div>
+    <p class="lede"><span class="drop">M</span>ost portfolios show artifacts. This one keeps books: what was set running, what it produced, and whether it still runs without anyone watching. The work below is mostly invisible by design — cron jobs, reorder points, publishing queues — and the measure of it is that you never hear from it.</p>
+    <div class="cols">
+      <p>The instinct behind everything here is the same one you learn counting stock: write it down, count it again, trust the difference. Systems earn trust the same way people do — by matching their books.</p>
+      <p>Procurement taught the discipline; AI tooling changed the speed; the ledger stayed the same. A good operation is dull to watch and excellent to audit.</p>
+    </div>
+  </div>
+  <figure>
+    <div class="stage">
+      <div class="medal" aria-hidden="true">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <div class="tick" style="transform:rotate(0deg)"></div><div class="tick" style="transform:rotate(45deg)"></div>
+        <div class="tick" style="transform:rotate(90deg)"></div><div class="tick" style="transform:rotate(135deg)"></div>
+        <div class="tick" style="transform:rotate(180deg)"></div><div class="tick" style="transform:rotate(225deg)"></div>
+        <div class="tick" style="transform:rotate(270deg)"></div><div class="tick" style="transform:rotate(315deg)"></div>
+      </div>
+    </div>
+    <figcaption>fig. 1 — the rotation, engraved: a system turning on its own axis</figcaption>
+  </figure>
+</div>
+
+<section class="idx">
+  <h2>Index of works</h2>
+  <div class="entry"><span class="folio">001</span><div><h3><a href="https://github.com/H4fizWasabie/theoses2">Theoses</a></h3><p>A personal AI coding and operations harness: one assistant with hands on the server, governed by a review gate instead of a promise.</p></div><span class="meta">live · self-hosted</span></div>
+  <div class="entry"><span class="folio">002</span><div><h3>Procura</h3><p>Procurement and inventory for a veterinary group — stock levels, purchase orders, reorder signals, and a movement history you can audit line by line.</p></div><span class="meta">live · sqlite + api</span></div>
+  <div class="entry"><span class="folio">003</span><div><h3>Daily content machinery</h3><p>News digests, quotes, jokes and social posts that publish themselves on schedule, each with its own ledger of what went out and how it did.</p></div><span class="meta">cron · unattended</span></div>
+  <div class="entry"><span class="folio">004</span><div><h3>AI Content Lab</h3><p>A bench for hooks, short-form copy and image prompting — where ideas get tested before they earn a pipeline.</p></div><span class="meta">lab · ongoing</span></div>
+</section>
+
+<section class="loop">
+  <h2>The working loop</h2>
+  <ol>
+    <li>Get close to the facts — count the shelf, read the log, watch the number.</li>
+    <li>Make the work visible — if it isn't written down, it didn't happen.</li>
+    <li>Automate what repeats — the machine takes the boring shift.</li>
+    <li>Learn from the response — keep what the numbers liked, retire the rest.</li>
+  </ol>
+  <div class="contact">
+    <a href="https://portfolio.wasabietech.com">portfolio.wasabietech.com</a>
+    <a href="https://github.com/H4fizWasabie">github.com/H4fizWasabie</a>
+  </div>
+</section>
+
+<footer><span>concept: ledger — not the live site</span><span>set in fraunces &amp; plex mono</span><span>© 2026 hafiz jamali</span></footer>
+</div>
+</body>
+</html>

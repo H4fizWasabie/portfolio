@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Hafiz Jamali — Flight Data (concept)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c11; --panel:#0c1219; --line:#1a2531; --dim:#5d7183;
+  --ice:#b8d2e0; --amber:#ff9f45; --green:#4ade80;
+  --mono:"IBM Plex Mono",ui-monospace,monospace; --sans:"Archivo",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ice);font-family:var(--mono);line-height:1.6;overflow-x:hidden}
+a{color:var(--amber);text-decoration:none;border-bottom:1px solid #3a2f22}
+a:hover{border-color:var(--amber)}
+#field{position:fixed;inset:0;z-index:0;opacity:.55}
+.hud{position:fixed;z-index:5;font-size:11px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+.hud-tl{top:16px;left:20px}.hud-tr{top:16px;right:20px;text-align:right}
+.hud-bl{bottom:16px;left:20px}.hud-br{bottom:16px;right:20px;text-align:right}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;animation:blink 2.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:120px 24px 96px}
+section{margin-bottom:112px}
+.tag{font-size:11px;letter-spacing:.22em;color:var(--amber);text-transform:uppercase;margin-bottom:18px}
+.tag::before{content:"[ "}
+.tag::after{content:" ]"}
+h1{font-family:var(--sans);font-weight:800;font-size:clamp(34px,6vw,64px);line-height:1.04;letter-spacing:-.02em;color:#eef6fa;text-transform:uppercase}
+h1 em{font-style:normal;color:var(--amber)}
+.sub{margin-top:22px;max-width:560px;color:var(--dim);font-size:14px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:34px;font-size:12px;color:var(--dim)}
+.hero-meta b{color:var(--ice);font-weight:500}
+h2{font-family:var(--sans);font-weight:800;font-size:clamp(22px,3vw,30px);text-transform:uppercase;letter-spacing:-.01em;color:#eef6fa;margin-bottom:26px}
+.tbl{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:34px 1.4fr 1fr 90px;gap:14px;padding:18px 4px;border-bottom:1px solid var(--line);font-size:13px;align-items:baseline}
+.row:hover{background:rgba(159,216,255,.03)}
+.row .idx{color:var(--dim);font-size:11px}
+.row .nm{color:#eef6fa;font-weight:500}
+.row .ds{color:var(--dim);font-size:12px}
+.st{font-size:10px;letter-spacing:.14em;text-align:right;color:var(--green)}
+.st.arc{color:var(--dim)}
+.caps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.cap{background:var(--panel);padding:22px 20px}
+.cap h3{font-size:11px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase;font-weight:500;margin-bottom:10px}
+.cap p{font-size:13px;color:var(--ice)}
+.cap span{display:block;margin-top:8px;font-size:11px;color:var(--dim)}
+.about{max-width:620px;font-size:14px;color:var(--ice)}
+.about p+p{margin-top:16px}
+.links{display:flex;flex-wrap:wrap;gap:14px 30px;margin-top:26px;font-size:13px}
+footer{border-top:1px solid var(--line);padding-top:18px;font-size:11px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:640px){.row{grid-template-columns:26px 1fr 70px}.row .ds{display:none}.hud-bl{display:none}}
+</style>
+</head>
+<body>
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="hud hud-tl">HJ·01 / portfolio</div>
+<div class="hud hud-tr"><span class="dot"></span>systems nominal<br><span id="clk">--:--:--</span> gmt+08</div>
+<div class="hud hud-bl">scroll to read telemetry</div>
+<div class="hud hud-br" id="pct">00%</div>
+
+<main>
+<section>
+  <div class="tag">operator profile</div>
+  <h1>I build systems that keep running <em>when I'm asleep.</em></h1>
+  <p class="sub">Procurement operations, inventory data, and AI-assisted content pipelines — designed to be boring, measurable, and unattended.</p>
+  <div class="hero-meta">
+    <span><b>Hafiz Jamali</b></span>
+    <span>role <b>systems operator</b></span>
+    <span>base <b>GMT+08</b></span>
+    <span>status <b style="color:var(--green)">shipping</b></span>
+  </div>
+</section>
+
+<section>
+  <div class="tag">01 / flight log — selected work</div>
+  <div class="tbl">
+    <div class="row"><span class="idx">001</span><span class="nm">Theoses</span><span class="ds">personal AI coding + ops harness running 24/7 on a VPS</span><span class="st">live</span></div>
+    <div class="row"><span class="idx">002</span><span class="nm">Procura</span><span class="ds">clinic procurement &amp; inventory system: stock, POs, reorder signals</span><span class="st">live</span></div>
+    <div class="row"><span class="idx">003</span><span class="nm">Content pipelines</span><span class="ds">daily news, quotes and social posting — cron-driven, zero babysitting</span><span class="st">live</span></div>
+    <div class="row"><span class="idx">004</span><span class="nm">AI Content Lab</span><span class="ds">experiments in hooks, short-form copy and image prompting</span><span class="st arc">lab</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="tag">02 / operating principles</div>
+  <div class="caps">
+    <div class="cap"><h3>Measure first</h3><p>No change ships without a number to compare against.</p><span>stock levels, open rates, cron success</span></div>
+    <div class="cap"><h3>Automate the dull</h3><p>If a human does it twice a week the same way, it becomes a job for the machine.</p><span>scheduled, logged, revertable</span></div>
+    <div class="cap"><h3>Show the work</h3><p>Every system keeps a paper trail you can read a month later.</p><span>ledgers, git history, run logs</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="tag">03 / operator</div>
+  <div class="about">
+    <p>I run operations where the interesting part is the system, not the slide deck: what gets ordered, what runs out, what gets published, and what the numbers say afterward.</p>
+    <p>Half ops, half engineering, a little writing on the side — the thread connecting all of it is making work visible and repeatable.</p>
+  </div>
+  <div class="links">
+    <a href="https://portfolio.wasabietech.com">portfolio.wasabietech.com</a>
+    <a href="https://github.com/H4fizWasabie">github / H4fizWasabie</a>
+  </div>
+</section>
+
+<footer><span>concept: flight-data · not the live site</span><span>© 2026 Hafiz Jamali</span></footer>
+</main>
+
+<script>
+const clk=document.getElementById('clk'),pct=document.getElementById('pct');
+setInterval(()=>{clk.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false})},1000);
+addEventListener('scroll',()=>{const p=scrollY/(document.body.scrollHeight-innerHeight||1);pct.textContent=String(Math.round(p*100)).padStart(2,'0')+'%'},{passive:true});
+
+import('https://unpkg.com/three@0.160.0/build/three.module.js').then(THREE=>{
+  const cv=document.getElementById('field'),renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x080c11,.055);
+  const cam=new THREE.PerspectiveCamera(58,1,.1,100);cam.position.set(0,3.2,9);
+  const ROWS=46,COLS=90,W=26,segs=[];
+  const mat=new THREE.LineBasicMaterial({color:0x3f7fa8,transparent:true,opacity:.5});
+  for(let r=0;r<ROWS;r++){
+    const g=new THREE.BufferGeometry(),pos=new Float32Array(COLS*3);
+    g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const line=new THREE.Line(g,mat);line.userData.row=r;scene.add(line);segs.push(line);
+  }
+  let mx=0,my=0;
+  addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5)},{passive:true});
+  function fit(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+  addEventListener('resize',fit);fit();
+  const t0=performance.now();
+  (function loop(){
+    const t=(performance.now()-t0)/1000;
+    for(const line of segs){
+      const r=line.userData.row,z=(r/ROWS-.5)*W,attr=line.geometry.attributes.position;
+      for(let c=0;c<COLS;c++){
+        const x=(c/COLS-.5)*W;
+        const y=Math.sin(x*.55+t*.9)*.34+Math.cos(z*.42-t*.6)*.42
+               +Math.sin((x+z)*.23+t*.35)*.55
+               +Math.exp(-((x-1.5)**2+(z-1)**2)*.18)*Math.sin(t*2.4)*.9;
+        attr.setXYZ(c,x,y-1.4,z);
+      }
+      attr.needsUpdate=true;
+    }
+    cam.position.x+=((mx*2.4)-cam.position.x)*.04;
+    cam.position.y+=((3.2-my*1.6)-cam.position.y)*.04;
+    cam.lookAt(0,-.6,0);
+    renderer.render(scene,cam);requestAnimationFrame(loop);
+  });
+}).catch(()=>{document.getElementById('field').style.display='none'});
+</script>
+</body>
+</html>
