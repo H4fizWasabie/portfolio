@@ -1,0 +1,47 @@
+[
+  {
+    "width": 1440,
+    "publicHTML": true,
+    "webglReady": true,
+    "scrollCameraPool": true,
+    "css": {
+      "#pause": "12px",
+      "#still": "12px",
+      ".preview-status": "12px",
+      ".preview-status strong": "12px",
+      ".disclosure": "12px",
+      "#scene-label": "12px",
+      "controlsShadow": "none"
+    }
+  },
+  {
+    "width": 390,
+    "publicHTML": true,
+    "webglReady": true,
+    "scrollCameraPool": true,
+    "css": {
+      "#pause": "12px",
+      "#still": "12px",
+      ".preview-status": "12px",
+      ".preview-status strong": "12px",
+      ".disclosure": "12px",
+      "#scene-label": "12px",
+      "controlsShadow": "none"
+    }
+  },
+  {
+    "width": 320,
+    "publicHTML": true,
+    "webglReady": true,
+    "scrollCameraPool": true,
+    "css": {
+      "#pause": "12px",
+      "#still": "12px",
+      ".preview-status": "12px",
+      ".preview-status strong": "12px",
+      ".disclosure": "12px",
+      "#scene-label": "12px",
+      "controlsShadow": "none"
+    }
+  }
+]

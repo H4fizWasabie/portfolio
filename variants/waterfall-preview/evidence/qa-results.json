@@ -1,0 +1,33 @@
+[
+  {
+    "test": "actual water-only GPU pixel changes",
+    "water": 5076,
+    "waterChanged": 4727,
+    "rock": 128897,
+    "rockChanged": 5
+  },
+  {
+    "test": "desktop real artifact: load, no overflow/network/errors, pause, resume, scroll-camera, still, keyboard, 8 links",
+    "pass": true
+  },
+  {
+    "test": "mobile real artifact: load, no overflow/network/errors, pause, resume, scroll-camera, still, keyboard, 8 links",
+    "pass": true
+  },
+  {
+    "test": "small-mobile real artifact: load, no overflow/network/errors, pause, resume, scroll-camera, still, keyboard, 8 links",
+    "pass": true
+  },
+  {
+    "test": "reduced motion: water and camera both static",
+    "pass": true
+  },
+  {
+    "test": "no-js: real image and text retained",
+    "pass": true
+  },
+  {
+    "test": "no-webgl: real image and text retained",
+    "pass": true
+  }
+]

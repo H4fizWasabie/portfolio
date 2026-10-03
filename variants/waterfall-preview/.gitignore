@@ -1,0 +1,5 @@
+dist/
+evidence/*
+!evidence/qa-results.json
+!evidence/public-results.json
+!evidence/finish-review.md

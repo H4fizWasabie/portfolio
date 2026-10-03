@@ -1,0 +1,5 @@
+{
+  "file": "water-matte.png",
+  "sha256": "d3e8b1876aa778d63a2afe9024d31dc0b78623788c52ea0dccbe7ba01240f1b2",
+  "origin": "Derived from approved waterfall pixels with generate-matte.py; falling-water and pool classification, not a separately generated scene"
+}

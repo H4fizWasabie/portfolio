@@ -1,0 +1,27 @@
+[
+  {
+    "file": "theoses-report.webp",
+    "sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190",
+    "origin": "Existing owner-reviewed variants/product-launch/theoses-report.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
+  },
+  {
+    "file": "water-matte.png",
+    "sha256": "d3e8b1876aa778d63a2afe9024d31dc0b78623788c52ea0dccbe7ba01240f1b2",
+    "origin": "Derived from approved waterfall pixels with generate-matte.py; falling-water and pool classification, not a separately generated scene"
+  },
+  {
+    "file": "waterfall.webp",
+    "sha256": "d12d35cdc4d1bf1504ef9cb8ff1bd1695a76d36f4990fc4636553004501a3efe",
+    "origin": "Owner-approved AI-generated image, 2026-10-03; OpenRouter meta/muse-image; original /home/theoses/.theoses/agent/generated-images/1791021665028.webp"
+  },
+  {
+    "file": "map-overview.webp",
+    "sha256": "04693d5b7762302f89845774d36d0e835287d707439af4be4350047de94c1249",
+    "origin": "Existing owner-reviewed variants/product-launch/map-overview.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
+  },
+  {
+    "file": "procura-inventory.webp",
+    "sha256": "57f38ef07c773bb83603350fde7b6e4e7e6103e021f3d19628df83ce4b113a1a",
+    "origin": "Existing owner-reviewed variants/product-launch/procura-inventory.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
+  }
+]
