@@ -1,0 +1,25 @@
+/* Read mode: the approved white datasheet, with live text rather than an embed. */
+.resume-paper{background:#fff;color:#17190f;font-size:16px;line-height:1.65;max-width:980px;margin:28px auto 0;border-radius:18px;overflow-wrap:anywhere;text-align:left;color-scheme:light}
+.resume-paper .page{padding:36px;zoom:1}
+.resume-paper p,.resume-paper .profile,.resume-paper .sysdesc,.resume-paper .jdesc{max-width:75ch;font-size:16px;line-height:1.65;margin:0;text-align:left}
+.resume-paper h2{font-size:clamp(21px,3vw,31px);line-height:1.25;letter-spacing:.02em;text-wrap:initial}
+.resume-paper h3{font-size:14px;font-weight:700;line-height:1.5;margin:0 0 14px;letter-spacing:0}
+.resume-paper .sec{margin-top:30px}
+.resume-paper .secno,.resume-paper .sectitle{font-size:13px;letter-spacing:.08em}
+.resume-paper table,.resume-paper tbody,.resume-paper tr,.resume-paper td{display:block;width:100%;max-width:100%}
+.resume-paper .meta,.resume-paper td.sysurl,.resume-paper td.jd{text-align:left;font-size:13px;line-height:1.6;margin-top:6px}
+.resume-paper .meta{margin-top:14px}.resume-paper .meta span{display:inline-block;margin-right:16px}
+.resume-paper .role{font-size:14px;line-height:1.6;margin-top:8px}
+.resume-paper .certline{font-size:12px;line-height:1.7;margin-top:18px;padding:12px 0;letter-spacing:0}
+.resume-paper .certline b,.resume-paper .secno,.resume-paper td.sysname .kind,.resume-paper td.sklabel{color:#4c6720}
+.resume-paper td.sysname,.resume-paper td.jt{font-size:16px;line-height:1.5;padding-top:8px}
+.resume-paper td.sysname .kind{display:block;font-size:12px;line-height:1.6;letter-spacing:.04em;margin-top:3px}
+.resume-paper .tags,.resume-paper .jloc{font-size:13px;line-height:1.6;letter-spacing:0}
+.resume-paper .tags{padding:7px 0}.resume-paper .sysdesc{margin-bottom:12px}
+.resume-paper ul.sysul{padding-left:20px;margin:0 0 24px}.resume-paper ul.sysul li{margin-bottom:8px}
+.resume-paper .job{margin-bottom:24px}.resume-paper .jdesc{margin-top:9px}
+.resume-paper td.sklabel{font-size:12px;letter-spacing:.04em;padding:10px 0 4px}.resume-paper td.sk{font-size:16px}
+.resume-paper::selection,.resume-paper ::selection{background:#e8ddc5;color:#172016}
+.resume-main{padding-top:48px;padding-bottom:64px}.resume-main>h1{font-size:clamp(32px,5vw,56px);margin:0 0 18px}
+.resume-intro{max-width:65ch;line-height:1.6}.resume-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:24px}
+@media(max-width:640px){.resume-paper .page{padding:22px 18px}.resume-paper .meta span{display:block;margin-right:0}.resume-paper .sectitle{letter-spacing:.04em}.resume-main{padding-top:32px}}
