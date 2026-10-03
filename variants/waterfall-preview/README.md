@@ -4,6 +4,9 @@ Question: does flowing-water motion plus a scroll camera make the owner-selected
 
 Latest preview: https://image.wasabietech.com/portfolio-waterfall-preview/?v=5
 
+## Canonical publication
+Owner explicitly authorised merging V4 and the resume work, opening/merging the publishing PR and showing the final main site on2026-10-03. The shared standard-Node build.cjs owns offline asset embedding; build.py remains a compatibility command. Product Launch's --publish swaps in this approved homepage while retaining canonical SEO and ten other pages. QA supports WATERFALL_QA_URL / WATERFALL_QA_PUBLISHED for actual HTTP publication, excluding typed JSON-LD from shader-source inspection. New release and scoped resume routing are verified before/after deployment; no prototype noindex metadata is promoted.
+
 ## Owner-selected résumé preview
 Owner approved the edited Systems Builder/MAP résumé and requested primary preview on 2026-10-03. About now has a native Preview résumé disclosure: real, selectable, responsive text generated from ../../resume/resume-datasheet-source.html, not a browser-dependent PDF embed. The separate Download PDF link embeds the exact approved one-page PDF and works offline. Footer Résumé navigation reveals it with JavaScript; native disclosure/keyboard preview and download work without JavaScript. Scene badge is hidden only while reading, avoiding overlap; existing water/control scripts, photo, cards and motion behavior are preserved.
 
