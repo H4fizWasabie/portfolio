@@ -5,6 +5,7 @@
     "dpr": 2,
     "publicHTML": true,
     "pauseScrollStillPassed": true,
+    "motionControls": "compact-v4",
     "cardTreatment": "moss-glass-v3",
     "cardBackground": "rgba(35, 46, 30, 0.78)",
     "cardBlur": "blur(12px)",
@@ -28,7 +29,8 @@
     "css": {
       "#pause": "12px",
       "#still": "12px",
-      ".preview-status": "12px",
+      "#motion-toggle": "12px",
+      "#motion-status": "12px",
       ".disclosure": "12px"
     }
   },
@@ -38,6 +40,7 @@
     "dpr": 3,
     "publicHTML": true,
     "pauseScrollStillPassed": true,
+    "motionControls": "compact-v4",
     "cardTreatment": "moss-glass-v3",
     "cardBackground": "rgba(35, 46, 30, 0.78)",
     "cardBlur": "blur(12px)",
@@ -61,7 +64,8 @@
     "css": {
       "#pause": "12px",
       "#still": "12px",
-      ".preview-status": "12px",
+      "#motion-toggle": "12px",
+      "#motion-status": "12px",
       ".disclosure": "12px"
     }
   },
@@ -71,6 +75,7 @@
     "dpr": 2,
     "publicHTML": true,
     "pauseScrollStillPassed": true,
+    "motionControls": "compact-v4",
     "cardTreatment": "moss-glass-v3",
     "cardBackground": "rgba(35, 46, 30, 0.78)",
     "cardBlur": "blur(12px)",
@@ -94,7 +99,8 @@
     "css": {
       "#pause": "12px",
       "#still": "12px",
-      ".preview-status": "12px",
+      "#motion-toggle": "12px",
+      "#motion-status": "12px",
       ".disclosure": "12px"
     }
   }

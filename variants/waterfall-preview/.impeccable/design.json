@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-03T12:02:39.075791+00:00",
+  "generatedAt": "2026-10-03T12:40:40.957906+00:00",
   "title": "Design System: Living waterfall motion preview",
   "extensions": {
     "shadows": [
@@ -60,11 +60,11 @@
       "css": ".ds-scene{font:12px Epilogue,sans-serif;padding:10px 15px;background:rgba(23,32,22,.9);color:#e8ddc5;border-radius:999px;border:1px solid rgba(232,221,197,.25)}"
     },
     {
-      "name": "Preview control",
+      "name": "Motion controls",
       "kind": "button",
-      "description": "Water pause/resume; development-only.",
-      "html": "<button class=\"ds-control\" type=\"button\">Pause water</button>",
-      "css": ".ds-control{font:600 12px Epilogue,sans-serif;min-height:42px;padding:9px 14px;border-radius:12px;background:#293321;color:#e8ddc5;border:1px solid rgba(232,221,197,.38)}.ds-control:hover{background:#35402b}.ds-control:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}.ds-control:disabled{opacity:.65}"
+      "description": "V4 always-visible pause with native options; 44px tap targets, truthful simulation/fallback status.",
+      "html": "<div class=\"ds-controls\"><button type=\"button\">Pause water</button><details class=\"ds-options\"><summary>Motion</summary><div class=\"ds-panel\"><button type=\"button\">Still view</button><span>Simulated water \u00b7 not a video loop</span></div></details></div>",
+      "css": ".ds-controls{position:relative;display:inline-flex;align-items:center;gap:2px;padding:4px;background:rgba(23,32,22,.97);border:1px solid rgba(232,221,197,.34);border-radius:18px;color:#e8ddc5;font-family:Epilogue,sans-serif}.ds-controls button,.ds-options summary{min-height:44px;min-width:44px;padding:10px 12px;border-radius:12px;background:transparent;color:inherit;border:1px solid transparent;font:600 12px Epilogue,sans-serif;white-space:nowrap}.ds-options summary{display:flex;align-items:center;cursor:pointer;list-style:none}.ds-options summary::-webkit-details-marker{display:none}.ds-controls button:hover,.ds-options summary:hover{background:#293321}.ds-controls button:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}.ds-options summary:focus-visible{outline:3px solid #e8ddc5;outline-offset:3px}.ds-controls button:disabled{opacity:.65}.ds-panel{position:absolute;bottom:calc(100% + 10px);right:0;width:260px;padding:14px;background:rgba(23,32,22,.98);border:1px solid rgba(232,221,197,.34);border-radius:16px;box-shadow:0 8px 22px rgba(23,32,22,.2)}.ds-panel button{width:100%;background:#293321;border-color:rgba(232,221,197,.38)}.ds-panel span{display:block;font:12px/1.6 Epilogue,sans-serif;margin-top:10px}"
     }
   ],
   "narrative": {
@@ -76,6 +76,7 @@
       "Simulation is explicitly identified; this is not an image-to-video result."
     ],
     "rules": [
+      "V4 compact201.3125\u00d754px bottom-right motion bar; pause directly available, native Motion options contain still/status. Main and first water script unchanged;44px targets and Escape/outside/focus dismissal.",
       "V3 reading cards:78% moss background,12px frost; no opacity applied to text/images/buttons.",
       "Fallback:94% moss/no blur for unsupported backdrop-filter, reduced transparency or increased contrast; unsupported engine branch unverified.",
       "Opaque secondary actions preserve contrast; white-backdrop body bound5.1658:1. V2 geometry, markup and water script unchanged.",
@@ -86,7 +87,7 @@
       "Photo placement only changes with camera geometry; simulation disclosure and reduced-motion fallback retained."
     ],
     "dos": [
-      "Do keep simulation disclosure and safe-screenshot descriptions visible.",
+      "Do keep simulation/fallback disclosure accessible in Motion options; preserve visible screenshot disclosures.",
       "Do retain normal scrolling, pause, static fallback and reduced-motion behaviour."
     ],
     "donts": [
