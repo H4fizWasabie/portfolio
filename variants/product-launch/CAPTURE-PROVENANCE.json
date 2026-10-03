@@ -1,0 +1,66 @@
+{
+  "captured": "2026-10-03",
+  "dataPolicy": "No production databases, APIs, credentials, sessions or reports. Fictional records only.",
+  "procura": {
+    "source": "Isolated Procura source archive from /tmp/procura-inspection-tbCh1S/source",
+    "originalMainSHA256": "5bc63652f62d11d808f12e80617043acf00b5778089940e7187e887b77625a78",
+    "mode": "PROCURA_DEMO=1 with newly created /tmp/portfolio-demo-procura/data",
+    "binding": "127.0.0.1:19082 only; isolated source listener changed to enforce loopback",
+    "captureMethod": "Real Go application with native fictional SeedDemo database"
+  },
+  "pims": {
+    "source": "H4fizWasabie/pims, b0c7ac5 (origin/main verified)",
+    "htmlSHA256": "6a9d97fc72fd1fd8ce1f6da677c5c06afb8376c1a690401c0f1f90d9e4c617d1",
+    "captureMethod": "Unmodified native static interface, API responses supplied locally by browser route fixtures; writes denied. UTF-8 response headers match native serving. Dashboard refreshed using its own control."
+  },
+  "theoses": {
+    "release": "v1.0.116",
+    "runtime": "/opt/theoses2-releases/v1.0.116/packages/dashboard/dist/public",
+    "appJS_SHA256": "330754e287d3652d7c68557ca6c5043bf2488f878fb89665fc5727763d011f30",
+    "captureMethod": "Actual deployed dashboard static assets; local fixture sessions/files ONLY. Explicitly staged fictional conversation, not live AI execution."
+  },
+  "assets": [
+    {
+      "file": "pims-dashboard.webp",
+      "sha256": "8da8a236598840a82b688963a0ab0755ef0101e8bbdfa55c45db8fd2c4aff9a5",
+      "bytes": 57884
+    },
+    {
+      "file": "pims-orders.webp",
+      "sha256": "ad6a64e7d56987a37e7b30850780be06200ccc9b60901521b91ffc0bc3f8bffe",
+      "bytes": 52674
+    },
+    {
+      "file": "pims-request.webp",
+      "sha256": "e035307fa72726c7cb5a60723a37e0136b426c8d3aa2f7070d19ce7cb341af2f",
+      "bytes": 40664
+    },
+    {
+      "file": "procura-inventory.webp",
+      "sha256": "57f38ef07c773bb83603350fde7b6e4e7e6103e021f3d19628df83ce4b113a1a",
+      "bytes": 54086
+    },
+    {
+      "file": "procura-orders.webp",
+      "sha256": "58490f4430077c2592a8775caa06c3445d4a0101b7dff710670acc3e072c6534",
+      "bytes": 47868
+    },
+    {
+      "file": "procura-planning.webp",
+      "sha256": "c556607fc41c9cc60cbb113d68e60f28946d0aca131ec8cb9bf16135477a3c41",
+      "bytes": 63820
+    },
+    {
+      "file": "theoses-report.webp",
+      "sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190",
+      "bytes": 51774
+    },
+    {
+      "file": "theoses-review.webp",
+      "sha256": "a49cd66a9d9076fc9ed27d3b7fd06f0fbccedb419483bc05a343f94fd1563965",
+      "bytes": 51192
+    }
+  ],
+  "networkEvidence": "evidence/capture-network.json",
+  "fictionalFixtures": "capture/fixtures.json"
+}

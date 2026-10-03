@@ -1,0 +1,352 @@
+{
+  "trace": [
+    {
+      "host": "pims.demo.invalid",
+      "path": "/",
+      "method": "GET"
+    },
+    {
+      "host": "unpkg.com",
+      "path": "/react@18/umd/react.production.min.js",
+      "method": "GET"
+    },
+    {
+      "host": "unpkg.com",
+      "path": "/react-dom@18/umd/react-dom.production.min.js",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2",
+      "method": "GET"
+    },
+    {
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/stocktake.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/poppins/v24/pxiByp8kv8JHgFVrLEj6V1s.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/dashboard/summary",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/dashboard/summary",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/dashboard/summary",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/indent/master-data",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "host": "pims.demo.invalid",
+      "path": "/api/order/list",
+      "method": "GET"
+    },
+    {
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/css2",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/style.css",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/field.js",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/app.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/build/three.module.js",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/ibmplexsans/v23/zYXGKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1swZSAXcomDVmadSDNF5zAA.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/ibmplexsans/v23/zYXGKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1swZSAXcomDVmadSD6llzAA.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n5ig.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/graph-layout.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/build/three.core.js",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/api/sessions",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/api/files",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/api/sessions/demo-morning-report",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/api/telegram",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/postprocessing/EffectComposer.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/shaders/CopyShader.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/postprocessing/ShaderPass.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/postprocessing/MaskPass.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/postprocessing/Pass.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/postprocessing/RenderPass.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/postprocessing/UnrealBloomPass.js",
+      "method": "GET"
+    },
+    {
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/three@0.179.1/examples/jsm/shaders/LuminosityHighPassShader.js",
+      "method": "GET"
+    },
+    {
+      "host": "theoses.demo.invalid",
+      "path": "/api/file",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/login",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/static/style.css",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/login/demo",
+      "method": "POST"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/inventory",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/pos",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/pos",
+      "method": "POST"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/items",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/static/style.css",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/icon",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/inventory/filter-options",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/inventory",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/planning",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/static/style.css",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/icon",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/planning",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/planning/orders",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/pos",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/static/style.css",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.googleapis.com",
+      "path": "/icon",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/inventory",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/suppliers",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/uom/mappings",
+      "method": "GET"
+    },
+    {
+      "host": "fonts.gstatic.com",
+      "path": "/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf",
+      "method": "GET"
+    },
+    {
+      "host": "127.0.0.1:19082",
+      "path": "/api/pos",
+      "method": "GET"
+    }
+  ],
+  "blocked": [],
+  "errors": [],
+  "productionRequests": 0
+}

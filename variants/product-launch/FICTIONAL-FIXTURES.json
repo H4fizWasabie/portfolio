@@ -1,0 +1,136 @@
+{
+  "supply": [
+    {
+      "stockId": "DEMO-001",
+      "itemName": "Nitrile Examination Gloves",
+      "currentStock": 96,
+      "uom": "BOX"
+    },
+    {
+      "stockId": "DEMO-002",
+      "itemName": "Sterile Syringes 5ml",
+      "currentStock": 38,
+      "uom": "BOX"
+    },
+    {
+      "stockId": "DEMO-003",
+      "itemName": "Hand Sanitiser 500ml",
+      "currentStock": 24,
+      "uom": "BOTTLE"
+    }
+  ],
+  "summary": {
+    "stats": {
+      "totalItems": 3,
+      "pendingRequests": 2,
+      "pendingSpecs": 1,
+      "varianceValue": -37.4
+    },
+    "pendingIndents": [
+      {
+        "date": "03 Oct 2026",
+        "requester": "Demo Clinic",
+        "itemName": "Nitrile Examination Gloves",
+        "stockId": "DEMO-001",
+        "qty": 12,
+        "rowParams": 1
+      },
+      {
+        "date": "03 Oct 2026",
+        "requester": "Demo Pharmacy",
+        "itemName": "Sterile Syringes 5ml",
+        "stockId": "DEMO-002",
+        "qty": 8,
+        "rowParams": 2
+      }
+    ],
+    "pendingSpecs": [
+      {
+        "reqId": "REQ-DEMO-001",
+        "requester": "Demo Clinic",
+        "itemName": "Reusable Storage Bin",
+        "justification": "Fictional warehouse reorganisation",
+        "cost": 28,
+        "rowIndex": 1
+      }
+    ]
+  },
+  "orders": [
+    {
+      "id": 1,
+      "prfNo": "PRF-DEMO-001",
+      "department": "Demo Clinic",
+      "itemName": "Nitrile Examination Gloves",
+      "qty": 12,
+      "uom": "BOX",
+      "totalCost": 222,
+      "orderedAt": "2026-10-03",
+      "orderTickAt": "03 Oct 2026",
+      "paymentTickAt": "03 Oct 2026",
+      "receivedTickAt": ""
+    },
+    {
+      "id": 2,
+      "prfNo": "PRF-DEMO-002",
+      "department": "Demo Clinic",
+      "itemName": "Sterile Syringes 5ml",
+      "qty": 8,
+      "uom": "BOX",
+      "totalCost": 176,
+      "orderedAt": "2026-10-03",
+      "orderTickAt": "03 Oct 2026",
+      "paymentTickAt": "",
+      "receivedTickAt": ""
+    },
+    {
+      "id": 3,
+      "prfNo": "PRF-DEMO-003",
+      "department": "Demo Clinic",
+      "itemName": "Hand Sanitiser 500ml",
+      "qty": 6,
+      "uom": "BOTTLE",
+      "totalCost": 44.4,
+      "orderedAt": "2026-10-03",
+      "orderTickAt": "03 Oct 2026",
+      "paymentTickAt": "",
+      "receivedTickAt": ""
+    }
+  ],
+  "session": {
+    "id": "demo-morning-report",
+    "title": "Morning stock report (fictional demo)",
+    "channel": "dashboard",
+    "messageCount": 3,
+    "modified": "2026-10-03T00:00:00.000Z"
+  },
+  "history": [
+    {
+      "role": "user",
+      "segments": [
+        {
+          "type": "text",
+          "text": "Fictional demo: prepare a morning report from the sample stock list. Keep it as a draft; do not contact suppliers."
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "segments": [
+        {
+          "type": "text",
+          "text": "Sample report prepared. Gloves: 96 boxes. Syringes: 38 boxes. Sanitiser: 24 bottles.\n\nThis is a staged sample conversation, not a live execution. The draft is ready for review; no order has been placed."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "segments": [
+        {
+          "type": "text",
+          "text": "Show me the draft alongside this conversation."
+        }
+      ]
+    }
+  ],
+  "report": "# Morning stock report\n\nFICTIONAL SAMPLE DATA\n\nGloves: 96 boxes\nSyringes: 38 boxes\nSanitiser: 24 bottles\n\nReview before ordering.\nNo supplier contacted.\nNo order submitted.\n"
+}
