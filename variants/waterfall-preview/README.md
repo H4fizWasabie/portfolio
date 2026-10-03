@@ -2,7 +2,12 @@
 
 Question: does flowing-water motion plus a scroll camera make the owner-selected waterfall a useful portfolio background?
 
-Latest preview: https://image.wasabietech.com/portfolio-waterfall-preview/?v=4
+Latest preview: https://image.wasabietech.com/portfolio-waterfall-preview/?v=5
+
+## Owner-selected résumé preview
+Owner approved the edited Systems Builder/MAP résumé and requested primary preview on 2026-10-03. About now has a native Preview résumé disclosure: real, selectable, responsive text generated from ../../resume/resume-datasheet-source.html, not a browser-dependent PDF embed. The separate Download PDF link embeds the exact approved one-page PDF and works offline. Footer Résumé navigation reveals it with JavaScript; native disclosure/keyboard preview and download work without JavaScript. Scene badge is hidden only while reading, avoiding overlap; existing water/control scripts, photo, cards and motion behavior are preserved.
+
+Build now requires standard Node as well as Python, using ../../resume/preview.cjs to enforce identical printable-source/PDF copies. `node resume/qa.cjs` from the repo root checks keyboard open/close, selected content, reading type, no overflow/errors and actual downloaded PDF hashes at1440/768/390/320, JS on/off. Physical-phone browser testing is not claimed. Public review publication is not canonical deployment or approval to merge PR55/57.
 
 ## V4 controls — owner-approved compact refinement
 The201.3125×54px bottom-right bar keeps Pause water directly available. Motion opens a native disclosure with Still view and the existing simulation/fallback status.44px tap targets, safe-area-aware offsets, upward bounded panel. On the390 phone its area was0.3951 of V3 (362×76px). Keyboard Enter/Tab operate it; Escape, outside pointer or focus dismiss. The native disclosure/status remain useful with JavaScript disabled. V3 cards/main markup and the first water/camera script are byte-identical; no assets changed.
@@ -22,7 +27,7 @@ Existing safe Procura/Theoses/MAP screenshot captures and verified copy are reus
 ## Run
 `python3 variants/waterfall-preview/build.py`
 
-Open `variants/waterfall-preview/dist/index.html` in a browser. Output is one self-contained offline HTML file. The build needs only standard Python. To regenerate motion assets, install Pillow and NumPy, run `python3 variants/waterfall-preview/generate-matte.py`, then `python3 variants/waterfall-preview/generate-flow.py`, then build. The order matters: flow generation adds landing foam in matte B. Tier flow RGB is deliberately opaque; encoding velocity in transparent pixels loses channels during browser decoding. Water detail is a deterministic repeatable synthetic texture, not new scene photography.
+Open `variants/waterfall-preview/dist/index.html` in a browser. Output is one self-contained offline HTML file. The build needs only standard Python and Node. To regenerate motion assets, install Pillow and NumPy, run `python3 variants/waterfall-preview/generate-matte.py`, then `python3 variants/waterfall-preview/generate-flow.py`, then build. The order matters: flow generation adds landing foam in matte B. Tier flow RGB is deliberately opaque; encoding velocity in transparent pixels loses channels during browser decoding. Water detail is a deterministic repeatable synthetic texture, not new scene photography.
 
 On the authoring VPS, `/tmp/node_modules/playwright` and Chromium 1243 are available. Run:
 - `node variants/waterfall-preview/qa.cjs`

@@ -9,8 +9,8 @@ const runtime=JSON.parse(fs.readFileSync(path.join(root,'runtime-manifest.json')
 const results=[],external=[],errors=[];let browser,server;
 fs.mkdirSync(evidence,{recursive:true});
 const assert=(test,message)=>{if(!test)throw Error(message);};
-const routes=['index.html','projects/index.html',...expected.map(slug=>'work/'+slug+'/index.html')];
-const mime={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.webp':'image/webp','.ttf':'font/ttf','.txt':'text/plain'};
+const routes=['index.html','projects/index.html','resume/index.html',...expected.map(slug=>'work/'+slug+'/index.html')];
+const mime={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.webp':'image/webp','.ttf':'font/ttf','.txt':'text/plain','.pdf':'application/pdf'};
 function contrast(a,b){const luminance=x=>{const v=x.slice(1).match(/../g).map(n=>parseInt(n,16)/255).map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4);return .2126*v[0]+.7152*v[1]+.0722*v[2];};const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 (async()=>{
  assert(JSON.stringify(projects.map(p=>p.slug))===JSON.stringify(expected),'Approved project selection changed');
@@ -46,8 +46,15 @@ function contrast(a,b){const luminance=x=>{const v=x.slice(1).match(/../g).map(n
     await page.locator('[data-app="procura"]').focus();await page.keyboard.press('ArrowRight');assert(await page.locator('[data-app="theoses"]').getAttribute('aria-selected')==='true','Arrow-key selection failed');
     await page.keyboard.press('End');assert(await page.locator('[data-app="map"]').getAttribute('aria-selected')==='true','End key failed');
     await page.keyboard.press('Home');await page.waitForFunction(()=>document.querySelector('#showcase-panel').getAttribute('aria-busy')==='false');
+    await page.locator('#about a[href="resume/index.html"]').click();await page.waitForURL(base+'resume/index.html');
+    assert((await page.locator('.resume-paper').innerText()).includes('MAP — My Awesome App'),'Preview button opens wrong resume');
+    await page.goto(base+'index.html');await page.evaluate(()=>document.fonts.ready);
    }else if(route==='projects/index.html'){
     assert(await page.locator('.project-list .project-row').count()===8,'Project index incomplete');
+   }else if(route==='resume/index.html'){
+    assert((await page.locator('.resume-paper').innerText()).includes('MAP — My Awesome App'),'Approved resume content missing');
+    assert(await page.locator('iframe,object,embed').count()===0,'Preview depends on a PDF viewer');
+    assert(await page.locator('.resume-paper p').evaluateAll(ps=>ps.every(p=>parseFloat(getComputedStyle(p).fontSize)>=16)),'Resume reading text too small');
    }else{
     const slug=route.split('/')[1],project=projects.find(p=>p.slug===slug);
     assert((await page.locator('h1').innerText())===project.title,'Wrong project page '+route);
@@ -74,7 +81,7 @@ function contrast(a,b){const luminance=x=>{const v=x.slice(1).match(/../g).map(n
   const colors=await page.evaluate(()=>{const s=getComputedStyle(document.documentElement);return Object.fromEntries(['moss','oat','ink','muted','rust'].map(k=>[k,s.getPropertyValue('--'+k).trim()]));});
   const pairs=[['oat/moss',colors.oat,colors.moss],['ink/oat',colors.ink,colors.oat],['muted/oat',colors.muted,colors.oat],['oat/rust',colors.oat,colors.rust]].map(([name,a,b])=>({name,ratio:contrast(a,b)}));assert(pairs.every(p=>p.ratio>=4.5),'Contrast below AA');
   assert(await page.locator('.nav a').evaluateAll(links=>links.every(link=>parseFloat(getComputedStyle(link).fontSize)>=12)),'Small functional nav text');
-  results.push({width,pages:10,passed:true,contrast:pairs});console.log('PASS '+width+'px: 10 pages; eight projects; featured tabs/keyboard; galleries/full-size; background/résumé/contact; links; disclosure; no overflow');await context.close();
+  results.push({width,pages:routes.length,passed:true,contrast:pairs});console.log('PASS '+width+'px: 11 pages; eight projects; featured tabs/keyboard; galleries/full-size; background/résumé/contact; links; disclosure; no overflow');await context.close();
  }
  // Exercise no-JS fallback and both manual navigation states without live mutation.
  const noJS=await browser.newContext({javaScriptEnabled:false});const fallback=await noJS.newPage();await fallback.goto(base+'index.html');assert(await fallback.locator('noscript').isVisible(),'No-JS homepage disclosure missing');assert(await fallback.locator('[data-app]').evaluateAll(t=>t.every(x=>x.disabled)),'Inactive controls misleading');await fallback.goto(base+'work/map/index.html');assert(await fallback.locator('.gallery-frame').evaluateAll(frames=>frames.every(f=>!f.hidden)),'No-JS gallery loses images');await noJS.close();console.log('PASS no-JS: links remain usable; four MAP captures visible; selectors disabled');
@@ -83,9 +90,9 @@ function contrast(a,b){const luminance=x=>{const v=x.slice(1).match(/../g).map(n
  // Offline ZIP opens from a normal extracted folder, with relative links/assets.
  const offline=await browser.newContext({reducedMotion:'no-preference'});const filePage=await offline.newPage();filePage.on('pageerror',error=>errors.push(error.message));
  for(const route of routes){await filePage.goto(pathToFileURL(path.join(root,route)).href);await filePage.evaluate(()=>document.fonts.ready);assert(await filePage.locator('h1').count()===1,'Offline page missing '+route);if(route==='index.html'){await filePage.locator('[data-app="map"]').click();await filePage.waitForFunction(()=>document.getElementById('demo-image').naturalWidth===1360&&document.getElementById('app-heading').textContent==='MAP');}if(route==='work/map/index.html'){await filePage.locator('[data-gallery-choice="3"]').click();await filePage.waitForFunction(()=>document.querySelector('[data-gallery-frame="3"] img').naturalWidth===1152);}}
- await offline.close();console.log('PASS offline file://: all 10 pages, local font/images, featured tabs and MAP gallery');
+ await offline.close();console.log('PASS offline file://: all 11 pages, local font/images, featured tabs and MAP gallery');
  assert(errors.length===0,'Runtime JS errors: '+errors.join('; '));assert(external.length===0,'Unexpected external runtime requests: '+external.join('; '));
  fs.writeFileSync(path.join(evidence,'qa.json'),JSON.stringify({results,noJS:true,missingAssets:true,offline:true,externalRequests:external,jsErrors:errors,root},null,2));
- console.log('PASS summary: 50 responsive route checks + all 10 offline pages; zero external/production runtime requests; zero JS errors');
+ console.log('PASS summary: 55 responsive route checks + all 11 offline pages; zero external/production runtime requests; zero JS errors');
  await browser.close();await new Promise(resolve=>server.close(resolve));
 })().catch(async error=>{console.error(error);fs.writeFileSync(path.join(evidence,'qa-partial.json'),JSON.stringify({results,external,errors},null,2));await browser?.close();server?.close();process.exitCode=1;});

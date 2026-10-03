@@ -1,7 +1,7 @@
 // Portable CI regression test: execute both builders, not just inspect source.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
 const root=__dirname,dist=path.join(root,'dist'),origin='https://portfolio.wasabietech.com';
-const routes=['/', '/projects/',...require('./projects.cjs').map(p=>'/work/'+p.slug+'/')];
+const routes=['/', '/projects/','/resume/',...require('./projects.cjs').map(p=>'/work/'+p.slug+'/')];
 const rel=route=>route==='/'?'index.html':route.slice(1)+'index.html';
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 execFileSync(process.execPath,[path.join(root,'build.cjs')],{stdio:'inherit'});
@@ -27,5 +27,7 @@ assert.match(site,/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
 const robots=fs.readFileSync(path.join(dist,'robots.txt'),'utf8');assert.match(robots,/Allow: \/\n/);assert.ok(robots.includes('Sitemap: '+origin+'/sitemap.xml'));assert.doesNotMatch(robots,/Disallow: \/variant-/);
 const manifest=JSON.parse(fs.readFileSync(path.join(dist,'runtime-manifest.json'),'utf8'));
 for(const entry of manifest){assert.equal(hash(fs.readFileSync(path.join(dist,entry.file))),entry.sha256);assert.doesNotMatch(entry.file,/^(\.impeccable|evidence|FICTIONAL|projects\.cjs|render\.cjs)/);}
-assert.equal(manifest.length,44);
-console.log('PASS publication regression: both executed modes; ten indexable canonical pages; valid JSON-LD; clean links; sitemap/robots; 44 runtime hashes; review output unchanged');
+assert.equal(manifest.length,46);
+assert.deepEqual(fs.readFileSync(path.join(dist,'resume/Resume-Hafiz-Jamali.pdf')),fs.readFileSync(path.join(root,'../../resume/Resume-Hafiz-Jamali.pdf')));
+const reader=fs.readFileSync(path.join(dist,'resume/index.html'),'utf8');assert.match(reader,/MAP — My Awesome App/);assert.doesNotMatch(reader,/Procure Pilot|<iframe|<object|<embed/);assert.match(reader,/Preview résumé/);
+console.log('PASS publication regression: both executed modes; eleven indexable canonical pages; valid JSON-LD; clean links; sitemap/robots; 46 runtime hashes; responsive HTML resume and approved PDF; review output unchanged');

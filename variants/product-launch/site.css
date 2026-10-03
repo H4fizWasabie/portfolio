@@ -19,3 +19,75 @@
 .about{background:var(--moss);color:var(--oat);padding:80px 0}.about-grid{display:grid;grid-template-columns:.8fr 1.5fr;gap:55px}.about p{max-width:68ch;font-size:15px;line-height:1.8;margin:0 0 20px}.about .about-lead{font-size:22px;line-height:1.5}.about .button-case{border-color:var(--oat);color:var(--oat)}
 .back-link{display:inline-block;font-size:13px;margin-bottom:36px}.index-page,.case-page{padding-top:58px;padding-bottom:0}.index-page h1,.case-intro h1{font-size:clamp(38px,5vw,64px);line-height:1.13;letter-spacing:-.04em;font-weight:500;margin:0 0 24px;text-wrap:balance}.page-intro{font-size:17px;line-height:1.8;max-width:68ch;margin:0 0 32px}.case-summary{font-size:clamp(24px,3vw,34px);line-height:1.4;letter-spacing:-.025em;max-width:35ch;margin:0 0 20px}.technology{display:flex;flex-wrap:wrap;list-style:none;padding:0;gap:12px 24px;margin:0 0 46px;font-size:13px;color:var(--muted)}.case-evidence{margin-bottom:65px}.evidence-note{font-size:13px;color:var(--muted);max-width:70ch;margin:0 0 24px}.gallery-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}.gallery-tabs button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;min-height:44px;padding:9px 17px;font-size:13px}.gallery-tabs button[aria-pressed=true]{background:var(--ink);color:var(--oat);border-color:var(--ink)}.gallery-frame{margin:0 0 32px}.gallery-frame img{width:100%;height:auto;aspect-ratio:68/43;object-fit:contain;border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(41,51,33,.13)}.gallery-frame figcaption{font-size:13px;max-width:75ch;line-height:1.8;margin:18px 0 0}.gallery-frame figcaption a{display:inline-block;margin-left:8px}.gallery-phone .gallery-frame>a{display:block;max-width:390px;margin:auto}.gallery-phone .gallery-frame img{aspect-ratio:9/20;width:100%;max-height:none}.gallery-error{font-size:14px;padding:20px;border:1px solid var(--rust);border-radius:18px;color:var(--rust)}.case-story{max-width:75ch;margin-bottom:75px}.case-story section{margin-bottom:48px}.case-story p{font-size:16px;line-height:1.85;margin:0 0 20px}.plain-workflow{padding-left:24px;font-size:15px;line-height:1.9}.plain-workflow li{padding-left:6px;margin-bottom:8px}.case-boundary{border-top:1px solid var(--line);padding-top:35px}.workflow-outline{padding:35px 0 65px;margin-bottom:20px;border-top:1px solid var(--line)}.workflow-steps{padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin:30px 0 0;counter-reset:workflow}.workflow-steps li{border-top:1px solid var(--line);padding-top:20px;line-height:1.65;font-size:16px;counter-increment:workflow}.workflow-steps li::before{content:counter(workflow) '. ';display:block;color:var(--rust);font-size:22px;margin-bottom:10px}.content-outputs{max-width:75ch;margin-top:45px}.content-outputs article{margin-bottom:30px}.content-outputs h3{font-size:22px;line-height:1.4;font-weight:500;margin:0 0 10px}.content-outputs p{font-size:15px;color:var(--muted);margin:0}.related{padding-top:35px;border-top:1px solid var(--line)}.related .project-row h3{font-size:22px}.page-contact{padding:80px 0}.page-contact p{font-size:15px;max-width:65ch;margin:0 0 24px}.case-page .footer{margin-top:0}
 @media(max-width:767px){.preview-summary{padding:16px 13px;display:block;font-size:12px}.preview-summary p{margin-bottom:12px}.text-link{font-size:12px}.project-map .project-grid,.about-grid{grid-template-columns:1fr;gap:25px}.project-map .project-copy,.project-map .project-visual{order:initial}.all-work{padding-bottom:55px}.section-heading{display:block;margin-bottom:24px}.project-row{grid-template-columns:1fr;gap:16px;padding:24px 0}.project-row h3{font-size:24px}.project-row p{font-size:14px}.project-row-action{align-items:flex-start;flex-direction:row;justify-content:space-between;flex-wrap:wrap;gap:12px}.project-row-action span{max-width:60%;line-height:1.7}.about{padding:55px 0}.about p{font-size:14px}.about .about-lead{font-size:20px}.index-page,.case-page{padding-top:35px}.back-link{margin-bottom:28px}.page-intro{font-size:15px}.technology{font-size:12px;gap:10px 16px;margin-bottom:35px}.case-evidence{margin-bottom:45px}.case-page h2,.index-page h2{font-size:27px}.gallery-tabs{gap:6px;margin-bottom:20px}.gallery-tabs button{font-size:12px;padding:9px 13px}.gallery-frame figcaption{font-size:12px}.gallery-frame figcaption a{margin-left:0;display:block}.gallery-phone .gallery-frame>a{max-width:330px}.case-story p{font-size:15px}.case-story section{margin-bottom:35px}.workflow-steps{grid-template-columns:1fr;gap:22px}.workflow-steps li{font-size:16px}.workflow-steps li::before{display:inline;font-size:16px}.page-contact{padding:55px 0}.nav .button,.button{font-size:12px}.footer{font-size:12px}}
+
+.resume-paper *{ margin: 0; padding: 0; box-sizing: border-box; }
+.resume-paper{
+    font-family: "Inter", "DejaVu Sans", Arial, sans-serif;
+    font-size: 9.5pt; line-height: 1.42; color: #17190f; background: #ffffff;
+  }
+.resume-paper .mono{ font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace; }
+.resume-paper .page{ padding: 34px 40px 30px 40px; }
+.resume-paper a{ color: inherit; text-decoration: none; }
+.resume-paper .idtop{ border-top: 4px solid #17190f; padding-top: 12px; }
+.resume-paper .idrow{ width: 100%; }
+.resume-paper h2{ font-size: 23pt; letter-spacing: 1px; font-weight: 700; }
+.resume-paper .role{ font-size: 10.5pt; color: #4a4d3a; margin-top: 2px; }
+.resume-paper .meta{ text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
+.resume-paper .meta span{ display: block; }
+.resume-paper .certline{
+    margin-top: 10px; padding: 5px 8px; border-top: 1px solid #17190f; border-bottom: 1px solid #17190f;
+    font-size: 8pt; color: #17190f; letter-spacing: 0.5px;
+  }
+.resume-paper .certline b{ color: #5a7a22; }
+.resume-paper .sec{ margin-top: 14px; }
+.resume-paper .sechead{ border-bottom: 2px solid #17190f; padding-bottom: 3px; margin-bottom: 8px; }
+.resume-paper .secno{ font-size: 8pt; font-weight: 700; color: #5a7a22; letter-spacing: 1px; }
+.resume-paper .sectitle{ font-size: 8pt; font-weight: 700; letter-spacing: 3px; color: #17190f; }
+.resume-paper .profile{ font-size: 9.5pt; text-align: justify; }
+.resume-paper table.sys{ width: 100%; border-collapse: collapse; }
+.resume-paper td.sysname{ padding: 3px 0 1px 0; font-weight: 700; font-size: 10pt; }
+.resume-paper td.sysname .kind{ font-weight: 400; font-size: 7.5pt; color: #5a7a22; letter-spacing: 1px; }
+.resume-paper td.sysurl{ text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
+.resume-paper .tags{ font-size: 7.2pt; color: #4a4d3a; letter-spacing: 0.5px; padding-bottom: 3px; }
+.resume-paper .sysdesc{ margin: 0 0 4px 0; font-size: 9.3pt; }
+.resume-paper ul.sysul{ margin: 0 0 8px 0; padding-left: 14px; }
+.resume-paper ul.sysul li{ margin-bottom: 2px; }
+.resume-paper .metric-inline{ font-weight: 700; }
+.resume-paper .job{ margin-bottom: 9px; }
+.resume-paper table.jobrow{ width: 100%; border-collapse: collapse; }
+.resume-paper td.jt{ font-weight: 700; font-size: 9.8pt; }
+.resume-paper td.jd{ text-align: right; font-size: 7.8pt; color: #4a4d3a; vertical-align: bottom; }
+.resume-paper .jloc{ font-size: 8.2pt; color: #4a4d3a; }
+.resume-paper .jdesc{ font-size: 9.2pt; }
+.resume-paper table.skills{ width: 100%; border-collapse: collapse; }
+.resume-paper td.sk{ padding: 1.5px 0; vertical-align: top; font-size: 9.2pt; }
+.resume-paper td.sklabel{ width: 92px; font-size: 7.6pt; font-weight: 700; letter-spacing: 1px; color: #5a7a22; padding-top: 3px; }
+.resume-paper .foot{ margin-top: 14px; border-top: 1px solid #17190f; padding-top: 5px;
+          font-size: 7.2pt; color: #4a4d3a; display: block; }
+.resume-paper .foot .ref{ letter-spacing: 1px; color: #5a7a22; font-weight: 700; }
+
+/* Read mode: the approved white datasheet, with live text rather than an embed. */
+.resume-paper{background:#fff;color:#17190f;font-size:16px;line-height:1.65;max-width:980px;margin:28px auto 0;border-radius:18px;overflow-wrap:anywhere;text-align:left;color-scheme:light}
+.resume-paper .page{padding:36px;zoom:1}
+.resume-paper p,.resume-paper .profile,.resume-paper .sysdesc,.resume-paper .jdesc{max-width:75ch;font-size:16px;line-height:1.65;margin:0;text-align:left}
+.resume-paper h2{font-size:clamp(21px,3vw,31px);line-height:1.25;letter-spacing:.02em;text-wrap:initial}
+.resume-paper h3{font-size:14px;font-weight:700;line-height:1.5;margin:0 0 14px;letter-spacing:0}
+.resume-paper .sec{margin-top:30px}
+.resume-paper .secno,.resume-paper .sectitle{font-size:13px;letter-spacing:.08em}
+.resume-paper table,.resume-paper tbody,.resume-paper tr,.resume-paper td{display:block;width:100%;max-width:100%}
+.resume-paper .meta,.resume-paper td.sysurl,.resume-paper td.jd{text-align:left;font-size:13px;line-height:1.6;margin-top:6px}
+.resume-paper .meta{margin-top:14px}.resume-paper .meta span{display:inline-block;margin-right:16px}
+.resume-paper .role{font-size:14px;line-height:1.6;margin-top:8px}
+.resume-paper .certline{font-size:12px;line-height:1.7;margin-top:18px;padding:12px 0;letter-spacing:0}
+.resume-paper .certline b,.resume-paper .secno,.resume-paper td.sysname .kind,.resume-paper td.sklabel{color:#4c6720}
+.resume-paper td.sysname,.resume-paper td.jt{font-size:16px;line-height:1.5;padding-top:8px}
+.resume-paper td.sysname .kind{display:block;font-size:12px;line-height:1.6;letter-spacing:.04em;margin-top:3px}
+.resume-paper .tags,.resume-paper .jloc{font-size:13px;line-height:1.6;letter-spacing:0}
+.resume-paper .tags{padding:7px 0}.resume-paper .sysdesc{margin-bottom:12px}
+.resume-paper ul.sysul{padding-left:20px;margin:0 0 24px}.resume-paper ul.sysul li{margin-bottom:8px}
+.resume-paper .job{margin-bottom:24px}.resume-paper .jdesc{margin-top:9px}
+.resume-paper td.sklabel{font-size:12px;letter-spacing:.04em;padding:10px 0 4px}.resume-paper td.sk{font-size:16px}
+.resume-paper::selection,.resume-paper ::selection{background:#e8ddc5;color:#172016}
+.resume-main{padding-top:48px;padding-bottom:64px}.resume-main>h1{font-size:clamp(32px,5vw,56px);margin:0 0 18px}
+.resume-intro{max-width:65ch;line-height:1.6}.resume-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:24px}
+@media(max-width:640px){.resume-paper .page{padding:22px 18px}.resume-paper .meta span{display:block;margin-right:0}.resume-paper .sectitle{letter-spacing:.04em}.resume-main{padding-top:32px}}

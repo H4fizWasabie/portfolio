@@ -3,7 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/home/theoses/.resume-gen/node_modules/playwright-core');
 const base=(process.env.BASE_URL||'http://127.0.0.1:19124').replace(/\/$/,'');
 const origin='https://portfolio.wasabietech.com',root=process.env.BUILD_ROOT||path.join(__dirname,'dist');
-const projects=require('./projects.cjs'),routes=['/', '/projects/',...projects.map(p=>'/work/'+p.slug+'/')];
+const projects=require('./projects.cjs'),routes=['/', '/projects/','/resume/',...projects.map(p=>'/work/'+p.slug+'/')];
 let browser;
 (async()=>{
  for(const route of routes){
@@ -14,7 +14,7 @@ let browser;
   const ld=JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);assert.equal(ld['@graph'][2].url,origin+route);
   const alias=await fetch(base+route+'index.html',{redirect:'manual'});assert.equal(alias.status,308);assert.equal(new URL(alias.headers.get('location'),base).pathname,route);
  }
- console.log('PASS public crawl: ten 200/indexable canonical pages; JSON-LD; all index.html aliases redirect');
+ console.log('PASS public crawl: eleven 200/indexable canonical pages; JSON-LD; all index.html aliases redirect');
  for(const [alias,expected] of [['/variant-product-launch','/'],['/variant-product-launch/','/'],['/variant-product-launch/work/map/index.html','/work/map/index.html'],['/work/map','/work/map/']]){
   const response=await fetch(base+alias,{redirect:'manual'});assert.equal(response.status,308,alias);assert.equal(new URL(response.headers.get('location'),base).pathname,expected,alias);
  }
@@ -26,11 +26,11 @@ let browser;
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'runtime-manifest.json'),'utf8'));
  for(const entry of manifest){const response=await fetch(base+'/'+entry.file);assert.equal(response.status,200,entry.file);assert.equal(crypto.createHash('sha256').update(Buffer.from(await response.arrayBuffer())).digest('hex'),entry.sha256,entry.file);}
  console.log('PASS live assets: all '+manifest.length+' served files match the production manifest');
- const pdf=await fetch(base+'/resume/Resume-Hafiz-Jamali.pdf');assert.equal(pdf.status,200);assert.match(pdf.headers.get('content-type')||'',/application\/pdf/);
- const resumeRedirect=await fetch(base+'/resume',{redirect:'manual'});assert.equal(resumeRedirect.status,302);assert.equal(new URL(resumeRedirect.headers.get('location'),base).pathname,'/resume/Resume-Hafiz-Jamali.pdf');
+ const pdf=await fetch(base+'/resume/Resume-Hafiz-Jamali.pdf');assert.equal(pdf.status,200);assert.match(pdf.headers.get('content-type')||'',/application\/pdf/);assert.deepEqual(Buffer.from(await pdf.arrayBuffer()),fs.readFileSync(path.join(__dirname,'../../resume/Resume-Hafiz-Jamali.pdf')));
+ const resumeRedirect=await fetch(base+'/resume',{redirect:'manual'});assert.equal(resumeRedirect.status,308);assert.equal(new URL(resumeRedirect.headers.get('location'),base).pathname,'/resume/');
  const movie=fs.readdirSync('/var/www/portfolio/apps/web/dist').filter(name=>name.endsWith('.mp4')).sort().at(-1);
  if(movie){const response=await fetch(base+'/'+movie,{method:'HEAD'});assert.equal(response.status,200);assert.match(response.headers.get('content-type')||'',/video\/mp4/);}
- console.log('PASS legacy assets: existing résumé PDF/redirect and published video remain accessible');
+ console.log('PASS legacy assets: approved résumé PDF, HTML preview/redirect and published video accessible');
  browser=await chromium.launch({executablePath:process.env.CHROME||'/home/theoses/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
  for(const width of [1440,390]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'});const errors=[];
@@ -44,13 +44,14 @@ let browser;
     await page.locator('[data-app="map"]').click();await page.waitForFunction(()=>document.getElementById('demo-image').naturalWidth===1360&&document.getElementById('app-heading').textContent==='MAP');
     await page.locator('#preview-project-link').click();await page.waitForURL(base+'/work/map/');assert.equal(await page.locator('h1').innerText(),'MAP');
    }
+   if(route==='/resume/'){assert.match(await page.locator('.resume-paper').innerText(),/MAP — My Awesome App/);assert.equal(await page.locator('iframe,object,embed').count(),0);}
    if(route==='/work/map/'){
     await page.locator('[data-gallery-choice="3"]').click();await page.waitForFunction(()=>document.querySelector('[data-gallery-frame="3"] img').naturalWidth===1152&&!document.querySelector('[data-gallery-frame="3"]').hidden);
     const png=process.env.PUBLIC_EVIDENCE;
     if(png){fs.mkdirSync(png,{recursive:true});await page.screenshot({path:path.join(png,'live-map-'+width+'.png'),fullPage:true});}
    }
   }
-  assert.deepEqual(errors,[]);await context.close();console.log('PASS actual browser '+width+'px: ten public routes; canonical navigation; MAP featured link/gallery; no preview banner, overflow or JS errors');
+  assert.deepEqual(errors,[]);await context.close();console.log('PASS actual browser '+width+'px: eleven public routes; canonical navigation; MAP featured link/gallery; no preview banner, overflow or JS errors');
  }
  await browser.close();console.log('PASS public verification complete: canonical portfolio reachable and crawlable; indexing/ranking is controlled by search engines');
 })().catch(async error=>{console.error(error);await browser?.close();process.exitCode=1;});

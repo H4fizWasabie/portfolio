@@ -21,7 +21,7 @@ No deployment is performed by either build or tests. Hafiz explicitly authorised
 - Detailed screenshot galleries live on project pages, not the homepage.
 - These pages are static case studies and screenshot galleries, not interactive application installations.
 
-Legacy source files remain untouched. On approved production promotion, their public `/work/<slug>` URLs lead to the matching new canonical case studies; legacy assets, résumé and API remain available. Old Product Launch variant URLs redirect to the main site. `projects.cjs` is the verified content source; `render.cjs` generates all ten pages in separate review or publication modes.
+Legacy app and case-study sources remain untouched. The owner-selected Systems Builder résumé replaces the Marketing Executive template; printable source copies are synchronized. On approved production promotion, their public `/work/<slug>` URLs lead to the matching new canonical case studies; legacy assets, résumé and API remain available. Old Product Launch variant URLs redirect to the main site. `projects.cjs` is the verified content source; `render.cjs` generates all eleven pages in separate review or publication modes.
 
 ## Evidence and truthful visuals
 
@@ -40,9 +40,9 @@ node build.cjs
 node qa.cjs
 ```
 
-`build.cjs` writes static pages, combines the unchanged incumbent `base.css` with scoped `extension.css`, and writes `runtime-manifest.json`. Each output manifest is the **only runtime copy allowlist**: ten pages, CSS, JavaScript, local font/licence, thirteen WebP assets and their origin sidecars. Publication adds a favicon, robots.txt, a ten-URL sitemap.xml and llms.txt, canonical/JSON-LD/social metadata, and the existing Google Search Console verification tag from `apps/web/index.html`. Verification was absent from the old public static homepage despite remaining in the React source; this publishing mode restores it and regression-tests it. Never copy source scripts, fixture files, evidence, provenance records, PRODUCT/DESIGN documents or `.impeccable` development contracts into a public preview directory.
+`build.cjs` writes static pages, combines the unchanged incumbent `base.css` with scoped `extension.css`, and writes `runtime-manifest.json`. Each output manifest is the **only runtime copy allowlist**: eleven pages, the approved résumé PDF, CSS, JavaScript, local font/licence, thirteen WebP assets and their origin sidecars. Publication adds a favicon, robots.txt, an eleven-URL sitemap.xml and llms.txt, canonical/JSON-LD/social metadata, and the existing Google Search Console verification tag from `apps/web/index.html`. Verification was absent from the old public static homepage despite remaining in the React source; this publishing mode restores it and regression-tests it. Never copy source scripts, fixture files, evidence, provenance records, PRODUCT/DESIGN documents or `.impeccable` development contracts into a public preview directory.
 
-`qa.cjs` serves the preview on a temporary loopback port and closes it on completion. It exercises all ten pages at 1440/1024/768/390/320 pixels, featured keyboard controls, every gallery and full-size image, local links, disclosure, résumé/contact presence, no-JS fallbacks, request-induced missing assets, colour contrast and normal extracted-folder `file://` review mode. No production app APIs or account connections are made. Failures are simulated by intercepting requests, not editing live/source state.
+`qa.cjs` serves the preview on a temporary loopback port and closes it on completion. It exercises all eleven pages at 1440/1024/768/390/320 pixels, featured keyboard controls, every gallery and full-size image, local links, disclosure, résumé/contact presence, no-JS fallbacks, request-induced missing assets, colour contrast and normal extracted-folder `file://` review mode. No production app APIs or account connections are made. Failures are simulated by intercepting requests, not editing live/source state.
 
 For packaged-folder validation:
 
@@ -56,7 +56,7 @@ Browser tools default to the existing Playwright-core/Chromium installation; ove
 
 - Interactive application demos are deferred by the approved first-pass scope.
 - New screenshot captures for DD, Yen, Hill’s or 89lab require separate safe-data preparation; no production screenshot is substituted.
-- Résumé links point to the existing public PDF; the PDF opens online, and its live files were not changed.
+- Preview résumé is the primary entry, opening a responsive HTML reader at `/resume/`; PDF download is secondary and uses the owner-approved one-page Systems Builder/MAP version. Both review and production manifests include that exact PDF. Source/PDF assets are prepared on the review branch; canonical deployment and the scoped Caddy resume-route migration require owner approval (see ../../resume/DEPLOYMENT.md).
 - Original Product Launch `DESIGN.md` remains the visual authority; its earlier three-project/capture inventory is historical. Current selection and evidence are recorded here and in PRODUCT.md, without changing approved tokens or introducing a new identity.
 
 Font: self-hosted Epilogue, SIL OFL (`OFL-Epilogue.txt`). No analytics, remote fonts, API client, credentials or live telemetry in the preview.
