@@ -1,7 +1,11 @@
-// Build a genuinely self-contained preview; no bundle or production checkout.
-const fs=require('node:fs'),path=require('node:path');
-const root=__dirname,site=fs.existsSync(path.join(root,'site','index.html'))?path.join(root,'site'):root;
-let html=fs.readFileSync(path.join(site,'index.html'),'utf8');
-for(const name of fs.readdirSync(site).filter(name=>/\.(ttf|webp)$/.test(name))){const mime=name.endsWith('.ttf')?'font/ttf':'image/webp';const uri='data:'+mime+';base64,'+fs.readFileSync(path.join(site,name)).toString('base64');html=html.replaceAll(name,uri);}
-fs.writeFileSync(path.join(root,'Hafiz-Product-Launch-preview.html'),html);
-console.log('Built self-contained preview:',Buffer.byteLength(html),'bytes. No production files touched.');
+// Build static review pages and a strict runtime allowlist. Never deploys.
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const root = __dirname;
+fs.writeFileSync(path.join(root,'site.css'),fs.readFileSync(path.join(root,'base.css'),'utf8')+'\n'+fs.readFileSync(path.join(root,'extension.css'),'utf8'));
+require('./render.cjs');
+const runtime = ['index.html','projects/index.html',...require('./projects.cjs').map(p=>'work/'+p.slug+'/index.html'),'site.css','gallery.js','epilogue.ttf','OFL-Epilogue.txt',...fs.readdirSync(root).filter(name=>/\.webp(?:\.json)?$/.test(name)).sort()];
+const manifest = runtime.map(file=>({file,sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(root,file))).digest('hex')}));
+fs.writeFileSync(path.join(root,'runtime-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+console.log(`PASS build: ${manifest.length} allowlisted runtime files; source, fixtures and design contracts excluded`);

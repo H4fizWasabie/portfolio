@@ -1,0 +1,162 @@
+[
+  {
+    "file": "index.html",
+    "sha256": "83890eb012ff577e405aa7422ecb1a8c23ab2b14fed479c9ba2bb476b5a07e25"
+  },
+  {
+    "file": "projects/index.html",
+    "sha256": "5c11e7ec848ad5e0aeb8330f3e185913667941d0725791be14e547bf2c54faf6"
+  },
+  {
+    "file": "work/procura/index.html",
+    "sha256": "4aa1c029839bc09ffa845f68528947c11554da7cec60d2824e5e7878258920ac"
+  },
+  {
+    "file": "work/pims/index.html",
+    "sha256": "3c67e686d1bc449fb3f477a3c067585dd1da0e32e46976f98a57ab20f3fae129"
+  },
+  {
+    "file": "work/dd-drugs-register/index.html",
+    "sha256": "edd025a4c1f4dfd95b0e31a5c823c4c701a365f5541ddfcb68e6541290b4bae2"
+  },
+  {
+    "file": "work/theoses/index.html",
+    "sha256": "f5968aaaf0c0f2b3e59bda63fd581afa15edb0b1316f1aab4019451c7843ecc0"
+  },
+  {
+    "file": "work/yen/index.html",
+    "sha256": "e4f49c5bb1f0f1d5c8dfaefec0f2e872a4c90307200de4ddbc2bf2290d94dcfe"
+  },
+  {
+    "file": "work/map/index.html",
+    "sha256": "64c1d232870bef5e80e739f0cceb23d4eaa758152611591e175093d4eb7535da"
+  },
+  {
+    "file": "work/hills-ai-content-lab/index.html",
+    "sha256": "a10547829b2ce94c8517ee49abf07d9d077991a108c8b5c0a4c4a8054ea7e5c5"
+  },
+  {
+    "file": "work/89lab/index.html",
+    "sha256": "14b708a4a5947c679f984fa1a7195c55fdef1d6da532bb2263351113731ed134"
+  },
+  {
+    "file": "site.css",
+    "sha256": "4a1642cd8c334567b28b7b8d4f5288b8093c77e532800f2417a66995f597aff8"
+  },
+  {
+    "file": "gallery.js",
+    "sha256": "d6ecaeb5656654d69baf157dea761c35f6c5259d629a3e9b0bc704fed7869ef3"
+  },
+  {
+    "file": "epilogue.ttf",
+    "sha256": "1a882268467037d359116b89e9296e8ea5006b72e6bdbacd5016afc9137df513"
+  },
+  {
+    "file": "OFL-Epilogue.txt",
+    "sha256": "95ebd6a2e4035b8398c83928fb85297b48441f27f405398c29b59aae899fc747"
+  },
+  {
+    "file": "map-calendar-demo.webp",
+    "sha256": "6a6f0a76451066746d5b8068ee9cadd374c51c5a4e5d736d79e7b8995a017282"
+  },
+  {
+    "file": "map-calendar-demo.webp.json",
+    "sha256": "cc05589537fdd096380a563c61120c42a7929529ddd2fb56d392c076cdcf166b"
+  },
+  {
+    "file": "map-home-demo.webp",
+    "sha256": "d28fa98d9fe1337b32875d0aeb0362c7c491e72b4792e21a500913d6846969d7"
+  },
+  {
+    "file": "map-home-demo.webp.json",
+    "sha256": "4d91f03e64a7a42e59b436b74b435670239cbc3cbf81af1fa87a8adcf744d2ec"
+  },
+  {
+    "file": "map-overview.webp",
+    "sha256": "04693d5b7762302f89845774d36d0e835287d707439af4be4350047de94c1249"
+  },
+  {
+    "file": "map-overview.webp.json",
+    "sha256": "f77dbdbc8c37a653c50307e4ea34b64f5c624cd063c0a4bc6d8f9bfaca0da7c6"
+  },
+  {
+    "file": "map-tasks-demo.webp",
+    "sha256": "11adad190908fd17f7b30e2dd41063a421c403a87a74e12a0f1f064a940a4c2e"
+  },
+  {
+    "file": "map-tasks-demo.webp.json",
+    "sha256": "6118e4b32a07db3e29c139e3acda22a9d9bc14dab39cb3e8fe3786171b865dde"
+  },
+  {
+    "file": "map-tools-demo.webp",
+    "sha256": "db83479a28c06222f8be78c6e42f434251146ebd8d9a152ce4365aaa8366348e"
+  },
+  {
+    "file": "map-tools-demo.webp.json",
+    "sha256": "3889d1e2af77f7c7f06a4ebbb554b4ad2c5070d1310f125191fba7462f33c58f"
+  },
+  {
+    "file": "pims-dashboard.webp",
+    "sha256": "8da8a236598840a82b688963a0ab0755ef0101e8bbdfa55c45db8fd2c4aff9a5"
+  },
+  {
+    "file": "pims-dashboard.webp.json",
+    "sha256": "54332e3f3684ff5c1b94ac94c93730af6c3b01d9898b1ce4c8ec877003bd7c1c"
+  },
+  {
+    "file": "pims-orders.webp",
+    "sha256": "ad6a64e7d56987a37e7b30850780be06200ccc9b60901521b91ffc0bc3f8bffe"
+  },
+  {
+    "file": "pims-orders.webp.json",
+    "sha256": "665c3d4313e9034cd8ac72c27ce280a426638535bca4812e3806af1079996999"
+  },
+  {
+    "file": "pims-request.webp",
+    "sha256": "e035307fa72726c7cb5a60723a37e0136b426c8d3aa2f7070d19ce7cb341af2f"
+  },
+  {
+    "file": "pims-request.webp.json",
+    "sha256": "6193537b111bc6355c80c5fdc73ca72093e8f39543e305e77baadfcd3d5f9715"
+  },
+  {
+    "file": "procura-inventory.webp",
+    "sha256": "57f38ef07c773bb83603350fde7b6e4e7e6103e021f3d19628df83ce4b113a1a"
+  },
+  {
+    "file": "procura-inventory.webp.json",
+    "sha256": "7e98a6db46d8a0308d3924d908dad1e3dda27a2e49962212cd014d8926c9cde3"
+  },
+  {
+    "file": "procura-orders.webp",
+    "sha256": "58490f4430077c2592a8775caa06c3445d4a0101b7dff710670acc3e072c6534"
+  },
+  {
+    "file": "procura-orders.webp.json",
+    "sha256": "5316a5e2775c3e46d0bdb908a57e781e34f0338d6512c5bfe787fa8917aff2ae"
+  },
+  {
+    "file": "procura-planning.webp",
+    "sha256": "c556607fc41c9cc60cbb113d68e60f28946d0aca131ec8cb9bf16135477a3c41"
+  },
+  {
+    "file": "procura-planning.webp.json",
+    "sha256": "d4f56f740ae8a1ed0c9364fcc0c2246763644fdbb7ed51e20289cd4ee5827639"
+  },
+  {
+    "file": "theoses-report.webp",
+    "sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190"
+  },
+  {
+    "file": "theoses-report.webp.json",
+    "sha256": "02413fadf7aea65390d22a84f35dcce320f4051fa2778812c2db83182a031734"
+  },
+  {
+    "file": "theoses-review.webp",
+    "sha256": "a49cd66a9d9076fc9ed27d3b7fd06f0fbccedb419483bc05a343f94fd1563965"
+  },
+  {
+    "file": "theoses-review.webp.json",
+    "sha256": "b94a5bed63640c66d0359007a29c32102951a28db72fa0236a0aae15f67fb9a5"
+  }
+]

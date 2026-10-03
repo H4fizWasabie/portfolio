@@ -1,0 +1,125 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "pages": 10,
+      "passed": true,
+      "contrast": [
+        {
+          "name": "oat/moss",
+          "ratio": 4.893508159084815
+        },
+        {
+          "name": "ink/oat",
+          "ratio": 9.800119358497813
+        },
+        {
+          "name": "muted/oat",
+          "ratio": 5.762544449074407
+        },
+        {
+          "name": "oat/rust",
+          "ratio": 4.916522631530387
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "pages": 10,
+      "passed": true,
+      "contrast": [
+        {
+          "name": "oat/moss",
+          "ratio": 4.893508159084815
+        },
+        {
+          "name": "ink/oat",
+          "ratio": 9.800119358497813
+        },
+        {
+          "name": "muted/oat",
+          "ratio": 5.762544449074407
+        },
+        {
+          "name": "oat/rust",
+          "ratio": 4.916522631530387
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "pages": 10,
+      "passed": true,
+      "contrast": [
+        {
+          "name": "oat/moss",
+          "ratio": 4.893508159084815
+        },
+        {
+          "name": "ink/oat",
+          "ratio": 9.800119358497813
+        },
+        {
+          "name": "muted/oat",
+          "ratio": 5.762544449074407
+        },
+        {
+          "name": "oat/rust",
+          "ratio": 4.916522631530387
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "pages": 10,
+      "passed": true,
+      "contrast": [
+        {
+          "name": "oat/moss",
+          "ratio": 4.893508159084815
+        },
+        {
+          "name": "ink/oat",
+          "ratio": 9.800119358497813
+        },
+        {
+          "name": "muted/oat",
+          "ratio": 5.762544449074407
+        },
+        {
+          "name": "oat/rust",
+          "ratio": 4.916522631530387
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "pages": 10,
+      "passed": true,
+      "contrast": [
+        {
+          "name": "oat/moss",
+          "ratio": 4.893508159084815
+        },
+        {
+          "name": "ink/oat",
+          "ratio": 9.800119358497813
+        },
+        {
+          "name": "muted/oat",
+          "ratio": 5.762544449074407
+        },
+        {
+          "name": "oat/rust",
+          "ratio": 4.916522631530387
+        }
+      ]
+    }
+  ],
+  "noJS": true,
+  "missingAssets": true,
+  "offline": true,
+  "externalRequests": [],
+  "jsErrors": [],
+  "root": "/tmp/portfolio-eight-projects/variants/product-launch"
+}
