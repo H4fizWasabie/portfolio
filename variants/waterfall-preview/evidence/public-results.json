@@ -1,0 +1,107 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "dpr": 2,
+    "publicHTML": true,
+    "pauseScrollStillPassed": true,
+    "motionControls": "compact-v4",
+    "cardTreatment": "moss-glass-v3",
+    "cardBackground": "rgba(35, 46, 30, 0.78)",
+    "cardBlur": "blur(12px)",
+    "cardOpacity": "1",
+    "revision": "directional-water-v2",
+    "source": [
+      1920,
+      1280
+    ],
+    "canvas": [
+      2880,
+      1800
+    ],
+    "native": [
+      2880,
+      1800
+    ],
+    "zoom": 1.18,
+    "nativePhotoPlaced": true,
+    "photoTop": "0px",
+    "css": {
+      "#pause": "12px",
+      "#still": "12px",
+      "#motion-toggle": "12px",
+      "#motion-status": "12px",
+      ".disclosure": "12px"
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "dpr": 3,
+    "publicHTML": true,
+    "pauseScrollStillPassed": true,
+    "motionControls": "compact-v4",
+    "cardTreatment": "moss-glass-v3",
+    "cardBackground": "rgba(35, 46, 30, 0.78)",
+    "cardBlur": "blur(12px)",
+    "cardOpacity": "1",
+    "revision": "directional-water-v2",
+    "source": [
+      1920,
+      1280
+    ],
+    "canvas": [
+      1170,
+      2532
+    ],
+    "native": [
+      1170,
+      2532
+    ],
+    "zoom": 1.0738,
+    "nativePhotoPlaced": true,
+    "photoTop": "0px",
+    "css": {
+      "#pause": "12px",
+      "#still": "12px",
+      "#motion-toggle": "12px",
+      "#motion-status": "12px",
+      ".disclosure": "12px"
+    }
+  },
+  {
+    "width": 320,
+    "height": 740,
+    "dpr": 2,
+    "publicHTML": true,
+    "pauseScrollStillPassed": true,
+    "motionControls": "compact-v4",
+    "cardTreatment": "moss-glass-v3",
+    "cardBackground": "rgba(35, 46, 30, 0.78)",
+    "cardBlur": "blur(12px)",
+    "cardOpacity": "1",
+    "revision": "directional-water-v2",
+    "source": [
+      1920,
+      1280
+    ],
+    "canvas": [
+      640,
+      1480
+    ],
+    "native": [
+      640,
+      1480
+    ],
+    "zoom": 1.0738,
+    "nativePhotoPlaced": true,
+    "photoTop": "0px",
+    "css": {
+      "#pause": "12px",
+      "#still": "12px",
+      "#motion-toggle": "12px",
+      "#motion-status": "12px",
+      ".disclosure": "12px"
+    }
+  }
+]

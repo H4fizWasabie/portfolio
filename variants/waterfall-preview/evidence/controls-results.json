@@ -1,0 +1,94 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "dpr": 2,
+    "before": {
+      "x": 499.4765625,
+      "y": 816,
+      "width": 441.046875,
+      "height": 66
+    },
+    "after": {
+      "x": 1224.6875,
+      "y": 832,
+      "width": 201.3125,
+      "height": 54
+    },
+    "areaFraction": 0.37345288360274015,
+    "minimumTouchSize": 44,
+    "whiteBackdropTextContrast": 11.464573774799963,
+    "keyboardStill": true,
+    "escapeOutsideFocusDismissal": true,
+    "noErrors": true
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "dpr": 3,
+    "before": {
+      "x": 14,
+      "y": 756,
+      "width": 362,
+      "height": 76
+    },
+    "after": {
+      "x": 174.6875,
+      "y": 776,
+      "width": 201.3125,
+      "height": 54
+    },
+    "areaFraction": 0.3951321241640012,
+    "minimumTouchSize": 44,
+    "whiteBackdropTextContrast": 11.464573774799963,
+    "keyboardStill": true,
+    "escapeOutsideFocusDismissal": true,
+    "noErrors": true
+  },
+  {
+    "width": 320,
+    "height": 740,
+    "dpr": 2,
+    "before": {
+      "x": 14,
+      "y": 616,
+      "width": 292,
+      "height": 112
+    },
+    "after": {
+      "x": 104.6875,
+      "y": 672,
+      "width": 201.3125,
+      "height": 54
+    },
+    "areaFraction": 0.3324019997553816,
+    "minimumTouchSize": 44,
+    "whiteBackdropTextContrast": 11.464573774799963,
+    "keyboardStill": true,
+    "escapeOutsideFocusDismissal": true,
+    "noErrors": true
+  },
+  {
+    "width": 667,
+    "height": 375,
+    "dpr": 2,
+    "before": {
+      "x": 14,
+      "y": 299,
+      "width": 639,
+      "height": 64
+    },
+    "after": {
+      "x": 451.6875,
+      "y": 307,
+      "width": 201.3125,
+      "height": 54
+    },
+    "areaFraction": 0.2658175616197183,
+    "minimumTouchSize": 44,
+    "whiteBackdropTextContrast": 11.464573774799963,
+    "keyboardStill": true,
+    "escapeOutsideFocusDismissal": true,
+    "noErrors": true
+  }
+]

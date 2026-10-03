@@ -1,0 +1,49 @@
+# Living waterfall — throwaway preview
+
+Question: does flowing-water motion plus a scroll camera make the owner-selected waterfall a useful portfolio background?
+
+Latest preview: https://image.wasabietech.com/portfolio-waterfall-preview/?v=5
+
+## Owner-selected résumé preview
+Owner approved the edited Systems Builder/MAP résumé and requested primary preview on 2026-10-03. About now has a native Preview résumé disclosure: real, selectable, responsive text generated from ../../resume/resume-datasheet-source.html, not a browser-dependent PDF embed. The separate Download PDF link embeds the exact approved one-page PDF and works offline. Footer Résumé navigation reveals it with JavaScript; native disclosure/keyboard preview and download work without JavaScript. Scene badge is hidden only while reading, avoiding overlap; existing water/control scripts, photo, cards and motion behavior are preserved.
+
+Build now requires standard Node as well as Python, using ../../resume/preview.cjs to enforce identical printable-source/PDF copies. `node resume/qa.cjs` from the repo root checks keyboard open/close, selected content, reading type, no overflow/errors and actual downloaded PDF hashes at1440/768/390/320, JS on/off. Physical-phone browser testing is not claimed. Public review publication is not canonical deployment or approval to merge PR55/57.
+
+## V4 controls — owner-approved compact refinement
+The201.3125×54px bottom-right bar keeps Pause water directly available. Motion opens a native disclosure with Still view and the existing simulation/fallback status.44px tap targets, safe-area-aware offsets, upward bounded panel. On the390 phone its area was0.3951 of V3 (362×76px). Keyboard Enter/Tab operate it; Escape, outside pointer or focus dismiss. The native disclosure/status remain useful with JavaScript disabled. V3 cards/main markup and the first water/camera script are byte-identical; no assets changed.
+
+Controls checked at1440×900DPR2,390×844DPR3,320×740DPR2,667×375DPR2. Actual Chromium AX confirmed DisclosureTriangle/expanded/name semantics; an initial QA assertion incorrectly expected a button role and was corrected, not a UI defect. A broad run timed out while QA contained an unbounded RAF wait; the frame wait is now bounded/traced and a fresh full regression passed. The exact timeout trigger was not reproduced. See evidence/controls-results.json and controls-finish.md. One mechanical detector pass reported only advisories: approved incumbent type/color values and border/offset-shadow pairing for a temporary popup. No redesign/drift repair.
+
+## V3 cards — owner-approved refinement
+Reading cards use78% moss tint with the existing12px frost. Only their background is translucent; text/screenshots stay opacity1, and both primary and outlined secondary buttons have solid readable surfaces. The card borders, rounding, spacing, copy and V2 water/camera are unchanged. Supported reduced-transparency or increased-contrast preferences switch to94% moss/no blur. Browsers without backdrop-filter receive that same conservative base style.
+
+Actual card checks: all six cards at1440/390/320, exact V2 bounding boxes, nominal body contrast5.1658:1 even over white, opaque image/text/button layers, and solid hover buttons. Actual Chromium CDP preference emulation confirmed both94%/no-blur branches. An unsupported-blur engine could not be forced: that branch is implemented but not certified. Physical-phone smoothness remains for the owner to assess; blur radius did not increase.
+
+## Explicit limits
+This is **procedural image motion**, not AI-generated video. No configured image-to-video provider was found. V2 replaces sinusoidal wobble with continuous tier-directed advection, variable-speed strands and restrained landing foam confined to the image-derived water matte. The motion is illustrative, not physically simulated fluid flow. The browser now renders the static photograph separately from a transparent water canvas; reduced zoom and native-density output remove the initial rendering bottleneck. The original 1920×1280 photograph remains unchanged. This does not recover missing photographic detail or claim a regenerated 4K master. Normal scrolling moves the crop through the upper cascades, rock ledges, lower falls and pool. This route does not replace the canonical portfolio.
+
+Existing safe Procura/Theoses/MAP screenshot captures and verified copy are reused. Detailed case-study links point at the existing canonical pages. No production API, private records, analytics or credentials are used. Screenshot origin details: ../product-launch/CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json; source assets and matte: RASTER-PROVENANCE.json.
+
+## Run
+`python3 variants/waterfall-preview/build.py`
+
+Open `variants/waterfall-preview/dist/index.html` in a browser. Output is one self-contained offline HTML file. The build needs only standard Python and Node. To regenerate motion assets, install Pillow and NumPy, run `python3 variants/waterfall-preview/generate-matte.py`, then `python3 variants/waterfall-preview/generate-flow.py`, then build. The order matters: flow generation adds landing foam in matte B. Tier flow RGB is deliberately opaque; encoding velocity in transparent pixels loses channels during browser decoding. Water detail is a deterministic repeatable synthetic texture, not new scene photography.
+
+On the authoring VPS, `/tmp/node_modules/playwright` and Chromium 1243 are available. Run:
+- `node variants/waterfall-preview/qa.cjs`
+- `node variants/waterfall-preview/controls-qa.cjs` (V3 baseline at `/tmp/waterfall-v3-delivery.html`, overridable via `WATERFALL_V3_BASELINE`)
+- `node variants/waterfall-preview/card-qa.cjs` (compares local V2 baseline at `/tmp/waterfall-v2-delivery.html`)
+- `node variants/waterfall-preview/record.cjs`
+- `node variants/waterfall-preview/verify-public.cjs` (after preview publication)
+
+Those evidence helpers name the VPS browser/package paths; adjust them on another machine. The recording is a finite actual-browser scroll demonstration, not a generated water video.
+
+## Verified
+The exact latest V4-control/V3-card/V2-water delivery HTML ran in Chromium at 1440×900 DPR1 and DPR2, 390×844 DPR3 and 320×740 DPR2. The retina desktop water canvas is 2880×1800; phone canvas 1170×2532. Native photo placement and reduced source cropping passed. The canvas budget is DPR3, 8M pixels and the GPU limit; static photograph rendering is independent. Load, zero horizontal overflow, no runtime network requests, normal scroll, keyboard anchor navigation, pause/resume, still view and eight project links passed. Reduced-motion, no-JavaScript and unavailable-WebGL fallbacks retain the actual image and content. Browser-decoded field data showed all 50,665 sampled falling-water pixels pointing downward, with unequal speeds and 6,511 landing-foam pixels. Actual GPU readback showed 4,100 changing water samples and zero changing terrain samples. These checks demonstrate rendering/direction, not photoreal naturalness. Public HTTPS loaded the same bytes and ran the camera at all three widths; computed control/disclosure sizes were 12px.
+
+Independent read-only finish review: ship at prototype scope. See evidence/finish-review.md for scope and corrections to the reviewer’s stale source/timestamp assumptions. Dedicated shipped reviewer/documenter agents are not exposed here: read-only explorer review plus inline documentation were used.
+
+Physical-phone performance/battery and a true generated water video are **not** verified. Hafiz visually approved V2 water and V3 cards; the next owner check is whether V4 compact controls are clear and comfortably reachable. V4 was visually reviewed inline against actual desktop/mobile screenshots; the earlier independent motion review above is historical. The earlier recorded walkthrough is V2, not a newly recorded V4 video. A proper video source remains an option if this illustrative motion is not sufficient.
+
+## Review / deployment boundary
+Issue #54; feature branch `feat/waterfall-motion-preview`. No automatic merge or canonical deployment. Existing Caddy config and canonical homepage hashes remained unchanged. Standalone noindex preview is stored at `/var/www/portfolio-variants/waterfall-preview/index.html`, exposed through an isolated link under the already-existing image file host. No Caddy change. Only the built index.html is served; development notes, source and evidence are not in that served directory.

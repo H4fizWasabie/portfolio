@@ -1,47 +1,51 @@
 [
   {
     "file": "index.html",
-    "sha256": "83890eb012ff577e405aa7422ecb1a8c23ab2b14fed479c9ba2bb476b5a07e25"
+    "sha256": "ca21222aff4f4a4ac583918ccf7fd360106b45f0e9f2f4925c484be8b32762e8"
   },
   {
     "file": "projects/index.html",
-    "sha256": "5c11e7ec848ad5e0aeb8330f3e185913667941d0725791be14e547bf2c54faf6"
+    "sha256": "6c5a2f534d23aa9ab043aa203ed880466f07c4b7cf2867c47f28737e24adbd0c"
+  },
+  {
+    "file": "resume/index.html",
+    "sha256": "7c3b3a524a4f0090aad387e5d2513073ed0b06b96453ddf0122bc2545bd61a04"
   },
   {
     "file": "work/procura/index.html",
-    "sha256": "4aa1c029839bc09ffa845f68528947c11554da7cec60d2824e5e7878258920ac"
+    "sha256": "261ef7db51916162293063dc9c09decae61e75fe2aef661a127c7bcea691077f"
   },
   {
     "file": "work/pims/index.html",
-    "sha256": "3c67e686d1bc449fb3f477a3c067585dd1da0e32e46976f98a57ab20f3fae129"
+    "sha256": "8c323ea3aace140059cd2d910683cd5ff076979891d38890e3e18e6f8f58ad60"
   },
   {
     "file": "work/dd-drugs-register/index.html",
-    "sha256": "edd025a4c1f4dfd95b0e31a5c823c4c701a365f5541ddfcb68e6541290b4bae2"
+    "sha256": "951ece30f37060f417ca2da75373d5537abb61935e3910d37736db3ff97611d0"
   },
   {
     "file": "work/theoses/index.html",
-    "sha256": "f5968aaaf0c0f2b3e59bda63fd581afa15edb0b1316f1aab4019451c7843ecc0"
+    "sha256": "6c9940b40ed5bd05c8921cae84e78ff80d58c35ccba04d00551b22e7319c3dde"
   },
   {
     "file": "work/yen/index.html",
-    "sha256": "e4f49c5bb1f0f1d5c8dfaefec0f2e872a4c90307200de4ddbc2bf2290d94dcfe"
+    "sha256": "e3bbdadc5f9fc6d62ee8b310eb4102fe478172f853e6b736c87b6b8a881fc984"
   },
   {
     "file": "work/map/index.html",
-    "sha256": "64c1d232870bef5e80e739f0cceb23d4eaa758152611591e175093d4eb7535da"
+    "sha256": "13c9cc5587d870700986a3be6d882081d9e60e0b7a08b50570cfd9deb679b352"
   },
   {
     "file": "work/hills-ai-content-lab/index.html",
-    "sha256": "a10547829b2ce94c8517ee49abf07d9d077991a108c8b5c0a4c4a8054ea7e5c5"
+    "sha256": "eebcd83d470f40c872881eb05a92cf3f9920cd67b7b5a76d99072d63f063eeb9"
   },
   {
     "file": "work/89lab/index.html",
-    "sha256": "14b708a4a5947c679f984fa1a7195c55fdef1d6da532bb2263351113731ed134"
+    "sha256": "e555e5ae615256799ac04c039a0778ed7c7d29d50477120abac1790faf58efa7"
   },
   {
     "file": "site.css",
-    "sha256": "4a1642cd8c334567b28b7b8d4f5288b8093c77e532800f2417a66995f597aff8"
+    "sha256": "4ad56d32eaf01289ae48eeeb377d6631e4d42e505d364f3bfb4c0af01d6fc1e1"
   },
   {
     "file": "gallery.js",
@@ -158,5 +162,9 @@
   {
     "file": "theoses-review.webp.json",
     "sha256": "b94a5bed63640c66d0359007a29c32102951a28db72fa0236a0aae15f67fb9a5"
+  },
+  {
+    "file": "resume/Resume-Hafiz-Jamali.pdf",
+    "sha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4"
   }
 ]

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="dark">
+<title>Waterfall motion preview · Hafiz Jamali</title>
+<style>
+@font-face{font-family:Epilogue;src:url('__FONT__') format('truetype');font-weight:100 900;font-display:swap}
+:root{--oat:#e8ddc5;--moss:#293321;--sage:#8b9d83;--rust:#9c4021;--ink:#172016;--round:24px;--reading-glass:rgba(35,46,30,.78);--reading-fallback:rgba(35,46,30,.94);--reading-blur:12px;color:var(--oat);font-family:Epilogue,sans-serif;font-synthesis:none;background:var(--moss)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scrollbar-color:var(--sage) var(--moss)}body{margin:0}::selection{background:var(--oat);color:var(--ink)}a{color:inherit;text-underline-offset:.24em}a:focus-visible,button:focus-visible{outline:3px solid var(--oat);outline-offset:5px}button,a{touch-action:manipulation}button{font:inherit;cursor:pointer}button:disabled{cursor:default;opacity:.65}.skip{position:fixed;left:16px;top:-90px;z-index:30;background:var(--moss);padding:14px;border-radius:16px}.skip:focus{top:16px}
+#landscape{position:fixed;inset:0;z-index:-2;overflow:hidden;background:var(--moss)}#fallback{width:100%;height:100%;object-fit:cover;object-position:70% 45%;display:block}#water{position:absolute;inset:0;width:100%;height:100%;opacity:0}#water.ready{opacity:1}#shade{position:fixed;inset:0;pointer-events:none;z-index:-1;background:linear-gradient(90deg,rgba(23,32,22,.28),transparent 72%)}
+header{position:absolute;top:0;left:0;right:0;background:linear-gradient(180deg,rgba(23,32,22,.9),rgba(23,32,22,.25));padding:34px 5vw;display:flex;align-items:center;justify-content:space-between;gap:20px;z-index:2}header>a{font-size:19px;font-weight:750;text-decoration:none}nav{display:flex;gap:26px;align-items:center;font-size:13px;font-weight:600}nav a{text-decoration:none;border-bottom:1px solid transparent;padding:9px 0}nav a:hover{border-color:var(--oat)}
+main{position:relative}section{min-height:112svh;display:flex;align-items:center;padding:110px 5vw 130px;position:relative}.reading{width:min(630px,54vw);padding:40px;border-radius:var(--round);background:var(--reading-fallback);border:1px solid rgba(232,221,197,.18);box-shadow:0 18px 50px rgba(23,32,22,.22);-webkit-backdrop-filter:none;backdrop-filter:none}h1,h2,h3,p{margin:0}h1{font-size:clamp(38px,4.4vw,65px);line-height:1.09;font-weight:650;letter-spacing:-.04em;text-wrap:balance}h2{font-size:clamp(32px,3.1vw,48px);line-height:1.12;letter-spacing:-.035em;font-weight:650;text-wrap:balance}p{font-size:16px;line-height:1.65;margin-top:22px;max-width:68ch}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.action{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:14px 21px;font-size:13px;font-weight:650;border-radius:999px;text-decoration:none;background:var(--oat);color:var(--ink);border:1px solid var(--oat);transition:background .3s ease}.action:hover{background:#d4b895}.action.secondary{background:var(--moss);color:var(--oat);border-color:rgba(232,221,197,.55)}.action.secondary:hover{background:#36432d}.scroll-note{display:flex;align-items:center;gap:12px;margin-top:36px;font-size:13px;line-height:1.5}.scroll-note svg{width:18px;height:28px;flex-shrink:0}.project-title{font-size:17px;font-weight:650;margin-bottom:20px}.project-shot{margin:27px -12px 0;border-radius:16px;overflow:hidden;background:var(--oat)}.project-shot img{display:block;width:100%;height:auto}.disclosure{font-size:12px;line-height:1.6;margin-top:14px;color:var(--oat)}.link-line{display:inline-block;margin-top:22px;font-weight:650;font-size:14px}.index{margin-top:32px;padding-top:24px;border-top:1px solid rgba(232,221,197,.3)}.index summary{cursor:pointer;font-size:14px;font-weight:650;padding:9px 0}.index ul{list-style:none;padding:0;margin:16px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.index li a{display:block;padding:13px 0;border-bottom:1px solid rgba(232,221,197,.2);font-size:12px;text-decoration:none}.index li a:hover{text-decoration:underline}.about .reading{width:min(650px,54vw)}footer{font-size:12px;margin-top:32px;line-height:1.7}.email{overflow-wrap:anywhere}
+#preview-controls{position:fixed;bottom:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));right:max(14px,env(safe-area-inset-right));width:max-content;max-width:calc(100% - 28px);z-index:10;background:rgba(23,32,22,.97);border:1px solid rgba(232,221,197,.34);border-radius:18px;padding:4px;display:flex;align-items:center;gap:2px}#preview-controls button,#motion-options summary{min-height:44px;min-width:44px;padding:10px 12px;border-radius:12px;background:transparent;color:var(--oat);border:1px solid transparent;font-size:12px;font-weight:600;white-space:nowrap}#preview-controls button:hover:not(:disabled),#motion-options summary:hover{background:var(--moss)}#preview-controls button[aria-pressed="true"]{background:var(--oat);color:var(--ink)}#preview-controls button[aria-pressed="true"]:hover{background:#d4b895}#motion-options summary{display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;list-style:none;touch-action:manipulation}#motion-options summary::-webkit-details-marker{display:none}#motion-options summary:focus-visible{outline:3px solid var(--oat);outline-offset:3px}#motion-options summary svg{width:12px;height:12px;flex-shrink:0}#motion-options[open] summary svg{transform:rotate(180deg)}#motion-panel{position:absolute;bottom:calc(100% + 10px);right:0;width:260px;max-width:calc(100vw - 28px);max-height:calc(100svh - 100px);overflow:auto;padding:14px;background:rgba(23,32,22,.98);border:1px solid rgba(232,221,197,.34);border-radius:16px;box-shadow:0 8px 22px rgba(23,32,22,.2)}#motion-panel #still{width:100%;background:var(--moss);border-color:rgba(232,221,197,.38)}#motion-panel #still[aria-pressed="true"]{background:var(--oat);color:var(--ink)}#motion-status{display:block;font-size:12px;line-height:1.6;margin-top:10px;max-width:none}#scene-label{position:fixed;right:5vw;top:112px;background:rgba(23,32,22,.9);padding:10px 15px;border-radius:999px;border:1px solid rgba(232,221,197,.25);font-size:12px;pointer-events:none;z-index:1}noscript p{position:relative;margin:0;padding:110px 5vw 0;background:var(--moss);font-size:13px}#motion-error{font-size:12px}
+@media(min-width:1600px){section{padding-left:9vw}header{padding-left:9vw;padding-right:9vw}.reading{width:650px}}
+@media(max-width:760px){header{padding:24px 22px;align-items:flex-start}header>a{font-size:16px}nav{gap:15px;font-size:12px}nav .desktop-link{display:none}section{min-height:116svh;padding:240px 18px 140px;align-items:center}.reading,.about .reading{width:100%;padding:27px;border-radius:22px}h1{font-size:clamp(34px,8vw,46px)}h2{font-size:clamp(30px,7vw,40px)}p{font-size:14px}.project-shot{margin:25px -9px 0}.project-title{font-size:15px}.actions{gap:10px}.action{font-size:12px;padding:13px 17px}.scroll-note{margin-top:26px;font-size:12px}#scene-label{top:83px;right:22px;font-size:11px}.index ul{grid-template-columns:1fr}#shade{background:linear-gradient(0deg,rgba(23,32,22,.2),transparent 85%)}.disclosure{font-size:11px}.link-line{font-size:13px}}
+@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.reading{background:var(--reading-glass);-webkit-backdrop-filter:blur(var(--reading-blur));backdrop-filter:blur(var(--reading-blur))}}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.reading{background:var(--reading-fallback);-webkit-backdrop-filter:none;backdrop-filter:none}}
+#preview-controls button,#motion-options summary,#motion-status,#scene-label,.disclosure,#motion-error{font-size:12px}#preview-controls{box-shadow:none}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+__RESUME_CSS__
+body:has(#resume-preview[open]) #scene-label{display:none}
+.resume-preview{margin-top:28px}.resume-preview>summary{cursor:pointer;list-style:none;width:max-content;max-width:100%;touch-action:manipulation}.resume-preview>summary::-webkit-details-marker{display:none}.resume-preview>summary:focus-visible{outline:3px solid var(--oat);outline-offset:5px}.resume-preview>summary svg{width:16px;height:16px;margin-left:12px;transition:transform .2s}.resume-preview[open]>summary svg{transform:rotate(180deg)}.resume-preview .resume-paper{margin:24px -20px 0;border-radius:16px}.resume-preview .resume-paper .page{padding:28px 22px}.resume-download{display:inline-block;margin-top:20px;font-size:14px;line-height:1.6}
+@media(max-width:760px){.resume-preview .resume-paper{margin-left:-16px;margin-right:-16px}.resume-preview .resume-paper .page{padding:24px 14px}}
+</style>
+</head>
+<body data-card-treatment="moss-glass-v3" data-motion-controls="compact-v4">
+<a class="skip" href="#content">Skip to content</a>
+<div id="landscape" aria-hidden="true"><img id="fallback" src="__WATERFALL__" alt=""><canvas id="water"></canvas></div><div id="shade" aria-hidden="true"></div>
+<header><a href="#content">Hafiz Jamali.</a><nav aria-label="Main navigation"><a href="#work">Work</a><a href="#about" class="desktop-link">About</a><a href="#contact">Contact</a></nav></header>
+<div id="scene-label" aria-hidden="true">Upper cascades</div>
+<noscript><p>Still-image preview. Enable JavaScript to see simulated water and scroll-driven camera movement.</p></noscript>
+<main id="content">
+<section id="intro"><div class="reading"><h1>Less work around work.<br>More room for business.</h1><p>Custom business apps and AI automation, built around how your business actually works.</p><div class="actions"><a class="action" href="#work">See the apps</a><a class="action secondary" href="mailto:kisame350@gmail.com">Discuss your project</a></div><div class="scroll-note"><svg aria-hidden="true" viewBox="0 0 20 30" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="1" width="12" height="21" rx="6"/><path d="M10 5v5M6 25l4 4 4-4"/></svg><span>Scroll to follow the waterfall.</span></div></div></section>
+<section id="work"><article class="reading"><p class="project-title">Procura</p><h2>Know what needs buying.<br>Keep purchasing organised.</h2><p>Inventory, suppliers, reorder planning and purchase orders in one connected application.</p><figure class="project-shot"><img src="__PROCURA__" alt="Actual Procura inventory interface with fictional seeded records" width="1440" height="1080"></figure><p class="disclosure">Actual Procura UI; isolated fictional demo records.</p><a class="link-line" href="https://portfolio.wasabietech.com/work/procura/">View Procura project</a></article></section>
+<section id="theoses"><article class="reading"><p class="project-title">Theoses</p><h2>Turn repeated tasks into reviewable workflows.</h2><p>A self-hosted personal assistant and coding agent, available through the terminal, Telegram and a private dashboard.</p><figure class="project-shot"><img src="__THEOSES__" alt="Actual Theoses dashboard showing a staged sample report conversation" width="1440" height="1000" loading="lazy"></figure><p class="disclosure">Actual Theoses dashboard; staged sample conversation, not live execution.</p><a class="link-line" href="https://portfolio.wasabietech.com/work/theoses/">View Theoses project</a></article></section>
+<section id="map"><article class="reading"><p class="project-title">MAP</p><h2>Keep everyday tools together, on your phone.</h2><p>Tasks, calendar, documents, scan-to-PDF and local music in one personal Android utility.</p><figure class="project-shot"><img src="__MAP__" alt="Edited genuine MAP phone captures with fictional demo text" width="1440" height="960" loading="lazy"></figure><p class="disclosure">Edited MAP phone screenshots; fictional demo text. Original app layout retained.</p><a class="link-line" href="https://portfolio.wasabietech.com/work/map/">View MAP project</a><details class="index"><summary>All eight projects</summary><ul><li><a href="https://portfolio.wasabietech.com/work/procura/">Procura</a></li><li><a href="https://portfolio.wasabietech.com/work/pims/">PIMS</a></li><li><a href="https://portfolio.wasabietech.com/work/dd-drugs-register/">DD Drugs Register</a></li><li><a href="https://portfolio.wasabietech.com/work/theoses/">Theoses</a></li><li><a href="https://portfolio.wasabietech.com/work/yen/">Yen</a></li><li><a href="https://portfolio.wasabietech.com/work/map/">MAP</a></li><li><a href="https://portfolio.wasabietech.com/work/hills-ai-content-lab/">Hill’s AI Content Lab</a></li><li><a href="https://portfolio.wasabietech.com/work/89lab/">89lab content automation</a></li></ul><a class="link-line" href="https://portfolio.wasabietech.com/projects/">Browse the project index</a></details></article></section>
+<section id="about" class="about"><div class="reading"><h2>The person<br>behind the software.</h2><p>I’m Hafiz Jamali. I build practical software around the work I know.</p><p>My work connects veterinary procurement, inventory operations, personal organisation and AI-assisted workflows. I turn scattered information and repeated steps into tools I can use and maintain.</p><p>The projects here include operational systems, software I use myself and a self-directed content project. Each case study explains what it does—and what it does not claim.</p><details id="resume-preview" class="resume-preview"><summary class="action">Preview résumé<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 7 5 5 5-5"/></svg></summary>__RESUME_HTML__</details><a class="resume-download" href="__RESUME_PDF__" download="Resume-Hafiz-Jamali.pdf">Download PDF</a></div></section>
+<section id="contact"><div class="reading"><h2>What should your<br>software do?</h2><p>Tell me what your team does today, what gets repeated, and what a better workflow would look like.</p><div class="actions"><a class="action" href="mailto:kisame350@gmail.com">Discuss your project</a></div><p class="email"><a href="mailto:kisame350@gmail.com">kisame350@gmail.com</a></p><footer>Hafiz Jamali. Custom business apps and AI automation.<br><a href="#resume-preview">Résumé</a> · <a href="https://github.com/H4fizWasabie">GitHub</a></footer></div></section>
+</main>
+<div id="preview-controls" role="group" aria-label="Waterfall motion controls"><button id="pause" type="button" aria-pressed="false" aria-describedby="motion-status" disabled>Pause water</button><details id="motion-options"><summary id="motion-toggle" aria-controls="motion-panel"><span>Motion</span><svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div id="motion-panel" role="group" aria-label="Motion options"><button id="still" type="button" aria-pressed="false" disabled>Still view</button><span id="motion-status" role="status">Still image · motion unavailable</span></div></details></div>
+<script>
+(()=>{
+'use strict';
+const imageURI=document.getElementById('fallback').src,maskURI='__MASK__',flowURI='__FLOW__',detailURI='__DETAIL__';
+const canvas=document.getElementById('water'),fallback=document.getElementById('fallback'),status=document.getElementById('motion-status'),label=document.getElementById('scene-label'),pause=document.getElementById('pause'),still=document.getElementById('still');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let gl,program,raf=0,paused=false,staticView=reduced.matches,ready=false,lastFrame=0,clock=0,previousTime=0,needsRender=true,draws=0;
+const keys=[[.67,.30,1.18],[.68,.40,1.17],[.67,.52,1.13],[.63,.65,1.08],[.57,.73,1.04],[.55,.74,1.02]];
+const revision='directional-water-v2';
+let photoPositionKey='',renderLimit=4096;
+const names=['Upper cascades','Rock ledges','Middle falls','Lower falls','Pool edge','Jade pool'];
+function state(){return {ready,paused,staticView,reducedMotion:reduced.matches,draws,time:clock,progress:Math.min(1,Math.max(0,scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight))),camera:camera(),revision,renderPixels:[canvas.width,canvas.height],deviceScale:devicePixelRatio};}
+function camera(){const p=Math.min(1,Math.max(0,scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight)));if(staticView)return [.5,.5,1];const n=p*(keys.length-1),k=Math.min(keys.length-2,Math.floor(n)),t=n-k,s=t*t*(3-2*t);const values=keys[k].map((v,i)=>v+(keys[k+1][i]-v)*s);if(innerWidth<761){values[0]+=.07*(1-p);values[2]=Math.max(1.01,values[2]*.91);}return values;}
+function update(){pause.disabled=!ready||staticView||reduced.matches;still.disabled=!ready||reduced.matches;pause.textContent=paused?'Resume water':'Pause water';pause.setAttribute('aria-pressed',String(paused));still.setAttribute('aria-pressed',String(staticView));still.textContent=staticView?'Follow scroll':'Still view';status.textContent=!ready?'Still image · motion unavailable':reduced.matches?'Reduced motion · still image':staticView?'Still image · camera fixed':paused?'Water paused · scroll camera active':'Simulated water · not a video loop';needsRender=true;schedule();}
+function fail(){ready=false;cancelAnimationFrame(raf);raf=0;canvas.classList.remove('ready');update();}
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error('Water shader unavailable');return s;}
+const vertex='attribute vec2 position; varying vec2 v; void main(){ v=position*.5+.5;gl_Position=vec4(position,0.,1.);}';
+const fragment=`precision highp float;
+varying vec2 v;
+uniform sampler2D scene; uniform sampler2D matte;
+uniform sampler2D tierFlow; uniform sampler2D detail;
+uniform vec2 viewport; uniform vec2 imageSize; uniform vec3 camera;
+uniform float time; uniform float motion;
+void main(){
+ float cover=max(viewport.x/imageSize.x,viewport.y/imageSize.y);
+ vec2 windowSize=viewport/(imageSize*cover*camera.z);
+ vec2 center=clamp(camera.xy,windowSize*.5,1.-windowSize*.5);
+ vec2 uv=center+vec2(v.x-.5,.5-v.y)*windowSize;
+ vec4 m=texture2D(matte,uv);
+ float alpha=max(m.r*smoothstep(.06,.24,m.r),m.g*.62*smoothstep(.06,.24,m.g))*motion;
+ if(alpha<.002){gl_FragColor=vec4(0.);return;}
+ vec3 base=texture2D(scene,uv).rgb;
+ vec4 field=texture2D(tierFlow,uv);
+ vec2 velocity=(field.rg*2.-1.)*256./imageSize;
+ // Advect upstream photograph patches into this pixel. Two staggered phases
+ // hide wrap-around without reversing the direction of travel.
+ float p=fract(time/2.3+field.b*.6),q=fract(p+.5);
+ float weight=1.-abs(p*2.-1.);
+ vec2 a=clamp(uv-velocity*(p-.5)*2.3,0.,1.);
+ vec2 b=clamp(uv-velocity*(q-.5)*2.3,0.,1.);
+ float validA=smoothstep(.08,.8,texture2D(matte,a).r);
+ float validB=smoothstep(.08,.8,texture2D(matte,b).r);
+ vec3 flowA=mix(base,texture2D(scene,a).rgb,validA*.58);
+ vec3 flowB=mix(base,texture2D(scene,b).rgb,validB*.58);
+ vec3 curtain=mix(flowB,flowA,weight);
+ // Unequal strands move monotonically down the local tier vector; they do
+ // not oscillate sideways. The photograph still supplies all scene detail.
+ vec3 grain=texture2D(detail,fract((uv-velocity*time)*vec2(36.,14.))).rgb;
+ float streams=(grain.r-.5)*.13+(grain.g-.5)*.05;
+ curtain+=vec3(streams);
+ float foam=m.b*(.25+grain.b*.75);
+ curtain=mix(curtain,vec3(.95,.965,.95),foam*.28);
+ // Small continuous pooling drift; no whole-pool wobble or regular rings.
+ vec2 drift=vec2(-.00075,.00030)*(grain.g-.5)*2.;
+ vec3 pool=texture2D(scene,clamp(uv+drift,0.,1.)).rgb;
+ float falling=smoothstep(.01,.75,m.r);
+ gl_FragColor=vec4(mix(pool,curtain,falling),alpha);
+}`;
+function load(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});}
+function texture(img,unit,name){const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.uniform1i(gl.getUniformLocation(program,name),unit);}
+function placePhotograph(c){const iw=fallback.naturalWidth,ih=fallback.naturalHeight;if(!iw||!ih)return;const key=[innerWidth,innerHeight,...c].join(',');if(key===photoPositionKey)return;photoPositionKey=key;const cover=Math.max(innerWidth/iw,innerHeight/ih),w=iw*cover*c[2],h=ih*cover*c[2];const cx=Math.max(innerWidth/w/2,Math.min(1-innerWidth/w/2,c[0])),cy=Math.max(innerHeight/h/2,Math.min(1-innerHeight/h/2,c[1]));Object.assign(fallback.style,{position:'absolute',width:w+'px',height:h+'px',left:(innerWidth/2-cx*w)+'px',top:(innerHeight/2-cy*h)+'px'});}
+function schedule(){if(!raf&&ready&&!document.hidden)raf=requestAnimationFrame(frame);}
+function frame(now){raf=0;if(!ready||document.hidden)return;const active=!paused&&!staticView&&!reduced.matches;if(active||needsRender){if(now-lastFrame<32&&active){schedule();return;}const dt=previousTime?Math.min(.1,(now-previousTime)/1000):0;previousTime=now;if(active)clock+=dt;lastFrame=now;const dpr=Math.min(devicePixelRatio||1,3,Math.sqrt(8000000/(innerWidth*innerHeight)),renderLimit/Math.max(innerWidth,innerHeight));const w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.viewport(0,0,w,h);const c=camera();placePhotograph(c);gl.uniform2f(gl.getUniformLocation(program,'viewport'),innerWidth,innerHeight);gl.uniform3f(gl.getUniformLocation(program,'camera'),...c);gl.uniform1f(gl.getUniformLocation(program,'time'),clock);gl.uniform1f(gl.getUniformLocation(program,'motion'),staticView||reduced.matches?0:1);gl.drawArrays(gl.TRIANGLES,0,6);draws++;needsRender=false;label.textContent=staticView?'Full waterfall':names[Math.round(state().progress*(names.length-1))];}if(active)schedule();}
+pause.addEventListener('click',()=>{paused=!paused;previousTime=0;update();});
+still.addEventListener('click',()=>{staticView=!staticView;previousTime=0;update();});
+addEventListener('scroll',()=>{needsRender=true;schedule();},{passive:true});addEventListener('resize',()=>{needsRender=true;schedule();},{passive:true});
+reduced.addEventListener('change',()=>{staticView=reduced.matches;previousTime=0;update();});
+document.addEventListener('visibilitychange',()=>{previousTime=0;if(document.hidden){cancelAnimationFrame(raf);raf=0;}else{needsRender=true;schedule();}});
+canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();fail();});
+window.waterfallPreview={state};
+(async()=>{try{gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:false,antialias:false,preserveDrawingBuffer:true});if(!gl){fail();return;}const [img,mask,flow,detail]=await Promise.all([load(imageURI),load(maskURI),load(flowURI),load(detailURI)]);program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Water rendering unavailable');gl.useProgram(program);const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);const attr=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,2,gl.FLOAT,false,0,0);texture(img,0,'scene');texture(mask,1,'matte');texture(flow,2,'tierFlow');texture(detail,3,'detail');gl.uniform2f(gl.getUniformLocation(program,'imageSize'),img.width,img.height);renderLimit=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);ready=true;canvas.classList.add('ready');update();}catch{fail();}})();
+})();
+</script>
+<script>
+(()=>{
+ const controls=document.getElementById('preview-controls'),options=document.getElementById('motion-options'),toggle=document.getElementById('motion-toggle');
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&options.open){options.open=false;toggle.focus({preventScroll:true});}});
+ document.addEventListener('pointerdown',event=>{if(options.open&&!controls.contains(event.target))options.open=false;});
+ document.addEventListener('focusin',event=>{if(options.open&&!controls.contains(event.target))options.open=false;});
+})();
+</script>
+<script>
+// Progressive navigation only; the disclosure itself works without JavaScript.
+function revealResume(){if(location.hash==='#resume-preview')document.getElementById('resume-preview').open=true;}
+window.addEventListener('hashchange',revealResume);revealResume();
+document.querySelector('footer a[href="#resume-preview"]').addEventListener('click',()=>{document.getElementById('resume-preview').open=true;});
+</script>
+</body></html>

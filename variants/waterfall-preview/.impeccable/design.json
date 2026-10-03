@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-03T12:40:40.957906+00:00",
+  "title": "Design System: Living waterfall motion preview",
+  "extensions": {
+    "shadows": [
+      {
+        "name": "reading",
+        "value": "0 18px 50px rgba(23,32,22,.22)",
+        "purpose": "Separate reading panel from photograph."
+      }
+    ],
+    "motion": [
+      {
+        "name": "action-hover",
+        "value": ".3s ease",
+        "purpose": "Background state transition; disabled with reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "large",
+        "value": "1600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Existing verified email/project action.",
+      "html": "<a class=\"ds-primary\" href=\"#\">Discuss your project</a>",
+      "css": ".ds-primary{font-family:Epilogue,sans-serif;font-size:13px;border-radius:999px;padding:14px 21px;text-decoration:none;display:inline-block;background:#e8ddc5;color:#172016;border:1px solid #e8ddc5}.ds-primary:hover{background:#d4b895}.ds-primary:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "description": "Supporting navigation.",
+      "html": "<a class=\"ds-secondary\" href=\"#\">View project</a>",
+      "css": ".ds-secondary{font-family:Epilogue,sans-serif;font-size:13px;border-radius:999px;padding:14px 21px;text-decoration:none;display:inline-block;background:#293321;color:#e8ddc5;border:1px solid rgba(232,221,197,.55)}.ds-secondary:hover{background:#36432d}.ds-secondary:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}"
+    },
+    {
+      "name": "Reading surface",
+      "kind": "card",
+      "refersTo": "reading",
+      "description": "Readable content above photograph.",
+      "html": "<div class=\"ds-reading\">Custom business apps and AI automation.</div>",
+      "css": ".ds-reading{font-family:Epilogue,sans-serif;color:#e8ddc5;background:rgba(35,46,30,.94);padding:40px;border:1px solid rgba(232,221,197,.18);border-radius:24px;box-shadow:0 18px 50px rgba(23,32,22,.22);-webkit-backdrop-filter:none;backdrop-filter:none}@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.ds-reading{background:rgba(35,46,30,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.ds-reading{background:rgba(35,46,30,.94);-webkit-backdrop-filter:none;backdrop-filter:none}}"
+    },
+    {
+      "name": "Scene label",
+      "kind": "chip",
+      "description": "Development-only camera position.",
+      "html": "<span class=\"ds-scene\">Upper cascades</span>",
+      "css": ".ds-scene{font:12px Epilogue,sans-serif;padding:10px 15px;background:rgba(23,32,22,.9);color:#e8ddc5;border-radius:999px;border:1px solid rgba(232,221,197,.25)}"
+    },
+    {
+      "name": "Motion controls",
+      "kind": "button",
+      "description": "V4 always-visible pause with native options; 44px tap targets, truthful simulation/fallback status.",
+      "html": "<div class=\"ds-controls\"><button type=\"button\">Pause water</button><details class=\"ds-options\"><summary>Motion</summary><div class=\"ds-panel\"><button type=\"button\">Still view</button><span>Simulated water \u00b7 not a video loop</span></div></details></div>",
+      "css": ".ds-controls{position:relative;display:inline-flex;align-items:center;gap:2px;padding:4px;background:rgba(23,32,22,.97);border:1px solid rgba(232,221,197,.34);border-radius:18px;color:#e8ddc5;font-family:Epilogue,sans-serif}.ds-controls button,.ds-options summary{min-height:44px;min-width:44px;padding:10px 12px;border-radius:12px;background:transparent;color:inherit;border:1px solid transparent;font:600 12px Epilogue,sans-serif;white-space:nowrap}.ds-options summary{display:flex;align-items:center;cursor:pointer;list-style:none}.ds-options summary::-webkit-details-marker{display:none}.ds-controls button:hover,.ds-options summary:hover{background:#293321}.ds-controls button:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}.ds-options summary:focus-visible{outline:3px solid #e8ddc5;outline-offset:3px}.ds-controls button:disabled{opacity:.65}.ds-panel{position:absolute;bottom:calc(100% + 10px);right:0;width:260px;padding:14px;background:rgba(23,32,22,.98);border:1px solid rgba(232,221,197,.34);border-radius:16px;box-shadow:0 8px 22px rgba(23,32,22,.2)}.ds-panel button{width:100%;background:#293321;border-color:rgba(232,221,197,.38)}.ds-panel span{display:block;font:12px/1.6 Epilogue,sans-serif;margin-top:10px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Living waterfall",
+    "overview": "Owner-approved image and scroll interaction, applied only to a throwaway preview. The canonical Product Launch design record is unchanged. Existing Epilogue and oat lettering remain; the forest background is the selected new material.",
+    "keyCharacteristics": [
+      "Image leads; restrained frosted moss cards reveal scenery while preserving readable content.",
+      "Camera travel and water-only movement form one continuous scene.",
+      "Simulation is explicitly identified; this is not an image-to-video result."
+    ],
+    "rules": [
+      "V4 compact201.3125\u00d754px bottom-right motion bar; pause directly available, native Motion options contain still/status. Main and first water script unchanged;44px targets and Escape/outside/focus dismissal.",
+      "V3 reading cards:78% moss background,12px frost; no opacity applied to text/images/buttons.",
+      "Fallback:94% moss/no blur for unsupported backdrop-filter, reduced transparency or increased contrast; unsupported engine branch unverified.",
+      "Opaque secondary actions preserve contrast; white-backdrop body bound5.1658:1. V2 geometry, markup and water script unchanged.",
+      "Static photograph rendered natively outside transparent water overlay; original image unchanged.",
+      "Reduced camera zoom: desktop1.18\u20131.02; mobile approximately1.074\u20131.01.",
+      "Continuous tier-directed advection; opaque RGB velocity map; landing foam in matte blue channel.",
+      "Water canvas budget: native device scale up to DPR3 and8M pixels, within GPU renderbuffer limit.",
+      "Photo placement only changes with camera geometry; simulation disclosure and reduced-motion fallback retained."
+    ],
+    "dos": [
+      "Do keep simulation/fallback disclosure accessible in Motion options; preserve visible screenshot disclosures.",
+      "Do retain normal scrolling, pause, static fallback and reduced-motion behaviour."
+    ],
+    "donts": [
+      "Don\u2019t promote this prototype to the homepage without owner review."
+    ]
+  }
+}
