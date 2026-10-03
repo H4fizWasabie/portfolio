@@ -35,43 +35,66 @@ main{position:relative}section{min-height:112svh;display:flex;align-items:center
 <script>
 (()=>{
 'use strict';
-const imageURI=document.getElementById('fallback').src,maskURI='__MASK__';
+const imageURI=document.getElementById('fallback').src,maskURI='__MASK__',flowURI='__FLOW__',detailURI='__DETAIL__';
 const canvas=document.getElementById('water'),fallback=document.getElementById('fallback'),status=document.getElementById('motion-status'),label=document.getElementById('scene-label'),pause=document.getElementById('pause'),still=document.getElementById('still');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let gl,program,raf=0,paused=false,staticView=reduced.matches,ready=false,lastFrame=0,clock=0,previousTime=0,needsRender=true,draws=0;
-const keys=[[.67,.30,1.55],[.68,.40,1.55],[.67,.52,1.48],[.63,.65,1.4],[.57,.73,1.3],[.55,.74,1.25]];
+const keys=[[.67,.30,1.18],[.68,.40,1.17],[.67,.52,1.13],[.63,.65,1.08],[.57,.73,1.04],[.55,.74,1.02]];
+const revision='directional-water-v2';
+let photoPositionKey='',renderLimit=4096;
 const names=['Upper cascades','Rock ledges','Middle falls','Lower falls','Pool edge','Jade pool'];
-function state(){return {ready,paused,staticView,reducedMotion:reduced.matches,draws,time:clock,progress:Math.min(1,Math.max(0,scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight))),camera:camera()};}
-function camera(){const p=Math.min(1,Math.max(0,scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight)));if(staticView)return [.5,.5,1];const n=p*(keys.length-1),k=Math.min(keys.length-2,Math.floor(n)),t=n-k,s=t*t*(3-2*t);const values=keys[k].map((v,i)=>v+(keys[k+1][i]-v)*s);if(innerWidth<761)values[0]+=.07*(1-p);return values;}
+function state(){return {ready,paused,staticView,reducedMotion:reduced.matches,draws,time:clock,progress:Math.min(1,Math.max(0,scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight))),camera:camera(),revision,renderPixels:[canvas.width,canvas.height],deviceScale:devicePixelRatio};}
+function camera(){const p=Math.min(1,Math.max(0,scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight)));if(staticView)return [.5,.5,1];const n=p*(keys.length-1),k=Math.min(keys.length-2,Math.floor(n)),t=n-k,s=t*t*(3-2*t);const values=keys[k].map((v,i)=>v+(keys[k+1][i]-v)*s);if(innerWidth<761){values[0]+=.07*(1-p);values[2]=Math.max(1.01,values[2]*.91);}return values;}
 function update(){pause.disabled=!ready||staticView||reduced.matches;still.disabled=!ready||reduced.matches;pause.textContent=paused?'Resume water':'Pause water';pause.setAttribute('aria-pressed',String(paused));still.setAttribute('aria-pressed',String(staticView));still.textContent=staticView?'Follow scroll':'Still view';status.textContent=!ready?'Still image · motion unavailable':reduced.matches?'Reduced motion · still image':staticView?'Still image · camera fixed':paused?'Water paused · scroll camera active':'Simulated water · not a video loop';needsRender=true;schedule();}
 function fail(){ready=false;cancelAnimationFrame(raf);raf=0;canvas.classList.remove('ready');update();}
 function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error('Water shader unavailable');return s;}
 const vertex='attribute vec2 position; varying vec2 v; void main(){ v=position*.5+.5;gl_Position=vec4(position,0.,1.);}';
-const fragment=`precision mediump float;
-varying vec2 v; uniform sampler2D scene; uniform sampler2D matte;
-uniform vec2 viewport; uniform vec2 imageSize; uniform vec3 camera; uniform float time; uniform float motion;
+const fragment=`precision highp float;
+varying vec2 v;
+uniform sampler2D scene; uniform sampler2D matte;
+uniform sampler2D tierFlow; uniform sampler2D detail;
+uniform vec2 viewport; uniform vec2 imageSize; uniform vec3 camera;
+uniform float time; uniform float motion;
 void main(){
  float cover=max(viewport.x/imageSize.x,viewport.y/imageSize.y);
  vec2 windowSize=viewport/(imageSize*cover*camera.z);
  vec2 center=clamp(camera.xy,windowSize*.5,1.-windowSize*.5);
  vec2 uv=center+vec2(v.x-.5,.5-v.y)*windowSize;
- vec4 m=texture2D(matte,uv); vec4 base=texture2D(scene,uv);
- float phase=uv.y*170.-time*2.2;
- float strands=sin(uv.x*235.+sin(uv.y*24.)*2.);
- vec2 flow=vec2(sin(uv.y*70.+time*1.7)*.00075,sin(phase+strands)*.0014);
- vec4 falling=texture2D(scene,clamp(uv+flow,0.,1.));
- float sheen=(sin(phase+strands)*.014+sin(uv.y*340.-time*3.4)*.008)*motion;
- vec3 water=falling.rgb+vec3(sheen);
- vec3 color=mix(base.rgb,water,m.r*motion);
- vec2 ripple=vec2(sin(uv.y*185.+time*1.1),cos(uv.x*175.-time*.8))*.0006;
- vec3 pool=texture2D(scene,clamp(uv+ripple,0.,1.)).rgb;
- color=mix(color,pool,m.g*motion*.75);
- gl_FragColor=vec4(color,1.);
+ vec4 m=texture2D(matte,uv);
+ float alpha=max(m.r*smoothstep(.06,.24,m.r),m.g*.62*smoothstep(.06,.24,m.g))*motion;
+ if(alpha<.002){gl_FragColor=vec4(0.);return;}
+ vec3 base=texture2D(scene,uv).rgb;
+ vec4 field=texture2D(tierFlow,uv);
+ vec2 velocity=(field.rg*2.-1.)*256./imageSize;
+ // Advect upstream photograph patches into this pixel. Two staggered phases
+ // hide wrap-around without reversing the direction of travel.
+ float p=fract(time/2.3+field.b*.6),q=fract(p+.5);
+ float weight=1.-abs(p*2.-1.);
+ vec2 a=clamp(uv-velocity*(p-.5)*2.3,0.,1.);
+ vec2 b=clamp(uv-velocity*(q-.5)*2.3,0.,1.);
+ float validA=smoothstep(.08,.8,texture2D(matte,a).r);
+ float validB=smoothstep(.08,.8,texture2D(matte,b).r);
+ vec3 flowA=mix(base,texture2D(scene,a).rgb,validA*.58);
+ vec3 flowB=mix(base,texture2D(scene,b).rgb,validB*.58);
+ vec3 curtain=mix(flowB,flowA,weight);
+ // Unequal strands move monotonically down the local tier vector; they do
+ // not oscillate sideways. The photograph still supplies all scene detail.
+ vec3 grain=texture2D(detail,fract((uv-velocity*time)*vec2(36.,14.))).rgb;
+ float streams=(grain.r-.5)*.13+(grain.g-.5)*.05;
+ curtain+=vec3(streams);
+ float foam=m.b*(.25+grain.b*.75);
+ curtain=mix(curtain,vec3(.95,.965,.95),foam*.28);
+ // Small continuous pooling drift; no whole-pool wobble or regular rings.
+ vec2 drift=vec2(-.00075,.00030)*(grain.g-.5)*2.;
+ vec3 pool=texture2D(scene,clamp(uv+drift,0.,1.)).rgb;
+ float falling=smoothstep(.01,.75,m.r);
+ gl_FragColor=vec4(mix(pool,curtain,falling),alpha);
 }`;
 function load(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});}
 function texture(img,unit,name){const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.uniform1i(gl.getUniformLocation(program,name),unit);}
+function placePhotograph(c){const iw=fallback.naturalWidth,ih=fallback.naturalHeight;if(!iw||!ih)return;const key=[innerWidth,innerHeight,...c].join(',');if(key===photoPositionKey)return;photoPositionKey=key;const cover=Math.max(innerWidth/iw,innerHeight/ih),w=iw*cover*c[2],h=ih*cover*c[2];const cx=Math.max(innerWidth/w/2,Math.min(1-innerWidth/w/2,c[0])),cy=Math.max(innerHeight/h/2,Math.min(1-innerHeight/h/2,c[1]));Object.assign(fallback.style,{position:'absolute',width:w+'px',height:h+'px',left:(innerWidth/2-cx*w)+'px',top:(innerHeight/2-cy*h)+'px'});}
 function schedule(){if(!raf&&ready&&!document.hidden)raf=requestAnimationFrame(frame);}
-function frame(now){raf=0;if(!ready||document.hidden)return;const active=!paused&&!staticView&&!reduced.matches;if(active||needsRender){if(now-lastFrame<32&&active){schedule();return;}const dt=previousTime?Math.min(.1,(now-previousTime)/1000):0;previousTime=now;if(active)clock+=dt;lastFrame=now;const dpr=Math.min(devicePixelRatio||1,1.25);const w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.viewport(0,0,w,h);const c=camera();gl.uniform2f(gl.getUniformLocation(program,'viewport'),innerWidth,innerHeight);gl.uniform3f(gl.getUniformLocation(program,'camera'),...c);gl.uniform1f(gl.getUniformLocation(program,'time'),clock);gl.uniform1f(gl.getUniformLocation(program,'motion'),staticView||reduced.matches?0:1);gl.drawArrays(gl.TRIANGLES,0,6);draws++;needsRender=false;label.textContent=staticView?'Full waterfall':names[Math.round(state().progress*(names.length-1))];}if(active)schedule();}
+function frame(now){raf=0;if(!ready||document.hidden)return;const active=!paused&&!staticView&&!reduced.matches;if(active||needsRender){if(now-lastFrame<32&&active){schedule();return;}const dt=previousTime?Math.min(.1,(now-previousTime)/1000):0;previousTime=now;if(active)clock+=dt;lastFrame=now;const dpr=Math.min(devicePixelRatio||1,3,Math.sqrt(8000000/(innerWidth*innerHeight)),renderLimit/Math.max(innerWidth,innerHeight));const w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.viewport(0,0,w,h);const c=camera();placePhotograph(c);gl.uniform2f(gl.getUniformLocation(program,'viewport'),innerWidth,innerHeight);gl.uniform3f(gl.getUniformLocation(program,'camera'),...c);gl.uniform1f(gl.getUniformLocation(program,'time'),clock);gl.uniform1f(gl.getUniformLocation(program,'motion'),staticView||reduced.matches?0:1);gl.drawArrays(gl.TRIANGLES,0,6);draws++;needsRender=false;label.textContent=staticView?'Full waterfall':names[Math.round(state().progress*(names.length-1))];}if(active)schedule();}
 pause.addEventListener('click',()=>{paused=!paused;previousTime=0;update();});
 still.addEventListener('click',()=>{staticView=!staticView;previousTime=0;update();});
 addEventListener('scroll',()=>{needsRender=true;schedule();},{passive:true});addEventListener('resize',()=>{needsRender=true;schedule();},{passive:true});
@@ -79,7 +102,7 @@ reduced.addEventListener('change',()=>{staticView=reduced.matches;previousTime=0
 document.addEventListener('visibilitychange',()=>{previousTime=0;if(document.hidden){cancelAnimationFrame(raf);raf=0;}else{needsRender=true;schedule();}});
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();fail();});
 window.waterfallPreview={state};
-(async()=>{try{gl=canvas.getContext('webgl',{alpha:false,antialias:false,preserveDrawingBuffer:true});if(!gl){fail();return;}const [img,mask]=await Promise.all([load(imageURI),load(maskURI)]);program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Water rendering unavailable');gl.useProgram(program);const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);const attr=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,2,gl.FLOAT,false,0,0);texture(img,0,'scene');texture(mask,1,'matte');gl.uniform2f(gl.getUniformLocation(program,'imageSize'),img.width,img.height);ready=true;canvas.classList.add('ready');update();}catch{fail();}})();
+(async()=>{try{gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:false,antialias:false,preserveDrawingBuffer:true});if(!gl){fail();return;}const [img,mask,flow,detail]=await Promise.all([load(imageURI),load(maskURI),load(flowURI),load(detailURI)]);program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Water rendering unavailable');gl.useProgram(program);const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);const attr=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,2,gl.FLOAT,false,0,0);texture(img,0,'scene');texture(mask,1,'matte');texture(flow,2,'tierFlow');texture(detail,3,'detail');gl.uniform2f(gl.getUniformLocation(program,'imageSize'),img.width,img.height);renderLimit=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);ready=true;canvas.classList.add('ready');update();}catch{fail();}})();
 })();
 </script>
 </body></html>

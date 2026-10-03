@@ -1,47 +1,89 @@
 [
   {
     "width": 1440,
+    "height": 900,
+    "dpr": 2,
     "publicHTML": true,
-    "webglReady": true,
-    "scrollCameraPool": true,
+    "pauseScrollStillPassed": true,
+    "revision": "directional-water-v2",
+    "source": [
+      1920,
+      1280
+    ],
+    "canvas": [
+      2880,
+      1800
+    ],
+    "native": [
+      2880,
+      1800
+    ],
+    "zoom": 1.18,
+    "nativePhotoPlaced": true,
+    "photoTop": "0px",
     "css": {
       "#pause": "12px",
       "#still": "12px",
       ".preview-status": "12px",
-      ".preview-status strong": "12px",
-      ".disclosure": "12px",
-      "#scene-label": "12px",
-      "controlsShadow": "none"
+      ".disclosure": "12px"
     }
   },
   {
     "width": 390,
+    "height": 844,
+    "dpr": 3,
     "publicHTML": true,
-    "webglReady": true,
-    "scrollCameraPool": true,
+    "pauseScrollStillPassed": true,
+    "revision": "directional-water-v2",
+    "source": [
+      1920,
+      1280
+    ],
+    "canvas": [
+      1170,
+      2532
+    ],
+    "native": [
+      1170,
+      2532
+    ],
+    "zoom": 1.0738,
+    "nativePhotoPlaced": true,
+    "photoTop": "0px",
     "css": {
       "#pause": "12px",
       "#still": "12px",
       ".preview-status": "12px",
-      ".preview-status strong": "12px",
-      ".disclosure": "12px",
-      "#scene-label": "12px",
-      "controlsShadow": "none"
+      ".disclosure": "12px"
     }
   },
   {
     "width": 320,
+    "height": 740,
+    "dpr": 2,
     "publicHTML": true,
-    "webglReady": true,
-    "scrollCameraPool": true,
+    "pauseScrollStillPassed": true,
+    "revision": "directional-water-v2",
+    "source": [
+      1920,
+      1280
+    ],
+    "canvas": [
+      640,
+      1480
+    ],
+    "native": [
+      640,
+      1480
+    ],
+    "zoom": 1.0738,
+    "nativePhotoPlaced": true,
+    "photoTop": "0px",
     "css": {
       "#pause": "12px",
       "#still": "12px",
       ".preview-status": "12px",
-      ".preview-status strong": "12px",
-      ".disclosure": "12px",
-      "#scene-label": "12px",
-      "controlsShadow": "none"
+      ".disclosure": "12px"
     }
   }
 ]

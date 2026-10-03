@@ -8,6 +8,8 @@ ASSETS = {
     'FONT': ('epilogue.ttf', 'font/ttf'),
     'WATERFALL': ('waterfall.webp', 'image/webp'),
     'MASK': ('water-matte.png', 'image/png'),
+    'FLOW': ('tier-flow.png', 'image/png'),
+    'DETAIL': ('water-detail.png', 'image/png'),
     'PROCURA': ('procura-inventory.webp', 'image/webp'),
     'THEOSES': ('theoses-report.webp', 'image/webp'),
     'MAP': ('map-overview.webp', 'image/webp'),

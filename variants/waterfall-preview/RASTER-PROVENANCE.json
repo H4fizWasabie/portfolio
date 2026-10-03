@@ -1,20 +1,5 @@
 [
   {
-    "file": "theoses-report.webp",
-    "sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190",
-    "origin": "Existing owner-reviewed variants/product-launch/theoses-report.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
-  },
-  {
-    "file": "water-matte.png",
-    "sha256": "d3e8b1876aa778d63a2afe9024d31dc0b78623788c52ea0dccbe7ba01240f1b2",
-    "origin": "Derived from approved waterfall pixels with generate-matte.py; falling-water and pool classification, not a separately generated scene"
-  },
-  {
-    "file": "waterfall.webp",
-    "sha256": "d12d35cdc4d1bf1504ef9cb8ff1bd1695a76d36f4990fc4636553004501a3efe",
-    "origin": "Owner-approved AI-generated image, 2026-10-03; OpenRouter meta/muse-image; original /home/theoses/.theoses/agent/generated-images/1791021665028.webp"
-  },
-  {
     "file": "map-overview.webp",
     "sha256": "04693d5b7762302f89845774d36d0e835287d707439af4be4350047de94c1249",
     "origin": "Existing owner-reviewed variants/product-launch/map-overview.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
@@ -23,5 +8,30 @@
     "file": "procura-inventory.webp",
     "sha256": "57f38ef07c773bb83603350fde7b6e4e7e6103e021f3d19628df83ce4b113a1a",
     "origin": "Existing owner-reviewed variants/product-launch/procura-inventory.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
+  },
+  {
+    "file": "theoses-report.webp",
+    "sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190",
+    "origin": "Existing owner-reviewed variants/product-launch/theoses-report.webp; fictional data only; see canonical CAPTURE-PROVENANCE.json and MAP-CAPTURE-PROVENANCE.json"
+  },
+  {
+    "file": "tier-flow.png",
+    "sha256": "d5bc4dcc81abce4c7b89bd7f99ffa5d386892867e66694822c39fde4f6c905de",
+    "origin": "Deterministic opaque RGB tier velocity+phase map from generate-flow.py; synthetic motion data, not scene photography. RGB remains opaque to avoid browser alpha0 premultiplication loss."
+  },
+  {
+    "file": "water-detail.png",
+    "sha256": "764eb641c2b75e306893dc019a53380d055ab3a9a72b98aaa6dfe941dd3280b7",
+    "origin": "Deterministic seed54 synthetic strand/turbulence/foam texture from generate-flow.py; no new photographic scene/detail claim."
+  },
+  {
+    "file": "water-matte.png",
+    "sha256": "38bb9074cff867833eae9a5c92b3a07143e4571db4cf1ca5a8b72639ff6a18f9",
+    "origin": "Derived from approved image colours via generate-matte.py with feathered ROI gates; generate-flow.py adds water-only landing foam in blue. Red falling-water/green pool unchanged channels."
+  },
+  {
+    "file": "waterfall.webp",
+    "sha256": "d12d35cdc4d1bf1504ef9cb8ff1bd1695a76d36f4990fc4636553004501a3efe",
+    "origin": "Owner-approved AI-generated image, 2026-10-03; OpenRouter meta/muse-image; original /home/theoses/.theoses/agent/generated-images/1791021665028.webp"
   }
 ]

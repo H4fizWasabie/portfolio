@@ -13,5 +13,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 ## Boundaries
 Source stays on a feature branch in /tmp. No live homepage or Caddy configuration changes. Deliver an offline HTML and, if available, a separate noindex preview URL. Keep case-study links absolute to the existing canonical portfolio. Only safe existing project screenshots; no private data, credentials, production API or analytics. Pause, reduced-motion, WebGL-unavailable and JavaScript-disabled states must retain readable content.
 
+## Approved V2 refinement (2026-10-03)
+Hafiz approved sharper rendering/reduced zoom and tier-directed variable-speed water with restrained landing foam. Preserve this exact image, page copy and layout. Native browser photograph outside a transparent water canvas; water layer at native tested DPR2/3 within DPR3/8M/GPU budget. Feather image-colour ROI gates. Opaque RGB tier velocity/phase, foam in matte B: never encode velocity under alpha0. This is still illustrative motion, not true video or newly generated 4K photography. Update only the separate preview and existing draft PR; no canonical promotion.
+
 ## Exit
 Verify actual shipped HTML on desktop and mobile, moving-water pixels, fixed rock pixels, scroll-camera differences, controls and still/reduced-motion fallbacks. Record the actual browser walkthrough. Open PR for review; no merge or homepage promotion.

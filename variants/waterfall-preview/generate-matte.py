@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate an image-derived water matte, not geometric water cut-outs.
 The broad ROIs exclude unrelated highlights. Pixel colour gives every contour.
-Red = falling water; green = pool. This is a preview approximation.
+Red = falling water; green = pool. generate-flow.py adds landing foam in blue.
+Soft ROI gates exclude unrelated highlights without rectangular motion edges.
 Requires Pillow and NumPy only when regenerating; normal build uses stdlib.
 """
 from pathlib import Path
@@ -15,9 +16,14 @@ h, w = a.shape[:2]
 y, x = np.mgrid[:h, :w]
 x, y = x / w, y / h
 ranges = [(.71,.81,.055,.185),(.725,.845,.18,.27),(.665,.83,.295,.4),(.665,.91,.40,.49),(.515,.81,.49,.70),(.485,.795,.64,.835)]
-region = np.zeros((h,w),dtype=bool)
+region = np.zeros((h,w),dtype=np.float32)
 for x1,x2,y1,y2 in ranges:
-    region |= (x>x1)&(x<x2)&(y>y1)&(y<y2)
+    # Feather the ROI gate before colour extraction; do not shear moving water
+    # at an artificial horizontal crop boundary within a photographic curtain.
+    distance=np.minimum(np.minimum((x-x1)*w,(x2-x)*w),np.minimum((y-y1)*h,(y2-y)*h))
+    gate=np.clip(distance/16,0,1)
+    gate=gate*gate*(3-2*gate)
+    region=np.maximum(region,gate)
 minimum = a.min(axis=2)
 chroma = a.max(axis=2)-minimum
 brightness = np.clip((minimum-145)/65,0,1)

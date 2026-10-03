@@ -1,5 +1,5 @@
 {
   "file": "water-matte.png",
-  "sha256": "d3e8b1876aa778d63a2afe9024d31dc0b78623788c52ea0dccbe7ba01240f1b2",
-  "origin": "Derived from approved waterfall pixels with generate-matte.py; falling-water and pool classification, not a separately generated scene"
+  "sha256": "38bb9074cff867833eae9a5c92b3a07143e4571db4cf1ca5a8b72639ff6a18f9",
+  "origin": "Derived from approved image colours via generate-matte.py with feathered ROI gates; generate-flow.py adds water-only landing foam in blue. Red falling-water/green pool unchanged channels."
 }

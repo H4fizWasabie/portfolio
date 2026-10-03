@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-03T10:33:26.028615+00:00",
+  "generatedAt": "2026-10-03T11:39:29.625342+00:00",
   "title": "Design System: Living waterfall motion preview",
   "extensions": {
     "shadows": [
@@ -75,7 +75,13 @@
       "Camera travel and water-only movement form one continuous scene.",
       "Simulation is explicitly identified; this is not an image-to-video result."
     ],
-    "rules": [],
+    "rules": [
+      "Static photograph rendered natively outside transparent water overlay; original image unchanged.",
+      "Reduced camera zoom: desktop1.18\u20131.02; mobile approximately1.074\u20131.01.",
+      "Continuous tier-directed advection; opaque RGB velocity map; landing foam in matte blue channel.",
+      "Water canvas budget: native device scale up to DPR3 and8M pixels, within GPU renderbuffer limit.",
+      "Photo placement only changes with camera geometry; simulation disclosure and reduced-motion fallback retained."
+    ],
     "dos": [
       "Do keep simulation disclosure and safe-screenshot descriptions visible.",
       "Do retain normal scrolling, pause, static fallback and reduced-motion behaviour."
