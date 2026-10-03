@@ -1,0 +1,51 @@
+[
+  {
+    "file": "map-home-demo.webp",
+    "origin": "Owner-approved edited MAP phone screenshot, 2026-10-03. Original app UI retained; identifying text replaced with fictional demo data.",
+    "source_sha256": "d28fa98d9fe1337b32875d0aeb0362c7c491e72b4792e21a500913d6846969d7",
+    "dimensions": [
+      1152,
+      2560
+    ]
+  },
+  {
+    "file": "map-calendar-demo.webp",
+    "origin": "Owner-approved edited MAP phone screenshot, 2026-10-03. Original app UI retained; identifying text replaced with fictional demo data.",
+    "source_sha256": "6a6f0a76451066746d5b8068ee9cadd374c51c5a4e5d736d79e7b8995a017282",
+    "dimensions": [
+      1152,
+      2560
+    ]
+  },
+  {
+    "file": "map-tasks-demo.webp",
+    "origin": "Owner-approved edited MAP phone screenshot, 2026-10-03. Original app UI retained; identifying text replaced with fictional demo data.",
+    "source_sha256": "11adad190908fd17f7b30e2dd41063a421c403a87a74e12a0f1f064a940a4c2e",
+    "dimensions": [
+      1152,
+      2560
+    ]
+  },
+  {
+    "file": "map-tools-demo.webp",
+    "origin": "Owner-approved edited MAP phone screenshot, 2026-10-03. Original app UI retained; identifying text replaced with fictional demo data.",
+    "source_sha256": "db83479a28c06222f8be78c6e42f434251146ebd8d9a152ce4365aaa8366348e",
+    "dimensions": [
+      1152,
+      2560
+    ]
+  },
+  {
+    "file": "map-overview.webp",
+    "origin": "Three-panel composite of owner-approved MAP Home, Tasks and Tools edited phone captures. No interface reconstruction, generated dashboard or invented phone chrome.",
+    "sources": [
+      "map-home-demo.webp",
+      "map-tasks-demo.webp",
+      "map-tools-demo.webp"
+    ],
+    "dimensions": [
+      1360,
+      860
+    ]
+  }
+]

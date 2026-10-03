@@ -1,48 +1,62 @@
-# Product Launch portfolio working preview
+# Product Launch — eight-project review preview
 
-Approved concept B for Hafiz's custom business apps and AI automation. Review issue: https://github.com/H4fizWasabie/portfolio/issues/48.
+Owner-approved static first pass, 2026-10-03. Issue: https://github.com/H4fizWasabie/portfolio/issues/50.
 
-## Open it
-Open `index.html` in a browser with this directory's assets alongside it. Or, from this directory:
+## Review locally
 
-```
+```sh
+node build.cjs
 python3 -m http.server 19090 --bind 127.0.0.1
 ```
 
-Then visit http://127.0.0.1:19090/. This is local-only. Do not add Caddy routing, alter live dist, run the live repo's build, promote the preview, or merge without Hafiz's separate review/approval.
+Open `http://127.0.0.1:19090/index.html`, or extract the review ZIP and open `index.html` directly in a browser. Keep the folder structure and assets together. Do not use the obsolete single-file export from the earlier preview: eight individual project pages now require the directory bundle.
 
-A self-contained HTML export is also provided separately for Telegram review. Open it in a browser, not a document-preview renderer. Its full-size image links deliberately generate blob URLs because browsers block top-level data URL navigation.
+No deployment is performed by either build or tests. Do not change Caddy, live dist, production services or data. Leave the issue and feature-branch PR for Hafiz to review and merge. Main-homepage promotion remains separately gated.
 
-## What actually works
-- Three genuine-app screenshot showcases: Procura, PIMS, Theoses.
-- App selection, keyboard arrow/Home/End navigation, manual workflow-scene selection.
-- On-demand finite walkthrough with pause, app-switch cancellation and visibility cleanup.
-- Reduced-motion disables automatic playback and animation; manual navigation remains.
-- Full-size screenshot viewing, project-to-showcase controls, actual email contact links.
-- All fonts and images local. No API client, analytics, credentials or production connection.
+## Pages and scope
 
-These are screenshot walkthroughs, NOT exposed live applications. No supplier is contacted, no order submitted, no AI request made by this preview.
+- Homepage: approved Product Launch design; Procura, Theoses and MAP featured; all eight projects listed; background, résumé and email contact preserved.
+- `projects/index.html`: the complete project index.
+- `work/<slug>/index.html`: Procura, PIMS, DD Drugs Register, Theoses, Yen, MAP, Hill’s AI Content Lab and 89lab content automation.
+- Detailed screenshot galleries live on project pages, not the homepage.
+- These pages are static case studies and screenshot galleries, not interactive application installations.
 
-## Capture honesty
-Eight screenshots come from real application interfaces, never invented div dashboards or generated product images. See CAPTURE-PROVENANCE.json.
+The six legacy `apps/web/public/work/*` pages and legacy React/API routes remain untouched. This extension adds matching routes inside the Product Launch variant, including new Yen/89lab case studies, without redirecting or duplicating the legacy runtime. `projects.cjs` is the verified content source; `render.cjs` generates all ten variant pages.
 
-- Procura: actual Go application with native SeedDemo, a new isolated SQLite in /tmp, and loopback-only listener. Recorder verifies executable + environment, requires eight DEMO stock IDs, and proves writes return HTTP 403.
-- PIMS: genuine source UI at b0c7ac5, rendering local fictional API fixtures. No production DB or public demo visited. Native dashboard refresh avoids its initial double-render race; UTF-8 response headers match normal serving.
-- Theoses: exact deployed dashboard assets from runtime v1.0.116; local fixture sessions/files only. The conversation is explicitly staged sample content, not a claimed live execution.
+## Evidence and truthful visuals
 
-Source UI may show sample quantities, monetary values and workflow state; all are explicitly fictional. Important production detail: an existing public demo is not necessarily synthetic and was NOT reused.
+Procura/PIMS captures retain their native isolated fictional-data provenance. Theoses images are explicitly staged conversations in the real v1.0.116 dashboard, not a claim of current/live AI execution. See the existing `CAPTURE-PROVENANCE.json`.
 
-## Tests and evidence
-Desktop 1440/1024, tablet 768, mobile 390/320 were exercised in Chromium. Tests run the actual exported HTML after the last source change. Evidence includes network allowlist traces, sample fixtures, isolation audit, actual control/playback tests, keyboard navigation, image geometry, reduced-motion handling, no-JS fallback and missing-asset recovery.
+MAP uses four owner-approved edited phone captures. Actual interface layout is retained; identifying text is replaced with fictional data. The homepage overview is an explicitly described three-panel composition, not an invented wide-screen MAP interface. See `MAP-CAPTURE-PROVENANCE.json`.
 
-Text contrast: oat/moss 4.89:1; ink/oat 9.80:1; muted/oat 5.76:1; oat/terracotta 4.92:1. Moss/terracotta were darkened slightly from the selected comp for accessibility. Mobile functional text was raised to 12px. All captured application images retain their original UI styling.
+DD, Yen and 89lab show labelled semantic workflow/architecture outlines, not simulated dashboards. Hill’s shows its self-directed content method and authored content concept, with no client relationship, affiliation or campaign results claimed. DD source remains private; no clinical records, drug locations, quantities or staff information are published.
 
-Mechanical detector ran once. Its real small-text findings were corrected and checked through computed styles after the edit. Remaining heuristic findings are intentional bounded hero clipping (no menu/popover is clipped), shell padding inherited via the child with a verified >=22px inset, and nonzero-offset tinted elevation (not a zero-offset glow). Do not treat the pre-fix detector JSON as a clean final audit.
+`RASTER-PROVENANCE.json` records source/shipping hashes and pixel preservation. The provenance tool stores WebP origins in `.webp.json` sidecars; these accompany every shipping image in the runtime manifest and review ZIP. Source image pixels are unchanged except for the documented MAP overview composition, whose input files were already approved fictional-data copies.
 
-No production files were replaced. Existing dirty resume files and untracked PRODUCT.md in the live checkout are preserved. Existing legacy product context is not migrated by this variant; this directory's approved DESIGN.md records the client-facing direction.
+## Build and runtime boundary
 
-## Font licence
-Epilogue is self-hosted under SIL OFL; see OFL-Epilogue.txt. Application screenshots are Hafiz's own interfaces, populated with sample data.
+```sh
+node build.cjs
+node qa.cjs
+```
 
-## Review gate
-Theoses prepared this preview locally without directly committing or pushing code. A GitHub agent can import the reviewed artifact into an implementation PR referencing issue #48. Leave issue and PR open for Hafiz; no merge, release publication or deployment is authorised.
+`build.cjs` writes static pages, combines the unchanged incumbent `base.css` with scoped `extension.css`, and writes `runtime-manifest.json`. That manifest is the **only runtime copy allowlist**: ten pages, CSS, JavaScript, local font/licence, thirteen WebP assets and their origin sidecars. Never copy source scripts, fixture files, evidence, provenance records, PRODUCT/DESIGN documents or `.impeccable` development contracts into a public preview directory.
+
+`qa.cjs` serves the preview on a temporary loopback port and closes it on completion. It exercises all ten pages at 1440/1024/768/390/320 pixels, featured keyboard controls, every gallery and full-size image, local links, disclosure, résumé/contact presence, no-JS fallbacks, request-induced missing assets, colour contrast and normal extracted-folder `file://` review mode. No production app APIs or account connections are made. Failures are simulated by intercepting requests, not editing live/source state.
+
+For packaged-folder validation:
+
+```sh
+PREVIEW_ROOT=/tmp/extracted-preview QA_EVIDENCE=/tmp/packaged-qa QA_CAPTURE=0 node qa.cjs
+```
+
+Browser tools default to the existing Playwright-core/Chromium installation; override `PLAYWRIGHT_MODULE` and `CHROME` as needed. Evidence under `evidence/eight-projects/` belongs to development/review only.
+
+## Known boundaries
+
+- Interactive application demos are deferred by the approved first-pass scope.
+- New screenshot captures for DD, Yen, Hill’s or 89lab require separate safe-data preparation; no production screenshot is substituted.
+- Résumé links point to the existing public PDF; the PDF opens online, and its live files were not changed.
+- Original Product Launch `DESIGN.md` remains the visual authority; its earlier three-project/capture inventory is historical. Current selection and evidence are recorded here and in PRODUCT.md, without changing approved tokens or introducing a new identity.
+
+Font: self-hosted Epilogue, SIL OFL (`OFL-Epilogue.txt`). No analytics, remote fonts, API client, credentials or live telemetry in the preview.

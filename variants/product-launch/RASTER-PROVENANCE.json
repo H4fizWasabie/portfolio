@@ -1,0 +1,93 @@
+[
+  {
+    "file": "map-calendar-demo.webp",
+    "origin": "Origin: owner-approved MAP phone captures (2026-10-03); real app UI, identifying text replaced with fictional demo data; not generated.",
+    "source_file_sha256": "6a6f0a76451066746d5b8068ee9cadd374c51c5a4e5d736d79e7b8995a017282",
+    "shipping_file_sha256": "6a6f0a76451066746d5b8068ee9cadd374c51c5a4e5d736d79e7b8995a017282",
+    "pixels_preserved": true
+  },
+  {
+    "file": "map-home-demo.webp",
+    "origin": "Origin: owner-approved MAP phone captures (2026-10-03); real app UI, identifying text replaced with fictional demo data; not generated.",
+    "source_file_sha256": "d28fa98d9fe1337b32875d0aeb0362c7c491e72b4792e21a500913d6846969d7",
+    "shipping_file_sha256": "d28fa98d9fe1337b32875d0aeb0362c7c491e72b4792e21a500913d6846969d7",
+    "pixels_preserved": true
+  },
+  {
+    "file": "map-overview.webp",
+    "origin": "Origin: owner-approved MAP phone captures (2026-10-03); real app UI, identifying text replaced with fictional demo data; not generated. Three-panel composition of Home, Tasks and Tools captures; no invented UI.",
+    "source_file_sha256": "04693d5b7762302f89845774d36d0e835287d707439af4be4350047de94c1249",
+    "shipping_file_sha256": "04693d5b7762302f89845774d36d0e835287d707439af4be4350047de94c1249",
+    "pixels_preserved": true
+  },
+  {
+    "file": "map-tasks-demo.webp",
+    "origin": "Origin: owner-approved MAP phone captures (2026-10-03); real app UI, identifying text replaced with fictional demo data; not generated.",
+    "source_file_sha256": "11adad190908fd17f7b30e2dd41063a421c403a87a74e12a0f1f064a940a4c2e",
+    "shipping_file_sha256": "11adad190908fd17f7b30e2dd41063a421c403a87a74e12a0f1f064a940a4c2e",
+    "pixels_preserved": true
+  },
+  {
+    "file": "map-tools-demo.webp",
+    "origin": "Origin: owner-approved MAP phone captures (2026-10-03); real app UI, identifying text replaced with fictional demo data; not generated.",
+    "source_file_sha256": "db83479a28c06222f8be78c6e42f434251146ebd8d9a152ce4365aaa8366348e",
+    "shipping_file_sha256": "db83479a28c06222f8be78c6e42f434251146ebd8d9a152ce4365aaa8366348e",
+    "pixels_preserved": true
+  },
+  {
+    "file": "pims-dashboard.webp",
+    "origin": "Origin: existing owner-reviewed genuine PIMS UI capture with local fictional API responses, no production database; not generated. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "8da8a236598840a82b688963a0ab0755ef0101e8bbdfa55c45db8fd2c4aff9a5",
+    "shipping_file_sha256": "8da8a236598840a82b688963a0ab0755ef0101e8bbdfa55c45db8fd2c4aff9a5",
+    "pixels_preserved": true
+  },
+  {
+    "file": "pims-orders.webp",
+    "origin": "Origin: existing owner-reviewed genuine PIMS UI capture with local fictional API responses, no production database; not generated. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "ad6a64e7d56987a37e7b30850780be06200ccc9b60901521b91ffc0bc3f8bffe",
+    "shipping_file_sha256": "ad6a64e7d56987a37e7b30850780be06200ccc9b60901521b91ffc0bc3f8bffe",
+    "pixels_preserved": true
+  },
+  {
+    "file": "pims-request.webp",
+    "origin": "Origin: existing owner-reviewed genuine PIMS UI capture with local fictional API responses, no production database; not generated. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "e035307fa72726c7cb5a60723a37e0136b426c8d3aa2f7070d19ce7cb341af2f",
+    "shipping_file_sha256": "e035307fa72726c7cb5a60723a37e0136b426c8d3aa2f7070d19ce7cb341af2f",
+    "pixels_preserved": true
+  },
+  {
+    "file": "procura-inventory.webp",
+    "origin": "Origin: existing owner-reviewed genuine Procura UI capture, separate isolated SeedDemo database, fictional records only; not generated. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "57f38ef07c773bb83603350fde7b6e4e7e6103e021f3d19628df83ce4b113a1a",
+    "shipping_file_sha256": "57f38ef07c773bb83603350fde7b6e4e7e6103e021f3d19628df83ce4b113a1a",
+    "pixels_preserved": true
+  },
+  {
+    "file": "procura-orders.webp",
+    "origin": "Origin: existing owner-reviewed genuine Procura UI capture, separate isolated SeedDemo database, fictional records only; not generated. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "58490f4430077c2592a8775caa06c3445d4a0101b7dff710670acc3e072c6534",
+    "shipping_file_sha256": "58490f4430077c2592a8775caa06c3445d4a0101b7dff710670acc3e072c6534",
+    "pixels_preserved": true
+  },
+  {
+    "file": "procura-planning.webp",
+    "origin": "Origin: existing owner-reviewed genuine Procura UI capture, separate isolated SeedDemo database, fictional records only; not generated. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "c556607fc41c9cc60cbb113d68e60f28946d0aca131ec8cb9bf16135477a3c41",
+    "shipping_file_sha256": "c556607fc41c9cc60cbb113d68e60f28946d0aca131ec8cb9bf16135477a3c41",
+    "pixels_preserved": true
+  },
+  {
+    "file": "theoses-report.webp",
+    "origin": "Origin: existing owner-reviewed genuine Theoses v1.0.116 dashboard capture with staged fictional conversation, not live AI execution or generated UI. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190",
+    "shipping_file_sha256": "eb2d5b0ed436cf4401e4f922a12d63d03a0ed7307ad31b39df62d6bc0cc98190",
+    "pixels_preserved": true
+  },
+  {
+    "file": "theoses-review.webp",
+    "origin": "Origin: existing owner-reviewed genuine Theoses v1.0.116 dashboard capture with staged fictional conversation, not live AI execution or generated UI. See CAPTURE-PROVENANCE.json.",
+    "source_file_sha256": "a49cd66a9d9076fc9ed27d3b7fd06f0fbccedb419483bc05a343f94fd1563965",
+    "shipping_file_sha256": "a49cd66a9d9076fc9ed27d3b7fd06f0fbccedb419483bc05a343f94fd1563965",
+    "pixels_preserved": true
+  }
+]
