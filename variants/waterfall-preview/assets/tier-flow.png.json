@@ -1,0 +1,5 @@
+{
+  "file": "tier-flow.png",
+  "sha256": "d5bc4dcc81abce4c7b89bd7f99ffa5d386892867e66694822c39fde4f6c905de",
+  "origin": "Deterministic opaque RGB tier velocity+phase map from generate-flow.py; synthetic motion data, not scene photography. RGB remains opaque to avoid browser alpha0 premultiplication loss."
+}

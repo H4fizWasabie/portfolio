@@ -1,0 +1,13 @@
+# V4 compact motion controls — bounded finish
+
+Verdict: ready for standalone prototype review, not main promotion. Actual desktop/mobile closed and open captures inspected together. The forest is less obstructed; a small dark-moss bar recedes bottom-right while Pause remains one tap away. Motion reveals Still view and truthful simulation/fallback status. Oat type, rounded geometry and the incumbent palette retained; no cards, images, project copy, layout, shader or camera changes.
+
+Actual tests:1440/390/320/667 landscape, collapsed201.3125×54px; corresponding V3 toolbar area fractions0.37345/0.39513/0.33240/0.26582.44px targets; worst-white control text contrast11.4646:1. Native Chromium accessibility tree reports Motion as DisclosureTriangle, with real expanded state and controlled panel. Keyboard Enter/Tab, still toggles, pressed state, Escape/focus return, pointer-outside/focus-out dismissal and panel containment passed without errors.
+
+Full latest regression passed desktopDPR1/2, phoneDPR3, smallphoneDPR2: pause/resume, scroll-camera, static view, native-density overlay, anchor keyboard navigation, eight project links. GPU4100 changing-water samples;0 terrain changes. Reduced-motion, noJS and unavailable-WebGL show native options and disabled safe controls/status. V3 card contrast/layout/preferences reran unchanged. Unsupported-blur engine branch remains unverified from V3; Safari/physical-phone battery/performance are not certified.
+
+Test corrections: first assertion falsely expected Motion to expose button role; direct AX evidence confirmed native DisclosureTriangle and test was corrected. A full batch exceeded240s during an unbounded RAF promise after smallphone captures; frame evidence now uses a10s bounded wait and stage logging. Smallphone isolation plus fresh full regression passed. Exact timeout trigger was not reproduced; no runtime change made for it.
+
+One detector pass, advisory findings only. Existing approved typography/color/radius values preserved;12px control radius is now in the scoped token record. Border plus offset8px/blur22px shadow gives the temporary raised panel a visible boundary over busy scenery; retained deliberately. No generic advisory was used to redesign approved material.
+
+Source main and first water script byte-identical to V3. Recording helper uses only unchanged state()/scroll contracts and was inspected, not rerun; no new V4 video claimed. Scoped documentation/sidecar updated inline, canonical records untouched. Public checks follow atomic preview replacement and backing up V3. Feature branch/draft PR55 awaiting owner review; no merge/main promotion.

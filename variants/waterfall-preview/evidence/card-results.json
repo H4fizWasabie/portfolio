@@ -1,0 +1,50 @@
+[
+  {
+    "test": "six glass cards: exact V2 layout, blur, opaque content and worst-white body contrast",
+    "width": 1440,
+    "height": 900,
+    "dpr": 2,
+    "minContrast": 5.165812395461318,
+    "background": "rgba(35, 46, 30, 0.78)",
+    "blur": "blur(12px)"
+  },
+  {
+    "test": "six glass cards: exact V2 layout, blur, opaque content and worst-white body contrast",
+    "width": 390,
+    "height": 844,
+    "dpr": 3,
+    "minContrast": 5.165812395461318,
+    "background": "rgba(35, 46, 30, 0.78)",
+    "blur": "blur(12px)"
+  },
+  {
+    "test": "six glass cards: exact V2 layout, blur, opaque content and worst-white body contrast",
+    "width": 320,
+    "height": 740,
+    "dpr": 2,
+    "minContrast": 5.165812395461318,
+    "background": "rgba(35, 46, 30, 0.78)",
+    "blur": "blur(12px)"
+  },
+  {
+    "test": "real browser preference fallback",
+    "feature": "prefers-reduced-transparency",
+    "value": "reduce",
+    "background": "rgba(35, 46, 30, 0.94)",
+    "blur": "none",
+    "pass": true
+  },
+  {
+    "test": "real browser preference fallback",
+    "feature": "prefers-contrast",
+    "value": "more",
+    "background": "rgba(35, 46, 30, 0.94)",
+    "blur": "none",
+    "pass": true
+  },
+  {
+    "test": "unsupported-backdrop-filter fallback",
+    "verified": false,
+    "reason": "Chromium flag did not disable CSS feature; preference-based no-blur fallback tested instead"
+  }
+]
