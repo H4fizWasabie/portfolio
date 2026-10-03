@@ -15,6 +15,7 @@ if(published){
 }
 fs.writeFileSync(path.join(root,'site.css'),fs.readFileSync(path.join(source,'base.css'),'utf8')+'\n'+fs.readFileSync(path.join(source,'extension.css'),'utf8')+'\n'+require('../../resume/preview.cjs')().css);
 require('./render.cjs');
+if(published)require('./publish-waterfall.cjs')(root);
 const pages=['index.html','projects/index.html','resume/index.html',...projects.map(p=>'work/'+p.slug+'/index.html')];
 const runtime=[...pages,'site.css',...assets];
 if(published){

@@ -40,9 +40,10 @@ let browser;
    assert.equal(await page.locator('h1').count(),1,route);assert.equal(await page.locator('.preview-note').count(),0);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),route);
    if(route==='/'){
-    assert.equal(await page.locator('.all-work .project-row').count(),8);
-    await page.locator('[data-app="map"]').click();await page.waitForFunction(()=>document.getElementById('demo-image').naturalWidth===1360&&document.getElementById('app-heading').textContent==='MAP');
-    await page.locator('#preview-project-link').click();await page.waitForURL(base+'/work/map/');assert.equal(await page.locator('h1').innerText(),'MAP');
+    assert.equal(await page.locator('meta[name="portfolio-surface"]').getAttribute('content'),'waterfall-v4');
+    assert.equal(await page.locator('details.index li').count(),8);
+    assert.ok(await page.locator('#landscape #fallback').evaluate(img=>img.complete&&img.naturalWidth>0),'Approved waterfall image missing');
+    await page.locator('#map > article > a.link-line').click();await page.waitForURL(base+'/work/map/');assert.equal(await page.locator('h1').innerText(),'MAP');
    }
    if(route==='/resume/'){assert.match(await page.locator('.resume-paper').innerText(),/MAP — My Awesome App/);assert.equal(await page.locator('iframe,object,embed').count(),0);}
    if(route==='/work/map/'){
@@ -51,7 +52,7 @@ let browser;
     if(png){fs.mkdirSync(png,{recursive:true});await page.screenshot({path:path.join(png,'live-map-'+width+'.png'),fullPage:true});}
    }
   }
-  assert.deepEqual(errors,[]);await context.close();console.log('PASS actual browser '+width+'px: eleven public routes; canonical navigation; MAP featured link/gallery; no preview banner, overflow or JS errors');
+  assert.deepEqual(errors,[]);await context.close();console.log('PASS actual browser '+width+'px: eleven public routes; canonical navigation; V4 homepage/MAP link/gallery; no preview banner, overflow or JS errors');
  }
  await browser.close();console.log('PASS public verification complete: canonical portfolio reachable and crawlable; indexing/ranking is controlled by search engines');
 })().catch(async error=>{console.error(error);await browser?.close();process.exitCode=1;});

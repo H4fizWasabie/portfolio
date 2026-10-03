@@ -21,6 +21,10 @@ for(const route of routes){
 }
 const verification=fs.readFileSync(path.join(root,'../../apps/web/index.html'),'utf8').match(/<meta\b[^>]*name="google-site-verification"[^>]*>/)[0];
 assert.ok(fs.readFileSync(path.join(dist,'index.html'),'utf8').includes(verification),'Google Search Console verification lost');
+const home=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+assert.match(home,/name="portfolio-surface" content="waterfall-v4"/);assert.match(home,/id="resume-preview"/);assert.match(home,/href="\/resume\/Resume-Hafiz-Jamali.pdf"/);assert.doesNotMatch(home,/href="https:\/\/portfolio.wasabietech.com\/work\//);
+const approved=require('../waterfall-preview/build.cjs')();const scripts=html=>[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);assert.deepEqual(scripts(home),scripts(approved),'Canonical publication altered approved motion/control/navigation scripts');
+assert.equal(home.match(/<style>([\s\S]*?)<\/style>/)[1],approved.match(/<style>([\s\S]*?)<\/style>/)[1],'Canonical publication altered approved styles');
 const site=fs.readFileSync(path.join(dist,'sitemap.xml'),'utf8');
 assert.deepEqual([...site.matchAll(/<loc>(.*?)<\/loc>/g)].map(m=>m[1]),routes.map(route=>origin+route));
 assert.match(site,/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
@@ -30,4 +34,4 @@ for(const entry of manifest){assert.equal(hash(fs.readFileSync(path.join(dist,en
 assert.equal(manifest.length,46);
 assert.deepEqual(fs.readFileSync(path.join(dist,'resume/Resume-Hafiz-Jamali.pdf')),fs.readFileSync(path.join(root,'../../resume/Resume-Hafiz-Jamali.pdf')));
 const reader=fs.readFileSync(path.join(dist,'resume/index.html'),'utf8');assert.match(reader,/MAP — My Awesome App/);assert.doesNotMatch(reader,/Procure Pilot|<iframe|<object|<embed/);assert.match(reader,/Preview résumé/);
-console.log('PASS publication regression: both executed modes; eleven indexable canonical pages; valid JSON-LD; clean links; sitemap/robots; 46 runtime hashes; responsive HTML resume and approved PDF; review output unchanged');
+console.log('PASS publication regression: both executed modes; eleven indexable canonical pages; valid JSON-LD; clean links; sitemap/robots; 46 runtime hashes; canonical V4 scripts/styles preserved; responsive HTML resume and approved PDF; review output unchanged');

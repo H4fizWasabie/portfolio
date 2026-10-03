@@ -1,6 +1,6 @@
 # Product Launch — eight-project review preview
 
-Owner-approved static first pass, 2026-10-03. Issue: https://github.com/H4fizWasabie/portfolio/issues/50.
+Owner-approved static case-study system, 2026-10-03. Canonical publication now uses the approved V4 waterfall homepage; review output retains the Product Launch comparison. Issue: https://github.com/H4fizWasabie/portfolio/issues/50.
 
 ## Review locally
 
@@ -11,7 +11,7 @@ python3 -m http.server 19090 --bind 127.0.0.1
 
 Open `http://127.0.0.1:19090/index.html`, or extract the review ZIP and open `index.html` directly in a browser. Keep the folder structure and assets together. Do not use the obsolete single-file export from the earlier preview: eight individual project pages now require the directory bundle.
 
-No deployment is performed by either build or tests. Hafiz explicitly authorised merge and promotion to the main URL on 2026-10-03; follow-up issue #52 tracks production/search readiness. `node build.cjs --publish` writes indexable production pages and metadata to `dist/`, never over the review build. Preview pages remain noindex. Deploy only the production manifest after a backup, staged routing test and Caddy validation. Preserve résumé/video assets and API services. This authorisation does not grant general future merge/deploy permission.
+No deployment is performed by either build or tests. Hafiz explicitly authorised merge and promotion to the main URL on 2026-10-03; follow-up issue #52 tracks production/search readiness. `node build.cjs --publish` writes indexable production pages and metadata to `dist/`, never over the review build. It replaces only the production homepage with V4 via publish-waterfall.cjs, inheriting the existing canonical/Search Console/schema/social head. All other ten pages, project galleries and resume assets remain in the release. Approved V4 CSS/scripts and offline output are regression-checked byte-for-byte; public project/PDF links become same-origin. Preview pages remain noindex. Deploy only the production manifest after a backup, staged routing test and Caddy validation. Preserve résumé/video assets and API services. This authorisation does not grant general future merge/deploy permission.
 
 ## Pages and scope
 
