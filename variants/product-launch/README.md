@@ -11,7 +11,7 @@ python3 -m http.server 19090 --bind 127.0.0.1
 
 Open `http://127.0.0.1:19090/index.html`, or extract the review ZIP and open `index.html` directly in a browser. Keep the folder structure and assets together. Do not use the obsolete single-file export from the earlier preview: eight individual project pages now require the directory bundle.
 
-No deployment is performed by either build or tests. Do not change Caddy, live dist, production services or data. Leave the issue and feature-branch PR for Hafiz to review and merge. Main-homepage promotion remains separately gated.
+No deployment is performed by either build or tests. Hafiz explicitly authorised merge and promotion to the main URL on 2026-10-03; follow-up issue #52 tracks production/search readiness. `node build.cjs --publish` writes indexable production pages and metadata to `dist/`, never over the review build. Preview pages remain noindex. Deploy only the production manifest after a backup, staged routing test and Caddy validation. Preserve résumé/video assets and API services. This authorisation does not grant general future merge/deploy permission.
 
 ## Pages and scope
 
@@ -21,7 +21,7 @@ No deployment is performed by either build or tests. Do not change Caddy, live d
 - Detailed screenshot galleries live on project pages, not the homepage.
 - These pages are static case studies and screenshot galleries, not interactive application installations.
 
-The six legacy `apps/web/public/work/*` pages and legacy React/API routes remain untouched. This extension adds matching routes inside the Product Launch variant, including new Yen/89lab case studies, without redirecting or duplicating the legacy runtime. `projects.cjs` is the verified content source; `render.cjs` generates all ten variant pages.
+Legacy source files remain untouched. On approved production promotion, their public `/work/<slug>` URLs lead to the matching new canonical case studies; legacy assets, résumé and API remain available. Old Product Launch variant URLs redirect to the main site. `projects.cjs` is the verified content source; `render.cjs` generates all ten pages in separate review or publication modes.
 
 ## Evidence and truthful visuals
 
@@ -40,7 +40,7 @@ node build.cjs
 node qa.cjs
 ```
 
-`build.cjs` writes static pages, combines the unchanged incumbent `base.css` with scoped `extension.css`, and writes `runtime-manifest.json`. That manifest is the **only runtime copy allowlist**: ten pages, CSS, JavaScript, local font/licence, thirteen WebP assets and their origin sidecars. Never copy source scripts, fixture files, evidence, provenance records, PRODUCT/DESIGN documents or `.impeccable` development contracts into a public preview directory.
+`build.cjs` writes static pages, combines the unchanged incumbent `base.css` with scoped `extension.css`, and writes `runtime-manifest.json`. Each output manifest is the **only runtime copy allowlist**: ten pages, CSS, JavaScript, local font/licence, thirteen WebP assets and their origin sidecars. Publication adds a favicon, robots.txt, a ten-URL sitemap.xml and llms.txt, canonical/JSON-LD/social metadata, and the existing Google Search Console verification tag from `apps/web/index.html`. Verification was absent from the old public static homepage despite remaining in the React source; this publishing mode restores it and regression-tests it. Never copy source scripts, fixture files, evidence, provenance records, PRODUCT/DESIGN documents or `.impeccable` development contracts into a public preview directory.
 
 `qa.cjs` serves the preview on a temporary loopback port and closes it on completion. It exercises all ten pages at 1440/1024/768/390/320 pixels, featured keyboard controls, every gallery and full-size image, local links, disclosure, résumé/contact presence, no-JS fallbacks, request-induced missing assets, colour contrast and normal extracted-folder `file://` review mode. No production app APIs or account connections are made. Failures are simulated by intercepting requests, not editing live/source state.
 

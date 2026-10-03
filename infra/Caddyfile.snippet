@@ -1,28 +1,36 @@
-# portfolio.wasabietech.com — core block (variant handle_path blocks omitted).
-# Live source of truth: /etc/caddy/Caddyfile on the VPS. Mirrored here for the repo record.
+# Approved canonical Product Launch deployment; archive variant handlers omitted.
+# Live source of truth: /etc/caddy/Caddyfile. Release pointer is replaced atomically.
+# Legacy dist remains in place for existing asset/video writers and the résumé.
 portfolio.wasabietech.com {
 	bind 149.28.146.30
-	root * /var/www/portfolio/apps/web/dist
-	redir /ai-content-lab.html /work/hills-ai-content-lab 301
+	root * /var/www/portfolio-releases/current
+	handle_path /variant-product-launch/* {
+		redir https://portfolio.wasabietech.com{uri} 308
+	}
+	redir /variant-product-launch / 308
+	@archivedVariants path_regexp archived ^/variant-(alpha|bravo|charlie|delta|epsilon|zeta|eta|flight|ledger|rawgrid)(/|$)
+	header @archivedVariants X-Robots-Tag "noindex, nofollow"
+	@htmlIndex path_regexp htmlIndex ^/(|projects/|work/(?:procura|pims|dd-drugs-register|theoses|yen|map|hills-ai-content-lab|89lab)/)index\.html$
+	redir @htmlIndex /{re.htmlIndex.1} 308
+	@canonicalDirectories path /projects /work/procura /work/pims /work/dd-drugs-register /work/theoses /work/yen /work/map /work/hills-ai-content-lab /work/89lab
+	redir @canonicalDirectories {path}/ 308
+	redir /ai-content-lab.html /work/hills-ai-content-lab/ 301
 	redir /resume.html /resume 301
 	redir /ai-lab-prototypes.html / 301
 	redir /resume /resume/Resume-Hafiz-Jamali.pdf 302
 	handle /api/* {
 		reverse_proxy 127.0.0.1:8085
 	}
-	@spa path /work/*
-	handle @spa {
+	@legacyAssets path_regexp legacyAsset ^/(assets/|fonts/|img/|resume/|favicon(?:\.ico|-32x32\.png)$|apple-touch-icon\.png$|[0-9]{8}-[^/]+\.mp4$)
+	handle @legacyAssets {
 		root * /var/www/portfolio/apps/web/dist
-		try_files {path}/index.html {path} /react-index.html
 		file_server
 	}
 	handle {
-		try_files {path} /index.html
+		try_files {path} {path}/index.html
 		header Cache-Control "no-cache"
 		file_server
 	}
 	@hashedAssets path_regexp hashed /assets/.*-[A-Za-z0-9_-]+\.(js|css|woff2?|png|jpe?g|svg)$
 	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
-	@index path /index.html
-	header @index Cache-Control "no-cache"
 }

@@ -19,7 +19,7 @@
       document.getElementById('screen-label').textContent = project.slug === 'map' ? 'Edited phone captures' : project.slug === 'theoses' ? 'Staged sample conversation' : 'Fictional demo records';
       document.getElementById('preview-caption').textContent = project.disclosure;
       const link = document.getElementById('preview-project-link');
-      link.href = 'work/' + project.slug + '/index.html';
+      link.href = 'work/' + project.slug + '/' + (document.querySelector('link[rel="canonical"]') ? '' : 'index.html');
       link.textContent = 'View ' + project.title + ' project';
       error.hidden = true;
       image.alt = project.alt;
