@@ -2,4 +2,6 @@ dist/
 evidence/*
 !evidence/qa-results.json
 !evidence/public-results.json
+!evidence/card-results.json
+!evidence/card-finish.md
 !evidence/finish-review.md

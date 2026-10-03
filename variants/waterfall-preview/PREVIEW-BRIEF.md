@@ -16,5 +16,8 @@ Source stays on a feature branch in /tmp. No live homepage or Caddy configuratio
 ## Approved V2 refinement (2026-10-03)
 Hafiz approved sharper rendering/reduced zoom and tier-directed variable-speed water with restrained landing foam. Preserve this exact image, page copy and layout. Native browser photograph outside a transparent water canvas; water layer at native tested DPR2/3 within DPR3/8M/GPU budget. Feather image-colour ROI gates. Opaque RGB tier velocity/phase, foam in matte B: never encode velocity under alpha0. This is still illustrative motion, not true video or newly generated 4K photography. Update only the separate preview and existing draft PR; no canonical promotion.
 
+## Approved V3 cards (2026-10-03)
+Hafiz approved restrained visible glass after discussing readability. Reading backgrounds78% moss with the existing12px frost; full-opacity cream text/screenshots; solid primary and outlined secondary button surfaces. Preserve V2 water, image, card geometry, rounding, copy and layouts. Check nominal body contrast against all-white water, all six card bounding boxes, reduced-transparency and increased-contrast fallbacks. Unsupported-blur browsers get94%/no-blur base, but actual unsupported-engine emulation could not be verified. Keep changes on the separate preview/draft PR; no canonical promotion.
+
 ## Exit
 Verify actual shipped HTML on desktop and mobile, moving-water pixels, fixed rock pixels, scroll-camera differences, controls and still/reduced-motion fallbacks. Record the actual browser walkthrough. Open PR for review; no merge or homepage promotion.

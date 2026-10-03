@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-03T11:39:29.625342+00:00",
+  "generatedAt": "2026-10-03T12:02:39.075791+00:00",
   "title": "Design System: Living waterfall motion preview",
   "extensions": {
     "shadows": [
@@ -42,7 +42,7 @@
       "kind": "button",
       "description": "Supporting navigation.",
       "html": "<a class=\"ds-secondary\" href=\"#\">View project</a>",
-      "css": ".ds-secondary{font-family:Epilogue,sans-serif;font-size:13px;border-radius:999px;padding:14px 21px;text-decoration:none;display:inline-block;background:transparent;color:#e8ddc5;border:1px solid rgba(232,221,197,.55)}.ds-secondary:hover{background:rgba(232,221,197,.12)}.ds-secondary:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}"
+      "css": ".ds-secondary{font-family:Epilogue,sans-serif;font-size:13px;border-radius:999px;padding:14px 21px;text-decoration:none;display:inline-block;background:#293321;color:#e8ddc5;border:1px solid rgba(232,221,197,.55)}.ds-secondary:hover{background:#36432d}.ds-secondary:focus-visible{outline:3px solid #e8ddc5;outline-offset:5px}"
     },
     {
       "name": "Reading surface",
@@ -50,7 +50,7 @@
       "refersTo": "reading",
       "description": "Readable content above photograph.",
       "html": "<div class=\"ds-reading\">Custom business apps and AI automation.</div>",
-      "css": ".ds-reading{font-family:Epilogue,sans-serif;color:#e8ddc5;background:rgba(35,46,30,.91);padding:40px;border:1px solid rgba(232,221,197,.18);border-radius:24px;box-shadow:0 18px 50px rgba(23,32,22,.22);backdrop-filter:blur(12px)}"
+      "css": ".ds-reading{font-family:Epilogue,sans-serif;color:#e8ddc5;background:rgba(35,46,30,.94);padding:40px;border:1px solid rgba(232,221,197,.18);border-radius:24px;box-shadow:0 18px 50px rgba(23,32,22,.22);-webkit-backdrop-filter:none;backdrop-filter:none}@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.ds-reading{background:rgba(35,46,30,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.ds-reading{background:rgba(35,46,30,.94);-webkit-backdrop-filter:none;backdrop-filter:none}}"
     },
     {
       "name": "Scene label",
@@ -71,11 +71,14 @@
     "northStar": "Living waterfall",
     "overview": "Owner-approved image and scroll interaction, applied only to a throwaway preview. The canonical Product Launch design record is unchanged. Existing Epilogue and oat lettering remain; the forest background is the selected new material.",
     "keyCharacteristics": [
-      "Image leads; opaque-enough moss panels carry readable portfolio content.",
+      "Image leads; restrained frosted moss cards reveal scenery while preserving readable content.",
       "Camera travel and water-only movement form one continuous scene.",
       "Simulation is explicitly identified; this is not an image-to-video result."
     ],
     "rules": [
+      "V3 reading cards:78% moss background,12px frost; no opacity applied to text/images/buttons.",
+      "Fallback:94% moss/no blur for unsupported backdrop-filter, reduced transparency or increased contrast; unsupported engine branch unverified.",
+      "Opaque secondary actions preserve contrast; white-backdrop body bound5.1658:1. V2 geometry, markup and water script unchanged.",
       "Static photograph rendered natively outside transparent water overlay; original image unchanged.",
       "Reduced camera zoom: desktop1.18\u20131.02; mobile approximately1.074\u20131.01.",
       "Continuous tier-directed advection; opaque RGB velocity map; landing foam in matte blue channel.",

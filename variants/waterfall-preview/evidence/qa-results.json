@@ -28,7 +28,7 @@
   {
     "test": "actual transparent GPU layer: water moves; terrain overlay unchanged",
     "water": 4311,
-    "waterChanged": 4064,
+    "waterChanged": 4100,
     "rock": 128754,
     "rockChanged": 0
   },

@@ -6,7 +6,9 @@ colors:
   moss: "#293321"
   ink: "#172016"
   sage: "#8b9d83"
-  reading-surface: "rgba(35,46,30,.91)"
+  reading-surface: "rgba(35,46,30,.78)"
+  reading-fallback: "rgba(35,46,30,.94)"
+  secondary-hover: "#36432d"
 typography:
   display:
     fontFamily: "Epilogue, sans-serif"
@@ -69,13 +71,13 @@ Self-hosted Epilogue throughout. Desktop body 16px; mobile body 14px. Display co
 Normal document scroll; six left reading passages, with full-viewport fixed background. The static photograph is rendered by the browser independently of the transparent water canvas; camera placement is shared and updates only when the view changes. Desktop camera zoom now ranges 1.18–1.02, mobile approximately 1.074–1.01. The original 1920×1280 image is unchanged, not regenerated or claimed as new 4K detail. Desktop panels max 630px (650px for about and large displays); mobile panels full available width, padded 27px. Mobile leaves forest visible above its opening reading panel and centres the upper cascades. The fixed preview toolbar is development UI, not a proposed production element.
 
 ## Elevation & Depth
-Reading panel uses 0 18px 50px rgba(23,32,22,.22), a low-opacity border and 12px backdrop blur for separation from the photograph. Toolbar uses a defined border with no shadow. Header gradient protects text over bright vegetation.
+V3 reading cards use a 78% moss tint over the photograph and retain the existing 12px frost, 0 18px 50px rgba(23,32,22,.22) shadow and subtle border. Transparency applies only to the background: text, images and actions keep opacity1. The CSS base surface is 94% moss with no blur; supporting browsers opt into glass through @supports for either backdrop-filter or its WebKit-prefixed form. Reduced-transparency and increased-contrast preferences restore the 94%/no-blur surface. Those preference branches ran in actual Chromium; an unsupported-blur engine could not be forced and remains unverified. Toolbar uses a defined border with no shadow. Header gradient protects text over bright vegetation.
 
 ## Shapes
 Reading corners 24px / mobile 22px; screenshot corners 16px; primary actions are pills; preview toolbar 18px and its buttons 12px.
 
 ## Components
-Primary actions use oat background and dark ink. Secondary actions are transparent with oat border. Focus is a 3px oat outline offset 5px. Hover background transitions last .3s, disabled under reduced motion. All eight project links lead to actual canonical case studies. Water controls have accessible pressed state; reduced motion disables both animated water and camera.
+Primary actions use oat background and dark ink. Secondary actions retain their oat outline but now use fully opaque moss and #36432d hover to prevent loss of contrast over bright water. Cream body text against the mathematical all-white backdrop bound measures5.1658:1; six cards at desktop and mobile preserve V2 bounding boxes. Focus is a 3px oat outline offset 5px. Hover background transitions last .3s, disabled under reduced motion. All eight project links lead to actual canonical case studies. Water controls have accessible pressed state; reduced motion disables both animated water and camera.
 
 ## Do's and Don'ts
 - Do keep simulation disclosure and safe-screenshot descriptions visible.

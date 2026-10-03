@@ -5,6 +5,10 @@
     "dpr": 2,
     "publicHTML": true,
     "pauseScrollStillPassed": true,
+    "cardTreatment": "moss-glass-v3",
+    "cardBackground": "rgba(35, 46, 30, 0.78)",
+    "cardBlur": "blur(12px)",
+    "cardOpacity": "1",
     "revision": "directional-water-v2",
     "source": [
       1920,
@@ -34,6 +38,10 @@
     "dpr": 3,
     "publicHTML": true,
     "pauseScrollStillPassed": true,
+    "cardTreatment": "moss-glass-v3",
+    "cardBackground": "rgba(35, 46, 30, 0.78)",
+    "cardBlur": "blur(12px)",
+    "cardOpacity": "1",
     "revision": "directional-water-v2",
     "source": [
       1920,
@@ -63,6 +71,10 @@
     "dpr": 2,
     "publicHTML": true,
     "pauseScrollStillPassed": true,
+    "cardTreatment": "moss-glass-v3",
+    "cardBackground": "rgba(35, 46, 30, 0.78)",
+    "cardBlur": "blur(12px)",
+    "cardOpacity": "1",
     "revision": "directional-water-v2",
     "source": [
       1920,

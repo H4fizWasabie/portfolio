@@ -2,7 +2,12 @@
 
 Question: does flowing-water motion plus a scroll camera make the owner-selected waterfall a useful portfolio background?
 
-Preview: https://image.wasabietech.com/portfolio-waterfall-preview/
+Latest preview: https://image.wasabietech.com/portfolio-waterfall-preview/?v=3
+
+## V3 cards — owner-approved refinement
+Reading cards use78% moss tint with the existing12px frost. Only their background is translucent; text/screenshots stay opacity1, and both primary and outlined secondary buttons have solid readable surfaces. The card borders, rounding, spacing, copy and V2 water/camera are unchanged. Supported reduced-transparency or increased-contrast preferences switch to94% moss/no blur. Browsers without backdrop-filter receive that same conservative base style.
+
+Actual card checks: all six cards at1440/390/320, exact V2 bounding boxes, nominal body contrast5.1658:1 even over white, opaque image/text/button layers, and solid hover buttons. Actual Chromium CDP preference emulation confirmed both94%/no-blur branches. An unsupported-blur engine could not be forced: that branch is implemented but not certified. Physical-phone smoothness remains for the owner to assess; blur radius did not increase.
 
 ## Explicit limits
 This is **procedural image motion**, not AI-generated video. No configured image-to-video provider was found. V2 replaces sinusoidal wobble with continuous tier-directed advection, variable-speed strands and restrained landing foam confined to the image-derived water matte. The motion is illustrative, not physically simulated fluid flow. The browser now renders the static photograph separately from a transparent water canvas; reduced zoom and native-density output remove the initial rendering bottleneck. The original 1920×1280 photograph remains unchanged. This does not recover missing photographic detail or claim a regenerated 4K master. Normal scrolling moves the crop through the upper cascades, rock ledges, lower falls and pool. This route does not replace the canonical portfolio.
@@ -16,17 +21,18 @@ Open `variants/waterfall-preview/dist/index.html` in a browser. Output is one se
 
 On the authoring VPS, `/tmp/node_modules/playwright` and Chromium 1243 are available. Run:
 - `node variants/waterfall-preview/qa.cjs`
+- `node variants/waterfall-preview/card-qa.cjs` (compares local V2 baseline at `/tmp/waterfall-v2-delivery.html`)
 - `node variants/waterfall-preview/record.cjs`
 - `node variants/waterfall-preview/verify-public.cjs` (after preview publication)
 
 Those evidence helpers name the VPS browser/package paths; adjust them on another machine. The recording is a finite actual-browser scroll demonstration, not a generated water video.
 
 ## Verified
-The exact V2 delivery HTML ran in Chromium at 1440×900 DPR1 and DPR2, 390×844 DPR3 and 320×740 DPR2. The retina desktop water canvas is 2880×1800; phone canvas 1170×2532. Native photo placement and reduced source cropping passed. The canvas budget is DPR3, 8M pixels and the GPU limit; static photograph rendering is independent. Load, zero horizontal overflow, no runtime network requests, normal scroll, keyboard anchor navigation, pause/resume, still view and eight project links passed. Reduced-motion, no-JavaScript and unavailable-WebGL fallbacks retain the actual image and content. Browser-decoded field data showed all 50,665 sampled falling-water pixels pointing downward, with unequal speeds and 6,511 landing-foam pixels. Actual GPU readback showed 4,064 changing water samples and zero changing terrain samples. These checks demonstrate rendering/direction, not photoreal naturalness. Public HTTPS loaded the same bytes and ran the camera at all three widths; computed control/disclosure sizes were 12px.
+The exact latest V3-card/V2-water delivery HTML ran in Chromium at 1440×900 DPR1 and DPR2, 390×844 DPR3 and 320×740 DPR2. The retina desktop water canvas is 2880×1800; phone canvas 1170×2532. Native photo placement and reduced source cropping passed. The canvas budget is DPR3, 8M pixels and the GPU limit; static photograph rendering is independent. Load, zero horizontal overflow, no runtime network requests, normal scroll, keyboard anchor navigation, pause/resume, still view and eight project links passed. Reduced-motion, no-JavaScript and unavailable-WebGL fallbacks retain the actual image and content. Browser-decoded field data showed all 50,665 sampled falling-water pixels pointing downward, with unequal speeds and 6,511 landing-foam pixels. Actual GPU readback showed 4,100 changing water samples and zero changing terrain samples. These checks demonstrate rendering/direction, not photoreal naturalness. Public HTTPS loaded the same bytes and ran the camera at all three widths; computed control/disclosure sizes were 12px.
 
 Independent read-only finish review: ship at prototype scope. See evidence/finish-review.md for scope and corrections to the reviewer’s stale source/timestamp assumptions. Dedicated shipped reviewer/documenter agents are not exposed here: read-only explorer review plus inline documentation were used.
 
-Physical-phone performance/battery and a true generated water video are **not** verified. The next owner check is whether V2 reads as more convincing on the actual phone. A proper video source remains an option if this illustrative motion is not sufficient.
+Physical-phone performance/battery and a true generated water video are **not** verified. Hafiz visually approved V2 water; the next owner check is whether V3 cards have enough transparency without distracting from reading. A proper video source remains an option if this illustrative motion is not sufficient.
 
 ## Review / deployment boundary
 Issue #54; feature branch `feat/waterfall-motion-preview`. No automatic merge or canonical deployment. Existing Caddy config and canonical homepage hashes remained unchanged. Standalone noindex preview is stored at `/var/www/portfolio-variants/waterfall-preview/index.html`, exposed through an isolated link under the already-existing image file host. No Caddy change. Only the built index.html is served; development notes, source and evidence are not in that served directory.
