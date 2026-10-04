@@ -1,0 +1,51 @@
+[
+  {
+    "test": "desktop native photo + high-density water + reduced zoom",
+    "revision": "directional-water-v2",
+    "canvas": [
+      1440,
+      900
+    ],
+    "native": [
+      1440,
+      900
+    ],
+    "sourceCrop": [
+      1627,
+      1017
+    ],
+    "imageCSSWidth": 1699.2,
+    "expectedCSSWidth": 1699.1999999999998
+  },
+  {
+    "test": "actual decoded tier-flow: all streams downward, varied speeds, water-only landing foam",
+    "water": 50665,
+    "downward": 50665,
+    "foam": 6511,
+    "minSpeed": 39.778610710405395,
+    "maxSpeed": 147.4705769205697
+  },
+  {
+    "test": "actual transparent GPU layer: water moves; terrain overlay unchanged",
+    "water": 4311,
+    "waterChanged": 4064,
+    "rock": 128754,
+    "rockChanged": 0
+  },
+  {
+    "test": "desktop real artifact: load, no overflow/network/errors, pause, resume, scroll-camera, still, keyboard, 8 links",
+    "pass": true
+  },
+  {
+    "test": "reduced motion: water and camera both static",
+    "pass": true
+  },
+  {
+    "test": "no-js: real image and text retained",
+    "pass": true
+  },
+  {
+    "test": "no-webgl: real image and text retained",
+    "pass": true
+  }
+]

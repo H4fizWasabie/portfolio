@@ -8,3 +8,9 @@ evidence/*
 !evidence/controls-finish.md
 !evidence/controls-detector.json
 !evidence/finish-review.md
+!evidence/wide-glass-finish.md
+!evidence/wide-glass-results.json
+!evidence/wide-glass-motion-results.json
+!evidence/wide-glass-public-motion-results.json
+!evidence/wide-glass-resume-results.json
+!evidence/wide-glass-detector.json

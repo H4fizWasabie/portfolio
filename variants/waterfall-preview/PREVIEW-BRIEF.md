@@ -22,5 +22,8 @@ Hafiz approved restrained visible glass after discussing readability. Reading ba
 ## Approved V4 controls (2026-10-03)
 Hafiz approved compact controls to reveal more waterfall, not further card/water/layout changes. Always-visible Pause water; native Motion disclosure reveals Still view and unchanged simulation/fallback status.44px touch targets, upward bounded panel, keyboard/native expanded semantics, Escape/outside/focus dismissal. Preserve disabled/reduced-motion/JavaScript-disabled/WebGL fallback information and all existing project content. Keep standalone preview/draft PR; no canonical promotion.
 
+## Approved V5 wider desktop cards (2026-10-04)
+Hafiz found the waterfall dominated desktop reading. He approved a separate preview of wider floating cards with slightly clearer glass while preserving readability. Desktop shared card width min(1120px,60vw), responsive 32–56px padding, 18px body; 75% moss tint and 24px frost. Remove the conflicting About and ≥1600px width caps. Preserve mobile's exact V4 geometry/treatment and all copy, JavaScript, imagery, compact controls and approved resume. Text/image opacity remains 1; reduced-transparency/increased-contrast and unsupported-blur base remain 94%/no blur. Published V4 canonical site remains untouched. The new preview has its own URL; earlier preview remains intact. No merge or production promotion authorized.
+
 ## Exit
 Verify actual shipped HTML on desktop and mobile, moving-water pixels, fixed rock pixels, scroll-camera differences, controls and still/reduced-motion fallbacks. Record the actual browser walkthrough. Open PR for review; no merge or homepage promotion.

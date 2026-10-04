@@ -1,0 +1,88 @@
+[
+  {
+    "test": "all JavaScript byte-identical to published V4 source",
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 1280,
+    "height": 720,
+    "cardWidth": 768,
+    "whiteBackdropBodyContrast": 4.683792172495773,
+    "mobileGeometryUnchanged": false,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 1440,
+    "height": 900,
+    "cardWidth": 864,
+    "whiteBackdropBodyContrast": 4.683792172495773,
+    "mobileGeometryUnchanged": false,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 1920,
+    "height": 1080,
+    "cardWidth": 1120,
+    "whiteBackdropBodyContrast": 4.683792172495773,
+    "mobileGeometryUnchanged": false,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 1024,
+    "height": 768,
+    "cardWidth": 614.390625,
+    "whiteBackdropBodyContrast": 4.683792172495773,
+    "mobileGeometryUnchanged": false,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 820,
+    "height": 1180,
+    "cardWidth": 492,
+    "whiteBackdropBodyContrast": 4.683792172495773,
+    "mobileGeometryUnchanged": false,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 390,
+    "height": 844,
+    "cardWidth": 354,
+    "whiteBackdropBodyContrast": 5.165812395461318,
+    "mobileGeometryUnchanged": true,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 320,
+    "height": 740,
+    "cardWidth": 284,
+    "whiteBackdropBodyContrast": 5.165812395461318,
+    "mobileGeometryUnchanged": true,
+    "pass": true
+  },
+  {
+    "test": "six readable cards, no overflow, resume disclosure, eight projects",
+    "width": 667,
+    "height": 375,
+    "cardWidth": 631,
+    "whiteBackdropBodyContrast": 5.165812395461318,
+    "mobileGeometryUnchanged": true,
+    "pass": true
+  },
+  {
+    "test": "native preference fallback",
+    "feature": "prefers-reduced-transparency",
+    "pass": true
+  },
+  {
+    "test": "native preference fallback",
+    "feature": "prefers-contrast",
+    "pass": true
+  }
+]

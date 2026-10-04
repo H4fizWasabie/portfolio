@@ -2,7 +2,14 @@
 
 Question: does flowing-water motion plus a scroll camera make the owner-selected waterfall a useful portfolio background?
 
-Latest preview: https://image.wasabietech.com/portfolio-waterfall-preview/?v=5
+Wider-card review preview: https://image.wasabietech.com/portfolio-wide-glass-preview/
+
+## V5 wider desktop glass — preview only (2026-10-04)
+Issue #60. Owner approved a separate preview: wider floating reading cards, slightly clearer green glass, stronger frost and readable content. Desktop cards now share `min(1120px,60vw)`, including About and large-display overrides, with responsive 32–56px padding and 18px body text. Desktop moss tint is 75%, blur 24px; worst-white oat body contrast is 4.6838:1. Mobile keeps exact V4 reading geometry, 78% tint, 12px blur and 14px body. Copy, images, three scripts, motion controls and approved resume are unchanged. Reduced-transparency/increased-contrast fallback remains 94%/no blur.
+
+Build with `node variants/waterfall-preview/build.cjs`. Save a published-V4 offline baseline using the same builder before changing source, then run `WATERFALL_WIDE_BASELINE=/path/to/v4.html node variants/waterfall-preview/wide-glass-qa.cjs`. `WATERFALL_WIDE_QA_URL` targets the actual published preview; `WATERFALL_WIDE_EVIDENCE` isolates its evidence directory. Historical card/controls QA asserts V2/V3 geometry and cannot validate this intentional desktop change; the V5 scoped suite replaces those layout expectations, while the existing motion and resume suites remain applicable.
+
+Eight browser viewports checked: 1280×720, 1440×900, 1920×1080, 1024×768, 820×1180, 390×844, 320×740, 667×375. See `evidence/wide-glass-finish.md` and `evidence/wide-glass-results.json` for exact verified scope and known limitations. No canonical homepage or Caddy changes; no merge/promotion authorized.
 
 ## Canonical publication
 Owner explicitly authorised merging V4 and the resume work, opening/merging the publishing PR and showing the final main site on2026-10-03. The shared standard-Node build.cjs owns offline asset embedding; build.py remains a compatibility command. Product Launch's --publish swaps in this approved homepage while retaining canonical SEO and ten other pages. QA supports WATERFALL_QA_URL / WATERFALL_QA_PUBLISHED for actual HTTP publication, excluding typed JSON-LD from shader-source inspection. New release and scoped resume routing are verified before/after deployment; no prototype noindex metadata is promoted.
