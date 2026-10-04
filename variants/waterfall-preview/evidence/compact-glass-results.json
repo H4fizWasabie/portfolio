@@ -1,0 +1,412 @@
+{
+  "url": "https://image.wasabietech.com/portfolio-compact-glass-preview/",
+  "results": [
+    {
+      "test": "existing scripts unchanged",
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1280,
+      "height": 604,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 391.53125
+        },
+        {
+          "id": "work",
+          "height": 404.28125
+        },
+        {
+          "id": "theoses",
+          "height": 393.40625
+        },
+        {
+          "id": "map",
+          "height": 436.015625
+        },
+        {
+          "id": "about",
+          "height": 471.65625
+        },
+        {
+          "id": "contact",
+          "height": 394.484375
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1280,
+      "height": 720,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 391.53125
+        },
+        {
+          "id": "work",
+          "height": 404.28125
+        },
+        {
+          "id": "theoses",
+          "height": 393.40625
+        },
+        {
+          "id": "map",
+          "height": 436.015625
+        },
+        {
+          "id": "about",
+          "height": 471.65625
+        },
+        {
+          "id": "contact",
+          "height": 394.484375
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1440,
+      "height": 640,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 406.875
+        },
+        {
+          "id": "work",
+          "height": 422.796875
+        },
+        {
+          "id": "theoses",
+          "height": 424.25
+        },
+        {
+          "id": "map",
+          "height": 451.484375
+        },
+        {
+          "id": "about",
+          "height": 477.75
+        },
+        {
+          "id": "contact",
+          "height": 400.578125
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1440,
+      "height": 900,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 467.125
+        },
+        {
+          "id": "work",
+          "height": 453.234375
+        },
+        {
+          "id": "theoses",
+          "height": 439.8125
+        },
+        {
+          "id": "map",
+          "height": 480.3125
+        },
+        {
+          "id": "about",
+          "height": 597.828125
+        },
+        {
+          "id": "contact",
+          "height": 489.46875
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1920,
+      "height": 640,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 410.46875
+        },
+        {
+          "id": "work",
+          "height": 417.984375
+        },
+        {
+          "id": "theoses",
+          "height": 437.171875
+        },
+        {
+          "id": "map",
+          "height": 437.171875
+        },
+        {
+          "id": "about",
+          "height": 477.75
+        },
+        {
+          "id": "contact",
+          "height": 400.578125
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1920,
+      "height": 1080,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 479.0625
+        },
+        {
+          "id": "work",
+          "height": 508.3125
+        },
+        {
+          "id": "theoses",
+          "height": 527.5
+        },
+        {
+          "id": "map",
+          "height": 527.5
+        },
+        {
+          "id": "about",
+          "height": 613.703125
+        },
+        {
+          "id": "contact",
+          "height": 505.34375
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 1024,
+      "height": 604,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 367
+        },
+        {
+          "id": "work",
+          "height": 390.546875
+        },
+        {
+          "id": "theoses",
+          "height": 409.734375
+        },
+        {
+          "id": "map",
+          "height": 409.734375
+        },
+        {
+          "id": "about",
+          "height": 459.84375
+        },
+        {
+          "id": "contact",
+          "height": 382.671875
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 820,
+      "height": 600,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 351.59375
+        },
+        {
+          "id": "work",
+          "height": 380.65625
+        },
+        {
+          "id": "theoses",
+          "height": 375.6875
+        },
+        {
+          "id": "map",
+          "height": 418.296875
+        },
+        {
+          "id": "about",
+          "height": 459.84375
+        },
+        {
+          "id": "contact",
+          "height": 382.671875
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 820,
+      "height": 1180,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 372.1875
+        },
+        {
+          "id": "work",
+          "height": 380.65625
+        },
+        {
+          "id": "theoses",
+          "height": 375.6875
+        },
+        {
+          "id": "map",
+          "height": 418.296875
+        },
+        {
+          "id": "about",
+          "height": 529.859375
+        },
+        {
+          "id": "contact",
+          "height": 421.5
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 390,
+      "height": 844,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 427.46875
+        },
+        {
+          "id": "work",
+          "height": 694.40625
+        },
+        {
+          "id": "theoses",
+          "height": 703.09375
+        },
+        {
+          "id": "map",
+          "height": 769
+        },
+        {
+          "id": "about",
+          "height": 618.296875
+        },
+        {
+          "id": "contact",
+          "height": 430.734375
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 320,
+      "height": 740,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 485.46875
+        },
+        {
+          "id": "work",
+          "height": 702.921875
+        },
+        {
+          "id": "theoses",
+          "height": 711.609375
+        },
+        {
+          "id": "map",
+          "height": 743.921875
+        },
+        {
+          "id": "about",
+          "height": 687.578125
+        },
+        {
+          "id": "contact",
+          "height": 487.421875
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally",
+      "width": 667,
+      "height": 375,
+      "cards": [
+        {
+          "id": "intro",
+          "height": 356.4375
+        },
+        {
+          "id": "work",
+          "height": 801.703125
+        },
+        {
+          "id": "theoses",
+          "height": 801.703125
+        },
+        {
+          "id": "map",
+          "height": 909.890625
+        },
+        {
+          "id": "about",
+          "height": 491.640625
+        },
+        {
+          "id": "contact",
+          "height": 409.65625
+        }
+      ],
+      "pass": true
+    },
+    {
+      "test": "protected oat text worst-white contrast",
+      "ratio": 4.591312955843427,
+      "pass": true
+    },
+    {
+      "test": "preference fallback",
+      "feature": "prefers-reduced-transparency",
+      "pass": true
+    },
+    {
+      "test": "preference fallback",
+      "feature": "prefers-contrast",
+      "pass": true
+    },
+    {
+      "test": "no-JS images, links, index and resume; no dead enlargement buttons",
+      "pass": true
+    }
+  ]
+}

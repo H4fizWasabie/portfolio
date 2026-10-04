@@ -1,0 +1,69 @@
+{
+  "url": "file:///tmp/portfolio-wide-glass/variants/waterfall-preview/dist/index.html",
+  "results": [
+    {
+      "width": 1440,
+      "js": true,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "js": false,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "js": true,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "js": false,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "js": true,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "js": false,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "js": true,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "js": false,
+      "keyboard": true,
+      "htmlReading": true,
+      "downloadSha256": "f0ae32a3e0036532b9b9d65f9e882827b3a90152f8a48b9bed0a40c1e8f73ca4",
+      "overflow": false
+    }
+  ]
+}
