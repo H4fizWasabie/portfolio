@@ -2,7 +2,14 @@
 
 Question: does flowing-water motion plus a scroll camera make the owner-selected waterfall a useful portfolio background?
 
-Wider-card review preview: https://image.wasabietech.com/portfolio-wide-glass-preview/
+Latest review preview: https://image.wasabietech.com/portfolio-compact-glass-preview/
+
+## V6 clearer, viewport-fitting cards — preview only (2026-10-04)
+Follow-up to issue #60 / PR #61. Owner approved clearer glass and text-left/screenshot-right project interiors after V5 project cards measured873–1005px tall in a1280×604 browser viewport. Shared desktop shell is62% moss/24px blur;28% ink protects reading without hiding media-side scenery. Three project cards now use semantic columns with contain-fit screenshot height capped at min(42svh,360px). Accessible native image viewer has named Enlarge/Close buttons, original disclosure, Escape and opener focus restore; unsupported-dialog/no-JS users retain the image and project links with no dead buttons. About/Contact also compact at short viewport heights. Mobile remains stacked with original78%/12px material and normal page scroll. Original images, copy, resume/PDF and three scripts are untouched.
+
+Run `node variants/waterfall-preview/build.cjs`, then `node variants/waterfall-preview/compact-glass-qa.cjs` with `/tmp/portfolio-v5-baseline.html` containing the V5 built artifact for script invariants. `COMPACT_QA_URL` tests actual HTTPS and `COMPACT_EVIDENCE` isolates test outputs. The checks cover all six collapsed card rectangles against actual viewport edges at12 sizes, complete screenshot contain-fit, keyboard enlargement/Escape/Close/focus, mobile stacking, expanded index/resume, preferences and no-JS. The older V5 test below describes the historical V5 artifact only. Expanded content and very short/mobile windows deliberately use normal scrolling, not hidden overflow or internal card scrolling. Physical Safari/phone and old desktop GPU performance remain unverified.
+
+V5 comparison preview is preserved: https://image.wasabietech.com/portfolio-wide-glass-preview/
 
 ## V5 wider desktop glass — preview only (2026-10-04)
 Issue #60. Owner approved a separate preview: wider floating reading cards, slightly clearer green glass, stronger frost and readable content. Desktop cards now share `min(1120px,60vw)`, including About and large-display overrides, with responsive 32–56px padding and 18px body text. Desktop moss tint is 75%, blur 24px; worst-white oat body contrast is 4.6838:1. Mobile keeps exact V4 reading geometry, 78% tint, 12px blur and 14px body. Copy, images, three scripts, motion controls and approved resume are unchanged. Reduced-transparency/increased-contrast fallback remains 94%/no blur.

@@ -50,7 +50,7 @@
       "refersTo": "reading",
       "description": "Readable content above photograph.",
       "html": "<div class=\"ds-reading\">Custom business apps and AI automation.</div>",
-      "css": ".ds-reading{--glass:rgba(35,46,30,.75);--blur:24px;font-family:Epilogue,sans-serif;color:#e8ddc5;width:min(1120px,60vw);background:rgba(35,46,30,.94);padding:clamp(32px,3.6vw,56px);border:1px solid rgba(232,221,197,.18);border-radius:24px;box-shadow:0 18px 50px rgba(23,32,22,.22);-webkit-backdrop-filter:none;backdrop-filter:none}@media(max-width:760px){.ds-reading{--glass:rgba(35,46,30,.78);--blur:12px;width:100%;padding:27px;border-radius:22px}}@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.ds-reading{background:var(--glass);-webkit-backdrop-filter:blur(var(--blur));backdrop-filter:blur(var(--blur))}}@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.ds-reading{background:rgba(35,46,30,.94);-webkit-backdrop-filter:none;backdrop-filter:none}}"
+      "css": ".ds-reading{--glass:rgba(35,46,30,.62);--veil:linear-gradient(rgba(23,32,22,.28),rgba(23,32,22,.28));--blur:24px;font-family:Epilogue,sans-serif;color:#e8ddc5;width:min(1120px,60vw);background:rgba(35,46,30,.94);padding:clamp(32px,3.6vw,56px);border:1px solid rgba(232,221,197,.18);border-radius:24px;box-shadow:0 18px 50px rgba(23,32,22,.22);-webkit-backdrop-filter:none;backdrop-filter:none}@media(max-width:760px){.ds-reading{--glass:rgba(35,46,30,.78);--veil:none;--blur:12px;width:100%;padding:27px;border-radius:22px}}@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.ds-reading{background:var(--veil),var(--glass);-webkit-backdrop-filter:blur(var(--blur));backdrop-filter:blur(var(--blur))}}@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.ds-reading{background:rgba(35,46,30,.94);-webkit-backdrop-filter:none;backdrop-filter:none}}"
     },
     {
       "name": "Scene label",
@@ -76,10 +76,11 @@
       "Simulation is explicitly identified; this is not an image-to-video result."
     ],
     "rules": [
-      "V4 compact201.3125\u00d754px motion bar unchanged; all JavaScript and controls preserved, including Escape/outside/focus dismissal.",
-      "V5 desktop: width min(1120px,60vw), padding clamp(32px,3.6vw,56px), body18px,75% moss/24px frost. Mobile V4 geometry and78%/12px retained; text/images/buttons opaque.",
+      "V4 compact motion bar and all three original scripts unchanged. V6 adds only a progressive native image viewer after the original scripts; Escape/Close return focus.",
+      "V6 desktop:62% moss/24px frost,28% ink text veil; project veil fades52–72% across the card. Project text-left/media-right,1:1.05 columns,24–28px gap,24–40px padding. Images contain, max-height:min(42svh,360px). Mobile remains78%/12px, stacked/normal page scroll, opaque text/images/buttons.",
       "Fallback:94% moss/no blur for unsupported backdrop-filter, reduced transparency or increased contrast; unsupported engine branch unverified.",
-      "Opaque secondary actions preserve contrast; white-backdrop body bound4.6838:1 desktop and5.1658:1 mobile. Copy and water scripts unchanged; desktop geometry intentionally widened.",
+      "Protected text white-backdrop bound4.5913:1 desktop/5.1658:1 mobile. All six collapsed cards fit tested desktop viewport edges; expanded index/resume scroll naturally. Factual copy/assets unchanged.",
+      "Short desktop: at<=760px viewport height use28px padding (project24px),16px body and28–36px h2; at761–1100px width use80vw reading width. No hidden card overflow or internal scrollbar.",
       "Static photograph rendered natively outside transparent water overlay; original image unchanged.",
       "Reduced camera zoom: desktop1.18\u20131.02; mobile approximately1.074\u20131.01.",
       "Continuous tier-directed advection; opaque RGB velocity map; landing foam in matte blue channel.",

@@ -1,0 +1,49 @@
+// V6 regression: whole collapsed cards fit usable desktop viewport; images are never cropped.
+const {chromium}=require('/tmp/node_modules/playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
+const root=__dirname,url=process.env.COMPACT_QA_URL||pathToFileURL(path.join(root,'dist/index.html')).href,evidence=process.env.COMPACT_EVIDENCE||'/tmp/portfolio-compact-evidence';
+let browser;const results=[];
+const rgba=s=>s.match(/[\d.]+/g).map(Number),lum=c=>c.slice(0,3).reduce((n,x,i)=>{const v=x/255;return n+(v<=.04045?v/12.92:((v+.055)/1.055)**2.4)*[.2126,.7152,.0722][i];},0),over=(c,b)=>c.slice(0,3).map((x,i)=>x*c[3]+b[i]*(1-c[3])),ratio=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05);
+(async()=>{
+fs.mkdirSync(evidence,{recursive:true});
+const scripts=h=>[...h.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
+assert.deepEqual(scripts(require('./build.cjs')()).slice(0,-1),scripts(fs.readFileSync('/tmp/portfolio-v5-baseline.html','utf8')),'Existing water/control/resume scripts unchanged; viewer is the only added script');
+results.push({test:'existing scripts unchanged',pass:true});
+browser=await chromium.launch({executablePath:'/home/theoses/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome',args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader-webgl','--enable-unsafe-swiftshader','--disable-gpu-sandbox']});
+for(const [width,height] of [[1280,604],[1280,720],[1440,640],[1440,900],[1920,640],[1920,1080],[1024,604],[820,600],[820,1180],[390,844],[320,740],[667,375]]){
+ const ctx=await browser.newContext({viewport:{width,height},reducedMotion:'reduce'}),p=await ctx.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(url);await p.evaluate(()=>document.fonts.ready);
+ await p.waitForFunction(()=>window.waterfallPreview?.state().ready);await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ assert.equal(await p.locator('body').getAttribute('data-card-treatment'),'compact-clear-glass-v6');assert.equal(await p.locator('meta[name="robots"]').getAttribute('content'),'noindex,nofollow');
+ assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));const sizes=[];
+ for(const id of ['intro','work','theoses','map','about','contact']){
+  await p.locator('#'+id).evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  const card=await p.locator('#'+id+' .reading').evaluate(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {top:r.top,bottom:r.bottom,height:r.height,width:r.width,background:s.backgroundColor,veil:s.backgroundImage,blur:s.backdropFilter,overflow:s.overflowY,opacity:s.opacity};});
+  if(width>760){assert(card.top>=20,id+' top visible');assert(card.bottom<=height-20,`${width}x${height} ${id} bottom ${card.bottom} exceeds viewport`);assert(card.height<=height-40,id+' full card fit');assert.equal(card.background,'rgba(35, 46, 30, 0.62)');assert.equal(card.blur,'blur(24px)');assert(card.veil.includes('0.28'));}
+  else {assert.equal(card.background,'rgba(35, 46, 30, 0.78)');assert.equal(card.blur,'blur(12px)');}
+  assert.equal(card.overflow,'visible');assert.equal(card.opacity,'1');
+  const escaped=await p.locator('#'+id+' .reading').evaluate(e=>{const r=e.getBoundingClientRect();return [...e.querySelectorAll('h1,h2,p,img,a,button,summary')].filter(x=>x.checkVisibility()).filter(x=>{const b=x.getBoundingClientRect();return b.left<r.left-1||b.right>r.right+1||b.top<r.top-1||b.bottom>r.bottom+1;}).map(x=>x.tagName+':'+x.textContent.slice(0,30));});assert.deepEqual(escaped,[],id+' children within card');
+  if(['work','theoses','map'].includes(id)){
+   await p.waitForFunction(id=>{const i=document.querySelector('#'+id+' .project-shot img');return i.complete&&i.naturalWidth>0;},id);
+   const g=await p.locator('#'+id).evaluate(e=>{const a=e.querySelector('.project-copy').getBoundingClientRect(),b=e.querySelector('.project-media').getBoundingClientRect(),i=e.querySelector('.project-shot img'),s=getComputedStyle(i);return {copy:{x:a.x,y:a.y,right:a.right,bottom:a.bottom},media:{x:b.x,y:b.y},fit:s.objectFit,imageHeight:i.getBoundingClientRect().height};});
+   if(width>760){assert(g.media.x>g.copy.right,id+' text-left/media-right');assert.equal(g.fit,'contain');assert(g.imageHeight<=Math.min(height*.42,360)+1);}
+   else assert(g.media.y>=g.copy.bottom-1,id+' mobile stacked');
+   if(width===1280&&height===604)await p.screenshot({path:path.join(evidence,id+'-1280x604.png')});
+   const button=p.locator('#'+id+' .image-enlarge');await button.focus();await p.keyboard.press('Enter');assert(await p.locator('#image-viewer').evaluate(e=>e.open));
+   await p.waitForFunction(()=>{const i=document.getElementById('viewer-image');return i?.complete&&i.naturalWidth>0;});await p.locator('header>a').evaluate(e=>e.focus());assert(await p.locator('#image-viewer').evaluate(e=>e.contains(document.activeElement)),'Background focus blocked while modal is open');
+   assert.equal(await p.locator('#viewer-image').getAttribute('alt'),await p.locator('#'+id+' .project-shot img').getAttribute('alt'));assert.equal(await p.locator('#viewer-caption').textContent(),await p.locator('#'+id+' .disclosure').textContent());
+   const viewer=await p.locator('#image-viewer').boundingBox();assert(viewer.x>=0&&viewer.y>=0&&viewer.x+viewer.width<=width+1&&viewer.y+viewer.height<=height+1);assert.equal(await p.locator('#viewer-image').evaluate(e=>getComputedStyle(e).objectFit),'contain');
+   await p.keyboard.press('Escape');assert(!(await p.locator('#image-viewer').evaluate(e=>e.open)));assert(await button.evaluate(e=>e===document.activeElement));
+   await button.click();await p.locator('#viewer-close').click();assert(!(await p.locator('#image-viewer').evaluate(e=>e.open)));
+  }
+  sizes.push({id,height:card.height});
+ }
+ if(width===1280&&height===604){await p.locator('#intro').evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await p.screenshot({path:path.join(evidence,'hero-1280x604.png')});}
+ if(width===390){await p.locator('#work').evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));await p.screenshot({path:path.join(evidence,'work-390.png')});}
+ await p.locator('.index summary').click();assert(await p.locator('.index').evaluate(e=>e.open));assert.equal(await p.locator('.index li a').count(),8);assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await p.locator('#resume-preview summary').click();assert(await p.locator('#resume-preview').evaluate(e=>e.open));assert(await p.locator('.resume-paper').isVisible());assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.equal(errors.length,0,errors.join('\n'));
+ results.push({test:'all six collapsed desktop cards fit; mobile stacked; three images contained; viewer keyboard/close/focus; expanded index/resume scroll normally',width,height,cards:sizes,pass:true});await ctx.close();
+}
+const desktopBound=over([23,32,22,.28],over([35,46,30,.62],[255,255,255]));const c=ratio([232,221,197],desktopBound);assert(c>=4.5);results.push({test:'protected oat text worst-white contrast',ratio:c,pass:true});
+for(const feature of ['prefers-reduced-transparency','prefers-contrast']){const ctx=await browser.newContext({viewport:{width:1280,height:604}}),p=await ctx.newPage(),cdp=await ctx.newCDPSession(p);await cdp.send('Emulation.setEmulatedMedia',{features:[{name:feature,value:feature==='prefers-contrast'?'more':'reduce'}]});await p.goto(url);for(const card of await p.locator('.reading').all()){const s=await card.evaluate(e=>{const s=getComputedStyle(e);return [s.backgroundColor,s.backgroundImage,s.backdropFilter];});assert.deepEqual(s,['rgba(35, 46, 30, 0.94)','none','none']);}results.push({test:'preference fallback',feature,pass:true});await ctx.close();}
+const ctx=await browser.newContext({viewport:{width:1280,height:604},javaScriptEnabled:false}),p=await ctx.newPage();await p.goto(url);assert(await p.locator('#work .project-shot img').isVisible());assert.equal(await p.locator('.image-enlarge:visible').count(),0);assert.equal(await p.locator('.index li a').count(),8);await p.locator('#resume-preview summary').click();assert(await p.locator('.resume-paper').isVisible());results.push({test:'no-JS images, links, index and resume; no dead enlargement buttons',pass:true});await ctx.close();
+fs.writeFileSync(path.join(evidence,'results.json'),JSON.stringify({url,results},null,2));for(const r of results)console.log('PASS',JSON.stringify(r));await browser.close();
+})().catch(async e=>{console.error(e);await browser?.close();process.exit(1)});
