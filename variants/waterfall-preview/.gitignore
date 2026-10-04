@@ -19,3 +19,8 @@ evidence/*
 !evidence/compact-glass-motion-results.json
 !evidence/compact-glass-resume-results.json
 !evidence/compact-glass-detector.json
+!evidence/all-projects-finish.md
+!evidence/all-projects-results.json
+!evidence/all-projects-motion-results.json
+!evidence/all-projects-resume-results.json
+!evidence/all-projects-detector.json

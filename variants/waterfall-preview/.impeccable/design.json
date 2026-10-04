@@ -81,6 +81,7 @@
       "Fallback:94% moss/no blur for unsupported backdrop-filter, reduced transparency or increased contrast; unsupported engine branch unverified.",
       "Protected text white-backdrop bound4.5913:1 desktop/5.1658:1 mobile. All six collapsed cards fit tested desktop viewport edges; expanded index/resume scroll naturally. Factual copy/assets unchanged.",
       "Short desktop: at<=760px viewport height use28px padding (project24px),16px body and28–36px h2; at761–1100px width use80vw reading width. No hidden card overflow or internal scrollbar.",
+      "V7 overview after MAP/before About: flat semantic list,2 desktop columns/1 mobile column,24px column gap,10px row padding,bottom rules,16px/1.3/650 names,14px/1.5 purposes,16px SVG link arrows,44px minimum links. Hero Explore 8 projects links directly to #projects. All8 canonical links visible without JS/disclosure; all7 desktop cards fit. No new scripts/screenshots; remove MAP .index. Preserve V6 treatment/viewer/resume/water.",
       "Static photograph rendered natively outside transparent water overlay; original image unchanged.",
       "Reduced camera zoom: desktop1.18\u20131.02; mobile approximately1.074\u20131.01.",
       "Continuous tier-directed advection; opaque RGB velocity map; landing foam in matte blue channel.",
