@@ -1,6 +1,6 @@
 // V7 regression: portfolio breadth is visible; whole desktop cards fit; images are never cropped.
 const {chromium}=require('/tmp/node_modules/playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
-const canonicalLinkPrefix=process.env.COMPACT_QA_PUBLISHED==='1'?'/work/':'https://portfolio.wasabietech.com/work/';
+const published=process.env.COMPACT_QA_PUBLISHED==='1',canonicalLinkPrefix=published?'/work/':'https://portfolio.wasabietech.com/work/';
 const root=__dirname,url=process.env.COMPACT_QA_URL||pathToFileURL(path.join(root,'dist/index.html')).href,evidence=process.env.COMPACT_EVIDENCE||'/tmp/portfolio-compact-evidence';
 let browser;const results=[];
 const rgba=s=>s.match(/[\d.]+/g).map(Number),lum=c=>c.slice(0,3).reduce((n,x,i)=>{const v=x/255;return n+(v<=.04045?v/12.92:((v+.055)/1.055)**2.4)*[.2126,.7152,.0722][i];},0),over=(c,b)=>c.slice(0,3).map((x,i)=>x*c[3]+b[i]*(1-c[3])),ratio=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05);
@@ -13,7 +13,7 @@ browser=await chromium.launch({executablePath:'/home/theoses/.cache/ms-playwrigh
 for(const [width,height] of [[1280,604],[1280,720],[1440,640],[1440,900],[1920,640],[1920,1080],[1024,604],[820,600],[820,1180],[390,844],[320,740],[667,375]]){
  const ctx=await browser.newContext({viewport:{width,height},reducedMotion:'reduce'}),p=await ctx.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(url);await p.evaluate(()=>document.fonts.ready);
  await p.waitForFunction(()=>window.waterfallPreview?.state().ready);await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
- assert.equal(await p.locator('body').getAttribute('data-card-treatment'),'visible-eight-projects-v7');assert.equal(await p.locator('meta[name="robots"]').getAttribute('content'),'noindex,nofollow');
+ assert.equal(await p.locator('body').getAttribute('data-card-treatment'),'visible-eight-projects-v7');assert.equal(await p.locator('meta[name="robots"]').getAttribute('content'),published?'index,follow':'noindex,nofollow');
  assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));const sizes=[];
  for(const id of ['intro','work','theoses','map','projects','about','contact']){
   await p.locator('#'+id).evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
