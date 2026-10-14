@@ -92,16 +92,17 @@ module.exports = [
     evidence:['H4fizWasabie/map-android README at ef07c3295bd0e3e7dc0621564044082c22d5409d','Owner daily-use confirmation and screenshot approval, 2026-10-03','MAP-CAPTURE-PROVENANCE.json']
   },
   {
-    slug:'89lab', title:'89lab content automation', category:'Publishing & video pipelines',
-    summary:'Give repeated content production a reliable path.',
-    description:'A family of publishing and narrated-video workflows, grouped as one automation case study.',
-    problem:'Research, writing, voiceover, captions, rendering and publishing become fragile when every handover is manual or untracked.',
-    built:'I connected content workspaces into repeatable pipelines. The YouTube Shorts workflow selects a topic, prepares a script, creates voiceover and timed captions, renders the video, verifies the upload and records its outcome.',
-    workflow:['Select a topic and prepare the script','Produce voiceover, captions and video','Verify and publish the media','Record the outcome and prevent duplicates'],
-    implementation:'Workspace runners coordinate staged outputs and ledgers. Local Kokoro speech, caption timing and FFmpeg rendering handle media production; publishing integrations verify the transferred media. Quota failures can hand the finished video back for manual posting.',
-    limits:'This page explains the implemented pipeline without running it. No posts are published from the portfolio, no account credentials are exposed and no audience-growth claims are invented. The separate publishing jobs remain unchanged.',
-    stack:['Python & shell','Kokoro TTS','FFmpeg','Publishing integrations'],
+    slug:'89lab', title:'89lab content pipelines', category:'Content pipelines & AI teaching',
+    summary:'Daily AI news, lessons and videos, made and published on schedule.',
+    description:'A set of automated pipelines that research, write, voice, render and publish short AI news, concept lessons and GitHub repo highlights every day on Facebook, YouTube, Instagram and Threads.',
+    problem:'Teaching AI in public means posting every day: finding the topic, checking the facts, writing, voiceover, captions, rendering and publishing on several platforms. Done by hand, a day gets missed, a topic repeats or a weak post goes out.',
+    built:'I built and run each channel as its own pipeline with its own schedule. AI news shorts and AI concept explainers go to the 89lab Facebook page. A trending GitHub repo becomes a YouTube Short and a Threads post, and a build with AI series shows how to make things step by step. Practical AI lessons go to Instagram. A daily learning pipeline researches one AI concept and adds it to a growing library that the explainers draw from. Together they teach what is new, which tools are worth using and how AI agents are designed and built.',
+    workflow:['Pick a fresh topic: a news story, a trending repo or an AI concept, never one already posted','Research it and write a short script that passes length and source checks','Voice it, caption it and render the video','Publish on schedule, record the post and send me a report on Telegram'],
+    implementation:'Each pipeline is a folder of numbered stages run by a shell script on a schedule. The script, not a model, decides the order, retries and reporting, so model calls are few and bounded. A ledger per pipeline prevents repeats, and checks stop a script that is too long, overhyped or not supported by its source. Local Kokoro speech, timed captions, Remotion and FFmpeg make the videos. When YouTube’s daily upload limit is reached, the finished video goes to Telegram for me to post by hand. A nightly report tracks what the models cost.',
+    limits:'This page explains the pipelines without running them. No posts are published from the portfolio, no account credentials are exposed and no follower, view or growth numbers are claimed. Some series wait for my approval before they publish.',
+    stack:['Python & shell','Cron','Kokoro TTS','Remotion & FFmpeg','Telegram','Platform APIs'],
+    facts:['AI news shorts and AI concept explainers on the 89lab Facebook page, every day','A trending GitHub repo on YouTube Shorts and Threads, every day','A build with AI series on YouTube Shorts','A practical AI lesson on Instagram, every day','One AI concept researched and added to the library, every day'],
     disclosure:'Workflow outline; no publishing action is triggered.', scenes:[],
-    evidence:['ai-agent-shorts/AGENTS.md, read 2026-10-03','Owner-approved grouping of publishing/video workflows as 89lab']
+    evidence:['ai-agent-shorts/AGENTS.md, read 2026-10-03','Owner-approved grouping of publishing/video workflows as 89lab','Owner-approved expansion to all content pipelines and AI teaching, 2026-10-15','Content workspace AGENTS.md files and live crontabs, read 2026-10-15']
   }
 ];

@@ -113,23 +113,34 @@ const setups = {
   lab(d) {
     const stages = [...d.querySelectorAll('[data-pipeline] li')];
     const run = $(d, '[data-action=run]'), quota = $(d, '[data-quota]'), log = $(d, '[data-log]');
-    const topics = ['How reorder points work', 'Why registers keep corrections', 'What an indent is'];
-    let published = 0;
+    const lanes = {
+      news: ['89lab on Facebook', ['A lab releases a smaller open model', 'An editor adds agent mode', 'A new speech model runs on a laptop']],
+      repo: ['YouTube Shorts and Threads', ['A terminal coding agent', 'A local voice assistant', 'A browser automation kit']],
+      concept: ['89lab on Facebook', ['What a context window is', 'How tool calling works', 'Why agents need memory']]
+    };
+    const published = { news: 0, repo: 0, concept: 0 };
+    const buttons = [...d.querySelectorAll('[data-lane]')];
+    let lane = 'news';
+    buttons.forEach(b => b.addEventListener('click', () => {
+      lane = b.dataset.lane;
+      buttons.forEach(x => x.setAttribute('aria-pressed', x === b));
+    }));
     run.addEventListener('click', async () => {
       run.disabled = true; stamp(d, '');
       stages.forEach(s => s.className = '');
       log.replaceChildren();
-      if (published) log.append(li(`“${topics[published - 1]}” is already published, so the pipeline picked the next topic.`));
-      log.append(li(`Topic: ${topics[published % topics.length]}`));
+      const [where, topics] = lanes[lane], n = published[lane];
+      if (n) log.append(li(`“${topics[(n - 1) % topics.length]}” is already posted, so the pipeline picked the next topic.`));
+      log.append(li(`Topic: ${topics[n % topics.length]}`));
       for (const [i, s] of stages.entries()) {
-        s.classList.add('is-active'); await wait(420); s.classList.remove('is-active');
-        if (i === 5 && quota.checked) {
+        s.classList.add('is-active'); await wait(380); s.classList.remove('is-active');
+        if (i === 6 && quota.checked) {
           s.classList.add('is-fail');
-          log.append(li('Upload refused: quota used up. The finished video was handed back for manual posting.'));
+          log.append(li('Upload refused: daily limit reached. The finished video went to Telegram for manual posting.'));
         } else s.classList.add('is-done');
       }
-      log.append(li(quota.checked ? 'Outcome recorded: manual post needed.' : 'Outcome recorded: published and verified.'));
-      if (!quota.checked) published++;
+      log.append(li(quota.checked ? 'Recorded: manual post needed.' : `Recorded: published to ${where}.`));
+      if (!quota.checked) published[lane]++;
       stamp(d, quota.checked ? 'Handed back' : 'Published');
       run.disabled = false; run.textContent = 'Run again';
     });
