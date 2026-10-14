@@ -16,7 +16,8 @@ const services = [
   ['Stock and purchasing apps', 'Know what to buy, raise requests and track every order from request to receipt.', ['procura', 'pims']],
   ['Records with an audit trail', 'Daily counts and corrections that keep the original entry, with a name on every change.', ['dd-drugs-register']],
   ['AI assistants and automation', 'Repeated work done by an agent or a pipeline, with your review before anything goes out.', ['theoses', '89lab', 'yen']],
-  ['Android apps', 'Local-first phone apps that work without accounts or tracking.', ['map']]
+  ['Android apps', 'Local-first phone apps that work without accounts or tracking.', ['map']],
+  ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', ['89lab', 'theoses']]
 ];
 
 // How a project runs, in order.
@@ -67,7 +68,7 @@ function home({ projects, site, esc, root }) {
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
 </section></div>
 <main>
-<section class="services" aria-labelledby="services-title"><h2 id="services-title">What I can build for you</h2>
+<section class="services" aria-labelledby="services-title"><h2 id="services-title">What I can do for you</h2>
 <ul>${services.map(([h, d, slugs]) => `<li><h3>${h}</h3><p>${d}</p><p class="service-links">${slugs.map(s => `<a href="${root}work/${s}/">${esc(by[s].title)}</a>`).join('')}</p></li>`).join('')}</ul></section>
 
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">The work, object by object</h2>

@@ -45,10 +45,11 @@ ${stock.map(([item, have, at, sup]) => `<tr data-item data-reorder="${at}" data-
 <div class="sheet-foot"><button type="button" class="button" data-action="run">Run task</button>
 <span data-review hidden><button type="button" class="button" data-action="approve">Approve</button> <button type="button" class="link-button" data-action="revise">Ask for changes</button></span></div>${stamp}</div>`,
 
-  '89lab': () => `<div class="sheet" data-demo="lab">${sheetHead('Short video pipeline', 'Run the pipeline. Turn on the quota problem to see the manual hand-off.')}
-<ol class="pipeline" data-pipeline>${['Pick topic', 'Write script', 'Voiceover', 'Captions', 'Render', 'Verify upload', 'Record outcome'].map(s => `<li>${s}</li>`).join('')}</ol>
+  '89lab': () => `<div class="sheet" data-demo="lab">${sheetHead('Daily content pipeline', 'Pick a channel and run it. Run it again to see repeats skipped, or turn on the upload limit to see the hand-off.')}
+<div class="channels" role="group" aria-label="Channel">${[['news', 'AI news'], ['repo', 'GitHub repo'], ['concept', 'AI concept']].map(([k, c], i) => `<button type="button" aria-pressed="${i === 0}" data-lane="${k}">${c}</button>`).join('')}</div>
+<ol class="pipeline" data-pipeline>${['Pick topic', 'Check sources', 'Write script', 'Voiceover', 'Captions', 'Render', 'Publish', 'Record'].map(s => `<li>${s}</li>`).join('')}</ol>
 <div class="sheet-foot"><button type="button" class="button" data-action="run">Run pipeline</button>
-<label class="check"><input type="checkbox" data-quota> Upload quota is used up</label></div>
+<label class="check"><input type="checkbox" data-quota> Daily upload limit reached</label></div>
 <ul class="log" data-log></ul>${stamp}</div>`,
 
   map: (root, p) => `<div class="sheet sheet-phone" data-gallery>

@@ -22,7 +22,8 @@ const site = {
   cta: 'Discuss your project',
   about: [
     'I’m Hafiz Jamali. I build practical software around work I know: veterinary procurement, inventory, clinical records, personal organisation and AI-assisted workflows.',
-    'Most of what you see here is in daily use. Each case study says what the software does, and what it does not claim.'
+    'Most of what you see here is in daily use. Each case study says what the software does, and what it does not claim.',
+    'I also teach. My pipelines publish AI news, a GitHub repo worth studying and an AI concept explained every day, and I can coach you or your team to design and build your own agents and automation.'
   ],
   hiring: 'Hiring for internal tools or AI automation?',
   contactTitle: 'What should your software do?',
