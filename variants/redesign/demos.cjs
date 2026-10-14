@@ -3,7 +3,7 @@
 const B = require('./blocks.cjs');
 
 const tag = '<span class="tag">Sample data</span>';
-const sheetHead = (title, hint) => `<div class="sheet-head"><h4>${title}</h4>${tag}</div><p class="hint">${hint}</p>`;
+const sheetHead = (title, hint) => `<div class="sheet-head"><h3>${title}</h3>${tag}</div><p class="hint">${hint}</p>`;
 const stamp = '<div class="stamp" aria-hidden="true"></div><p class="sr-only" aria-live="polite" data-status></p>';
 
 const stock = [
@@ -59,7 +59,7 @@ ${p.scenes.map((s, i) => `<div role="tabpanel" id="map-p${i}" aria-labelledby="m
 
   yen: () => `<div class="sheet" data-demo="yen">${sheetHead('One conversation, three channels', 'Switch channel and keep talking. The conversation stays the same. Architecture demo, not a running agent.')}
 <div class="channels" role="group" aria-label="Channel">${['Terminal', 'Telegram', 'Browser'].map((c, i) => `<button type="button" aria-pressed="${i === 0}" data-channel="${c}">${c}</button>`).join('')}</div>
-<p class="conv">Conversation <strong>c-7f3a</strong>, memory shared</p>
+<p class="conv">One conversation and one memory, whichever channel you use</p>
 <ul class="thread" data-thread><li><span>Terminal</span>Remind me to check the gauze order on Friday.</li><li class="is-agent"><span>Yen</span>Noted for Friday.</li></ul>
 <form class="field-row" data-say><label class="sr-only" for="yen-say">Message</label><input id="yen-say" value="Did the gauze order go out?"><button class="button">Send</button></form></div>`
 };

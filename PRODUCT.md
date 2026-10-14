@@ -16,7 +16,9 @@ Help a visitor understand Hafiz's work through real projects, inspect individual
 
 ## Capabilities and Constraints
 
-Owner-approved selection (2026-10-14): Procura, PIMS, DD Drugs Register, Theoses, 89lab content automation, MAP and Yen. Hill's AI Content Lab was removed from the site and the résumé. Theoses is described as built on the pi coding agent, forked to suit Hafiz's workflow; never as written from scratch.
+Owner-approved selection (2026-10-14): Procura, PIMS, DD Drugs Register, Theoses, 89lab content pipelines, MAP and Yen. Hill's AI Content Lab was removed from the site and the résumé. Theoses is described as built on the pi coding agent, forked to suit Hafiz's workflow; never as written from scratch. 89lab covers every daily content pipeline (2026-10-15), and AI teaching and coaching is offered as a service.
+
+Impeccable critique and the madewithjev slop check (2026-10-15) drove a pass: the homepage leads with the veterinary-hospital software, services and projects share one set of shelves (no separate services list or numbered process), one small radius site-wide with solid surfaces, and the résumé reader uses the site's type and colours. "In use" facts come from the résumé source; the résumé's own figures stay on the résumé.
 
 Project pages include small in-browser demos of each workflow on fictional sample data. They are labelled as demos and are not the real applications. Code changes go through a feature-branch PR.
 
