@@ -53,7 +53,7 @@ Existing safe Procura/Theoses/MAP screenshot captures and verified copy are reus
 
 Open `variants/waterfall-preview/dist/index.html` in a browser. Output is one self-contained offline HTML file. The build needs only standard Python and Node. To regenerate motion assets, install Pillow and NumPy, run `python3 variants/waterfall-preview/generate-matte.py`, then `python3 variants/waterfall-preview/generate-flow.py`, then build. The order matters: flow generation adds landing foam in matte B. Tier flow RGB is deliberately opaque; encoding velocity in transparent pixels loses channels during browser decoding. Water detail is a deterministic repeatable synthetic texture, not new scene photography.
 
-On the authoring VPS, `/tmp/node_modules/playwright` and Chromium 1243 are available. Run:
+On the authoring VPS, the repo's `playwright-core` (run `npm ci`) and Chromium 1243 are available. Run:
 - `node variants/waterfall-preview/qa.cjs`
 - `node variants/waterfall-preview/controls-qa.cjs` (V3 baseline at `/tmp/waterfall-v3-delivery.html`, overridable via `WATERFALL_V3_BASELINE`)
 - `node variants/waterfall-preview/card-qa.cjs` (compares local V2 baseline at `/tmp/waterfall-v2-delivery.html`)

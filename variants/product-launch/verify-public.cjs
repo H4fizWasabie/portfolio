@@ -1,6 +1,6 @@
 // Non-mutating HTTP/browser verification. Defaults to the isolated staging port.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/home/theoses/.resume-gen/node_modules/playwright-core');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
 const base=(process.env.BASE_URL||'http://127.0.0.1:19124').replace(/\/$/,'');
 const origin='https://portfolio.wasabietech.com',root=process.env.BUILD_ROOT||path.join(__dirname,'dist');
 const projects=require('./projects.cjs'),routes=['/', '/projects/','/resume/',...projects.map(p=>'/work/'+p.slug+'/')];
@@ -45,7 +45,7 @@ let browser;
     assert.ok(await page.locator('#landscape #fallback').evaluate(img=>img.complete&&img.naturalWidth>0),'Approved waterfall image missing');
     await page.locator('#map .project-copy > a.link-line').click();await page.waitForURL(base+'/work/map/');assert.equal(await page.locator('h1').innerText(),'MAP');
    }
-   if(route==='/resume/'){assert.match(await page.locator('.resume-paper').innerText(),/MAP — My Awesome App/);assert.equal(await page.locator('iframe,object,embed').count(),0);}
+   if(route==='/resume/'){assert.match(await page.locator('.resume-paper').innerText(),/MAP — Android Productivity App/);assert.equal(await page.locator('iframe,object,embed').count(),0);}
    if(route==='/work/map/'){
     await page.locator('[data-gallery-choice="3"]').click();await page.waitForFunction(()=>document.querySelector('[data-gallery-frame="3"] img').naturalWidth===1152&&!document.querySelector('[data-gallery-frame="3"]').hidden);
     const png=process.env.PUBLIC_EVIDENCE;

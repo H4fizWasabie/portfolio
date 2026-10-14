@@ -1,7 +1,7 @@
 // Test the actual offline V4 disclosure + both renderer/source/PDF consistency.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {pathToFileURL}=require('node:url'),{execFileSync}=require('node:child_process');
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/tmp/node_modules/playwright');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
 const root=path.join(__dirname,'..'),evidence=process.env.RESUME_EVIDENCE||'/tmp/portfolio-resume-preview-evidence';
 const url=process.env.RESUME_PREVIEW_URL||pathToFileURL(path.join(root,'variants/waterfall-preview/dist/index.html')).href;
 const pdf=fs.readFileSync(path.join(__dirname,'Resume-Hafiz-Jamali.pdf')),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
@@ -19,7 +19,7 @@ let browser;
   const summary=page.locator('#resume-preview > summary');await summary.focus();await page.keyboard.press('Enter');
   assert(await page.locator('#resume-preview').evaluate(el=>el.open),'Keyboard did not open preview');
   assert(await page.locator('.resume-paper').isVisible());
-  const content=await page.locator('.resume-paper').innerText();for(const term of ['SYSTEMS BUILDER','MAP — My Awesome App','Procura','Theoses','EXPERIENCE','SKILLS','73'])assert(content.includes(term),term);
+  const content=await page.locator('.resume-paper').innerText();for(const term of ['INTERNAL TOOLS DEVELOPER','MAP — Android Productivity App','Procura','Theoses','EXPERIENCE','SKILLS','73'])assert(content.includes(term),term);
   assert(!content.includes('Procure Pilot'));assert.equal(await page.locator('iframe,object,embed').count(),0);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Preview overflows '+width);
   assert(await page.locator('.resume-paper p').evaluateAll(ps=>ps.every(p=>parseFloat(getComputedStyle(p).fontSize)>=16)),'Reading type too small');

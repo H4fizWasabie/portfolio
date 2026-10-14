@@ -33,5 +33,5 @@ const manifest=JSON.parse(fs.readFileSync(path.join(dist,'runtime-manifest.json'
 for(const entry of manifest){assert.equal(hash(fs.readFileSync(path.join(dist,entry.file))),entry.sha256);assert.doesNotMatch(entry.file,/^(\.impeccable|evidence|FICTIONAL|projects\.cjs|render\.cjs)/);}
 assert.equal(manifest.length,46);
 assert.deepEqual(fs.readFileSync(path.join(dist,'resume/Resume-Hafiz-Jamali.pdf')),fs.readFileSync(path.join(root,'../../resume/Resume-Hafiz-Jamali.pdf')));
-const reader=fs.readFileSync(path.join(dist,'resume/index.html'),'utf8');assert.match(reader,/MAP — My Awesome App/);assert.doesNotMatch(reader,/Procure Pilot|<iframe|<object|<embed/);assert.match(reader,/Preview résumé/);
+const reader=fs.readFileSync(path.join(dist,'resume/index.html'),'utf8');assert.match(reader,/MAP — Android Productivity App/);assert.doesNotMatch(reader,/Procure Pilot|<iframe|<object|<embed/);assert.match(reader,/Preview résumé/);
 console.log('PASS publication regression: both executed modes; eleven indexable canonical pages; valid JSON-LD; clean links; sitemap/robots; 46 runtime hashes; canonical V4 scripts/styles preserved; responsive HTML resume and approved PDF; review output unchanged');

@@ -8,5 +8,6 @@
     "typecheck": "npm run typecheck --workspace=packages/shared && npm run typecheck --workspace=apps/web && npm run typecheck --workspace=apps/api",
     "lint": "npm run lint --workspace=apps/web && npm run lint --workspace=apps/api"
   },
+  "devDependencies": {"playwright-core": "1.63.0"},
   "engines": {"node": ">=22", "npm": ">=10"}
 }

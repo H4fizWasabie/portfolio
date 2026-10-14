@@ -1,5 +1,5 @@
 // Final delivered motion affordance: size, keyboard, dismissal and invariants.
-const {chromium}=require('/tmp/node_modules/playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
+const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
 const root=__dirname,url=pathToFileURL(path.join(root,'dist/index.html')).href,baseline=pathToFileURL(process.env.WATERFALL_V3_BASELINE||'/tmp/waterfall-v3-delivery.html').href;
 let browser;const results=[];
 async function box(p,selector){return p.locator(selector).evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};});}

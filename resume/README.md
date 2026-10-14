@@ -1,24 +1,27 @@
-# Systems Builder résumé
+# Résumé
 
-Owner approved the edited Systems Builder/MAP document and requested a preview button, 2026-10-03. Procure Pilot is Procura, not a separate project. MAP replaces that duplicate entry; supplier achievements remain under Procura. Other profile, metrics, employment and skills are preserved.
+One-page Internal Tools Developer / AI Automation résumé, approved by the owner 2026-10-14. Projects: PIMS, Procura, DD Drugs Register, Theoses, MAP.
 
-## Single content source
+## Single source
 
-`resume-datasheet-source.html` and `../resume.html` must be byte-identical. The existing nightly printer reads the latter and replaces legacy/public/dist PDFs; never run it as a draft test. `Resume-Hafiz-Jamali.pdf` and `../apps/web/public/resume/Resume-Hafiz-Jamali.pdf` must match.
+`resume-datasheet-source.html` is the only file to edit. Everything else is derived from it at build time:
 
-The selected PDF used wkhtmltopdf0.12.6.1. Safe draft build from repository root:
+- `pdf.cjs` prints it to `Resume-Hafiz-Jamali.pdf` (gitignored) with headless Chromium, then fails unless the PDF is one page and every contact line and system title in the source appears in the PDF text.
+- `preview.cjs` derives the responsive HTML reader (`/resume/` and the homepage preview) and refuses to run if the PDF is missing or older than the source.
+
+`variants/product-launch/build.cjs` runs `pdf.cjs` first, so every build ships a PDF that matches the source.
 
 ```sh
-wkhtmltopdf --quiet --enable-local-file-access resume/resume-datasheet-source.html /tmp/Hafiz-Jamali-Systems-Builder-MAP.pdf
-pdfinfo /tmp/Hafiz-Jamali-Systems-Builder-MAP.pdf
+npm ci
+node resume/pdf.cjs
 ```
 
-The print-only rule keeps Chromium's nightly print path on one page too. Both renderer outputs were generated and checked for all four projects, corrected names, preserved metrics and footer; both visually inspected. No live generator was run.
+The one-page check depends on fonts: install Inter and IBM Plex Mono (`fonts-inter`, `fonts-ibm-plex` on Ubuntu) plus `poppler-utils`. On the VPS, set `PLAYWRIGHT_BROWSERS_PATH=/home/theoses/.cache/ms-playwright`; elsewhere run `npx playwright-core install --only-shell chromium` or set `CHROME`.
 
 ## Responsive preview
 
-`preview.cjs` derives scoped HTML from the same source and adds `reader.css`: semantic section headings, selectable16px reading text, labels≥12px, no PDF embed/viewer dependency. The screen reader reflows rather than shrinking A4 text on a phone. PDF remains unchanged/one-page.
+`preview.cjs` adds `reader.css`: semantic section headings, selectable 16px reading text, labels ≥12px, no PDF embed. The reader reflows on a phone instead of shrinking A4 text. `node resume/qa.cjs` checks four widths, JavaScript on/off, native open/close and that the downloaded PDF matches the built one.
 
-V4 uses a native About disclosure and exact embedded PDF download, including offline/no-JS/keyboard. Product Launch builds /resume/ and that exact PDF into its46-file/eleven-page production manifest. `node resume/qa.cjs` checks four widths, JavaScript on/off, native open/close and actual download hashes.
+## Deploy
 
-PR57 is stacked on V4 PR55; neither PR/main is automatically merged. Isolated V4 review publication is not canonical deployment. See DEPLOYMENT.md; do not claim the public canonical download changed before real release/routing verification.
+See `DEPLOYMENT.md`.

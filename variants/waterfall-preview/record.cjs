@@ -1,5 +1,5 @@
 // A finite actual-browser walkthrough, not a generated waterfall video.
-const {chromium}=require('/tmp/node_modules/playwright');
+const {chromium}=require('playwright-core');
 const path=require('node:path');const {pathToFileURL}=require('node:url');
 let browser;
 (async()=>{

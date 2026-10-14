@@ -1,5 +1,5 @@
 // Verify the actual public delivery, including native-density overlay and crop.
-const {chromium}=require('/tmp/node_modules/playwright');
+const {chromium}=require('playwright-core');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');let browser;
 (async()=>{browser=await chromium.launch({executablePath:'/home/theoses/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome',args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader-webgl','--enable-unsafe-swiftshader','--disable-gpu-sandbox']});const results=[];
 for(const [width,height,dpr] of [[1440,900,2],[390,844,3],[320,740,2]]){
