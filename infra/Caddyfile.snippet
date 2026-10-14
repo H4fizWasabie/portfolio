@@ -1,27 +1,27 @@
-# Approved canonical Product Launch deployment; archive variant handlers omitted.
+# Approved canonical Workshop deployment; archive variant handlers omitted.
 # Live source of truth: /etc/caddy/Caddyfile. Release pointer is replaced atomically.
-# Legacy dist remains in place for existing asset/video writers and the résumé.
+# Legacy dist remains in place for existing asset/video writers.
 portfolio.wasabietech.com {
-	bind 149.28.146.30
-	root * /var/www/portfolio-releases/current
+	bind 169.58.63.110
+	encode zstd gzip
 	handle_path /variant-product-launch/* {
 		redir https://portfolio.wasabietech.com{uri} 308
 	}
 	redir /variant-product-launch / 308
-	@archivedVariants path_regexp archived ^/variant-(alpha|bravo|charlie|delta|epsilon|zeta|eta|flight|ledger|rawgrid)(/|$)
+	@archivedVariants path_regexp archived ^/variant-(alpha|bravo|charlie|delta|epsilon|zeta|eta|flight|ledger|rawgrid|workshop|turntable|workflow)(/|$)
 	header @archivedVariants X-Robots-Tag "noindex, nofollow"
-	@htmlIndex path_regexp htmlIndex ^/(|projects/|work/(?:procura|pims|dd-drugs-register|theoses|yen|map|hills-ai-content-lab|89lab)/)index\.html$
+	@htmlIndex path_regexp htmlIndex ^/(|projects/|resume/|work/(?:procura|pims|dd-drugs-register|theoses|yen|map|89lab)/)index\.html$
 	redir @htmlIndex /{re.htmlIndex.1} 308
-	@canonicalDirectories path /projects /work/procura /work/pims /work/dd-drugs-register /work/theoses /work/yen /work/map /work/hills-ai-content-lab /work/89lab
+	@canonicalDirectories path /resume /projects /work/procura /work/pims /work/dd-drugs-register /work/theoses /work/yen /work/map /work/89lab
 	redir @canonicalDirectories {path}/ 308
-	redir /ai-content-lab.html /work/hills-ai-content-lab/ 301
-	redir /resume.html /resume 301
+	root * /var/www/portfolio-releases/current
+	redir /ai-content-lab.html / 301
+	redir /resume.html /resume/ 301
 	redir /ai-lab-prototypes.html / 301
-	redir /resume /resume/Resume-Hafiz-Jamali.pdf 302
 	handle /api/* {
 		reverse_proxy 127.0.0.1:8085
 	}
-	@legacyAssets path_regexp legacyAsset ^/(assets/|fonts/|img/|resume/|favicon(?:\.ico|-32x32\.png)$|apple-touch-icon\.png$|[0-9]{8}-[^/]+\.mp4$)
+	@legacyAssets path_regexp legacyAsset ^/(assets/|fonts/|img/|favicon(?:\.ico|-32x32\.png)$|apple-touch-icon\.png$|[0-9]{8}-[^/]+\.mp4$)
 	handle @legacyAssets {
 		root * /var/www/portfolio/apps/web/dist
 		file_server
