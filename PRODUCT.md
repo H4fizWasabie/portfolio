@@ -8,7 +8,7 @@ web
 
 ## Users
 
-Prospective clients evaluating custom business applications and AI automation. Personal background, résumé and contact also support recruiters and collaborators.
+Prospective clients evaluating custom business applications and AI automation come first. Personal background, résumé and contact also support employers hiring for internal tools or AI automation.
 
 ## Product Purpose
 
@@ -16,13 +16,13 @@ Help a visitor understand Hafiz's work through real projects, inspect individual
 
 ## Capabilities and Constraints
 
-Owner-approved selection: Procura, PIMS, DD Drugs Register, Theoses, Yen, MAP, Hill's AI Content Lab and 89lab content automation. Homepage features Procura, Theoses and MAP. Detailed exploration belongs on individual project pages.
+Owner-approved selection (2026-10-14): Procura, PIMS, DD Drugs Register, Theoses, 89lab content automation, MAP and Yen. Hill's AI Content Lab was removed from the site and the résumé. Theoses is described as built on the pi coding agent, forked to suit Hafiz's workflow; never as written from scratch.
 
-The approved first pass includes static project listings, verified case-study copy and safe visuals. Interactive applications are a later phase. Existing legacy routes, public homepage, services, databases and résumé files remain untouched. Code changes require an issue and feature-branch PR; neither merge nor deployment is authorised.
+Project pages include small in-browser demos of each workflow on fictional sample data. They are labelled as demos and are not the real applications. Code changes go through a feature-branch PR.
 
 ## Brand Commitments
 
-Hafiz selected Product Launch B. Its existing variant design is binding; this is an extension, not a new identity exercise. Projects must not be casually labelled experimental. A personal-use project does not imply public adoption; a self-directed campaign does not imply a paid client relationship.
+Hafiz selected the Workshop (2026-10-14): a small clay room modelled in Blender where every object is a project, with day and night switched by the desk lamp. See `variants/redesign/README.md`. It replaced Product Launch B and the waterfall homepage, which stay in the repo as archived designs. Projects must not be casually labelled experimental. A personal-use project does not imply public adoption; a self-directed campaign does not imply a paid client relationship.
 
 ## Evidence on Hand
 
