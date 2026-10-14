@@ -32,25 +32,25 @@
 .resume-paper a{ color: inherit; text-decoration: none; }
 .resume-paper .idtop{ border-top: 4px solid #17190f; padding-top: 12px; }
 .resume-paper .idrow{ width: 100%; }
-.resume-paper h2{ font-size: 23pt; letter-spacing: 1px; font-weight: 700; }
+.resume-paper h2{ font-size: 23pt; font-weight: 700; }
 .resume-paper .role{ font-size: 10.5pt; color: #4a4d3a; margin-top: 2px; }
 .resume-paper .meta{ text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
 .resume-paper .meta span{ display: block; }
 .resume-paper .certline{
     margin-top: 10px; padding: 5px 8px; border-top: 1px solid #17190f; border-bottom: 1px solid #17190f;
-    font-size: 8pt; color: #17190f; letter-spacing: 0.5px;
+    font-size: 8pt; color: #17190f;
   }
 .resume-paper .certline b{ color: #5a7a22; }
 .resume-paper .sec{ margin-top: 14px; }
 .resume-paper .sechead{ border-bottom: 2px solid #17190f; padding-bottom: 3px; margin-bottom: 8px; }
-.resume-paper .secno{ font-size: 8pt; font-weight: 700; color: #5a7a22; letter-spacing: 1px; }
-.resume-paper .sectitle{ font-size: 8pt; font-weight: 700; letter-spacing: 3px; color: #17190f; }
+.resume-paper .secno{ font-size: 8pt; font-weight: 700; color: #5a7a22; }
+.resume-paper .sectitle{ font-size: 8pt; font-weight: 700; color: #17190f; }
 .resume-paper .profile{ font-size: 9.5pt; text-align: justify; }
 .resume-paper table.sys{ width: 100%; border-collapse: collapse; }
 .resume-paper td.sysname{ padding: 3px 0 1px 0; font-weight: 700; font-size: 10pt; }
-.resume-paper td.sysname .kind{ font-weight: 400; font-size: 7.5pt; color: #5a7a22; letter-spacing: 1px; }
+.resume-paper td.sysname .kind{ font-weight: 400; font-size: 7.5pt; color: #5a7a22; }
 .resume-paper td.sysurl{ text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
-.resume-paper .tags{ font-size: 7.2pt; color: #4a4d3a; letter-spacing: 0.5px; padding-bottom: 3px; }
+.resume-paper .tags{ font-size: 7.2pt; color: #4a4d3a; padding-bottom: 3px; }
 .resume-paper .sysdesc{ margin: 0 0 4px 0; font-size: 9.3pt; }
 .resume-paper ul.sysul{ margin: 0 0 8px 0; padding-left: 14px; }
 .resume-paper ul.sysul li{ margin-bottom: 2px; }
@@ -63,10 +63,10 @@
 .resume-paper .jdesc{ font-size: 9.2pt; }
 .resume-paper table.skills{ width: 100%; border-collapse: collapse; }
 .resume-paper td.sk{ padding: 1.5px 0; vertical-align: top; font-size: 9.2pt; }
-.resume-paper td.sklabel{ width: 92px; font-size: 7.6pt; font-weight: 700; letter-spacing: 1px; color: #5a7a22; padding-top: 3px; }
+.resume-paper td.sklabel{ width: 92px; font-size: 7.6pt; font-weight: 700; color: #5a7a22; padding-top: 3px; }
 .resume-paper .foot{ margin-top: 14px; border-top: 1px solid #17190f; padding-top: 5px;
           font-size: 7.2pt; color: #4a4d3a; display: block; }
-.resume-paper .foot .ref{ letter-spacing: 1px; color: #5a7a22; font-weight: 700; }
+.resume-paper .foot .ref{ color: #5a7a22; font-weight: 700; }
 
 /* Read mode: the approved white datasheet, with live text rather than an embed. */
 .resume-paper{background:#fff;color:#17190f;font-size:16px;line-height:1.65;max-width:980px;margin:28px auto 0;border-radius:18px;overflow-wrap:anywhere;text-align:left;color-scheme:light}

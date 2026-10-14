@@ -1,6 +1,7 @@
 // Separate review/production builds. This command never deploys or reloads Caddy.
-const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{execFileSync}=require('node:child_process');
 const source=__dirname,published=process.argv.includes('--publish');
+execFileSync(process.execPath,[path.join(source,'../../resume/pdf.cjs')],{stdio:'inherit'});
 process.env.PORTFOLIO_PUBLISH=published?'1':'0';
 const root=published?path.join(source,'dist'):source;
 fs.mkdirSync(root,{recursive:true});

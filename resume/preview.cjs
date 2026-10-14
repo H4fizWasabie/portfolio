@@ -1,11 +1,10 @@
 // One approved source for the responsive HTML reader and offline PDF download.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 function payload(){
- const source=fs.readFileSync(path.join(__dirname,'resume-datasheet-source.html'),'utf8');
- const mirror=fs.readFileSync(path.join(__dirname,'../resume.html'),'utf8');
- if(source!==mirror)throw new Error('Printable resume sources differ');
- const pdf=fs.readFileSync(path.join(__dirname,'Resume-Hafiz-Jamali.pdf'));
- if(!pdf.equals(fs.readFileSync(path.join(__dirname,'../apps/web/public/resume/Resume-Hafiz-Jamali.pdf'))))throw new Error('Approved PDF copies differ');
+ const sourceFile=path.join(__dirname,'resume-datasheet-source.html'),pdfFile=path.join(__dirname,'Resume-Hafiz-Jamali.pdf');
+ const source=fs.readFileSync(sourceFile,'utf8');
+ if(!fs.existsSync(pdfFile)||fs.statSync(pdfFile).mtimeMs<fs.statSync(sourceFile).mtimeMs)throw new Error('Résumé PDF missing or older than its source; run node resume/pdf.cjs');
+ const pdf=fs.readFileSync(pdfFile);
  let body=source.match(/<body>([\s\S]*?)<\/body>/)[1].trim();
  body=body.replace(/<h1\b/g,'<h2').replace(/<\/h1>/g,'</h2>')
   .replace(/<div class="sechead">(.*?)<\/div>/g,'<h3 class="sechead">$1</h3>');

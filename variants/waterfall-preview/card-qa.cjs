@@ -1,5 +1,5 @@
 // Exercise final CSS, worst-case backdrop contrast, and preference fallbacks.
-const {chromium}=require('/tmp/node_modules/playwright');
+const {chromium}=require('playwright-core');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
 const root=__dirname,url=pathToFileURL(path.join(root,'dist/index.html')).href,baseline=pathToFileURL('/tmp/waterfall-v2-delivery.html').href;
 let browser;const results=[];

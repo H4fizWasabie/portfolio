@@ -1,5 +1,5 @@
 // Scoped V5 layout checks. Run against offline artifact or WATERFALL_WIDE_QA_URL.
-const {chromium}=require('/tmp/node_modules/playwright');
+const {chromium}=require('playwright-core');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
 const root=__dirname,url=process.env.WATERFALL_WIDE_QA_URL||pathToFileURL(path.join(root,'dist/index.html')).href;
 const baseline=process.env.WATERFALL_WIDE_BASELINE||'/tmp/portfolio-wide-baseline.html';

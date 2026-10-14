@@ -1,5 +1,5 @@
 // V7 regression: portfolio breadth is visible; whole desktop cards fit; images are never cropped.
-const {chromium}=require('/tmp/node_modules/playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
+const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{pathToFileURL}=require('node:url');
 const published=process.env.COMPACT_QA_PUBLISHED==='1',canonicalLinkPrefix=published?'/work/':'https://portfolio.wasabietech.com/work/';
 const root=__dirname,url=process.env.COMPACT_QA_URL||pathToFileURL(path.join(root,'dist/index.html')).href,evidence=process.env.COMPACT_EVIDENCE||'/tmp/portfolio-compact-evidence';
 let browser;const results=[];

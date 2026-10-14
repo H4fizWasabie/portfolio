@@ -1,5 +1,5 @@
 // Test actual built pages over HTTP and extracted-folder file:// review mode.
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/home/theoses/.resume-gen/node_modules/playwright-core');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {pathToFileURL}=require('node:url');
 const root=process.env.PREVIEW_ROOT||__dirname, evidence=process.env.QA_EVIDENCE||path.join(__dirname,'evidence','eight-projects');
@@ -47,12 +47,12 @@ function contrast(a,b){const luminance=x=>{const v=x.slice(1).match(/../g).map(n
     await page.keyboard.press('End');assert(await page.locator('[data-app="map"]').getAttribute('aria-selected')==='true','End key failed');
     await page.keyboard.press('Home');await page.waitForFunction(()=>document.querySelector('#showcase-panel').getAttribute('aria-busy')==='false');
     await page.locator('#about a[href="resume/index.html"]').click();await page.waitForURL(base+'resume/index.html');
-    assert((await page.locator('.resume-paper').innerText()).includes('MAP — My Awesome App'),'Preview button opens wrong resume');
+    assert((await page.locator('.resume-paper').innerText()).includes('MAP — Android Productivity App'),'Preview button opens wrong resume');
     await page.goto(base+'index.html');await page.evaluate(()=>document.fonts.ready);
    }else if(route==='projects/index.html'){
     assert(await page.locator('.project-list .project-row').count()===8,'Project index incomplete');
    }else if(route==='resume/index.html'){
-    assert((await page.locator('.resume-paper').innerText()).includes('MAP — My Awesome App'),'Approved resume content missing');
+    assert((await page.locator('.resume-paper').innerText()).includes('MAP — Android Productivity App'),'Approved resume content missing');
     assert(await page.locator('iframe,object,embed').count()===0,'Preview depends on a PDF viewer');
     assert(await page.locator('.resume-paper p').evaluateAll(ps=>ps.every(p=>parseFloat(getComputedStyle(p).fontSize)>=16)),'Resume reading text too small');
    }else{

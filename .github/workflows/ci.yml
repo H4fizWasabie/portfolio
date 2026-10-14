@@ -10,4 +10,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
+      # The résumé PDF is printed at build time; same fonts as the VPS so the one-page check means the same thing.
+      - run: sudo apt-get update && sudo apt-get install -y fonts-inter fonts-ibm-plex poppler-utils
+      - run: npx playwright-core install --with-deps --only-shell chromium
       - run: node variants/product-launch/publish-test.cjs
