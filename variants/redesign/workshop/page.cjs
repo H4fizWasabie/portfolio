@@ -5,40 +5,44 @@ const { demos } = require('../demos.cjs');
 
 const fonts = ['schibsted-grotesk-latin-wght-normal.woff2'];
 const licenses = ['OFL-schibsted-grotesk.txt'];
-const thumbs = ['procura', 'pims', 'dd-drugs-register', 'theoses', '89lab', 'map', 'yen'].map(s => `model/thumb-${s}.webp`);
+const thumbs = ['procura', 'pims', 'dd-drugs-register', 'theoses', '89lab', 'map', 'yen'].flatMap(s => [`model/thumb-${s}.webp`, `model/thumb-${s}-night.webp`]);
 const statics = ['model/workshop.glb', 'model/poster.webp', 'photo/hafiz-portrait.webp', ...thumbs];
 
 // What each project is on the bench, so the index can name the object.
 const objectName = { procura: 'Trolley of deliveries', pims: 'Supply cabinet', 'dd-drugs-register': 'Drug safe', theoses: 'Monitor and home server', '89lab': 'Camera, light and microphone', map: 'Phone on its charger', yen: 'Little robot' };
 
-// What a client can ask for, each tied to the projects that prove it.
+// What a client can ask for. The homepage shelves each project under the service it proves;
+// teaching has no object of its own, so its row is a short note instead of cards.
 const services = [
   ['Stock and purchasing apps', 'Know what to buy, raise requests and track every order from request to receipt.', ['procura', 'pims']],
   ['Records with an audit trail', 'Daily counts and corrections that keep the original entry, with a name on every change.', ['dd-drugs-register']],
   ['AI assistants and automation', 'Repeated work done by an agent or a pipeline, with your review before anything goes out.', ['theoses', '89lab', 'yen']],
   ['Android apps', 'Local-first phone apps that work without accounts or tracking.', ['map']],
-  ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', ['89lab', 'theoses']]
+  ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', []]
 ];
+const teaching = root => `<p class="shelf-note">My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub repo worth studying and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>`;
 
-// How a project runs, in order.
-const process = [
-  ['We talk through your workflow', 'You show me how the work happens today: the spreadsheets, the handovers and the steps that keep repeating.'],
-  ['I build a first version on sample data', 'You see something working early, with fictional data, before it touches any real records.'],
-  ['We test it with your team', 'The people who will use it try it on real tasks, and I adjust it to how they actually work.'],
-  ['I hand it over and support it', 'You get the running app and a walkthrough, and I stay available for fixes and changes.']
-];
-
-// Sets day or night before first paint: stored choice, else the device setting. Stills are always day.
-const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t='light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
-const toggle = '<button class="theme-toggle" type="button" data-theme-toggle>Lights off</button>';
-const nav = root => B.nav(root, '', toggle, `${root}resume/`);
+// Sets day or night before first paint: stored choice, else the device setting.
+// Stills are day unless render-stills.cjs asks for night.
+const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
+const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>Night</button>';
+// Phones keep a short contact button in the bar, since the hero's button sits below the room.
+const nav = (root, site, esc) => `<header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
+<nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a>${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></nav></header>`;
 const footer = root => B.footer(root, `${root}resume/`);
 
-// The uneven grid of object renders, shared by the homepage and /projects/.
-const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
-<span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.summary)}</span></span></a></li>`).join('')}</ul>`;
+const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
+<span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.summary)}</span></span></a></li>`;
 
-const thumb = (root, p, attrs = '') => `<img src="${root}static/thumb-${p.slug}.webp" alt="" width="640" height="480" ${attrs}>`;
+// /projects/: every object render in one uneven grid.
+const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => card(p, root, esc)).join('')}</ul>`;
+
+// Homepage: one shelf per service, the projects that prove it beside it.
+const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
+${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
+
+// Day and night renders of the same object; the theme shows one (the hidden one is never fetched).
+const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thumb${v || '-day'}" src="${root}static/thumb-${p.slug}${v}.webp" alt="" width="640" height="480" ${attrs}>`).join('');
 
 function home({ projects, site, esc, root }) {
   const by = Object.fromEntries(projects.map(p => [p.slug, p]));
@@ -50,14 +54,14 @@ function home({ projects, site, esc, root }) {
   return `${B.head({ title: site.title, description: site.description, root, fonts,
     route: '/', extra: `${themeScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
 <body>
-<div class="sky">${nav(root)}
+<div class="sky">${nav(root, site, esc)}
 <section class="bench">
 <div class="bench-stage" data-stage>
 <img class="bench-poster" src="${root}static/poster.webp" alt="A small clay workshop: a desk with a monitor, phone, lamp and robot, a supply cabinet, a drug safe, a trolley of deliveries, and a camera with a ring light." width="1600" height="1200">
 <p class="bench-tip" data-tip hidden></p>
 <aside class="drawer" data-drawer aria-labelledby="drawer-title" hidden>
 <button class="drawer-close" type="button" data-close>Back to the bench</button>
-<p class="drawer-kind" data-f="category"></p><h2 id="drawer-title" data-f="title"></h2><p class="drawer-summary" data-f="summary"></p>
+<h2 id="drawer-title" data-f="title"></h2><p class="drawer-kind" data-f="category"></p><p class="drawer-summary" data-f="summary"></p>
 <figure data-f="figure"></figure><p data-f="description"></p>
 <a class="button" data-f="link" href="#">Read the case study</a>
 <div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
@@ -68,14 +72,8 @@ function home({ projects, site, esc, root }) {
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
 </section></div>
 <main>
-<section class="services" aria-labelledby="services-title"><h2 id="services-title">What I can do for you</h2>
-<ul>${services.map(([h, d, slugs]) => `<li><h3>${h}</h3><p>${d}</p><p class="service-links">${slugs.map(s => `<a href="${root}work/${s}/">${esc(by[s].title)}</a>`).join('')}</p></li>`).join('')}</ul></section>
-
-<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">The work, object by object</h2>
-${workGrid(projects, root, esc)}</section>
-
-<section class="process" aria-labelledby="process-title"><h2 id="process-title">How a project runs</h2>
-<ol>${process.map(([h, d]) => `<li><h3>${h}</h3><p>${d}</p></li>`).join('')}</ol></section>
+<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">What I can do for you</h2>
+${shelves(by, root, esc)}</section>
 
 <section class="about" id="about" aria-labelledby="about-title">
 <img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">
@@ -83,9 +81,9 @@ ${workGrid(projects, root, esc)}</section>
 ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
 <section class="contact" id="contact"><h2>${esc(site.contactTitle)}</h2>
-<p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in.</p>
+<p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
 <form class="brief" data-brief data-email="${site.email}" novalidate>
-<fieldset><legend>What do you need?</legend><div class="chips">${[...services.map(sv => sv[0]), 'Something else'].map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
+<fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
 <fieldset><legend>How many people would use it?</legend><div class="chips">${['Just me', '2 to 10', '11 to 50', 'More than 50'].map((n, i) => `<label class="chip"><input type="radio" name="people" value="${n}" id="people-${i}">${n}</label>`).join('')}</div></fieldset>
 <div class="field"><label for="brief-today">How does the work happen today?</label>
 <textarea id="brief-today" rows="3" aria-describedby="brief-help"></textarea>
@@ -103,13 +101,13 @@ ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 
 function project({ p, next, site, esc, root }) {
   return `${B.head({ title: `${p.title} | ${site.name}`, description: p.description, root, fonts, route: `/work/${p.slug}/`, extra: themeScript })}
-<body>${nav(root)}
+<body>${nav(root, site, esc)}
 <main class="case">
-<header class="case-head"><div><p><a href="${root}#work">Back to the bench</a></p><h1>${esc(p.title)}</h1>
+<header class="case-head"><div><p><a href="${root}projects/">All projects</a></p><h1>${esc(p.title)}</h1>
 <p class="kind">${esc(p.category)}</p><p class="case-lede">${esc(p.description)}</p></div>
-<div><div class="object-view" data-object="${p.slug}" data-root="${root}">${thumb(root, p)}</div><p class="object-hint">Drag sideways to turn it.</p></div></header>
+<div><div class="object-view" data-object="${p.slug}" data-root="${root}">${thumb(root, p, 'loading="lazy"')}</div><p class="object-hint">Drag sideways to turn it.</p></div></header>
 ${p.slug === 'map' ? '' : `<section class="try" aria-labelledby="try-title"><h2 id="try-title">Try it</h2><p>A small working version of the workflow, running in your browser with fictional data.</p>${demos[p.slug](root, p)}</section>`}
-${B.gallery(p, root)}
+${p.scenes.length ? B.gallery(p, root) : ''}
 <div class="case-grid"><div class="case-body">${B.caseBody(p)}</div><aside class="case-facts">${B.facts(p)}</aside></div>
 <nav class="next" aria-label="Next project"><a href="${root}work/${next.slug}/">${thumb(root, next, 'loading="lazy"')}<span>Next on the bench<strong>${esc(next.title)}</strong></span></a></nav>
 <section class="contact">${B.contact()}</section>
@@ -119,9 +117,9 @@ ${B.gallery(p, root)}
 
 function projectsPage({ projects, site, esc, root }) {
   return `${B.head({ title: `All projects | ${site.name}`, description: 'Seven projects across procurement, inventory, clinical records, Android, AI agents and content automation.', root, fonts, route: '/projects/', extra: themeScript })}
-<body>${nav(root)}
+<body>${nav(root, site, esc)}
 <main class="index-page">
-<p><a href="${root}">Back to the bench</a></p>
+<p><a href="${root}">Back to the homepage</a></p>
 <h1>All projects</h1>
 <p class="index-intro">Business apps, an Android app and AI automation. Each case study shows what the software does, with fictional sample data, and what it does not claim.</p>
 ${workGrid(projects, root, esc)}
@@ -131,13 +129,13 @@ ${workGrid(projects, root, esc)}
 }
 
 // The résumé reader is derived from the approved source by resume/preview.cjs (needs the built PDF).
-function resumePage({ site, root }, reader) {
+function resumePage({ site, esc, root }, reader) {
   return `${B.head({ title: `Résumé | ${site.name}`, description: 'Hafiz Jamali’s résumé: internal tools developer and AI automation for operations.', root, fonts, route: '/resume/', extra: `${themeScript}<link rel="stylesheet" href="${root}static/resume.css">` })}
-<body>${nav(root)}
+<body>${nav(root, site, esc)}
 <main class="resume-page">
 <h1>Résumé</h1>
 <p class="index-intro">My experience and the systems I’ve built. Download the one-page PDF if you need a copy.</p>
-<p class="resume-actions"><a class="button" href="${reader.filename}" download="${reader.filename}">Download PDF</a><a href="${root}">Back to the bench</a></p>
+<p class="resume-actions"><a class="button" href="${reader.filename}" download="${reader.filename}">Download PDF</a><a href="${root}">Back to the homepage</a></p>
 ${reader.html}
 </main>${footer(root)}
 <script type="module" src="${root}static/main.js"></script></body></html>`;

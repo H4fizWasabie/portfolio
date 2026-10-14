@@ -17,13 +17,14 @@ const site = {
   resume: 'https://portfolio.wasabietech.com/resume/',
   title: 'Hafiz Jamali | Custom business apps and AI automation',
   description: 'Hafiz Jamali builds custom business apps and AI automation for stock, purchasing, records and repetitive work.',
-  headline: 'Software built around how your team already works.',
-  sub: 'I build custom business apps and AI automation for stock, purchasing, records and repetitive work.',
+  headline: 'I build the software a veterinary hospital runs on.',
+  sub: 'Stock, purchasing and a dangerous-drugs register, in daily use where I work. I build the same for other teams, automate the repeated work with AI, and teach people to build their own.',
   cta: 'Discuss your project',
+  ctaShort: 'Contact',
+  based: 'Based in Selangor, Malaysia (GMT+8).',
   about: [
     'I’m Hafiz Jamali. I build practical software around work I know: veterinary procurement, inventory, clinical records, personal organisation and AI-assisted workflows.',
-    'Most of what you see here is in daily use. Each case study says what the software does, and what it does not claim.',
-    'I also teach. My pipelines publish AI news, a GitHub repo worth studying and an AI concept explained every day, and I can coach you or your team to design and build your own agents and automation.'
+    'Most of what you see here is in daily use. Each case study says what the software does, and what it does not claim.'
   ],
   hiring: 'Hiring for internal tools or AI automation?',
   contactTitle: 'What should your software do?',

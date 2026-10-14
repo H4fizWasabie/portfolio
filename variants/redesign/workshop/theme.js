@@ -11,7 +11,7 @@ export const isNight = () => root.dataset.theme === 'dark';
 
 function apply(night) {
   root.dataset.theme = night ? 'dark' : 'light';
-  for (const b of buttons) b.textContent = night ? 'Lights on' : 'Lights off';
+  for (const b of buttons) b.setAttribute('aria-pressed', night);
   dispatchEvent(new Event('themechange'));
 }
 
@@ -23,4 +23,4 @@ export function toggleTheme() {
 
 system.addEventListener('change', e => { if (!stored()) apply(e.matches); });
 buttons.forEach(b => b.addEventListener('click', toggleTheme));
-for (const b of buttons) b.textContent = isNight() ? 'Lights on' : 'Lights off';
+for (const b of buttons) b.setAttribute('aria-pressed', isNight());

@@ -33,7 +33,7 @@ const ROOM = {
 };
 const OBJECT = {
   day: { exposure: 1.08, ground: 0xcfc6b8, hemi: 1.3, keyColor: 0xfff0d8, key: 2.4, fill: 0.6, shade: 0.16, screen: 1 },
-  night: { exposure: 0.95, ground: 0x1d2126, hemi: 0.7, keyColor: 0xdfe6ff, key: 1.6, fill: 0.3, shade: 0.35, screen: 0.85 }
+  night: { exposure: 1, ground: 0x2a3038, hemi: 0.95, keyColor: 0xdfe6ff, key: 2, fill: 0.45, shade: 0.35, screen: 0.85 }
 };
 const mix = (preset, t) => Object.fromEntries(Object.keys(preset.day).map(k => {
   const a = preset.day[k], b = preset.night[k];
@@ -315,12 +315,13 @@ function startBench(stage, { root, projects }) {
     switcher.traverse(o => { if (o.isMesh && !o.userData.glow) o.material = o.material.clone(); });
     room.getObjectByName('lamp_head').getWorldPosition(lamp.position);
     lampGlow.position.copy(lamp.position).add(new THREE.Vector3(0, -0.15, 0));
-    light(isNight() ? 1 : 0);
+    // Night stills are dusk, so objects far from the desk lamp still read on a small card.
+    light(isNight() ? (still ? 0.65 : 1) : 0);
     stage.classList.add('is-live');
     stage.prepend(canvas);
     resize();
     if (still && still !== 'poster') fly(still, true);
-    else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1));
+    else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
     dirty = true;
   }).catch(err => console.warn('Workshop model failed to load; showing the still image.', err));
@@ -449,9 +450,16 @@ function startBench(stage, { root, projects }) {
   const f = name => drawer.querySelector(`[data-f=${name}]`);
   const steps = [...drawer.querySelectorAll('[data-step]')];
   let lastTrigger = null;
-  function select(slug) {
+  // Opening an object adds one history entry, so the browser's Back closes it instead of
+  // leaving the site; moving between objects replaces that entry. fromHistory: Back/Forward.
+  let pushed = false;
+  function select(slug, fromHistory) {
     const p = bySlug[slug];
     if (!p || !groups[slug]) return;
+    if (!fromHistory) {
+      if (active) history.replaceState(null, '', `#${slug}`);
+      else { history.pushState(null, '', `#${slug}`); pushed = true; }
+    }
     if (!active) lastTrigger = document.activeElement;
     highlight(active, false);
     highlight(hovered, false);
@@ -483,11 +491,14 @@ function startBench(stage, { root, projects }) {
     });
     drawer.hidden = false;
     stage.classList.add('has-drawer');
-    history.replaceState(null, '', `#${slug}`);
     document.querySelectorAll('[data-pick]').forEach(a => a.toggleAttribute('aria-current', a.dataset.pick === slug));
     if (!drawer.contains(document.activeElement)) drawer.querySelector('[data-close]').focus({ preventScroll: true });
   }
-  function back() {
+  function back(fromHistory) {
+    if (!active) return;
+    if (!fromHistory && pushed) { history.back(); return; } // popstate finishes closing
+    if (!fromHistory) history.replaceState(null, '', location.pathname + location.search);
+    pushed = false;
     highlight(active, false);
     active = null;
     shiftGoal = shiftFor(size[0]);
@@ -495,11 +506,14 @@ function startBench(stage, { root, projects }) {
     drawer.hidden = true;
     stage.classList.remove('has-drawer');
     fly(home);
-    history.replaceState(null, '', location.pathname + location.search);
     document.querySelectorAll('[data-pick]').forEach(a => a.removeAttribute('aria-current'));
     if (lastTrigger && lastTrigger.matches('[data-pick]')) lastTrigger.focus({ preventScroll: true });
   }
-  drawer.querySelector('[data-close]').addEventListener('click', back);
+  addEventListener('popstate', () => {
+    const slug = location.hash.slice(1);
+    if (slug in bySlug) select(slug, true); else back(true);
+  });
+  drawer.querySelector('[data-close]').addEventListener('click', () => back());
   steps.forEach(b => b.addEventListener('click', () => select(b.dataset.to)));
   addEventListener('keydown', e => {
     if (!active || e.target.closest('input, textarea, select')) return;
@@ -617,7 +631,8 @@ function startObject(box) {
     turntable.add(obj);
     const size = b.getSize(new THREE.Vector3());
     const fit = size.length() / 2 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
-    camera.position.set(0, size.y / 2, 0).add(new THREE.Vector3(0, 0.45, 1).normalize().multiplyScalar(fit * 0.85));
+    // Tall objects (the phone on its stand) need more room above them at this camera tilt.
+    camera.position.set(0, size.y / 2, 0).add(new THREE.Vector3(0, 0.45, 1).normalize().multiplyScalar(fit * (size.y > size.x ? 1.05 : 0.85)));
     camera.lookAt(0, size.y / 2, 0);
     box.classList.add('is-live');
     box.prepend(canvas);
