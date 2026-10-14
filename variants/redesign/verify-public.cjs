@@ -73,9 +73,9 @@ let browser;
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route}: no sideways scroll at ${width}px`);
       if (route === '/') {
         assert.equal(await page.locator('meta[name="portfolio-surface"]').getAttribute('content'), 'workshop');
-        assert.equal(await page.locator('.work-grid a').count(), projects.length);
+        assert.equal(await page.locator('.shelf-items a').count(), projects.length);
         assert.ok(await page.locator('[data-stage] canvas, .bench-poster').first().isVisible(), 'room or its still image shows');
-        await page.locator('.work-grid a').first().click();
+        await page.locator('.shelf-items a').first().click();
         await page.waitForURL(base + '/work/procura/');
       }
       if (route === '/work/procura/') {
