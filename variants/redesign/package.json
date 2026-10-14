@@ -1,0 +1,13 @@
+{
+  "name": "portfolio-redesign-previews",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "gltfpack": "1.3.0",
+    "playwright-core": "1.63.0",
+    "three": "0.186.1"
+  }
+}

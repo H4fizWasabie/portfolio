@@ -9,7 +9,7 @@ One-page Internal Tools Developer / AI Automation résumé, approved by the owne
 - `pdf.cjs` prints it to `Resume-Hafiz-Jamali.pdf` (gitignored) with headless Chromium, then fails unless the PDF is one page and every contact line and system title in the source appears in the PDF text.
 - `preview.cjs` derives the responsive HTML reader (`/resume/` and the homepage preview) and refuses to run if the PDF is missing or older than the source.
 
-`variants/product-launch/build.cjs` runs `pdf.cjs` first, so every build ships a PDF that matches the source.
+`variants/redesign/publish.cjs` runs `pdf.cjs` first, so every production build ships a PDF that matches the source. The `/resume/` page is derived from the same source by `preview.cjs`.
 
 ```sh
 npm ci

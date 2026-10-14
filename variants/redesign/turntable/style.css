@@ -1,0 +1,127 @@
+/* Variant B, "Turntable". A product-photography studio: grey paper sweep, graphite type,
+   one signal orange for the turntable rim and the primary action.
+   Radius rule: buttons full pill, screenshots and panels 14px. */
+@font-face{font-family:Unbounded;src:url(unbounded-latin-wght-normal.woff2) format("woff2");font-weight:200 900;font-display:swap}
+@font-face{font-family:Figtree;src:url(figtree-latin-wght-normal.woff2) format("woff2");font-weight:300 900;font-display:swap}
+
+:root{
+  --sweep:#e2e4e5;--deep:#c9ccce;--plinth:#d3d5d6;--device:#b9bdc1;--panel:#eceeef;
+  --ink:#222529;--muted:#555b63;--signal:#c03f0e;--on-signal:#fbfbfa;--focus:#c03f0e;
+  --r:14px;--max:1320px;--pad:clamp(20px,4vw,56px);
+}
+@media (prefers-color-scheme:dark){:root{
+  --sweep:#1b1d20;--deep:#0f1012;--plinth:#2a2d31;--device:#4a4f55;--panel:#24272b;
+  --ink:#e8e9ea;--muted:#a3a9b1;--signal:#ff7a45;--on-signal:#1b1d20;--focus:#ff7a45;
+}}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font:400 1.0625rem/1.6 Figtree,system-ui,sans-serif;
+  background:var(--sweep) radial-gradient(120% 70% at 70% 10%,color-mix(in srgb,var(--sweep) 70%,#fff 30%),transparent 70%) fixed}
+@media (prefers-color-scheme:dark){body{background:var(--sweep) radial-gradient(120% 70% at 70% 10%,#2a2d31,transparent 70%) fixed}}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+h1,h2,h3{margin:0;font-family:Unbounded,sans-serif;font-weight:600;letter-spacing:-.02em;line-height:1.08}
+p{margin:0}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.no-js .js-only{display:none}
+
+.button{display:inline-flex;align-items:center;min-height:48px;padding:12px 22px;border-radius:999px;border:0;
+  background:var(--signal);color:var(--on-signal);font:600 1rem/1 Figtree,sans-serif;text-decoration:none;white-space:nowrap;cursor:pointer;
+  transition:transform .2s cubic-bezier(.2,.9,.3,1.2)}
+.button:hover{transform:translateY(-1px)}
+.button:active{transform:translateY(1px) scale(.98)}
+.button-small{min-height:40px;padding:8px 16px;font-size:.9375rem}
+.button-ghost{background:none;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.text-link{font-weight:600}
+
+.site-nav{position:relative;z-index:2;max-width:var(--max);margin:0 auto;padding:18px var(--pad);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font:600 1rem Unbounded,sans-serif;text-decoration:none;letter-spacing:-.01em}
+.site-nav nav{display:flex;align-items:center;gap:clamp(12px,2.4vw,28px)}
+.site-nav nav a:not(.button){text-decoration:none;font-weight:600}
+.site-nav nav a:not(.button):hover{text-decoration:underline}
+@media (max-width:640px){.site-nav nav .button{display:none}}
+
+main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+
+/* Studio: chapters scroll on the left, the stage stays put on the right */
+.studio{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,56px)}
+.stage{grid-column:2;grid-row:1;position:sticky;top:0;height:100dvh;align-self:start;display:flex;flex-direction:column;justify-content:center}
+.stage canvas{width:100%;height:78dvh;display:block;cursor:grab;touch-action:pan-y}
+.stage canvas:active{cursor:grabbing}
+.stage-fallback{border-radius:var(--r);box-shadow:0 30px 60px -30px rgba(34,37,41,.45)}
+.stage.is-live .stage-fallback{display:none}
+.stage-caption{margin-top:8px;color:var(--muted);font-size:.875rem;text-align:center;min-height:2.8em}
+.reel{grid-column:1;grid-row:1}
+
+.hero{min-height:calc(100dvh - 84px);display:flex;flex-direction:column;justify-content:center;padding-bottom:10vh}
+.hero h1{font-size:clamp(2rem,3.2vw,3.1rem);max-width:15ch}
+.hero>p:not(.actions):not(.drag-hint){margin-top:22px;font-size:1.1875rem;color:var(--muted);max-width:34ch}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:32px}
+.drag-hint{margin-top:28px;font-size:.9375rem;color:var(--muted)}
+
+.chapter{min-height:88dvh;display:flex;flex-direction:column;justify-content:center;gap:14px;max-width:44ch}
+.kind{color:var(--muted);font-weight:600;font-size:.9375rem}
+.chapter h2{font-size:clamp(2rem,3.4vw,3rem)}
+.chapter .summary{font-size:1.25rem;font-weight:600}
+.chapter p:not(.summary):not(.kind){color:var(--muted)}
+.chapter .button{align-self:flex-start;margin-top:8px}
+
+/* Phone: the stage pins to the top, chapters scroll underneath on a solid panel */
+@media (max-width:860px){
+  .studio{display:block}
+  .stage{height:46svh;z-index:1;background:var(--sweep);margin:0 calc(var(--pad) * -1);padding:0 var(--pad)}
+  .stage canvas{height:40svh}
+  .stage-caption{margin-top:2px;font-size:.8125rem;min-height:2.6em}
+  .hero{min-height:auto;padding:28px 0 56px}
+  .chapter{min-height:72svh;max-width:none;justify-content:flex-start;padding-top:6svh}
+}
+
+.about{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,56px);padding:clamp(72px,10vw,140px) 0 clamp(48px,6vw,80px)}
+.about h2{font-size:clamp(1.75rem,3vw,2.5rem)}
+.about div{display:grid;gap:16px;max-width:60ch;font-size:1.125rem}
+.hiring{color:var(--muted)}
+.hiring a{color:var(--ink);font-weight:600}
+@media (max-width:860px){.about{grid-template-columns:1fr}}
+
+.contact{margin-bottom:clamp(48px,7vw,96px);padding:clamp(28px,5vw,64px);border-radius:var(--r);background:var(--panel)}
+.contact h2{font-size:clamp(1.75rem,3.4vw,2.75rem);max-width:18ch}
+.contact>p{margin-top:14px;color:var(--muted);max-width:52ch}
+.contact .contact-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:28px;color:var(--ink);font-weight:600}
+.site-footer{max-width:var(--max);margin:0 auto;padding:24px var(--pad) 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9375rem}
+.site-footer p:last-child{display:flex;gap:20px}
+
+/* Galleries and case pages */
+.gallery-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.gallery-tabs button{min-height:40px;padding:6px 16px;border-radius:999px;border:0;background:none;box-shadow:inset 0 0 0 1.5px var(--deep);color:var(--ink);font:600 .9375rem Figtree,sans-serif;cursor:pointer}
+.gallery-tabs button[aria-selected=true]{background:var(--ink);color:var(--sweep);box-shadow:none}
+.no-js .gallery-panel[hidden]{display:block}
+.gallery-panel img{border-radius:var(--r);box-shadow:0 30px 60px -30px rgba(34,37,41,.45)}
+.gallery-panel.is-phone img{width:min(320px,80%);margin:0 auto;border-radius:28px}
+.gallery-panel p,.gallery figcaption{margin-top:12px;color:var(--muted);font-size:.9375rem}
+.gallery,.outline{margin:0}
+.outline{max-width:720px;padding:clamp(20px,3vw,32px);border-radius:var(--r);background:var(--panel)}
+.outline figcaption{color:var(--muted);font-weight:600;margin-bottom:12px}
+.outline ol,.steps{margin:0;padding-left:24px;display:grid;gap:8px}
+.outline li::marker,.steps li::marker{color:var(--signal);font-weight:700}
+
+.case-head{padding:clamp(24px,5vw,72px) 0 clamp(28px,4vw,48px);max-width:60ch}
+.case-head h1{font-size:clamp(2.5rem,6vw,4.75rem);margin-top:6px}
+.case-head .kind{margin-top:20px}
+.case-lede{margin-top:18px;font-size:1.25rem}
+.sweep{padding:clamp(20px,4vw,48px);border-radius:var(--r);background:var(--panel)}
+.case-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:clamp(28px,5vw,72px);margin-top:clamp(48px,7vw,96px);align-items:start}
+@media (max-width:860px){.case-grid{grid-template-columns:1fr}}
+.case-body{display:grid;gap:36px;max-width:64ch}
+.case-body h2{font-size:1.375rem;margin-bottom:10px}
+.case-facts dl{margin:0;display:grid;gap:20px;position:sticky;top:24px}
+.case-facts dt{font-weight:700;font-size:.875rem;color:var(--muted)}
+.case-facts dd{margin:4px 0 0}
+.case-facts ul{margin:0;padding-left:18px}
+.case-facts a{overflow-wrap:anywhere}
+.next{margin:clamp(56px,8vw,112px) 0 clamp(32px,4vw,48px)}
+.next a{display:inline-flex;flex-direction:column;gap:4px;text-decoration:none;font:600 clamp(1.75rem,4vw,3rem)/1.1 Unbounded,sans-serif}
+.next a span{font:600 .9375rem Figtree,sans-serif;color:var(--muted)}
+.next a:hover{color:var(--signal)}

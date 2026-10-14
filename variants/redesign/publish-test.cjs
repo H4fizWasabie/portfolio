@@ -1,0 +1,74 @@
+#!/usr/bin/env node
+// Regression test for the production build (CI and release.sh): builds the noindex preview and the
+// production site, then checks SEO tags, structured data, links, sitemap/robots, the résumé and
+// that every manifest hash matches. Replaces product-launch/publish-test.cjs for the Workshop design.
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const assert = require('assert/strict');
+const { execFileSync } = require('child_process');
+
+const here = __dirname;
+const origin = 'https://portfolio.wasabietech.com';
+const { projects } = require('./content.cjs');
+const routes = ['/', '/projects/', '/resume/', ...projects.map(p => `/work/${p.slug}/`)];
+const rel = route => (route === '/' ? 'index.html' : route.slice(1) + 'index.html');
+const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+
+execFileSync(process.execPath, [path.join(here, 'publish.cjs')], { stdio: 'inherit' });
+execFileSync(process.execPath, [path.join(here, 'build.cjs'), 'workshop'], { stdio: 'inherit' });
+const site = path.join(here, 'dist', 'site'), preview = path.join(here, 'dist', 'workshop');
+
+assert.ok(!projects.some(p => /hill/i.test(p.slug)), 'Hill’s AI Content Lab was removed from the portfolio');
+for (const route of routes) {
+  const html = fs.readFileSync(path.join(site, rel(route)), 'utf8');
+  assert.match(html, /name="robots" content="index,follow"/, route);
+  assert.ok(html.includes(`<link rel="canonical" href="${origin}${route}">`), route);
+  assert.ok(html.includes(`<meta property="og:url" content="${origin}${route}">`), route);
+  assert.doesNotMatch(html, /href="[^"]*index\.html/, route);
+  assert.doesNotMatch(html, /<a\b[^>]*href="https:\/\/portfolio\.wasabietech\.com\//, `${route}: links stay same-origin`);
+  if (route !== '/resume/') assert.doesNotMatch(html, /[—–]/, `${route}: no dashes in the copy`); // the résumé source keeps its own typography
+  assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, `${route}: one h1`);
+  const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);
+  assert.equal(ld['@graph'][0].name, 'Hafiz Jamali');
+  assert.equal(ld['@graph'][2].url, origin + route);
+  const previewHtml = fs.readFileSync(path.join(preview, rel(route)), 'utf8'); // publish.cjs printed the PDF, so the preview has /resume/ too
+  assert.match(previewHtml, /content="noindex,nofollow"/, `${route}: preview stays noindex`);
+  assert.doesNotMatch(previewHtml, /rel="canonical"/, `${route}: preview has no canonical`);
+}
+
+const verification = fs.readFileSync(path.join(here, '../../apps/web/index.html'), 'utf8').match(/<meta\b[^>]*name="google-site-verification"[^>]*>/)[0];
+const home = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
+assert.ok(home.includes(verification), 'Google Search Console verification lost');
+assert.equal((home.match(/data-pick="/g) || []).length, projects.length, 'every project is on the bench');
+assert.equal((home.match(/<li class="work-/g) || []).length, projects.length, 'every project is in the work grid');
+assert.match(home, /href="resume\/"/, 'homepage links the résumé on this site');
+assert.match(home, /data-brief/, 'contact brief present');
+
+const theoses = fs.readFileSync(path.join(site, 'work/theoses/index.html'), 'utf8');
+assert.match(theoses, /built on the pi coding agent/, 'Theoses is described as a fork of pi');
+for (const p of projects.filter(p => p.slug !== 'map')) {
+  assert.match(fs.readFileSync(path.join(site, `work/${p.slug}/index.html`), 'utf8'), /data-demo=/, `${p.slug}: playable demo`);
+}
+
+const sitemap = fs.readFileSync(path.join(site, 'sitemap.xml'), 'utf8');
+assert.deepEqual([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]), routes.map(r => origin + r));
+assert.match(sitemap, /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+const robots = fs.readFileSync(path.join(site, 'robots.txt'), 'utf8');
+assert.match(robots, /Allow: \/\n/);
+assert.ok(robots.includes(`Sitemap: ${origin}/sitemap.xml`));
+
+const manifest = JSON.parse(fs.readFileSync(path.join(site, 'runtime-manifest.json'), 'utf8'));
+const listed = new Set(manifest.map(e => e.file));
+for (const route of routes) assert.ok(listed.has(rel(route)), `manifest lists ${rel(route)}`);
+for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', 'static/workshop.glb', 'static/poster.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
+for (const e of manifest) {
+  assert.equal(hash(fs.readFileSync(path.join(site, e.file))), e.sha256, e.file);
+  assert.doesNotMatch(e.file, /^(assets\/|\.impeccable|evidence|FICTIONAL|.*\.cjs$)/, `${e.file}: no source or reserved paths`);
+}
+
+assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf')), fs.readFileSync(path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf')));
+const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
+assert.match(reader, /MAP — Android Productivity App/);
+assert.doesNotMatch(reader, /<iframe|<object|<embed/);
+console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, brief and résumé present; preview stays noindex`);

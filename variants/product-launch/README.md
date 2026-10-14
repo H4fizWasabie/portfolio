@@ -1,3 +1,5 @@
+> Archived. Production now ships the Workshop design from `variants/redesign`; this directory keeps the previous design and still supplies `projects.cjs` and the project screenshots.
+
 # Product Launch — eight-project review preview
 
 Owner-approved static case-study system, 2026-10-03. Canonical publication now uses the approved V4 waterfall homepage; review output retains the Product Launch comparison. Issue: https://github.com/H4fizWasabie/portfolio/issues/50.

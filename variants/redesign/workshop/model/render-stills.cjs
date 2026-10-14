@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+// Renders poster.webp (no-WebGL fallback and first paint) and one thumbnail per project
+// from the built Workshop page, so stills always match workshop.glb.
+// Usage: CHROME=/path/to/chrome node render-stills.cjs <url of built workshop homepage>
+const { chromium } = require('playwright-core');
+const { execFileSync } = require('child_process');
+const path = require('path');
+const { projects } = require('../../content.cjs');
+
+const url = process.argv[2];
+if (!url || !process.env.CHROME) throw new Error('usage: CHROME=... node render-stills.cjs <url>');
+
+const shots = [['poster', 1600, 1200], ...projects.map(p => [p.slug, 640, 480])];
+
+(async () => {
+  const browser = await chromium.launch({ executablePath: process.env.CHROME, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  for (const [still, width, height] of shots) {
+    const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, colorScheme: 'light' });
+    await page.goto(`${url}?still=${still}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('html[data-ready]', { state: 'attached', timeout: 60000 });
+    await page.waitForTimeout(500);
+    const png = path.join(__dirname, `${still}.png`);
+    await page.locator('canvas').screenshot({ path: png, omitBackground: still === 'poster' });
+    const out = path.join(__dirname, still === 'poster' ? 'poster.webp' : `thumb-${still}.webp`);
+    execFileSync('python3', ['-c', 'import sys; from PIL import Image; Image.open(sys.argv[1]).save(sys.argv[2], "WEBP", quality=82, method=6)', png, out]);
+    execFileSync('rm', [png]);
+    console.log('rendered', path.basename(out));
+    await page.close();
+  }
+  await browser.close();
+})();
