@@ -29,9 +29,11 @@ const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89l
 // Stills are day unless render-stills.cjs asks for night.
 const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
 const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>Night</button>';
-// Phones keep a short contact button in the bar, since the hero's button sits below the room.
+// Phones keep a short contact button in the bar, since the hero's button sits below the room;
+// the links drop to a second row there (style.css), so nothing has to be hidden.
 const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</a><header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
-<nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a>${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></nav></header>`;
+<nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a></nav>
+<div class="nav-actions">${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></div></header>`;
 const footer = root => B.footer(root, `${root}resume/`);
 
 const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
@@ -62,6 +64,7 @@ function home({ projects, site, esc, root }) {
 <div class="bench-stage" data-stage>
 <img class="bench-poster" src="${root}static/poster.webp" alt="A small clay workshop: a desk with a monitor, phone, lamp and robot, a supply cabinet, a drug safe, a trolley of deliveries, and a camera with a ring light." width="1600" height="1200">
 <p class="bench-tip" data-tip hidden></p>
+<p class="bench-hint" data-hint hidden>Tap anything in the room to open it</p>
 <aside class="drawer" data-drawer aria-labelledby="drawer-title" hidden>
 <button class="drawer-close" type="button" data-close>Back to the bench</button>
 <h2 id="drawer-title" data-f="title"></h2><p class="drawer-kind" data-f="category"></p><p class="drawer-summary" data-f="summary"></p>

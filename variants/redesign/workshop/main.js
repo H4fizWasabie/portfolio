@@ -15,6 +15,9 @@ const params = new URLSearchParams(location.search);
 const still = params.get('still'); // render-stills.cjs: "poster" or a project slug
 const reduced = !!still || matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+// Same query as the stacked hero in style.css: the room sits above the copy, not beside it.
+const stackedQuery = matchMedia('(max-width: 899px), (orientation: portrait)');
+const stacked = () => !still && stackedQuery.matches;
 // CSS tokens use light-dark(), so resolve them through a real element.
 const cssColor = name => {
   const probe = document.body.appendChild(document.createElement('i'));
@@ -319,6 +322,7 @@ function startBench(stage, { root, projects }) {
     light(isNight() ? (still ? 0.65 : 1) : 0);
     stage.classList.add('is-live');
     stage.prepend(canvas);
+    hint.hidden = fine || !!still;
     resize();
     if (still && still !== 'poster') fly(still, true);
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
@@ -328,7 +332,7 @@ function startBench(stage, { root, projects }) {
 
   // On wide screens the hero is full-bleed: the room is shifted right of the headline,
   // and slides back to centre while a project is open.
-  const shiftFor = width => (width >= 900 && !still ? width * 0.15 : 0);
+  const shiftFor = width => (!still && !stacked() ? width * 0.15 : 0);
   let size = [1, 1], shift = 0, shiftGoal = 0;
   function frame() {
     camera.setViewOffset(size[0], size[1], -shift, 0, size[0], size[1]);
@@ -341,7 +345,8 @@ function startBench(stage, { root, projects }) {
     size = [width, height];
     camera.aspect = width / height;
     // Narrow stages keep the whole room in frame; the full-bleed hero leaves air around it.
-    camera.fov = width / height < 1.05 ? 38 : width >= 900 && !still ? 34 : 30;
+    // Stacked stages are only a little wider than tall, so they need more than the stills' 30.
+    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 36 : 34;
     shiftGoal = active ? 0 : shiftFor(width);
     if (!flight) shift = shiftGoal;
     frame();
@@ -372,11 +377,14 @@ function startBench(stage, { root, projects }) {
     }
     intro = { t0: performance.now() + 200, pieces };
   }
+  // The sweep names each object as it lights up, slow enough to read.
   function sweep() {
-    [...order, 'lamp'].forEach((slug, i) => {
-      setTimeout(() => { if (!active && hovered !== slug) highlight(slug, true); }, 150 + i * 190);
-      setTimeout(() => { if (!active && hovered !== slug) highlight(slug, false); }, 150 + i * 190 + 460);
+    const all = [...order, 'lamp'];
+    all.forEach((slug, i) => {
+      setTimeout(() => { if (!active && hovered !== slug) { highlight(slug, true); if (!hovered) tipOver(slug); } }, 150 + i * 450);
+      setTimeout(() => { if (!active && hovered !== slug) highlight(slug, false); }, 150 + i * 450 + 600);
     });
+    setTimeout(() => { if (!hovered) tip.hidden = true; }, 150 + all.length * 450 + 150);
   }
   function stepIntro(now) {
     let done = true;
@@ -390,6 +398,17 @@ function startBench(stage, { root, projects }) {
   }
 
   const tip = stage.querySelector('[data-tip]');
+  const hint = stage.querySelector('[data-hint]');
+  const label = slug => (slug === 'lamp' ? (isNight() ? 'Turn the lights on' : 'Turn the lights off') : bySlug[slug].title);
+  // Places the tip just above an object, for when there is no cursor to follow.
+  const above = new THREE.Vector3();
+  function tipOver(slug) {
+    const box = slug === 'lamp' ? new THREE.Box3().setFromObject(switcher) : frameBox(groups[slug]);
+    box.getCenter(above).setY(box.max.y).project(camera);
+    tip.textContent = label(slug);
+    tip.hidden = false;
+    tip.style.transform = `translate(${((above.x + 1) / 2) * size[0]}px, ${((1 - above.y) / 2) * size[1]}px) translate(-50%, -130%)`;
+  }
   const ray = new THREE.Raycaster();
   const pick = e => {
     const rect = canvas.getBoundingClientRect();
@@ -411,7 +430,7 @@ function startBench(stage, { root, projects }) {
     tip.hidden = !slug;
     if (slug) {
       const rect = stage.getBoundingClientRect();
-      tip.textContent = slug === 'lamp' ? (isNight() ? 'Turn the lights on' : 'Turn the lights off') : bySlug[slug].title;
+      tip.textContent = label(slug);
       tip.style.transform = `translate(${e.clientX - rect.left + 14}px, ${e.clientY - rect.top + 14}px)`;
     }
   });
@@ -422,7 +441,7 @@ function startBench(stage, { root, projects }) {
   canvas.addEventListener('pointerup', e => {
     if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
     const slug = pick(e);
-    if (slug === 'lamp') { toggleTheme(); tip.hidden = true; } else if (slug) select(slug); else if (active) back();
+    if (slug === 'lamp') { toggleTheme(); tip.hidden = hint.hidden = true; } else if (slug) select(slug); else if (active) back();
   });
 
   const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -432,7 +451,7 @@ function startBench(stage, { root, projects }) {
     const size = box.getSize(new THREE.Vector3()).length();
     const tune = VIEW[slug] || {};
     const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, tune.yaw || 0);
-    const wide = stage.clientWidth > 700 && !still;
+    const wide = !still && !stacked();
     // Wide screens: shift the object left of the drawer. Phones: lift it above the bottom sheet.
     const target = center.clone().add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(wide ? size * 0.35 : 0));
     if (!wide && !still) target.y -= size * 0.45;
@@ -463,6 +482,7 @@ function startBench(stage, { root, projects }) {
     if (!active) lastTrigger = document.activeElement;
     highlight(active, false);
     highlight(hovered, false);
+    tip.hidden = hint.hidden = true;
     active = slug;
     shiftGoal = 0;
     stage.closest('.bench').classList.add('is-inside');
@@ -524,7 +544,7 @@ function startBench(stage, { root, projects }) {
   document.querySelectorAll('[data-pick]').forEach(a => a.addEventListener('click', e => {
     if (!groups[a.dataset.pick]) return; // model not loaded: follow the link
     e.preventDefault();
-    if (innerWidth < 900) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    if (stacked()) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     select(a.dataset.pick);
   }));
 
