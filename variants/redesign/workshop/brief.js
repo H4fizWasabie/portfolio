@@ -26,7 +26,16 @@ export function initBrief() {
     lines.push('', 'Sent from the brief form on portfolio.wasabietech.com');
     const body = lines.join('\n');
     const subject = `Project enquiry${needs.length ? `: ${needs.join(', ')}` : ''}`;
-    location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Webmail users may have no email app, so the drafted message stays on the page to copy.
+    form.querySelector('[data-brief-text]').value = `Subject: ${subject}\n\n${body}`;
+    copied.textContent = '';
     done.hidden = false;
+    location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+  const copied = form.querySelector('[data-brief-copied]');
+  form.querySelector('[data-brief-copy]').addEventListener('click', async () => {
+    const text = form.querySelector('[data-brief-text]');
+    try { await navigator.clipboard.writeText(text.value); copied.textContent = 'Copied'; }
+    catch { text.select(); copied.textContent = 'Selected: press Ctrl+C or Cmd+C to copy'; }
   });
 }
