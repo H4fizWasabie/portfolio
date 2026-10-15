@@ -452,9 +452,8 @@ function startBench(stage, { root, projects }) {
     const tune = VIEW[slug] || {};
     const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, tune.yaw || 0);
     const wide = !still && !stacked();
-    // Wide screens: shift the object left of the drawer. Phones: lift it above the bottom sheet.
+    // Wide screens: shift the object left of the drawer. Stacked: the drawer sits below the room.
     const target = center.clone().add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(wide ? size * 0.35 : 0));
-    if (!wide && !still) target.y -= size * 0.45;
     const fit = size / 2 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2); // distance that fits the object
     const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1);
     return { pos: target.clone().add(dir.multiplyScalar(dist)), target };
@@ -465,7 +464,7 @@ function startBench(stage, { root, projects }) {
     dirty = true;
   }
 
-  const drawer = stage.querySelector('[data-drawer]');
+  const drawer = document.querySelector('[data-drawer]');
   const f = name => drawer.querySelector(`[data-f=${name}]`);
   const steps = [...drawer.querySelectorAll('[data-step]')];
   let lastTrigger = null;

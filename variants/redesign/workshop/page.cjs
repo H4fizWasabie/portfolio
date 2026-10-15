@@ -65,13 +65,13 @@ function home({ projects, site, esc, root }) {
 <img class="bench-poster" src="${root}static/poster.webp" alt="A small clay workshop: a desk with a monitor, phone, lamp and robot, a supply cabinet, a drug safe, a trolley of deliveries, and a camera with a ring light." width="1600" height="1200">
 <p class="bench-tip" data-tip hidden></p>
 <p class="bench-hint" data-hint hidden>Tap anything in the room to open it</p>
+</div>
 <aside class="drawer" data-drawer aria-labelledby="drawer-title" hidden>
 <button class="drawer-close" type="button" data-close>Back to the bench</button>
 <h2 id="drawer-title" data-f="title"></h2><p class="drawer-kind" data-f="category"></p><p class="drawer-summary" data-f="summary"></p>
 <figure data-f="figure"></figure><p data-f="description"></p>
 <a class="button" data-f="link" href="#">Read the case study</a>
 <div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
-</div>
 <div class="bench-copy"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>

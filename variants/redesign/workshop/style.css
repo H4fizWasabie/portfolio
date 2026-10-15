@@ -91,7 +91,7 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 .bench-index a{display:inline-flex;align-items:center;min-height:40px;padding:6px 14px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);text-decoration:none;font-weight:600;font-size:.9375rem;transition:box-shadow .2s,color .2s}
 .bench-index a[aria-current]{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
 
-/* Drawer: slides over the right side of the room when an object is picked */
+/* Drawer: slides over the right side of the room when an object is picked (below it when stacked) */
 .drawer{position:absolute;z-index:2;top:50%;right:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));width:min(380px,92%);max-height:100%;overflow:auto;transform:translateY(-50%);
   background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:10px;
   animation:drawer .45s cubic-bezier(.2,.9,.3,1) both}
@@ -128,14 +128,11 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
   .bench::after{display:none}
   .bench-stage{position:relative;height:42svh;min-height:260px}
   .bench-copy{padding-top:8px;padding-bottom:48px}
-  /* The drawer sits inside the stage here, so the copy below it stays put. */
-  .bench.is-inside .bench-copy{opacity:1;visibility:visible}
-  .drawer{top:auto;bottom:8px;right:8px;left:8px;width:auto;max-height:calc(100% - 16px);transform:none;animation-name:sheet}
+  /* The drawer takes the copy's place below the room, so the opened object stays in view. */
+  .bench.is-inside .bench-copy{display:none}
+  .drawer{position:relative;top:auto;right:auto;width:min(640px,calc(100% - 2 * var(--pad)));max-height:none;margin:8px auto 48px;transform:none;padding:18px;animation-name:sheet}
   @keyframes sheet{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-  .drawer figure,.drawer p:not([class]){display:none}
-  .drawer{padding:16px;gap:6px}
-  .drawer h2{font-size:1.5rem}
-  .drawer-kind{display:none}
+  .drawer h2{font-size:1.75rem}
 }
 
 section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
