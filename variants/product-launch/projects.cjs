@@ -3,6 +3,7 @@ module.exports = [
   {
     slug:'procura', title:'Procura', category:'Procurement software',
     summary:'Know what needs buying. Keep purchasing organised.',
+    proof:'Runs purchasing at a veterinary hospital.',
     description:'Inventory, suppliers, reorder planning and purchase orders in one connected application.',
     problem:'Stock levels, supplier information and purchasing decisions are difficult to follow when they live in separate spreadsheets and conversations.',
     built:'I built a procurement application that connects inventory, suppliers, purchase orders, requests for quotation and planning. It brings the buying workflow into one place instead of treating each document as a separate task.',
@@ -19,6 +20,7 @@ module.exports = [
   {
     slug:'pims', title:'PIMS', category:'Inventory operations',
     summary:'Give stock requests a clear place to go.',
+    proof:'Replaced paper stock requests at a veterinary hospital.',
     description:'Procurement and inventory workflows for a veterinary hospital, from internal requests to receipt and stock take.',
     problem:'A team needs to request stock, review it and record what arrived without losing the handover between departments.',
     built:'I built PIMS around internal indents, department purchase orders, approval queues, goods receipt, stock take, disposal and expiry tracking. The system also supports item specification requests and master-data administration.',
@@ -35,6 +37,7 @@ module.exports = [
   {
     slug:'dd-drugs-register', title:'DD Drugs Register', category:'Clinical recordkeeping',
     summary:'Make daily counts accountable.',
+    proof:'In daily clinical use since September 2026.',
     description:'A hospital dangerous-drugs register that compares physical and system counts while preserving the record.',
     problem:'A daily count needs a clear owner, an explicit discrepancy and a correction history that does not erase the original entry.',
     built:'I built a multi-user daily register with physical-versus-system counts, discrepancy flags, audited corrections and CSV export. Original entries remain in the ledger when a correction is made.',
@@ -49,6 +52,7 @@ module.exports = [
   {
     slug:'theoses', title:'Theoses', category:'AI assistant & coding agent',
     summary:'Turn repeated tasks into reviewable workflows.',
+    proof:'Runs my scheduled work every day: purchasing alerts, reports and content.',
     description:'A self-hosted personal assistant and coding agent, built on the pi coding agent and forked to suit my own workflow.',
     problem:'Research, files, reports and code changes need continuity across conversations, and important actions still need human review.',
     built:'Theoses started as a fork of Mario Zechner’s pi coding agent, which I reshaped around how I work. It reads and edits files, runs commands, researches questions and uses extensions in real projects. Persisted sessions, working notes and durable memory carry context between tasks.',
@@ -80,6 +84,7 @@ module.exports = [
   {
     slug:'map', title:'MAP', category:'Local-first Android app',
     summary:'Keep everyday tools together, on your phone.',
+    proof:'On my own phone every day.',
     description:'Tasks, calendar, documents, scan-to-PDF and local music in one personal Android utility.',
     problem:'Everyday organisation can mean moving between unrelated tools, even when the task and the files are already on the phone.',
     built:'I built MAP around a Home/Today view, with tasks and calendar scheduling, a document shelf, scan-to-PDF and local music. I use it on my own phone.',
@@ -87,7 +92,7 @@ module.exports = [
     implementation:'A native Kotlin Android app with on-device state. There is no account, backend, analytics or cloud sync. The source and sideload APK releases are available on GitHub.',
     limits:'These owner-approved phone captures have fictional text substituted for private activity, filenames and music details. They are edited screenshots, not a populated demo installation. APK releases are debug-signed; this is personal-use software, not a claimed Play Store release or public-adoption result.',
     stack:['Kotlin','Android','On-device data'],
-    facts:['120+ tracked issues','Reminders with Done and Snooze actions','Weekly on-device backup'],
+    facts:['In daily use on my own phone','Reminders with Done and Snooze actions','Weekly on-device backup'],
     source:'https://github.com/H4fizWasabie/map-android', releases:'https://github.com/H4fizWasabie/map-android/releases',
     featured:true, preview:'map-overview.webp', previewAlt:'Composite of three genuine MAP phone screenshots: Home, Tasks and Tools, with fictional text',
     disclosure:'Edited MAP phone screenshots; fictional demo text. Original app layout retained.',
@@ -97,6 +102,7 @@ module.exports = [
   {
     slug:'89lab', title:'89lab content pipelines', category:'Content pipelines & AI teaching',
     summary:'Daily AI news, lessons and videos, made and published on schedule.',
+    proof:'Publishes AI news, lessons and videos every day.',
     description:'A set of automated pipelines that research, write, voice, render and publish short AI news, concept lessons and GitHub repo highlights every day on Facebook, YouTube, Instagram and Threads.',
     problem:'Teaching AI in public means posting every day: finding the topic, checking the facts, writing, voiceover, captions, rendering and publishing on several platforms. Done by hand, a day gets missed, a topic repeats or a weak post goes out.',
     built:'I built and run each channel as its own pipeline with its own schedule. AI news shorts and AI concept explainers go to the 89lab Facebook page. A trending GitHub repo becomes a YouTube Short and a Threads post, and a build with AI series shows how to make things step by step. Practical AI lessons go to Instagram. A daily learning pipeline researches one AI concept and adds it to a growing library that the explainers draw from. Together they teach what is new, which tools are worth using and how AI agents are designed and built.',

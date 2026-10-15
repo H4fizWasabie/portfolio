@@ -40,7 +40,9 @@ p{margin:0}
 .site-nav nav a:not(.button){text-decoration:none;font-weight:600}
 /* Night is a switch: pressed means the lights are off. */
 .theme-toggle{min-height:40px;padding:6px 14px;border:0;border-radius:var(--r);background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);font:600 .9375rem Schibsted,sans-serif;cursor:pointer;white-space:nowrap}
-.theme-toggle[aria-pressed=true]{background:var(--ink);color:var(--day);box-shadow:none}
+.theme-toggle{display:inline-flex;align-items:center;gap:8px}
+.theme-toggle::before{content:"";width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor}
+.theme-toggle[aria-pressed=true]::before{background:#ffc68a;box-shadow:0 0 0 3px color-mix(in srgb,#ffc68a 30%,transparent)}
 .no-js .theme-toggle{display:none}
 .cta-short{display:none}
 /* Phones: a short contact button stays in the bar; About and then Work and Résumé
@@ -49,6 +51,9 @@ p{margin:0}
 @media (max-width:420px){.site-nav nav a[href$="#work"],.site-nav nav a[href$="resume/"]{display:none}}
 
 main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+.skip{position:absolute;left:12px;top:-60px;z-index:10;padding:10px 16px;border-radius:var(--r);background:var(--ink);color:var(--day);font-weight:700;text-decoration:none}
+.skip:focus{top:12px}
+::selection{background:color-mix(in srgb,var(--cobalt) 28%,transparent)}
 
 /* Sky: the hero is one scene. Two light layers fade with the lamp switch:
    daylight from the window side by day, a warm lamp glow and moonlight at night. */
@@ -67,7 +72,7 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 .bench-stage.is-live .bench-poster{display:none}
 .bench-tip{position:absolute;left:0;top:0;z-index:3;pointer-events:none;padding:4px 10px;border-radius:var(--r);background:var(--cobalt);color:var(--on-cobalt);font-weight:700;font-size:.875rem;white-space:nowrap}
 /* A veil keeps the copy readable where the back wall of the room reaches behind it. */
-.bench::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(62% 85% at 6% 55%,color-mix(in srgb,var(--day) 88%,transparent) 30%,transparent 100%);transition:opacity .4s}
+.bench::after{content:"";position:absolute;inset:-90px 0 0;pointer-events:none;background:radial-gradient(62% 85% at 6% 55%,color-mix(in srgb,var(--day) 88%,transparent) 30%,transparent 100%);transition:opacity .4s}
 .bench-copy{position:relative;z-index:1;width:100%;max-width:var(--max);margin:0 auto;padding:clamp(24px,5vh,64px) var(--pad);pointer-events:none;transition:opacity .35s ease,visibility .35s}
 .bench-copy>*{pointer-events:auto;max-width:31rem}
 .bench.is-inside .bench-copy,.bench.is-inside::after{opacity:0;visibility:hidden}
@@ -105,7 +110,7 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 @media (max-width:899px){
   .bench{display:block;min-height:0}
   .bench::after{display:none}
-  .bench-stage{position:relative;height:58svh;min-height:320px}
+  .bench-stage{position:relative;height:42svh;min-height:260px}
   .bench-copy{padding-top:8px;padding-bottom:48px}
   /* The drawer sits inside the stage here, so the copy below it stays put. */
   .bench.is-inside .bench-copy{opacity:1;visibility:visible}
@@ -127,6 +132,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .shelf-head p{margin-top:8px;color:var(--muted);max-width:34ch}
 .shelf-items{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .shelf-note{align-self:center;max-width:58ch;font-size:1.125rem}
+.shelf-action{margin-top:20px}
 .shelf-note a{font-weight:700}
 @media (max-width:900px){.shelf{grid-template-columns:1fr}.shelf-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.shelf-items{grid-template-columns:1fr}}
@@ -171,13 +177,14 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .case-head h1{font-size:clamp(2.6rem,6vw,4.75rem);margin-top:18px}
 .case-head .kind{color:var(--muted);font-weight:600;margin-top:8px}
 .case-lede{margin-top:16px;font-size:1.25rem;max-width:44ch}
+.case-proof{margin-top:14px;font-weight:700;max-width:44ch}
 .object-view{position:relative;aspect-ratio:4/3;width:100%;border-radius:var(--r);background:var(--surface);overflow:hidden}
 .object-view img{width:100%;height:100%;object-fit:cover}
 .object-view canvas{position:absolute;inset:0;width:100%;height:100%;cursor:ew-resize;touch-action:pan-y}
 .object-view.is-live img{visibility:hidden}
 .object-view+.object-hint{margin-top:8px;font-size:.875rem;color:var(--muted);visibility:hidden}
 .object-view.is-live+.object-hint{visibility:visible}
-@media (max-width:760px){.case-head{grid-template-columns:1fr}.case-head>div:last-child{order:-1}}
+@media (max-width:760px){.case-head{grid-template-columns:1fr}}
 .gallery,.outline{margin:0}
 .gallery-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .gallery-tabs button{min-height:40px;padding:6px 14px;border-radius:var(--r);border:0;background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);font:600 .9375rem Schibsted,sans-serif;cursor:pointer}
@@ -302,7 +309,10 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 .brief textarea{font:inherit;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical;min-height:96px}
 .field-help{font-size:.875rem;color:var(--muted)}
 .brief-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;font-weight:700}
-.brief-done{color:var(--muted)}
+.brief-done{display:grid;gap:12px;color:var(--muted)}
+.brief-done a{color:var(--ink);font-weight:700}
+.brief-done textarea{font:inherit;font-size:.9375rem;color:var(--ink);background:var(--day);border:1.5px solid var(--line);border-radius:var(--r);padding:12px 14px;resize:vertical}
+.brief-copy{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-weight:700;color:var(--ink)}
 .js .brief-fallback{display:none}
 .no-js .brief{display:none}
 
@@ -323,7 +333,8 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 .resume-page .resume-paper .sectitle{font-size:1.125rem;font-weight:800;letter-spacing:-.02em}
 .resume-page .resume-paper :is(.certline b,.sklabel),.resume-page .resume-paper td.sysname .kind{color:#2f4fd0}
 /* Status lines start with a separator dot, so they stay all lower case. */
-.resume-page .resume-paper td.sysname .kind{display:block;font-weight:600}
+.resume-page .resume-paper td.sysname .kind{display:block;font-weight:600;letter-spacing:0}
+.resume-page .resume-paper :is(p,li,td.jt,td.sk,.profile,.sysdesc,.jdesc){max-width:62ch}
 .resume-page .resume-paper td.sysname .kind::first-letter{text-transform:none}
 
 /* Hover only where there is a pointer that hovers, so a tap on a phone leaves nothing lit. */
@@ -331,7 +342,6 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .button:hover{background:var(--cobalt);color:var(--on-cobalt)}
   .site-nav nav a:not(.button):hover{color:var(--cobalt)}
   .theme-toggle:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
-  .theme-toggle[aria-pressed=true]:hover{background:var(--cobalt);color:var(--on-cobalt);box-shadow:none}
   .bench-index a:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
   .drawer-close:hover{color:var(--cobalt)}
   .drawer-nav button:hover{background:var(--day)}

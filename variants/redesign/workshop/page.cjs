@@ -2,6 +2,7 @@
 // Every object on the bench is a project; selecting one flies the camera to it.
 const B = require('../blocks.cjs');
 const { demos } = require('../demos.cjs');
+const { site } = require('../content.cjs');
 
 const fonts = ['schibsted-grotesk-latin-wght-normal.woff2'];
 const licenses = ['OFL-schibsted-grotesk.txt'];
@@ -20,19 +21,21 @@ const services = [
   ['Android apps', 'Local-first phone apps that work without accounts or tracking.', ['map']],
   ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', []]
 ];
-const teaching = root => `<p class="shelf-note">My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub repo worth studying and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>`;
+const coaching = `mailto:${site.email}?subject=${encodeURIComponent('Coaching session')}&body=${encodeURIComponent('What I want to build or learn:\n\nJust me, or a team (how many people)?\n\nWhen suits me:\n')}`;
+const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
+<p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p></div>`;
 
 // Sets day or night before first paint: stored choice, else the device setting.
 // Stills are day unless render-stills.cjs asks for night.
 const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
 const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>Night</button>';
 // Phones keep a short contact button in the bar, since the hero's button sits below the room.
-const nav = (root, site, esc) => `<header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
+const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</a><header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
 <nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a>${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></nav></header>`;
 const footer = root => B.footer(root, `${root}resume/`);
 
 const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
-<span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.summary)}</span></span></a></li>`;
+<span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
 
 // /projects/: every object render in one uneven grid.
 const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => card(p, root, esc)).join('')}</ul>`;
@@ -47,7 +50,7 @@ const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thum
 function home({ projects, site, esc, root }) {
   const by = Object.fromEntries(projects.map(p => [p.slug, p]));
   const data = projects.map(p => ({
-    slug: p.slug, title: p.title, category: p.category, summary: p.summary, description: p.description,
+    slug: p.slug, title: p.title, category: p.category, summary: p.proof || p.summary, description: p.description,
     image: p.slug === 'map' ? 'map-home-demo.webp' : p.preview || (p.scenes[0] && p.scenes[0][1]) || null,
     disclosure: p.disclosure, steps: p.workflow
   }));
@@ -71,7 +74,7 @@ function home({ projects, site, esc, root }) {
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
 </section></div>
-<main>
+<main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">What I can do for you</h2>
 ${shelves(by, root, esc)}</section>
 
@@ -90,7 +93,9 @@ ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <p class="field-help" id="brief-help">For example: we track stock in three spreadsheets and orders get missed.</p></div>
 <p class="field-error" data-brief-error role="alert" hidden></p>
 <div class="brief-actions"><button class="button">Write the email</button><a href="mailto:${site.email}">${site.email}</a></div>
-<p class="brief-done" data-brief-done hidden>Your email app should open with the draft. If it does not, write to ${site.email}.</p>
+<div class="brief-done" data-brief-done hidden><p>Your email app should open with this message. If it does not, copy it and send it to <a href="mailto:${site.email}">${site.email}</a>.</p>
+<textarea readonly rows="7" data-brief-text aria-label="Your message"></textarea>
+<p class="brief-copy"><button type="button" class="button" data-brief-copy>Copy message</button><span role="status" data-brief-copied></span></p></div>
 </form>
 <p class="contact-actions brief-fallback"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a href="mailto:${site.email}">${site.email}</a></p>
 </section>
@@ -102,14 +107,14 @@ ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 function project({ p, next, site, esc, root }) {
   return `${B.head({ title: `${p.title} | ${site.name}`, description: p.description, root, fonts, route: `/work/${p.slug}/`, extra: themeScript })}
 <body>${nav(root, site, esc)}
-<main class="case">
+<main id="main" class="case">
 <header class="case-head"><div><p><a href="${root}projects/">All projects</a></p><h1>${esc(p.title)}</h1>
-<p class="kind">${esc(p.category)}</p><p class="case-lede">${esc(p.description)}</p></div>
+<p class="kind">${esc(p.category)}</p><p class="case-lede">${esc(p.description)}</p>${p.proof ? `<p class="case-proof">${esc(p.proof)}</p>` : ''}</div>
 <div><div class="object-view" data-object="${p.slug}" data-root="${root}">${thumb(root, p, 'loading="lazy"')}</div><p class="object-hint">Drag sideways to turn it.</p></div></header>
 ${p.slug === 'map' ? '' : `<section class="try" aria-labelledby="try-title"><h2 id="try-title">Try it</h2><p>A small working version of the workflow, running in your browser with fictional data.</p>${demos[p.slug](root, p)}</section>`}
 ${p.scenes.length ? B.gallery(p, root) : ''}
 <div class="case-grid"><div class="case-body">${B.caseBody(p)}</div><aside class="case-facts">${B.facts(p)}</aside></div>
-<nav class="next" aria-label="Next project"><a href="${root}work/${next.slug}/">${thumb(root, next, 'loading="lazy"')}<span>Next on the bench<strong>${esc(next.title)}</strong></span></a></nav>
+<nav class="next" aria-label="Next project"><a href="${root}work/${next.slug}/">${thumb(root, next, 'loading="lazy"')}<span>Next project<strong>${esc(next.title)}</strong></span></a></nav>
 <section class="contact">${B.contact()}</section>
 </main>${footer(root)}
 <script type="module" src="${root}static/main.js"></script></body></html>`;
@@ -118,7 +123,7 @@ ${p.scenes.length ? B.gallery(p, root) : ''}
 function projectsPage({ projects, site, esc, root }) {
   return `${B.head({ title: `All projects | ${site.name}`, description: 'Seven projects across procurement, inventory, clinical records, Android, AI agents and content automation.', root, fonts, route: '/projects/', extra: themeScript })}
 <body>${nav(root, site, esc)}
-<main class="index-page">
+<main id="main" class="index-page">
 <p><a href="${root}">Back to the homepage</a></p>
 <h1>All projects</h1>
 <p class="index-intro">Business apps, an Android app and AI automation. Each case study shows what the software does, with fictional sample data, and what it does not claim.</p>
@@ -132,7 +137,7 @@ ${workGrid(projects, root, esc)}
 function resumePage({ site, esc, root }, reader) {
   return `${B.head({ title: `Résumé | ${site.name}`, description: 'Hafiz Jamali’s résumé: internal tools developer and AI automation for operations.', root, fonts, route: '/resume/', extra: `${themeScript}<link rel="stylesheet" href="${root}static/resume.css">` })}
 <body>${nav(root, site, esc)}
-<main class="resume-page">
+<main id="main" class="resume-page">
 <h1>Résumé</h1>
 <p class="index-intro">My experience and the systems I’ve built. Download the one-page PDF if you need a copy.</p>
 <p class="resume-actions"><a class="button" href="${reader.filename}" download="${reader.filename}">Download PDF</a><a href="${root}">Back to the homepage</a></p>
