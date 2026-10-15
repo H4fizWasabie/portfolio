@@ -11,7 +11,7 @@ module.exports = [
     implementation:'Go serves the web interface and embeds its assets in a single binary. SQLite keeps the inventory and purchasing records together. Spreadsheet import and unit-of-measure mappings support existing operational data.',
     limits:'The screenshots use a separate seeded demo database. No supplier is contacted and no purchase is submitted from this portfolio. Operational records and client results are not published here.',
     stack:['Go','SQLite','Embedded web UI'],
-    facts:['In production at a veterinary hospital','Replaced a Google Apps Script and Python setup','Its supplier spend analysis supports supplier consolidation and credit terms'],
+    facts:['In production at a veterinary hospital','Replaced a Google Apps Script and Python setup','Its spend analysis guides supplier choice and credit terms'],
     featured:true, preview:'procura-inventory.webp', previewAlt:'Actual Procura inventory interface with fictional seeded records',
     disclosure:'Actual Procura UI; isolated fictional demo records.',
     scenes:[['Inventory','procura-inventory.webp','See stock levels and reorder points before deciding what to buy.'],['Planning','procura-planning.webp','Review reorder planning alongside a fictional stock list.'],['Purchase orders','procura-orders.webp','Follow the order workflow using fictional suppliers and sample amounts.']],
