@@ -55,7 +55,7 @@ const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', pro
 const OFF_FRAME = new Set(['server']);
 // Per-object camera adjustments: distance multiplier and extra turn around the vertical axis.
 // The overview looks from azimuth ~0.7 rad; these turn each close-up towards the object's front.
-const VIEW = { procura: { yaw: -0.55 }, pims: { yaw: 0.45 }, 'dd-drugs-register': { yaw: -0.3 }, theoses: { yaw: -0.35 }, map: { yaw: -0.5, dist: 1.15 }, yen: { yaw: -0.2, dist: 1.3 } };
+const VIEW = { procura: { yaw: -0.55 }, pims: { yaw: 0.45 }, 'dd-drugs-register': { yaw: -0.3, pull: 1.1 }, theoses: { yaw: -0.35 }, map: { yaw: -0.5, dist: 1.15 }, yen: { yaw: -0.2, dist: 1.3 } };
 
 if (still) document.documentElement.classList.add('still');
 
@@ -343,9 +343,9 @@ function startBench(stage, { root, projects }) {
     size = [width, height];
     camera.aspect = width / height;
     // Narrow stages keep the whole room in frame; the full-bleed hero leaves air around it.
-    // Stacked stages are a little wider than tall (a phone's is about 1.3:1); 31 lets the room fill
-    // it, with only the empty floor corner near the hint left to the edge.
-    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 31 : 34;
+    // Stacked stages are only a little wider than tall, so they need more than the stills' 30;
+    // 31 looked fine headless but read too close on a real phone, tour stops included.
+    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 36 : 34;
     shiftGoal = active ? 0 : shiftFor(width);
     if (!flight) shift = shiftGoal;
     frame();
@@ -531,7 +531,11 @@ function startBench(stage, { root, projects }) {
     // Wide screens: shift the object left of the drawer. Stacked: the drawer sits below the room.
     const target = center.clone().add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(wide ? size * 0.35 : 0));
     const fit = size / 2 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2); // distance that fits the object
-    const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1);
+    // Phones are narrow, so a close-up framed for a wide stage reads too close there: step back so
+    // the object sits whole in frame, for tour stops and opened projects alike. A view whose
+    // step-back would pass behind something in front of it sets its own pull in VIEW.
+    const pull = stacked() && !still ? tune.pull ?? 1.4 : 1;
+    const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1) * pull;
     return { pos: target.clone().add(dir.multiplyScalar(dist)), target };
   }
   function fly(to, instant) {
