@@ -420,8 +420,6 @@ function startBench(stage, { root, projects }) {
     stage.closest('.bench').classList.toggle('is-touring', s > 0.35);
     return moving;
   }
-  addEventListener('scroll', () => { if (tour && active && Math.abs(scrollY - openedAt) > 160) back(); }, { passive: true });
-
   // Highlight in the accent colour; glowing parts keep their own light.
   function highlight(slug, on) {
     const target = slug === 'lamp' ? switcher : groups[slug];
@@ -534,6 +532,14 @@ function startBench(stage, { root, projects }) {
   }
 
   const drawer = document.querySelector('[data-drawer]');
+  // Scrolling away from an open project closes it, but not while a finger is on the sheet itself
+  // (reading its text) or just after it lifts, when the sheet's own scroll is still gliding.
+  let onSheet = 0;
+  const sheetTouch = on => () => { onSheet = on ? Infinity : performance.now() + 600; };
+  drawer.addEventListener('touchstart', sheetTouch(true), { passive: true });
+  drawer.addEventListener('touchend', sheetTouch(false), { passive: true });
+  drawer.addEventListener('touchcancel', sheetTouch(false), { passive: true });
+  addEventListener('scroll', () => { if (tour && active && performance.now() > onSheet && Math.abs(scrollY - openedAt) > 160) back(); }, { passive: true });
   const f = name => drawer.querySelector(`[data-f=${name}]`);
   const steps = [...drawer.querySelectorAll('[data-step]')];
   let lastTrigger = null;
