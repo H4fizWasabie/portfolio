@@ -63,7 +63,7 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 
 /* Sky: the hero is one scene. Two light layers fade with the lamp switch:
    daylight from the window side by day, a warm lamp glow and moonlight at night. */
-.sky{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(light-dark(#f2f4ef,#0f141d),var(--day))}
+.sky{position:relative;isolation:isolate;overflow:clip;background:linear-gradient(light-dark(#f2f4ef,#0f141d),var(--day))}
 .sky::before,.sky::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity .7s ease;mask-image:linear-gradient(#000 55%,transparent)}
 .sky::before{background:radial-gradient(70% 80% at 12% 18%,rgba(255,238,205,.75),transparent 62%),radial-gradient(60% 60% at 90% 90%,rgba(214,226,236,.55),transparent 70%)}
 .sky::after{opacity:0;background:radial-gradient(38% 46% at 72% 52%,rgba(255,178,104,.2),transparent 70%),radial-gradient(50% 60% at 10% 10%,rgba(126,146,255,.12),transparent 70%)}
@@ -129,6 +129,16 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 /* The same veil as the headline's, mirrored, so the caption reads over the room. */
 .tour-card::before{content:"";position:absolute;inset:-40% -30% -30% -40%;z-index:-1;pointer-events:none;
   background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 85%,transparent) 45%,transparent)}
+
+/* Phone tour (main.js sets .is-steps on stacked screens): the room pins at the top and one
+   caption per project scrolls up beneath it; an opened project is a sheet over the captions. */
+.tour-steps{display:none}
+.tour.is-steps .tour-steps{display:block;list-style:none;margin:0;padding:0 var(--pad) 34svh}
+.tour-steps li{min-height:60svh;display:grid;align-content:start;justify-items:start;gap:8px;padding-top:5svh}
+.tour.is-steps .bench-stage{position:sticky;top:0;z-index:3}
+.tour.is-steps .bench-stage.is-pinned{background:var(--day);box-shadow:0 14px 24px -18px light-dark(rgba(40,52,44,.45),rgba(0,0,0,.8))}
+.tour.is-steps .bench.is-inside .bench-copy{display:block}
+.tour.is-steps .drawer{position:fixed;inset:auto 0 0;z-index:4;width:auto;max-height:58svh;margin:0;border-radius:var(--r) var(--r) 0 0}
 
 /* Touch screens have no hover, so the room says it can be tapped until the first tap. */
 .bench-hint{position:absolute;left:50%;bottom:10px;z-index:2;transform:translateX(-50%);display:flex;align-items:center;gap:8px;pointer-events:none;
@@ -402,6 +412,14 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
     .shelf{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
   }
+  /* Phones: a shelf's cards become a swipeable row, so each shelf fits on screen and can stack. */
+  @media (max-width:900px) and (min-height:600px){
+    .shelf{position:sticky;top:12px;min-height:min(600px,92svh);align-content:start;background:var(--day);view-timeline:--shelf;
+      box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
+    .shelf-items{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(78%,340px);overflow-x:auto;overscroll-behavior-x:contain;
+      scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);scroll-padding-inline:var(--pad)}
+    .shelf-items li{scroll-snap-align:start}
+  }
 }
 @supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
   main{overflow-x:clip} /* titles start wider than the page */
@@ -424,6 +442,8 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   /* The portrait unrolls upwards out of a zoom, then drifts slower than the page. */
   .portrait{animation:portrait linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
   @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}45%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
+  /* In a swipeable row the cards' nearest scroller is the row, so they follow their shelf. */
+  @media (max-width:900px) and (min-height:600px){.shelf-items li{animation-timeline:--shelf}}
   .contact{animation:widen linear both;animation-timeline:view();animation-range:entry 0% entry 85%}
   @keyframes widen{from{border-radius:48px;transform:translateY(180px) scale(.72)}to{border-radius:var(--r);transform:none}}
 }}

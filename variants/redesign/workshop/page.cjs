@@ -50,6 +50,13 @@ const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(
 const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
 ${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
 
+// Phones: the room pins at the top and these captions scroll up beneath it, one stop each
+// (main.js flies the camera to whichever is passing). Shown only while the tour runs.
+const two = n => String(n).padStart(2, '0');
+const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
+<p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
+<button class="button" type="button" data-open="${p.slug}">Open the project</button></li>`).join('')}</ol>`;
+
 // Day and night renders of the same object; the theme shows one (the hidden one is never fetched).
 const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thumb${v || '-day'}" src="${root}static/thumb-${p.slug}${v}.webp" alt="" width="640" height="480" ${attrs}>`).join('');
 
@@ -82,7 +89,7 @@ function home({ projects, site, esc, root }) {
 <p class="actions"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
-</section></div></div>
+${steps(projects, esc)}</section></div></div>
 <main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>
 ${shelves(by, root, esc)}</section>

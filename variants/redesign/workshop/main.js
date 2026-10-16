@@ -324,7 +324,7 @@ function startBench(stage, { root, projects }) {
     stage.prepend(canvas);
     hint.hidden = fine || !!still;
     resize();
-    if (tour) hint.textContent = `Scroll to walk through the room, or ${fine ? 'click' : 'tap'} anything to open it`;
+    if (tour) hint.textContent = fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
     if (still && still !== 'poster') fly(still, true);
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
@@ -355,34 +355,48 @@ function startBench(stage, { root, projects }) {
   }
   new ResizeObserver(resize).observe(stage);
 
-  // Wide screens: the hero pins while scrolling flies the camera through the room, resting at
-  // each project with its name pinned beside it, then pulling back before the page carries on.
-  // Phones, reduced motion and stills keep the bench as it was.
+  // Scrolling flies the camera through the room, resting at each project, then pulling back
+  // before the page carries on. Wide screens pin the whole hero and set each project's name
+  // beside it; stacked screens (phones) pin the room at the top while a caption per project
+  // scrolls up beneath it. Reduced motion and stills keep the bench as it was.
   const tourBox = document.querySelector('[data-tour]');
   const card = stage.parentElement.querySelector('[data-tour-card]');
   const cardField = name => card.querySelector(`[data-t=${name}]`);
   cardField('open').addEventListener('click', () => select(cardField('open').dataset.slug));
+  const stepList = stage.parentElement.querySelector('[data-steps]');
+  stepList.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) select(b.dataset.open); });
   let tour = null, shown = -1, openedAt = 0;
   function setTour() {
-    const on = !still && !reduced && !stacked() && !!groups[order[0]];
-    tourBox.classList.toggle('is-on', on);
+    const on = !still && !reduced && !!groups[order[0]];
+    tourBox.classList.toggle('is-on', on && !stacked());
+    tourBox.classList.toggle('is-steps', on && stacked());
     if (!on) {
-      if (tour) { tour = null; card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); if (!active) fly(home); }
+      if (tour) { tour = null; card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); stage.classList.remove('is-pinned'); if (!active) fly(home); }
       return;
     }
     history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
     const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
     const views = [home, ...order.map(viewFor), out];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
-    tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1 };
+    tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
+    if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');
     tourBox.style.setProperty('--segments', tour.n);
   }
   // The camera rests at each stop for the outer part of a segment and travels in the middle.
   const hold = f => THREE.MathUtils.smoothstep(f, 0.3, 0.7);
   const tourPos = new THREE.Vector3(), tourAim = new THREE.Vector3();
   function stepTour(dt) {
-    const box = tourBox.getBoundingClientRect();
-    const s = THREE.MathUtils.clamp(-box.top / (box.height - innerHeight), 0, 1) * tour.n;
+    let s;
+    if (tour.steps) {
+      // A project's stop is reached when its caption's middle crosses the reading line, just
+      // below the middle of the space under the room.
+      const list = stepList.getBoundingClientRect();
+      s = THREE.MathUtils.clamp((innerHeight * 0.72 - list.top) / stepList.firstElementChild.offsetHeight + 0.5, 0, tour.n);
+      stage.classList.toggle('is-pinned', stage.getBoundingClientRect().top < 1);
+    } else {
+      const box = tourBox.getBoundingClientRect();
+      s = THREE.MathUtils.clamp(-box.top / (box.height - innerHeight), 0, 1) * tour.n;
+    }
     const i = Math.min(Math.floor(s), tour.n - 1), u = i + hold(s - i);
     tour.pos.getPoint(u / tour.n, tourPos);
     tour.target.getPoint(u / tour.n, tourAim);
@@ -394,6 +408,8 @@ function startBench(stage, { root, projects }) {
     controls.target.lerp(tourAim, a);
     camera.lookAt(controls.target);
     // The caption names the project the camera is resting on; it changes while hidden.
+    hint.hidden = s > 0.2;
+    if (tour.steps) return moving;
     const near = Math.round(s), p = bySlug[order[near - 1]];
     if (p && near !== shown) {
       shown = near;
@@ -405,7 +421,6 @@ function startBench(stage, { root, projects }) {
     }
     card.classList.toggle('is-away', !p || Math.abs(s - near) > 0.32);
     stage.closest('.bench').classList.toggle('is-touring', s > 0.35);
-    hint.hidden = s > 0.2;
     return moving;
   }
   addEventListener('scroll', () => { if (tour && active && Math.abs(scrollY - openedAt) > 160) back(); }, { passive: true });
@@ -602,7 +617,7 @@ function startBench(stage, { root, projects }) {
   document.querySelectorAll('[data-pick]').forEach(a => a.addEventListener('click', e => {
     if (!groups[a.dataset.pick]) return; // model not loaded: follow the link
     e.preventDefault();
-    if (stacked()) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    if (stacked() && !tour) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     select(a.dataset.pick);
   }));
 
