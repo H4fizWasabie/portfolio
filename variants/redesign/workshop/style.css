@@ -157,7 +157,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 /* What I can do: one shelf per service, the projects that prove it beside it */
 .work{padding:clamp(64px,9vw,120px) 0 0}
 .shelves{margin-top:28px}
-.shelf{display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
+.shelf{position:relative;display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
 .shelf-head h3{font-size:1.3rem;letter-spacing:-.02em}
 .shelf-head p{margin-top:8px;color:var(--muted);max-width:34ch}
 .shelf-items{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -388,30 +388,42 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 .w{display:inline-block;overflow:clip;padding-bottom:.08em;margin-bottom:-.08em;vertical-align:top}
 .w>span{display:inline-block}
 
-/* Below the room the page keeps moving with the scroll: headlines rise word by word out of a
-   mask, rows lift in, the shelf rules draw across, the portrait unrolls and the contact panel
-   opens out. Every animation is tied to scroll position (no JavaScript), so it runs backwards
-   on the way up and an anchor jump lands on the finished state. Browsers without scroll
-   timelines, and reduced motion, get the page as it was. */
+/* Below the room the page keeps moving with the scroll, the way the room does: section titles
+   sweep in large and settle while their words rise, the service shelves stack like a deck
+   (wide screens), cards fly in one after another, the portrait unrolls and drifts, the contact
+   panel widens out and the name rises letter by letter at the foot. Every animation is tied to
+   scroll position (no JavaScript), so it runs backwards on the way up and an anchor jump lands
+   on the finished state. Reduced motion gets the page as it was; so do browsers without scroll
+   timelines, apart from the deck, which is plain sticky positioning. */
+@media (prefers-reduced-motion:no-preference){
+  /* The deck: each shelf pins near the top and the next slides over it. Wide, tall screens only,
+     where a shelf fits on screen; every shelf is as tall as the tallest so each covers the last. */
+  @media (min-width:901px) and (min-height:700px){
+    .shelf{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
+      box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
+  }
+}
 @supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
-  .rise{view-timeline:--rise}
-  .rise .w>span{animation:rise linear both;animation-timeline:--rise;animation-range:cover calc(4% + var(--i) * 1.6%) cover calc(26% + var(--i) * 1.6%)}
-  @keyframes rise{from{transform:translateY(105%) rotate(4deg)}to{transform:none}}
+  main{overflow-x:clip} /* titles start wider than the page */
+  .rise{view-timeline:--rise;transform-origin:0 100%;animation:sweep linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
+  @keyframes sweep{from{transform:translateY(40%) scale(1.9)}to{transform:none}}
+  .rise .w>span{animation:rise linear both;animation-timeline:--rise;animation-range:cover calc(2% + var(--i) * 1.5%) cover calc(30% + var(--i) * 1.5%)}
+  @keyframes rise{from{transform:translateY(110%) rotate(6deg)}to{transform:none}}
   .wordmark{view-timeline:--mark}
   .wordmark .w>span{animation:rise linear both;animation-timeline:--mark;animation-range:entry calc(var(--i) * 4%) entry calc(45% + var(--i) * 4%)}
 
-  .shelf{position:relative;border-top-color:transparent}
-  .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:cover 0% cover 30%}
+  .shelf{border-top-color:transparent}
+  .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 35%}
   @keyframes draw{from{transform:scaleX(0)}to{transform:none}}
-  .shelf-head,.shelf-note,.about>div>p,.brief>*,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 30%}
-  @keyframes lift{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:none}}
-  /* Cards on a shelf come in one after another and settle from a slight tilt. */
-  .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 12%) cover calc(32% + var(--n,0) * 5%)}
+  .shelf-head,.shelf-note,.about>div>p,.brief>*,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+  @keyframes lift{from{opacity:0;transform:translateY(110px)}to{opacity:1;transform:none}}
+  .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 15%) cover calc(36% + var(--n,0) * 6%)}
   .shelf-items li:nth-child(2){--n:1}.shelf-items li:nth-child(3){--n:2}
-  @keyframes card{from{opacity:0;transform:translateY(90px) scale(.92) rotate(1.5deg)}to{opacity:1;transform:none}}
+  @keyframes card{from{opacity:0;transform:translateY(200px) scale(.82) rotate(4deg)}to{opacity:1;transform:none}}
 
-  .portrait{animation:unroll linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
-  @keyframes unroll{from{clip-path:inset(45% -80px -80px);transform:translateY(60px) scale(1.12)}to{clip-path:inset(-80px);transform:none}}
-  .contact{animation:open linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
-  @keyframes open{from{clip-path:inset(12% 7% 0 round 28px);transform:translateY(80px)}to{clip-path:inset(0 round var(--r));transform:none}}
+  /* The portrait unrolls upwards out of a zoom, then drifts slower than the page. */
+  .portrait{animation:portrait linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+  @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}45%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
+  .contact{animation:widen linear both;animation-timeline:view();animation-range:entry 0% entry 85%}
+  @keyframes widen{from{border-radius:48px;transform:translateY(180px) scale(.72)}to{border-radius:var(--r);transform:none}}
 }}
