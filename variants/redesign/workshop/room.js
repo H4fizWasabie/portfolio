@@ -377,7 +377,9 @@ function startBench(stage, { root, projects }) {
     }
     history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
     const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
-    const views = [home, ...order.map(viewFor), out];
+    // On phones the room is pinned only while the captions pass, so the tour ends at the last stop
+    // and the pinned room is released straight into the shelves; wide screens pull back first.
+    const views = [home, ...order.map(viewFor), ...(stacked() ? [] : [out])];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
     tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
     if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');
