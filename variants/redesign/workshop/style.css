@@ -160,7 +160,7 @@ input,select{accent-color:var(--cobalt)}
 @media (max-width:899px),(orientation:portrait){
   .bench{display:block;min-height:0}
   .bench::after{display:none}
-  .bench-stage{position:relative;height:42svh;min-height:260px}
+  .bench-stage{position:relative;height:35svh;min-height:240px}
   .bench-copy{padding-top:8px;padding-bottom:48px}
   /* The drawer takes the copy's place below the room, so the opened object stays in view. */
   .bench.is-inside .bench-copy{display:none}

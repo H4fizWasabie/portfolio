@@ -320,7 +320,8 @@ function startBench(stage, { root, projects }) {
     stage.prepend(canvas);
     hint.hidden = fine || !!still;
     resize();
-    if (tour) hint.textContent = fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
+    // Objects are only 20-25px wide on a phone, so there the hint offers the tour and not the taps.
+    if (tour) hint.textContent = tour.steps ? 'Scroll for a tour' : fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
     if (still && still !== 'poster') fly(still, true);
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
@@ -342,8 +343,9 @@ function startBench(stage, { root, projects }) {
     size = [width, height];
     camera.aspect = width / height;
     // Narrow stages keep the whole room in frame; the full-bleed hero leaves air around it.
-    // Stacked stages are only a little wider than tall, so they need more than the stills' 30.
-    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 36 : 34;
+    // Stacked stages are a little wider than tall (a phone's is about 1.3:1); 31 lets the room fill
+    // it, with only the empty floor corner near the hint left to the edge.
+    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 31 : 34;
     shiftGoal = active ? 0 : shiftFor(width);
     if (!flight) shift = shiftGoal;
     frame();
