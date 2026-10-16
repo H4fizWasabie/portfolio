@@ -266,7 +266,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .next strong{font-size:clamp(1.75rem,4vw,2.75rem);color:var(--ink);letter-spacing:-.03em}
 
 /* render-stills.cjs: the stage alone, filling the viewport */
-.still body>*:not(.sky),.still .site-nav,.still .bench-copy,.still .bench::after,.still .sky::before,.still .sky::after{display:none}
+.still body>*:not(.tour),.still .site-nav,.still .bench-copy,.still .bench::after,.still .sky::before,.still .sky::after{display:none}
 .still .sky{background:var(--day)}
 .still .bench{display:block;min-height:0}
 .still .bench-stage{position:fixed;inset:0;height:100%;margin:0}
