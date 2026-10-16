@@ -55,7 +55,7 @@ const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', pro
 const OFF_FRAME = new Set(['server']);
 // Per-object camera adjustments: distance multiplier and extra turn around the vertical axis.
 // The overview looks from azimuth ~0.7 rad; these turn each close-up towards the object's front.
-const VIEW = { procura: { yaw: -0.55 }, pims: { yaw: 0.45 }, 'dd-drugs-register': { yaw: -0.3 }, theoses: { yaw: -0.35 }, map: { yaw: -0.5, dist: 1.15 }, yen: { yaw: -0.2, dist: 1.3 } };
+const VIEW = { procura: { yaw: -0.55 }, pims: { yaw: 0.45 }, 'dd-drugs-register': { yaw: -0.3, pull: 1.1 }, theoses: { yaw: -0.35 }, map: { yaw: -0.5, dist: 1.15 }, yen: { yaw: -0.2, dist: 1.3 } };
 
 if (still) document.documentElement.classList.add('still');
 
@@ -382,9 +382,12 @@ function startBench(stage, { root, projects }) {
     // On phones the room is pinned only while the captions pass, so the tour ends at the last stop
     // and the pinned room is released straight into the shelves; wide screens pull back first.
     // Phones are narrow, so the stops framed for a wide stage read too close: the object filled the
-    // frame. Each stop steps back along its own view direction so the object sits whole in frame.
-    const pull = stacked() ? 1.4 : 1;
-    const stops = order.map(viewFor).map(v => ({ pos: v.target.clone().add(v.pos.sub(v.target).multiplyScalar(pull)), target: v.target }));
+    // frame. Each stop steps back along its own view direction so the object sits whole in frame;
+    // a stop whose step-back would pass behind something in front of it sets its own pull in VIEW.
+    const stops = order.map(slug => {
+      const v = viewFor(slug), pull = stacked() ? VIEW[slug]?.pull ?? 1.4 : 1;
+      return { pos: v.target.clone().add(v.pos.sub(v.target).multiplyScalar(pull)), target: v.target };
+    });
     const views = [home, ...stops, ...(stacked() ? [] : [out])];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
     tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
