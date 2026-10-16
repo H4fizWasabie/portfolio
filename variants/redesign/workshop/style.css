@@ -394,7 +394,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 }
 
 /* Wordmark: the name across the foot of every page. */
-.wordmark{max-width:var(--max);margin:clamp(32px,6vw,80px) auto 0;padding:0 var(--pad);font-weight:800;font-size:clamp(3.5rem,14.5vw,13.5rem);line-height:.9;letter-spacing:-.055em;white-space:nowrap;overflow:clip}
+.wordmark{max-width:var(--max);margin:clamp(40px,6vw,80px) auto clamp(14px,2.5vw,28px);padding:0 var(--pad);font-weight:800;font-size:clamp(3.5rem,14.5vw,13.5rem);line-height:.9;letter-spacing:-.055em;white-space:nowrap;overflow:clip}
 .w{display:inline-block;overflow:clip;padding-bottom:.08em;margin-bottom:-.08em;vertical-align:top}
 .w>span{display:inline-block}
 
@@ -412,9 +412,13 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
     .shelf{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
   }
-  /* Phones: a shelf's cards become a swipeable row, so each shelf fits on screen and can stack. */
+  /* Phones: a shelf's cards become a swipeable row, so each shelf fits on screen and can stack.
+     Shelves run edge to edge so nothing behind shows past them, and the grid makes each as tall
+     as the tallest, just enough to cover the one before. */
   @media (max-width:900px) and (min-height:600px){
-    .shelf{position:sticky;top:12px;min-height:min(600px,92svh);align-content:start;background:var(--day);view-timeline:--shelf;
+    .shelves{display:grid;grid-auto-rows:1fr;row-gap:35svh} /* a pinned shelf stays whole while the gap scrolls under it */
+    .about{padding-top:12px} /* the last shelf already ends in space, as tall as the ones it covers */
+    .shelf{position:sticky;top:12px;align-content:start;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);background:var(--day);view-timeline:--shelf;
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
     .shelf-items{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(78%,340px);overflow-x:auto;overscroll-behavior-x:contain;
       scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);scroll-padding-inline:var(--pad)}
@@ -431,19 +435,19 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .wordmark .w>span{animation:rise linear both;animation-timeline:--mark;animation-range:entry calc(var(--i) * 4%) entry calc(45% + var(--i) * 4%)}
 
   .shelf{border-top-color:transparent}
-  .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 35%}
+  .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 20%}
   @keyframes draw{from{transform:scaleX(0)}to{transform:none}}
-  .shelf-head,.shelf-note,.about>div>p,.brief>*,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+  .shelf-head,.shelf-note,.about>div>p,.brief>*,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
   @keyframes lift{from{opacity:0;transform:translateY(110px)}to{opacity:1;transform:none}}
-  .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 15%) cover calc(36% + var(--n,0) * 6%)}
+  .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 10%) cover calc(20% + var(--n,0) * 4%)}
   .shelf-items li:nth-child(2){--n:1}.shelf-items li:nth-child(3){--n:2}
   @keyframes card{from{opacity:0;transform:translateY(200px) scale(.82) rotate(4deg)}to{opacity:1;transform:none}}
 
   /* The portrait unrolls upwards out of a zoom, then drifts slower than the page. */
   .portrait{animation:portrait linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
-  @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}45%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
+  @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}30%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
   /* In a swipeable row the cards' nearest scroller is the row, so they follow their shelf. */
   @media (max-width:900px) and (min-height:600px){.shelf-items li{animation-timeline:--shelf}}
-  .contact{animation:widen linear both;animation-timeline:view();animation-range:entry 0% entry 85%}
+  .contact{animation:widen linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
   @keyframes widen{from{border-radius:48px;transform:translateY(180px) scale(.72)}to{border-radius:var(--r);transform:none}}
 }}
