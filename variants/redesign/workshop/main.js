@@ -388,10 +388,11 @@ function startBench(stage, { root, projects }) {
   function stepTour(dt) {
     let s;
     if (tour.steps) {
-      // A project's stop is reached when its caption's middle crosses the reading line, just
-      // below the middle of the space under the room.
-      const list = stepList.getBoundingClientRect();
-      s = THREE.MathUtils.clamp((innerHeight * 0.72 - list.top) / stepList.firstElementChild.offsetHeight + 0.5, 0, tour.n);
+      // A project's stop is reached when its caption's middle crosses the reading line. The camera
+      // rests for the middle 60% of a caption's travel (hold), so the line sits low enough that the
+      // caption's top, with its counter, is still clear of the pinned room at the end of that rest.
+      const list = stepList.getBoundingClientRect(), row = stepList.firstElementChild.offsetHeight;
+      s = THREE.MathUtils.clamp((stage.offsetHeight + row * 0.8 + 8 - list.top) / row + 0.5, 0, tour.n);
       stage.classList.toggle('is-pinned', stage.getBoundingClientRect().top < 1);
     } else {
       const box = tourBox.getBoundingClientRect();

@@ -115,7 +115,7 @@ input,select{accent-color:var(--cobalt)}
 .drawer-nav button+button{justify-items:end;text-align:right}
 .drawer-nav button span{color:var(--ink);font-size:.9375rem}
 
-/* Tour (wide screens, set by main.js): the hero pins while the scroll flies the camera
+/* Tour (wide screens, set by room.js): the hero pins while the scroll flies the camera
    through the room. Each stop's name is set large on the scene, the way a film titles a shot. */
 .tour.is-on{height:calc(100svh + var(--segments) * 70svh)}
 .tour.is-on>.sky{position:sticky;top:0;height:100svh}
@@ -133,11 +133,13 @@ input,select{accent-color:var(--cobalt)}
 .tour-card::before{content:"";position:absolute;inset:-40% -30% -30% -40%;z-index:-1;pointer-events:none;
   background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 93%,transparent) 58%,transparent)}
 
-/* Phone tour (main.js sets .is-steps on stacked screens): the room pins at the top and one
+/* Phone tour (room.js sets .is-steps on stacked screens): the room pins at the top and one
    caption per project scrolls up beneath it; an opened project is a sheet over the captions. */
 .tour-steps{display:none}
-.tour.is-steps .tour-steps{display:block;list-style:none;margin:0;padding:0 var(--pad) 34svh}
-.tour-steps li{min-height:60svh;display:grid;align-content:start;justify-items:start;gap:8px;padding-top:5svh}
+/* Short stops keep the page moving. Rows are as tall as the tallest, since room.js reads one row's height; the chip index is the no-tour path's way in, so the tour hides it. */
+.tour.is-steps .tour-steps{display:grid;grid-auto-rows:1fr;list-style:none;margin:0;padding:0 var(--pad) 12svh}
+.tour-steps li{min-height:36svh;display:grid;align-content:start;justify-items:start;gap:8px;padding-top:2svh}
+.tour.is-steps .bench-index{display:none}
 .tour.is-steps .bench-stage{position:sticky;top:0;z-index:3}
 .tour.is-steps .bench-stage.is-pinned{background:var(--day);box-shadow:0 14px 24px -18px light-dark(rgba(40,52,44,.45),rgba(0,0,0,.8))}
 .tour.is-steps .bench.is-inside .bench-copy{display:block}
@@ -152,7 +154,7 @@ input,select{accent-color:var(--cobalt)}
 .bench-stage.has-drawer .bench-hint{display:none}
 
 /* Stacked hero: narrow screens, and any portrait screen (a phone in desktop mode reports a
-   desktop width, but the full-bleed hero needs a landscape stage). main.js uses the same query. */
+   desktop width, but the full-bleed hero needs a landscape stage). room.js uses the same query. */
 @media (max-width:899px),(orientation:portrait){
   .bench{display:block;min-height:0}
   .bench::after{display:none}
@@ -178,7 +180,14 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .shelf-action{margin-top:20px}
 .shelf-note a{font-weight:700}
 @media (max-width:900px){.shelf{grid-template-columns:1fr}.shelf-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:560px){.shelf-items{grid-template-columns:1fr}}
+/* Phones: each shelf's cards are a swipeable row that snaps card by card, the next one peeking in.
+   (They once stacked like a deck; the next shelf slid over the text of the one before.) */
+@media (max-width:900px){
+  .shelf-items{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(78%,340px);overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);scroll-padding-inline:var(--pad)}
+  .shelf-items:has(>li:only-child){grid-auto-columns:100%}
+  .shelf-items li{scroll-snap-align:start}
+}
 
 /* /projects/: an uneven grid of every object render */
 .work-grid{list-style:none;margin:32px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
@@ -403,30 +412,18 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 .w>span{display:inline-block}
 
 /* Below the room the page keeps moving with the scroll, the way the room does: section titles
-   sweep in large and settle while their words rise, the service shelves stack like a deck
-   (wide screens), cards fly in one after another, the portrait unrolls and drifts, the contact
-   panel widens out and the name rises letter by letter at the foot. Every animation is tied to
-   scroll position (no JavaScript), so it runs backwards on the way up and an anchor jump lands
-   on the finished state. Reduced motion gets the page as it was; so do browsers without scroll
-   timelines, apart from the deck, which is plain sticky positioning. */
+   sweep in large and settle while their words rise, the service shelves stack like a deck (wide
+   screens; phones swipe a row per shelf), cards fly in one after another, the portrait unrolls and
+   drifts, the contact panel widens out and the name rises letter by letter at the foot. Every
+   animation is tied to scroll position (no JavaScript), so it runs backwards on the way up and an
+   anchor jump lands on the finished state. Reduced motion gets the page as it was; so do browsers
+   without scroll timelines, apart from the deck, which is plain sticky positioning. */
 @media (prefers-reduced-motion:no-preference){
   /* The deck: each shelf pins near the top and the next slides over it. Wide, tall screens only,
      where a shelf fits on screen; every shelf is as tall as the tallest so each covers the last. */
   @media (min-width:901px) and (min-height:700px){
     .shelf{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
-  }
-  /* Phones: a shelf's cards become a swipeable row, so each shelf fits on screen and can stack.
-     Shelves run edge to edge so nothing behind shows past them, and the grid makes each as tall
-     as the tallest, just enough to cover the one before. */
-  @media (max-width:900px) and (min-height:600px){
-    .shelves{display:grid;grid-auto-rows:1fr;row-gap:35svh} /* a pinned shelf stays whole while the gap scrolls under it */
-    .about{padding-top:12px} /* the last shelf already ends in space, as tall as the ones it covers */
-    .shelf{position:sticky;top:12px;align-content:start;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);background:var(--day);view-timeline:--shelf;
-      box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
-    .shelf-items{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(78%,340px);overflow-x:auto;overscroll-behavior-x:contain;
-      scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);scroll-padding-inline:var(--pad)}
-    .shelf-items li{scroll-snap-align:start}
   }
 }
 @supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
@@ -451,7 +448,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .portrait{animation:portrait linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
   @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}30%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
   /* In a swipeable row the cards' nearest scroller is the row, so they follow their shelf. */
-  @media (max-width:900px) and (min-height:600px){.shelf-items li{animation-timeline:--shelf}}
+  @media (max-width:900px){.shelf{view-timeline:--shelf}.shelf-items li{animation-timeline:--shelf}}
   .contact{animation:widen linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
   @keyframes widen{from{border-radius:48px;transform:translateY(180px) scale(.72)}to{border-radius:var(--r);transform:none}}
 }}
