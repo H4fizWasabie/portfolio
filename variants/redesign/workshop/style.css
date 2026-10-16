@@ -394,7 +394,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 }
 
 /* Wordmark: the name across the foot of every page. */
-.wordmark{max-width:var(--max);margin:clamp(32px,6vw,80px) auto 0;padding:0 var(--pad);font-weight:800;font-size:clamp(3.5rem,14.5vw,13.5rem);line-height:.9;letter-spacing:-.055em;white-space:nowrap;overflow:clip}
+.wordmark{max-width:var(--max);margin:clamp(40px,6vw,80px) auto clamp(14px,2.5vw,28px);padding:0 var(--pad);font-weight:800;font-size:clamp(3.5rem,14.5vw,13.5rem);line-height:.9;letter-spacing:-.055em;white-space:nowrap;overflow:clip}
 .w{display:inline-block;overflow:clip;padding-bottom:.08em;margin-bottom:-.08em;vertical-align:top}
 .w>span{display:inline-block}
 
@@ -412,9 +412,13 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
     .shelf{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
   }
-  /* Phones: a shelf's cards become a swipeable row, so each shelf fits on screen and can stack. */
+  /* Phones: a shelf's cards become a swipeable row, so each shelf fits on screen and can stack.
+     Shelves run edge to edge so nothing behind shows past them, and the grid makes each as tall
+     as the tallest, just enough to cover the one before. */
   @media (max-width:900px) and (min-height:600px){
-    .shelf{position:sticky;top:12px;min-height:min(600px,92svh);align-content:start;background:var(--day);view-timeline:--shelf;
+    .shelves{display:grid;grid-auto-rows:1fr}
+    .about{padding-top:12px} /* the last shelf already ends in space, as tall as the ones it covers */
+    .shelf{position:sticky;top:12px;align-content:start;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);background:var(--day);view-timeline:--shelf;
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
     .shelf-items{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(78%,340px);overflow-x:auto;overscroll-behavior-x:contain;
       scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);scroll-padding-inline:var(--pad)}
