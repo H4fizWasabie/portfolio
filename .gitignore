@@ -27,3 +27,6 @@ resume/archive/
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# impeccable's local critique snapshots and live-session files — not committed.
+/.impeccable/
