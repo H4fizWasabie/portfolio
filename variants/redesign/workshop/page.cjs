@@ -52,14 +52,14 @@ const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thum
 function home({ projects, site, esc, root }) {
   const by = Object.fromEntries(projects.map(p => [p.slug, p]));
   const data = projects.map(p => ({
-    slug: p.slug, title: p.title, category: p.category, summary: p.proof || p.summary, description: p.description,
+    slug: p.slug, title: p.title, object: objectName[p.slug], category: p.category, summary: p.proof || p.summary, description: p.description,
     image: p.slug === 'map' ? 'map-home-demo.webp' : p.preview || (p.scenes[0] && p.scenes[0][1]) || null,
     disclosure: p.disclosure, steps: p.workflow
   }));
   return `${B.head({ title: site.title, description: site.description, root, fonts,
     route: '/', extra: `${themeScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
 <body>
-<div class="sky">${nav(root, site, esc)}
+<div class="tour" data-tour><div class="sky">${nav(root, site, esc)}
 <section class="bench">
 <div class="bench-stage" data-stage>
 <img class="bench-poster" src="${root}static/poster.webp" alt="A small clay workshop: a desk with a monitor, phone, lamp and robot, a supply cabinet, a drug safe, a trolley of deliveries, and a camera with a ring light." width="1600" height="1200">
@@ -72,11 +72,13 @@ function home({ projects, site, esc, root }) {
 <figure data-f="figure"></figure><p data-f="description"></p>
 <a class="button" data-f="link" href="#">Read the case study</a>
 <div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
+<div class="tour-card is-away" data-tour-card><p class="tour-count" data-t="count"></p><p class="tour-object" data-t="object"></p>
+<p class="tour-title" data-t="title"></p><p class="tour-summary" data-t="summary"></p><button class="button" type="button" data-t="open">Open the project</button></div>
 <div class="bench-copy"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
-</section></div>
+</section></div></div>
 <main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">What I can do for you</h2>
 ${shelves(by, root, esc)}</section>
