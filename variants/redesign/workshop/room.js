@@ -381,14 +381,7 @@ function startBench(stage, { root, projects }) {
     const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
     // On phones the room is pinned only while the captions pass, so the tour ends at the last stop
     // and the pinned room is released straight into the shelves; wide screens pull back first.
-    // Phones are narrow, so the stops framed for a wide stage read too close: the object filled the
-    // frame. Each stop steps back along its own view direction so the object sits whole in frame;
-    // a stop whose step-back would pass behind something in front of it sets its own pull in VIEW.
-    const stops = order.map(slug => {
-      const v = viewFor(slug), pull = stacked() ? VIEW[slug]?.pull ?? 1.4 : 1;
-      return { pos: v.target.clone().add(v.pos.sub(v.target).multiplyScalar(pull)), target: v.target };
-    });
-    const views = [home, ...stops, ...(stacked() ? [] : [out])];
+    const views = [home, ...order.map(viewFor), ...(stacked() ? [] : [out])];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
     tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
     if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');
@@ -538,7 +531,11 @@ function startBench(stage, { root, projects }) {
     // Wide screens: shift the object left of the drawer. Stacked: the drawer sits below the room.
     const target = center.clone().add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(wide ? size * 0.35 : 0));
     const fit = size / 2 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2); // distance that fits the object
-    const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1);
+    // Phones are narrow, so a close-up framed for a wide stage reads too close there: step back so
+    // the object sits whole in frame, for tour stops and opened projects alike. A view whose
+    // step-back would pass behind something in front of it sets its own pull in VIEW.
+    const pull = stacked() && !still ? tune.pull ?? 1.4 : 1;
+    const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1) * pull;
     return { pos: target.clone().add(dir.multiplyScalar(dist)), target };
   }
   function fly(to, instant) {
