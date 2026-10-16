@@ -24,8 +24,8 @@ body{margin:0;background:var(--day);color:var(--ink);font:400 1.0625rem/1.6 Schi
 img{max-width:100%;height:auto;display:block}
 a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
 :focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
-h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.05}
-p{margin:0}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.05;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
 [hidden]{display:none!important}
 
 .button{display:inline-flex;align-items:center;min-height:48px;padding:12px 22px;border-radius:var(--r);border:0;background:var(--ink);color:var(--day);
@@ -60,6 +60,8 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 .skip{position:absolute;left:12px;top:-60px;z-index:10;padding:10px 16px;border-radius:var(--r);background:var(--ink);color:var(--day);font-weight:700;text-decoration:none}
 .skip:focus{top:12px}
 ::selection{background:color-mix(in srgb,var(--cobalt) 28%,transparent)}
+input,textarea,select{caret-color:var(--cobalt)}
+input,select{accent-color:var(--cobalt)}
 
 /* Sky: the hero is one scene. Two light layers fade with the lamp switch:
    daylight from the window side by day, a warm lamp glow and moonlight at night. */
@@ -124,11 +126,12 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 .tour-card.is-away{opacity:0;visibility:hidden;transform:translateY(20px)}
 .tour-count{font-weight:700;font-size:.875rem;letter-spacing:.08em;font-variant-numeric:tabular-nums;color:var(--cobalt)}
 .tour-object{font-weight:600;color:var(--muted)}
+.tour-card .tour-object{color:var(--ink)} /* over the scene, not the page */
 .tour-title{font-weight:800;font-size:clamp(2.6rem,5.2vw,4.75rem);line-height:.95;letter-spacing:-.045em}
 .tour-summary{font-size:1.0625rem;max-width:34ch;margin-bottom:8px}
 /* The same veil as the headline's, mirrored, so the caption reads over the room. */
 .tour-card::before{content:"";position:absolute;inset:-40% -30% -30% -40%;z-index:-1;pointer-events:none;
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 85%,transparent) 45%,transparent)}
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 93%,transparent) 58%,transparent)}
 
 /* Phone tour (main.js sets .is-steps on stacked screens): the room pins at the top and one
    caption per project scrolls up beneath it; an opened project is a sheet over the captions. */
@@ -168,7 +171,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .work{padding:clamp(64px,9vw,120px) 0 0}
 .shelves{margin-top:28px}
 .shelf{position:relative;display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
-.shelf-head h3{font-size:1.3rem;letter-spacing:-.02em}
+.shelf-head h3{font-size:1.5rem;letter-spacing:-.02em}
 .shelf-head p{margin-top:8px;color:var(--muted);max-width:34ch}
 .shelf-items{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .shelf-note{align-self:center;max-width:58ch;font-size:1.125rem}
@@ -273,7 +276,8 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .sheet-foot{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-top:18px}
 .no-js .sheet-foot,.no-js .field-row button,.no-js .stepper button{visibility:hidden}
 .link-button{background:none;border:0;padding:10px 4px;min-height:44px;color:var(--ink);font:600 1rem Schibsted,sans-serif;text-decoration:underline;text-underline-offset:.2em;cursor:pointer}
-.sheet table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.9375rem;font-variant-numeric:tabular-nums}
+.sheet table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.9375rem}
+.sheet td,.sheet output{font-variant-numeric:tabular-nums} /* not on names: tabular punctuation opens a gap before commas */
 .sheet th,.sheet td{text-align:left;padding:10px 8px;vertical-align:middle}
 .sheet thead th{font-weight:600;color:var(--muted);font-size:.8125rem;border-bottom:1px solid var(--line)}
 .sheet tbody tr+tr{border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
