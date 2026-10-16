@@ -34,7 +34,11 @@ const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" 
 const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</a><header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
 <nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a></nav>
 <div class="nav-actions">${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></div></header>`;
-const footer = root => B.footer(root, `${root}resume/`);
+// Words, or letters, each in a clipped span so the scroll can raise them one after another (style.css).
+const rise = (parts, esc) => parts.map((w, i) => (w === ' ' ? ' ' : `<span class="w"><span style="--i:${i}">${esc(w)}</span></span>`)).join('');
+const words = (text, esc) => rise(text.split(/( )/), esc);
+// The name set large where the page ends, rising letter by letter as it comes into view.
+const footer = root => `<p class="wordmark" aria-hidden="true">${rise([...site.name], s => s)}</p>${B.footer(root, `${root}resume/`)}`;
 
 const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
 <span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
@@ -46,20 +50,27 @@ const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(
 const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
 ${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
 
+// Phones: the room pins at the top and these captions scroll up beneath it, one stop each
+// (main.js flies the camera to whichever is passing). Shown only while the tour runs.
+const two = n => String(n).padStart(2, '0');
+const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
+<p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
+<button class="button" type="button" data-open="${p.slug}">Open the project</button></li>`).join('')}</ol>`;
+
 // Day and night renders of the same object; the theme shows one (the hidden one is never fetched).
 const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thumb${v || '-day'}" src="${root}static/thumb-${p.slug}${v}.webp" alt="" width="640" height="480" ${attrs}>`).join('');
 
 function home({ projects, site, esc, root }) {
   const by = Object.fromEntries(projects.map(p => [p.slug, p]));
   const data = projects.map(p => ({
-    slug: p.slug, title: p.title, category: p.category, summary: p.proof || p.summary, description: p.description,
+    slug: p.slug, title: p.title, object: objectName[p.slug], category: p.category, summary: p.proof || p.summary, description: p.description,
     image: p.slug === 'map' ? 'map-home-demo.webp' : p.preview || (p.scenes[0] && p.scenes[0][1]) || null,
     disclosure: p.disclosure, steps: p.workflow
   }));
   return `${B.head({ title: site.title, description: site.description, root, fonts,
     route: '/', extra: `${themeScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
 <body>
-<div class="sky">${nav(root, site, esc)}
+<div class="tour" data-tour><div class="sky">${nav(root, site, esc)}
 <section class="bench">
 <div class="bench-stage" data-stage>
 <img class="bench-poster" src="${root}static/poster.webp" alt="A small clay workshop: a desk with a monitor, phone, lamp and robot, a supply cabinet, a drug safe, a trolley of deliveries, and a camera with a ring light." width="1600" height="1200">
@@ -72,21 +83,23 @@ function home({ projects, site, esc, root }) {
 <figure data-f="figure"></figure><p data-f="description"></p>
 <a class="button" data-f="link" href="#">Read the case study</a>
 <div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
+<div class="tour-card is-away" data-tour-card><p class="tour-count" data-t="count"></p><p class="tour-object" data-t="object"></p>
+<p class="tour-title" data-t="title"></p><p class="tour-summary" data-t="summary"></p><button class="button" type="button" data-t="open">Open the project</button></div>
 <div class="bench-copy"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
-</section></div>
+${steps(projects, esc)}</section></div></div>
 <main id="main">
-<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">What I can do for you</h2>
+<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>
 ${shelves(by, root, esc)}</section>
 
 <section class="about" id="about" aria-labelledby="about-title">
 <img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">
-<div><h2 id="about-title">About me</h2>
+<div><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
 ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
-<section class="contact" id="contact"><h2>${esc(site.contactTitle)}</h2>
+<section class="contact" id="contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
 <p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
 <form class="brief" data-brief data-email="${site.email}" novalidate>
 <fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>

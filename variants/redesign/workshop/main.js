@@ -324,6 +324,7 @@ function startBench(stage, { root, projects }) {
     stage.prepend(canvas);
     hint.hidden = fine || !!still;
     resize();
+    if (tour) hint.textContent = fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
     if (still && still !== 'poster') fly(still, true);
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
@@ -350,8 +351,79 @@ function startBench(stage, { root, projects }) {
     shiftGoal = active ? 0 : shiftFor(width);
     if (!flight) shift = shiftGoal;
     frame();
+    setTour();
   }
   new ResizeObserver(resize).observe(stage);
+
+  // Scrolling flies the camera through the room, resting at each project, then pulling back
+  // before the page carries on. Wide screens pin the whole hero and set each project's name
+  // beside it; stacked screens (phones) pin the room at the top while a caption per project
+  // scrolls up beneath it. Reduced motion and stills keep the bench as it was.
+  const tourBox = document.querySelector('[data-tour]');
+  const card = stage.parentElement.querySelector('[data-tour-card]');
+  const cardField = name => card.querySelector(`[data-t=${name}]`);
+  cardField('open').addEventListener('click', () => select(cardField('open').dataset.slug));
+  const stepList = stage.parentElement.querySelector('[data-steps]');
+  stepList.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) select(b.dataset.open); });
+  let tour = null, shown = -1, openedAt = 0;
+  function setTour() {
+    const on = !still && !reduced && !!groups[order[0]];
+    tourBox.classList.toggle('is-on', on && !stacked());
+    tourBox.classList.toggle('is-steps', on && stacked());
+    if (!on) {
+      if (tour) { tour = null; card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); stage.classList.remove('is-pinned'); if (!active) fly(home); }
+      return;
+    }
+    history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
+    const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
+    const views = [home, ...order.map(viewFor), out];
+    const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
+    tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
+    if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');
+    tourBox.style.setProperty('--segments', tour.n);
+  }
+  // The camera rests at each stop for the outer part of a segment and travels in the middle.
+  const hold = f => THREE.MathUtils.smoothstep(f, 0.3, 0.7);
+  const tourPos = new THREE.Vector3(), tourAim = new THREE.Vector3();
+  function stepTour(dt) {
+    let s;
+    if (tour.steps) {
+      // A project's stop is reached when its caption's middle crosses the reading line, just
+      // below the middle of the space under the room.
+      const list = stepList.getBoundingClientRect();
+      s = THREE.MathUtils.clamp((innerHeight * 0.72 - list.top) / stepList.firstElementChild.offsetHeight + 0.5, 0, tour.n);
+      stage.classList.toggle('is-pinned', stage.getBoundingClientRect().top < 1);
+    } else {
+      const box = tourBox.getBoundingClientRect();
+      s = THREE.MathUtils.clamp(-box.top / (box.height - innerHeight), 0, 1) * tour.n;
+    }
+    const i = Math.min(Math.floor(s), tour.n - 1), u = i + hold(s - i);
+    tour.pos.getPoint(u / tour.n, tourPos);
+    tour.target.getPoint(u / tour.n, tourAim);
+    shiftGoal = shiftFor(size[0]) * Math.max(0, 1 - u);
+    // Easing towards the path, not jumping onto it, is what makes the scroll feel filmed.
+    const a = 1 - Math.pow(0.9, dt / 16.7);
+    const moving = camera.position.distanceToSquared(tourPos) + controls.target.distanceToSquared(tourAim) > 1e-6;
+    camera.position.lerp(tourPos, a);
+    controls.target.lerp(tourAim, a);
+    camera.lookAt(controls.target);
+    // The caption names the project the camera is resting on; it changes while hidden.
+    hint.hidden = s > 0.2;
+    if (tour.steps) return moving;
+    const near = Math.round(s), p = bySlug[order[near - 1]];
+    if (p && near !== shown) {
+      shown = near;
+      cardField('count').textContent = `${String(near).padStart(2, '0')} / ${String(order.length).padStart(2, '0')}`;
+      cardField('object').textContent = p.object;
+      cardField('title').textContent = p.title;
+      cardField('summary').textContent = p.summary;
+      cardField('open').dataset.slug = p.slug;
+    }
+    card.classList.toggle('is-away', !p || Math.abs(s - near) > 0.32);
+    stage.closest('.bench').classList.toggle('is-touring', s > 0.35);
+    return moving;
+  }
+  addEventListener('scroll', () => { if (tour && active && Math.abs(scrollY - openedAt) > 160) back(); }, { passive: true });
 
   // Highlight in the accent colour; glowing parts keep their own light.
   function highlight(slug, on) {
@@ -426,7 +498,7 @@ function startBench(stage, { root, projects }) {
       if (slug !== active) highlight(slug, true);
       hovered = slug;
     }
-    canvas.style.cursor = slug ? 'pointer' : 'grab';
+    canvas.style.cursor = slug ? 'pointer' : tour && !active ? '' : 'grab';
     tip.hidden = !slug;
     if (slug) {
       const rect = stage.getBoundingClientRect();
@@ -484,6 +556,8 @@ function startBench(stage, { root, projects }) {
     tip.hidden = hint.hidden = true;
     active = slug;
     shiftGoal = 0;
+    openedAt = scrollY;
+    card.classList.add('is-away');
     stage.closest('.bench').classList.add('is-inside');
     fly(slug);
     f('category').textContent = p.category;
@@ -515,7 +589,7 @@ function startBench(stage, { root, projects }) {
   }
   function back(fromHistory) {
     if (!active) return;
-    if (!fromHistory && pushed) { history.back(); return; } // popstate finishes closing
+    if (!fromHistory && pushed) { pushed = false; history.back(); return; } // popstate finishes closing
     if (!fromHistory) history.replaceState(null, '', location.pathname + location.search);
     pushed = false;
     highlight(active, false);
@@ -524,7 +598,7 @@ function startBench(stage, { root, projects }) {
     stage.closest('.bench').classList.remove('is-inside');
     drawer.hidden = true;
     stage.classList.remove('has-drawer');
-    fly(home);
+    if (tour) flight = null; else fly(home); // the tour eases back onto its path
     document.querySelectorAll('[data-pick]').forEach(a => a.removeAttribute('aria-current'));
     if (lastTrigger && lastTrigger.matches('[data-pick]')) lastTrigger.focus({ preventScroll: true });
   }
@@ -543,7 +617,7 @@ function startBench(stage, { root, projects }) {
   document.querySelectorAll('[data-pick]').forEach(a => a.addEventListener('click', e => {
     if (!groups[a.dataset.pick]) return; // model not loaded: follow the link
     e.preventDefault();
-    if (stacked()) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    if (stacked() && !tour) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     select(a.dataset.pick);
   }));
 
@@ -565,10 +639,11 @@ function startBench(stage, { root, projects }) {
       shift = reduced || Math.abs(shiftGoal - shift) < 0.5 ? shiftGoal : shift + (shiftGoal - shift) * 0.08;
       frame();
     }
-    if (controls.update()) dirty = true;
-    fade(now);
     const dt = Math.min(64, lastNow ? now - lastNow : 16);
     lastNow = now;
+    controls.enabled = !tour || !!active;
+    if (tour && !active && !flight) { if (stepTour(dt)) dirty = true; } else if (controls.update()) dirty = true;
+    fade(now);
     if (intro) { stepIntro(now); dirty = true; }
     // Opening and closing the active object.
     let moved = false;
