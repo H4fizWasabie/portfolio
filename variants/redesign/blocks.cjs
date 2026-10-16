@@ -71,11 +71,11 @@ ${p.source ? `<div><dt>Source</dt><dd><a href="${esc(p.source)}">${esc(p.source.
 ${p.releases ? `<div><dt>Download</dt><dd><a href="${esc(p.releases)}">APK releases on GitHub</a></dd></div>` : ''}
 </dl>`;
 
-const contact = () => `<h2>${esc(site.contactTitle)}</h2><p>${esc(site.contactBody)}</p>
-<p class="contact-actions"><a class="button" href="${site.mailto}">${esc(site.cta)}</a> <a href="mailto:${site.email}">${site.email}</a></p>`;
+const contact = (href = site.mailto) => `<h2>${esc(site.contactTitle)}</h2><p>${esc(site.contactBody)}</p>
+<p class="contact-actions"><a class="button" href="${href}">${esc(site.cta)}</a> <a href="mailto:${site.email}">${site.email}</a></p>`;
 
 const footer = (root, resume = site.resume) => `<footer class="site-footer"><p>${esc(site.name)}. Custom business apps and AI automation.</p>
-<p><a href="${resume}">Résumé</a> <a href="${site.github}">GitHub</a></p></footer>`;
+<p><a href="${resume}">Résumé</a> <a href="${site.github}">GitHub</a> <a href="mailto:${site.email}">${site.email}</a></p></footer>`;
 
 const nav = (root, extraClass = '', extra = '', resume = site.resume) => `<header class="site-nav ${extraClass}"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
 <nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${resume}">Résumé</a>${extra}<a class="button button-small" href="${site.mailto}">${esc(site.cta)}</a></nav></header>`;

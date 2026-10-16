@@ -55,8 +55,8 @@ function build(name, { out = path.join(here, 'dist', name), publish = false } = 
   }
 
   esbuild.buildSync({
-    entryPoints: [path.join(dir, 'main.js')], bundle: true, minify: true, format: 'esm',
-    target: 'es2020', outfile: path.join(out, 'static', 'main.js'), logLevel: 'warning'
+    entryPoints: [path.join(dir, 'main.js')], bundle: true, minify: true, format: 'esm', splitting: true,
+    target: 'es2020', outdir: path.join(out, 'static'), chunkNames: '[name]-[hash]', logLevel: 'warning'
   });
   console.log(`built ${name}${publish ? ' (production)' : ''}`);
   return out;

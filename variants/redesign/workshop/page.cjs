@@ -33,7 +33,7 @@ const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" 
 // the links drop to a second row there (style.css), so nothing has to be hidden.
 const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</a><header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
 <nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a></nav>
-<div class="nav-actions">${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></div></header>`;
+<div class="nav-actions">${toggle}<a class="button button-small" href="${root}#contact"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></div></header>`;
 // Words, or letters, each in a clipped span so the scroll can raise them one after another (style.css).
 const rise = (parts, esc) => parts.map((w, i) => (w === ' ' ? ' ' : `<span class="w"><span style="--i:${i}">${esc(w)}</span></span>`)).join('');
 const words = (text, esc) => rise(text.split(/( )/), esc);
@@ -51,7 +51,7 @@ const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, 
 ${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
 
 // Phones: the room pins at the top and these captions scroll up beneath it, one stop each
-// (main.js flies the camera to whichever is passing). Shown only while the tour runs.
+// (room.js flies the camera to whichever is passing). Shown only while the tour runs.
 const two = n => String(n).padStart(2, '0');
 const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
 <p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
@@ -86,7 +86,7 @@ function home({ projects, site, esc, root }) {
 <div class="tour-card is-away" data-tour-card><p class="tour-count" data-t="count"></p><p class="tour-object" data-t="object"></p>
 <p class="tour-title" data-t="title"></p><p class="tour-summary" data-t="summary"></p><button class="button" type="button" data-t="open">Open the project</button></div>
 <div class="bench-copy"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
-<p class="actions"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
+<p class="actions"><a class="button" href="#contact">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
 ${steps(projects, esc)}</section></div></div>
@@ -101,11 +101,11 @@ ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
 <section class="contact" id="contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
 <p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
-<form class="brief" data-brief data-email="${site.email}" novalidate>
+<form class="brief" data-brief data-email="${site.email}" action="mailto:${site.email}?subject=Project%20enquiry" method="post" enctype="text/plain" novalidate>
 <fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
 <fieldset><legend>How many people would use it?</legend><div class="chips">${['Just me', '2 to 10', '11 to 50', 'More than 50'].map((n, i) => `<label class="chip"><input type="radio" name="people" value="${n}" id="people-${i}">${n}</label>`).join('')}</div></fieldset>
 <div class="field"><label for="brief-today">How does the work happen today?</label>
-<textarea id="brief-today" rows="3" aria-describedby="brief-help"></textarea>
+<textarea id="brief-today" name="today" rows="3" aria-describedby="brief-help"></textarea>
 <p class="field-help" id="brief-help">For example: we track stock in three spreadsheets and orders get missed.</p></div>
 <p class="field-error" data-brief-error role="alert" hidden></p>
 <div class="brief-actions"><button class="button">Write the email</button><a href="mailto:${site.email}">${site.email}</a></div>
@@ -131,7 +131,7 @@ ${p.slug === 'map' ? '' : `<section class="try" aria-labelledby="try-title"><h2 
 ${p.scenes.length ? B.gallery(p, root) : ''}
 <div class="case-grid"><div class="case-body">${B.caseBody(p)}</div><aside class="case-facts">${B.facts(p)}</aside></div>
 <nav class="next" aria-label="Next project"><a href="${root}work/${next.slug}/">${thumb(root, next, 'loading="lazy"')}<span>Next project<strong>${esc(next.title)}</strong></span></a></nav>
-<section class="contact">${B.contact()}</section>
+<section class="contact">${B.contact(`${root}#contact`)}</section>
 </main>${footer(root)}
 <script type="module" src="${root}static/main.js"></script></body></html>`;
 }
@@ -144,7 +144,7 @@ function projectsPage({ projects, site, esc, root }) {
 <h1>All projects</h1>
 <p class="index-intro">Business apps, an Android app and AI automation. Each case study shows what the software does, with fictional sample data, and what it does not claim.</p>
 ${workGrid(projects, root, esc)}
-<section class="contact">${B.contact()}</section>
+<section class="contact">${B.contact(`${root}#contact`)}</section>
 </main>${footer(root)}
 <script type="module" src="${root}static/main.js"></script></body></html>`;
 }
