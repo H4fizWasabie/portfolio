@@ -320,7 +320,8 @@ function startBench(stage, { root, projects }) {
     stage.prepend(canvas);
     hint.hidden = fine || !!still;
     resize();
-    if (tour) hint.textContent = fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
+    // Objects are only 20-25px wide on a phone, so there the hint offers the tour and not the taps.
+    if (tour) hint.textContent = tour.steps ? 'Scroll for a tour' : fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
     if (still && still !== 'poster') fly(still, true);
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
@@ -342,8 +343,9 @@ function startBench(stage, { root, projects }) {
     size = [width, height];
     camera.aspect = width / height;
     // Narrow stages keep the whole room in frame; the full-bleed hero leaves air around it.
-    // Stacked stages are only a little wider than tall, so they need more than the stills' 30.
-    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 36 : 34;
+    // Stacked stages are a little wider than tall (a phone's is about 1.3:1); 31 lets the room fill
+    // it, with only the empty floor corner near the hint left to the edge.
+    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 31 : 34;
     shiftGoal = active ? 0 : shiftFor(width);
     if (!flight) shift = shiftGoal;
     frame();
@@ -361,9 +363,14 @@ function startBench(stage, { root, projects }) {
   cardField('open').addEventListener('click', () => select(cardField('open').dataset.slug));
   const stepList = stage.parentElement.querySelector('[data-steps]');
   stepList.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) select(b.dataset.open); });
-  let tour = null, shown = -1, openedAt = 0;
+  let tour = null, shown = -1, openedAt = 0, late;
   function setTour() {
-    const on = !still && !reduced && !!groups[order[0]];
+    const ready = !still && !reduced && !!groups[order[0]];
+    // The tour adds about two screens of captions above the shelves and hides the chip index, so
+    // it only starts for a visitor still at the hero when the room goes live. Anyone who has
+    // scrolled on keeps the page they are using, for the rest of the visit (resize included).
+    if (ready && late === undefined) late = stage.getBoundingClientRect().bottom <= 0;
+    const on = ready && !late;
     tourBox.classList.toggle('is-on', on && !stacked());
     tourBox.classList.toggle('is-steps', on && stacked());
     if (!on) {
@@ -372,7 +379,9 @@ function startBench(stage, { root, projects }) {
     }
     history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
     const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
-    const views = [home, ...order.map(viewFor), out];
+    // On phones the room is pinned only while the captions pass, so the tour ends at the last stop
+    // and the pinned room is released straight into the shelves; wide screens pull back first.
+    const views = [home, ...order.map(viewFor), ...(stacked() ? [] : [out])];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
     tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
     if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');

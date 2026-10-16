@@ -139,7 +139,7 @@ input,select{accent-color:var(--cobalt)}
    caption per project scrolls up beneath it; an opened project is a sheet over the captions. */
 .tour-steps{display:none}
 /* Short stops keep the page moving. Rows are as tall as the tallest, since room.js reads one row's height; the chip index is the no-tour path's way in, so the tour hides it. */
-.tour.is-steps .tour-steps{display:grid;grid-auto-rows:1fr;list-style:none;margin:0;padding:0 var(--pad) 12svh}
+.tour.is-steps .tour-steps{display:grid;grid-auto-rows:1fr;list-style:none;margin:0;padding:0 var(--pad)}
 .tour-steps li{min-height:36svh;display:grid;align-content:start;justify-items:start;gap:8px;padding-top:2svh}
 .tour.is-steps .bench-index{display:none}
 .tour.is-steps .bench-stage{position:sticky;top:0;z-index:3}
@@ -160,7 +160,7 @@ input,select{accent-color:var(--cobalt)}
 @media (max-width:899px),(orientation:portrait){
   .bench{display:block;min-height:0}
   .bench::after{display:none}
-  .bench-stage{position:relative;height:42svh;min-height:260px}
+  .bench-stage{position:relative;height:35svh;min-height:240px}
   .bench-copy{padding-top:8px;padding-bottom:48px}
   /* The drawer takes the copy's place below the room, so the opened object stays in view. */
   .bench.is-inside .bench-copy{display:none}
@@ -266,7 +266,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .next strong{font-size:clamp(1.75rem,4vw,2.75rem);color:var(--ink);letter-spacing:-.03em}
 
 /* render-stills.cjs: the stage alone, filling the viewport */
-.still body>*:not(.sky),.still .site-nav,.still .bench-copy,.still .bench::after,.still .sky::before,.still .sky::after{display:none}
+.still body>*:not(.tour),.still .site-nav,.still .bench-copy,.still .bench::after,.still .sky::before,.still .sky::after{display:none}
 .still .sky{background:var(--day)}
 .still .bench{display:block;min-height:0}
 .still .bench-stage{position:fixed;inset:0;height:100%;margin:0}
@@ -416,7 +416,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 /* Below the room the page keeps moving with the scroll, the way the room does: section titles
    sweep in large and settle while their words rise, the service shelves stack like a deck (wide
    screens; phones swipe a row per shelf), cards fly in one after another, the portrait unrolls and
-   drifts, the contact panel widens out and the name rises letter by letter at the foot. Every
+   drifts, the contact panel rises in and the name rises letter by letter at the foot. Every
    animation is tied to scroll position (no JavaScript), so it runs backwards on the way up and an
    anchor jump lands on the finished state. Reduced motion gets the page as it was; so do browsers
    without scroll timelines, apart from the deck, which is plain sticky positioning. */
@@ -432,6 +432,8 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   main{overflow-x:clip} /* titles start wider than the page */
   .rise{view-timeline:--rise;transform-origin:0 100%;animation:sweep linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
   @keyframes sweep{from{transform:translateY(40%) scale(1.9)}to{transform:none}}
+  /* On a phone a title at 1.9x is wider than the screen, so it entered as clipped letters. */
+  @media (max-width:640px){@keyframes sweep{from{transform:translateY(40%) scale(1.2)}to{transform:none}}}
   .rise .w>span{animation:rise linear both;animation-timeline:--rise;animation-range:cover calc(2% + var(--i) * 1.5%) cover calc(30% + var(--i) * 1.5%)}
   @keyframes rise{from{transform:translateY(110%) rotate(6deg)}to{transform:none}}
   .wordmark{view-timeline:--mark}
@@ -440,7 +442,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .shelf{border-top-color:transparent}
   .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 20%}
   @keyframes draw{from{transform:scaleX(0)}to{transform:none}}
-  .shelf-head,.shelf-note,.about>div>p,.brief>*,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
+  .shelf-head,.shelf-note,.about>div>p,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
   @keyframes lift{from{opacity:0;transform:translateY(110px)}to{opacity:1;transform:none}}
   .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 10%) cover calc(20% + var(--n,0) * 4%)}
   .shelf-items li:nth-child(2){--n:1}.shelf-items li:nth-child(3){--n:2}
@@ -451,6 +453,6 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}30%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
   /* In a swipeable row the cards' nearest scroller is the row, so they follow their shelf. */
   @media (max-width:900px){.shelf{view-timeline:--shelf}.shelf-items li{animation-timeline:--shelf}}
-  .contact{animation:widen linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
-  @keyframes widen{from{border-radius:48px;transform:translateY(180px) scale(.72)}to{border-radius:var(--r);transform:none}}
+  .contact{animation:settle linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+  @keyframes settle{from{border-radius:48px;transform:translateY(80px)}to{border-radius:var(--r);transform:none}}
 }}
