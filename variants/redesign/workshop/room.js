@@ -381,7 +381,11 @@ function startBench(stage, { root, projects }) {
     const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
     // On phones the room is pinned only while the captions pass, so the tour ends at the last stop
     // and the pinned room is released straight into the shelves; wide screens pull back first.
-    const views = [home, ...order.map(viewFor), ...(stacked() ? [] : [out])];
+    // Phones are narrow, so the stops framed for a wide stage read too close: the object filled the
+    // frame. Each stop steps back along its own view direction so the object sits whole in frame.
+    const pull = stacked() ? 1.4 : 1;
+    const stops = order.map(viewFor).map(v => ({ pos: v.target.clone().add(v.pos.sub(v.target).multiplyScalar(pull)), target: v.target }));
+    const views = [home, ...stops, ...(stacked() ? [] : [out])];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
     tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
     if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');
