@@ -34,7 +34,11 @@ const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" 
 const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</a><header class="site-nav"><a class="brand" href="${root || './'}">${esc(site.name)}</a>
 <nav aria-label="Main"><a href="${root}#work">Work</a><a href="${root}#about">About</a><a href="${root}resume/">Résumé</a></nav>
 <div class="nav-actions">${toggle}<a class="button button-small" href="${site.mailto}"><span class="cta-long">${esc(site.cta)}</span><span class="cta-short">${esc(site.ctaShort)}</span></a></div></header>`;
-const footer = root => B.footer(root, `${root}resume/`);
+// Words, or letters, each in a clipped span so the scroll can raise them one after another (style.css).
+const rise = (parts, esc) => parts.map((w, i) => (w === ' ' ? ' ' : `<span class="w"><span style="--i:${i}">${esc(w)}</span></span>`)).join('');
+const words = (text, esc) => rise(text.split(/( )/), esc);
+// The name set large where the page ends, rising letter by letter as it comes into view.
+const footer = root => `<p class="wordmark" aria-hidden="true">${rise([...site.name], s => s)}</p>${B.footer(root, `${root}resume/`)}`;
 
 const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
 <span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
@@ -80,15 +84,15 @@ function home({ projects, site, esc, root }) {
 <ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
 </section></div></div>
 <main id="main">
-<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title">What I can do for you</h2>
+<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>
 ${shelves(by, root, esc)}</section>
 
 <section class="about" id="about" aria-labelledby="about-title">
 <img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">
-<div><h2 id="about-title">About me</h2>
+<div><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
 ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
-<section class="contact" id="contact"><h2>${esc(site.contactTitle)}</h2>
+<section class="contact" id="contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
 <p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
 <form class="brief" data-brief data-email="${site.email}" novalidate>
 <fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>

@@ -64,7 +64,7 @@ main{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
 /* Sky: the hero is one scene. Two light layers fade with the lamp switch:
    daylight from the window side by day, a warm lamp glow and moonlight at night. */
 .sky{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(light-dark(#f2f4ef,#0f141d),var(--day))}
-.sky::before,.sky::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity .7s ease}
+.sky::before,.sky::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity .7s ease;mask-image:linear-gradient(#000 55%,transparent)}
 .sky::before{background:radial-gradient(70% 80% at 12% 18%,rgba(255,238,205,.75),transparent 62%),radial-gradient(60% 60% at 90% 90%,rgba(214,226,236,.55),transparent 70%)}
 .sky::after{opacity:0;background:radial-gradient(38% 46% at 72% 52%,rgba(255,178,104,.2),transparent 70%),radial-gradient(50% 60% at 10% 10%,rgba(126,146,255,.12),transparent 70%)}
 :root[data-theme=dark] .sky::before{opacity:0}
@@ -382,3 +382,36 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .stepper button:hover{color:var(--cobalt)}
   .chip:hover{box-shadow:inset 0 0 0 2px var(--cobalt)}
 }
+
+/* Wordmark: the name across the foot of every page. */
+.wordmark{max-width:var(--max);margin:clamp(32px,6vw,80px) auto 0;padding:0 var(--pad);font-weight:800;font-size:clamp(3.5rem,14.5vw,13.5rem);line-height:.9;letter-spacing:-.055em;white-space:nowrap;overflow:clip}
+.w{display:inline-block;overflow:clip;padding-bottom:.08em;margin-bottom:-.08em;vertical-align:top}
+.w>span{display:inline-block}
+
+/* Below the room the page keeps moving with the scroll: headlines rise word by word out of a
+   mask, rows lift in, the shelf rules draw across, the portrait unrolls and the contact panel
+   opens out. Every animation is tied to scroll position (no JavaScript), so it runs backwards
+   on the way up and an anchor jump lands on the finished state. Browsers without scroll
+   timelines, and reduced motion, get the page as it was. */
+@supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
+  .rise{view-timeline:--rise}
+  .rise .w>span{animation:rise linear both;animation-timeline:--rise;animation-range:cover calc(4% + var(--i) * 1.6%) cover calc(26% + var(--i) * 1.6%)}
+  @keyframes rise{from{transform:translateY(105%) rotate(4deg)}to{transform:none}}
+  .wordmark{view-timeline:--mark}
+  .wordmark .w>span{animation:rise linear both;animation-timeline:--mark;animation-range:entry calc(var(--i) * 4%) entry calc(45% + var(--i) * 4%)}
+
+  .shelf{position:relative;border-top-color:transparent}
+  .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:cover 0% cover 30%}
+  @keyframes draw{from{transform:scaleX(0)}to{transform:none}}
+  .shelf-head,.shelf-note,.about>div>p,.brief>*,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 30%}
+  @keyframes lift{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:none}}
+  /* Cards on a shelf come in one after another and settle from a slight tilt. */
+  .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 12%) cover calc(32% + var(--n,0) * 5%)}
+  .shelf-items li:nth-child(2){--n:1}.shelf-items li:nth-child(3){--n:2}
+  @keyframes card{from{opacity:0;transform:translateY(90px) scale(.92) rotate(1.5deg)}to{opacity:1;transform:none}}
+
+  .portrait{animation:unroll linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
+  @keyframes unroll{from{clip-path:inset(45% -80px -80px);transform:translateY(60px) scale(1.12)}to{clip-path:inset(-80px);transform:none}}
+  .contact{animation:open linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
+  @keyframes open{from{clip-path:inset(12% 7% 0 round 28px);transform:translateY(80px)}to{clip-path:inset(0 round var(--r));transform:none}}
+}}
