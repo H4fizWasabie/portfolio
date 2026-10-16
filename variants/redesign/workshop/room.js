@@ -361,9 +361,14 @@ function startBench(stage, { root, projects }) {
   cardField('open').addEventListener('click', () => select(cardField('open').dataset.slug));
   const stepList = stage.parentElement.querySelector('[data-steps]');
   stepList.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) select(b.dataset.open); });
-  let tour = null, shown = -1, openedAt = 0;
+  let tour = null, shown = -1, openedAt = 0, late;
   function setTour() {
-    const on = !still && !reduced && !!groups[order[0]];
+    const ready = !still && !reduced && !!groups[order[0]];
+    // The tour adds about two screens of captions above the shelves and hides the chip index, so
+    // it only starts for a visitor still at the hero when the room goes live. Anyone who has
+    // scrolled on keeps the page they are using, for the rest of the visit (resize included).
+    if (ready && late === undefined) late = stage.getBoundingClientRect().bottom <= 0;
+    const on = ready && !late;
     tourBox.classList.toggle('is-on', on && !stacked());
     tourBox.classList.toggle('is-steps', on && stacked());
     if (!on) {
