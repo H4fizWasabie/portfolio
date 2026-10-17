@@ -131,7 +131,7 @@ input,select{accent-color:var(--cobalt)}
 .tour-summary{font-size:1.0625rem;max-width:34ch;margin-bottom:8px}
 /* The same veil as the headline's, mirrored, so the caption reads over the room. */
 .tour-card::before{content:"";position:absolute;inset:-40% -30% -30% -40%;z-index:-1;pointer-events:none;
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 93%,transparent) 58%,transparent)}
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 93%,transparent) 75%,transparent)}
 .tour-card,.tour-steps{display:none}
 
 /* Touch screens have no hover, so the room says it can be tapped until the first tap. */
@@ -447,17 +447,21 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 /* The room is the page. While room.js runs it keeps html[data-room] set ("wide" or "phone"; the
    head script sets it before first paint). The canvas is one fixed full-screen background and the
    page is a run of steps, about a screen tall each, with its panel at the bottom (phone) or to one side
-   (wide) and the room showing in the rest: the hero, a project per step, a service per step, About,
-   Contact. Scroll snapping (proximity, so the long contact form is free) rests each step in place and
-   room.js keys the camera to that same position, so the panel and the object it names arrive together.
+   (wide) and the room showing in the rest: the hero, a project per step, a service per step, then the
+   goodbye. About and Contact follow it as plain page. Scroll snapping (proximity, so the long contact
+   form is free) rests each step in place and room.js keys the camera to that same position, so the
+   panel and the object it names arrive together.
    Without the attribute (no JavaScript, reduced motion, no WebGL, ?still= renders) none of this applies
    and the page keeps its static layout. */
-[data-room]{--nav-h:76px;--gap:38svh;scroll-snap-type:y proximity}
+[data-room]{--nav-h:76px;--edge:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));--scrim-a:94%;--scrim-hold:75%;--scrim-fade:24px;--scrim-c:color-mix(in srgb,var(--day) var(--scrim-a),transparent);--scrim:linear-gradient(to top,transparent,var(--scrim-c) var(--scrim-fade),var(--scrim-c) var(--scrim-hold),transparent);scroll-snap-type:y proximity}
+/* Fades to nothing below the step's foot (the scrim runs --scrim-fade into the next step), so one step's meets the next with no hard edge. Phones show more room: lighter, and a project's scrim is solid for less of the screen;
+   a service shelf is taller than that and has small muted text, so its scrim is sized to its text and denser. */
 @media (max-width:640px){[data-room]{--nav-h:100px}}
+[data-room=phone]{--scrim-a:86%;--scrim-hold:30%;--scrim-fade:64px}
 [data-room] :is(.bench-copy,[data-stop]){scroll-snap-align:start}
 /* Only the panels take pointer events, so a tap between them reaches the room. */
-[data-room] :is(.tour,.sky,.bench,.bench-copy,.tour-steps,main,.work,.shelf,.about){pointer-events:none}
-[data-room] :is(canvas,.bench-panel,.step-card,.drawer,.tour-card .button,.site-nav,.work>h2,.shelf-panel,.about>div,.contact,.wordmark,.site-footer){pointer-events:auto}
+[data-room] :is(.tour,.sky,.bench,.bench-copy,.tour-steps,main,.work,.shelf){pointer-events:none}
+[data-room] :is(canvas,.bench-panel,.step-card,.drawer,.tour-card .button,.site-nav,.work>h2,.shelf-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
 [data-room] .site-nav{position:fixed;inset:0 0 auto;z-index:7;max-width:none;margin:0;background:var(--day);transition:transform .3s ease;
   padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
 /* Scrolling down tucks the bar away so it does not eat the room; scrolling up brings it back. */
@@ -489,7 +493,8 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 [data-room=wide] .step-card{display:none}
 [data-room=wide] .tour-card{display:grid;position:fixed;z-index:5}
 [data-room=phone] .tour-steps li{display:flex;align-items:flex-end;padding:0 12px 12px}
-[data-room=phone] .step-card{position:relative;width:100%;display:grid;justify-items:start;gap:4px;padding:16px 18px 18px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+[data-room=phone] .step-card{position:relative;width:100%;display:grid;justify-items:start;gap:4px;padding:0 6px}
+[data-room=phone] .step-card .tour-object{color:var(--ink)}
 [data-room=phone] .step-card .tour-title{font-size:1.75rem}
 [data-room=phone] .step-card .tour-summary{font-size:1rem;margin-bottom:6px}
 
@@ -501,49 +506,50 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibility:hidden}
 
 /* Services: "What I can do for you" is a small label that stays under the bar while the shelves pass;
-   each shelf is its own compact panel (a step, like a project) and the camera turns to its objects.
-   The cards keep the title and link; the renders would only repeat the room. */
-[data-room] main{position:relative;z-index:1;padding-bottom:0}
+   each shelf is a stop with its captions on the room, the camera turns to its objects. A caption is the
+   count, object, title, one line and an Open link, over a soft scrim (--scrim) that keeps the text readable. */
+[data-room] main{position:relative;z-index:1;max-width:none;padding:0}
 [data-room] .work{padding:0}
-[data-room] .work>h2{position:sticky;top:calc(var(--nav-h) + 8px);width:max-content;max-width:100%;height:36px;margin:0 0 -36px;padding:0 14px;
+[data-room] .work>h2{position:sticky;z-index:2;top:calc(var(--nav-h) + 8px);width:max-content;max-width:100%;height:36px;margin:0 0 -36px var(--edge);padding:0 14px;
   font-size:1rem;line-height:36px;letter-spacing:-.01em;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
 [data-room] .shelves{margin:0}
-[data-room] .shelf{position:relative;top:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 0 12px;
+[data-room] .shelf{position:relative;top:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--edge) 12px;
   background:none;box-shadow:none;border:0;grid-template-columns:1fr}
 [data-room] .shelf::before{display:none}
-[data-room] .shelf-panel{display:grid;gap:12px;padding:18px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+[data-room] .shelf-panel{display:grid;gap:12px;padding:0 18px}
+[data-room] .shelf .work-object,[data-room] .shelf .work-text>span:last-child{color:var(--ink)}
 [data-room] .shelf-head h3{font-size:1.375rem}
 [data-room] .shelf-head p{margin-top:6px;max-width:none}
 [data-room] .shelf-items{grid-template-columns:1fr;grid-auto-flow:row;grid-auto-columns:auto;overflow:visible;overscroll-behavior:auto;scroll-snap-type:none;margin:0;padding:0;gap:8px}
-[data-room] .shelf-items a{display:flex;align-items:center;justify-content:space-between;gap:12px;height:auto;min-height:56px;padding:8px 14px;background:var(--day)}
-[data-room] .shelf-items a::after{content:"\2192";font-weight:700;color:var(--cobalt)}
+[data-room] .shelf-items a{display:grid;gap:2px;height:auto;padding:0;background:none}
+[data-room] .shelf-items a::after{content:"Open \2192";justify-self:start;margin-top:8px;font-weight:700;color:var(--cobalt)}
 [data-room] .work-text{padding:0}
-[data-room] .shelf-items .work-text strong{font-size:1.0625rem}
-[data-room] .shelf-items .work-text>span:last-child{display:none}
+[data-room] .shelf-items .work-text strong{font-size:1.25rem}
 :root[data-room] .shelf-items :is(.thumb-day,.thumb-night){display:none!important}
 [data-room] .shelf-note{font-size:1rem}
 [data-room] .shelf-action{margin-top:14px}
 
-/* About: the portrait hangs in the room (a frame on the wall; the photo stays in the page for screen
-   readers) and the words are the panel. Contact is a long form, so it scrolls freely, with the room
-   showing above it where it stops. */
-[data-room] .about{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 0 12px}
-[data-room] .about>div{max-width:none;padding:18px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
-[data-room] .about p{margin-top:12px;font-size:1rem}
-[data-room] .about h2{font-size:1.6rem}
-[data-room] .portrait{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;animation:none}
-[data-room] .contact{margin:var(--gap) 0 12px;scroll-margin-top:calc(var(--gap) - 2svh);padding:clamp(22px,3vw,40px);overflow:clip;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
-[data-room=phone] .contact{padding:20px}
-/* The room is the animation now: the panels do not also fly in. */
+/* The room is the animation now: the captions do not also fly in. */
 [data-room] :is(.rise,.rise .w>span,.shelf-items li,.shelf-head,.shelf-note,.about>div>p,.contact>p,.contact){animation:none}
 [data-room] :is(.wordmark,.site-footer){position:relative;z-index:1;max-width:none;margin:0;background:var(--surface);border:0;
   padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
-[data-room] .wordmark{padding-top:clamp(24px,4vw,48px);padding-bottom:clamp(8px,1.5vw,20px)}
+/* The goodbye: the name fills the screen's foot over the room, the camera pulls back here. */
+[data-room] .wordmark{padding-top:calc(100svh - 1em);padding-bottom:clamp(8px,1.5vw,20px);background:none}
+/* The scrim is a layer behind each caption (z -1 inside its own stacking context): a screen-high fade for
+   the captions, a shorter one under the goodbye's name so the room still shows above it. */
+[data-room] :is(.shelf,.wordmark),[data-room=phone] .tour-steps li{isolation:isolate}
+[data-room=phone] .tour-steps li{position:relative}
+[data-room] .shelf::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
+[data-room=phone] .tour-steps li::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
+[data-room=phone] .shelf::after{display:none}
+[data-room=phone] .shelf-panel{position:relative;--shelf-c:color-mix(in srgb,var(--day) 94%,transparent)}
+[data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-96px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 96px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
+[data-room] .wordmark::after{content:"";position:absolute;inset:auto 0 0;height:32%;z-index:-1;background:linear-gradient(to top,color-mix(in srgb,var(--day) 92%,transparent) 80%,transparent)}
+/* About and Contact are plain page below the goodbye, on a solid ground so the room does not show through. */
+[data-room] :is(.about,.contact){background:var(--day);scroll-margin-top:var(--nav-h)}
+[data-room] .about{padding:clamp(64px,9vw,120px) var(--edge) clamp(24px,4vw,48px)}
+[data-room] .contact{margin:0;padding:clamp(28px,5vw,64px) var(--edge);border-radius:0;box-shadow:none}
 
-/* Wide: panels sit to one side and the room fills the rest. */
-[data-room=wide]{--gap:10svh}
-[data-room=wide] .shelf,[data-room=wide] .about{justify-content:center;padding:0}
-[data-room=wide] :is(.shelf-panel,.about>div){width:min(30rem,42vw)}
-[data-room=wide] .about{align-items:flex-end}
-[data-room=wide] .about>div{padding:24px}
-[data-room=wide] .contact{width:min(46vw,680px)}
+/* Wide: captions sit at the foot of their shelf, the room fills the rest. */
+[data-room=wide] .shelf{justify-content:flex-end;padding:0 var(--edge) clamp(24px,6svh,72px)}
+[data-room=wide] .shelf-panel{width:min(30rem,42vw)}

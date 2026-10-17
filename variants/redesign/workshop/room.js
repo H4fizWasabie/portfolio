@@ -50,7 +50,7 @@ function nightFader(onChange) {
     return t;
   };
 }
-const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp', portrait: 'hafiz-portrait.webp' };
+const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp' };
 // Parts of a project that sit apart from it and should not steer framing.
 const OFF_FRAME = new Set(['server']);
 // Per-view camera adjustments: distance multiplier, extra turn around the vertical axis (yaw), a
@@ -78,9 +78,7 @@ const VIEW = {
 const STOPS = {
   hero: { at: [0.2, 0.55, 0.1], yaw: 0, dist: 1.1, off: 0.15, phone: { at: [1.1, 0.45, 0.1], dist: 0.46 } },
   teach: { at: [0.4, 1.3, -2.2], yaw: -0.2, dist: 0.4, off: 0.22, phone: { dist: 0.34 } },
-  about: { at: [6.0, 1.1, -2.7], yaw: -0.45, dist: 0.5, off: -0.3, phone: { dist: 0.34 } },
-  contact: { at: [9.0, 0.9, -2.4], yaw: -0.5, dist: 0.5, off: 0.23, phone: { dist: 0.34 } },
-  end: { at: [3.4, 0.6, -0.5], yaw: -0.1, dist: 1.6, off: 0, phone: { dist: 1.2 } }
+  end: { at: [3.4, 0.6, -0.5], yaw: -0.1, dist: 1.6, off: 0, phone: { at: [0.5, 0.6, 0], dist: 1.15 } }
 };
 const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom of the screen
 const DRAWER_OFF = 0.2; // phones: an opened project sits in the top of the screen, above its sheet
@@ -292,8 +290,7 @@ function startBench(stage, { root, projects }) {
   sun.shadow.mapSize.setScalar(small ? 1024 : 3072);
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.02;
-  // Wide enough for the annex at the right-hand end of the room (the sun is far off to the left).
-  Object.assign(sun.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 1, far: 45 });
+  Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
   scene.add(sun, sun.target);
   const fill = new THREE.DirectionalLight();
   fill.position.set(8, 10, 10);
@@ -304,9 +301,7 @@ function startBench(stage, { root, projects }) {
   lamp.shadow.mapSize.setScalar(small ? 512 : 1024);
   lamp.shadow.bias = -0.0005;
   const lampGlow = new THREE.PointLight(0xffc68a, 0, 5, 1.5);
-  // The floor lamp by the armchair lights the About and Contact corners at night.
-  const lamp2 = new THREE.PointLight(0xffc68a, 0, 7, 1.4);
-  scene.add(hemi, fill, lamp, lamp.target, lampGlow, lamp2);
+  scene.add(hemi, fill, lamp, lamp.target, lampGlow);
   let tint = () => {};
   const light = t => {
     const m = mix(ROOM, t);
@@ -314,7 +309,7 @@ function startBench(stage, { root, projects }) {
     hemi.color.copy(m.sky); hemi.groundColor.copy(m.ground); hemi.intensity = m.hemi;
     sun.color.copy(m.sunColor); sun.intensity = m.sun;
     fill.color.copy(m.fillColor); fill.intensity = m.fill;
-    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow; lamp2.intensity = m.lampGlow * 2.2;
+    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow;
     tint(t, m.screen);
     nightT = t;
     dirty = true;
@@ -348,7 +343,6 @@ function startBench(stage, { root, projects }) {
     switcher.traverse(o => { if (o.isMesh && !o.userData.glow) o.material = o.material.clone(); });
     room.getObjectByName('lamp_head').getWorldPosition(lamp.position);
     lampGlow.position.copy(lamp.position).add(new THREE.Vector3(0, -0.15, 0));
-    room.getObjectByName('floorlamp_head')?.getWorldPosition(lamp2.position);
     // Night stills are dusk, so objects far from the desk lamp still read on a small card.
     light(isNight() ? (still ? 0.65 : 1) : 0);
     stage.classList.add('is-live');
@@ -394,8 +388,8 @@ function startBench(stage, { root, projects }) {
   new ResizeObserver(resize).observe(stage);
 
   // The whole page is the room. Scrolling flies the camera along one path with a stop for every
-  // [data-stop] element of the page (page.cjs): the hero, a project per screen, a service per screen,
-  // the portrait wall for About, the writing desk for Contact and a pull-back at the foot. Each stop
+  // [data-stop] element of the page (page.cjs): the hero, a project per screen, a service per screen and
+  // a pull-back at the goodbye, where the room ends; About and Contact are plain page below it. Each stop
   // names what the room should show (data-look) and is tied to the scroll position where the browser's
   // own scroll snapping rests that element (measure), so the object on the card is the one in frame.
   // Wide screens set each project's name beside the room (tour-card); on phones a card per project rides
@@ -422,9 +416,8 @@ function startBench(stage, { root, projects }) {
       const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, t.yaw);
       return { pos: target.clone().add(dir.multiplyScalar(homeDist * t.dist)), target, ox: phone ? 0 : t.off, oy: phone ? PHONE_OY : 0 };
     };
-    // The hero first, then every stop of the page in order; a tall one (the contact form) is held
-    // along its whole length, so it has a second stop at its end.
-    const els = [null, ...document.querySelectorAll('[data-stop]')].flatMap(el => (el?.hasAttribute('data-hold') ? [{ el }, { el, end: true }] : [{ el }]));
+    // The hero first, then every stop of the page in order.
+    const els = [null, ...document.querySelectorAll('[data-stop]')].map(el => ({ el }));
     const views = els.map(({ el }) => {
       const look = el ? el.dataset.look : '@hero';
       if (!el) return stop('hero');
@@ -438,12 +431,12 @@ function startBench(stage, { root, projects }) {
     measure();
   }
   // The scroll position at which each stop rests, from the page's own layout: where scroll snapping
-  // puts its element (top, less its scroll-margin), the very end for the foot.
+  // puts its element (top, less its scroll-margin).
   function measure() {
     if (!tour) return;
     const vh = innerHeight, y0 = scrollY, max = html.scrollHeight - vh;
     const top = el => el.getBoundingClientRect().top + y0;
-    const keys = tour.els.map(({ el, end }) => (!el ? 0 : el.dataset.look === '@end' ? max : end ? el.getBoundingClientRect().bottom + y0 - vh : top(el) - parseFloat(getComputedStyle(el).scrollMarginTop)));
+    const keys = tour.els.map(({ el }) => (!el ? 0 : top(el) - parseFloat(getComputedStyle(el).scrollMarginTop)));
     for (let i = 1; i < keys.length; i++) keys[i] = Math.min(Math.max(keys[i], keys[i - 1] + 1), Math.max(max, keys[i - 1] + 1));
     tour.keys = keys;
     nav && html.style.setProperty('--nav-h', `${nav.offsetHeight}px`);
