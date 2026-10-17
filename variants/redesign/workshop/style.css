@@ -490,16 +490,17 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
    head script sets it before first paint). The canvas is one fixed full-screen background and the
    page is a run of steps, about a screen tall each, with its panel at the bottom (phone) or to one side
    (wide) and the room showing in the rest: the hero, a project per step, a service per step, then the
-   goodbye. About and Contact follow it as plain page. Scroll snapping (proximity) rests each step in place and room.js keys the camera to that same position,
+   goodbye. About and Contact follow it as plain page. Scroll snapping (mandatory) rests every step in place and room.js keys the camera to that same position,
    so the panel and the object it names arrive together.
    Without the attribute (no JavaScript, reduced motion, no WebGL, ?still= renders) none of this applies
    and the page keeps its static layout. */
-[data-room]{--nav-h:76px;--edge:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));--scrim-a:94%;--scrim-hold:75%;--scrim-fade:24px;--scrim-c:color-mix(in srgb,var(--day) var(--scrim-a),transparent);--scrim:linear-gradient(to top,transparent,var(--scrim-c) var(--scrim-fade),var(--scrim-c) var(--scrim-hold),transparent);scroll-snap-type:y proximity}
+[data-room]{--nav-h:76px;--edge:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));--scrim-a:94%;--scrim-hold:75%;--scrim-fade:24px;--scrim-c:color-mix(in srgb,var(--day) var(--scrim-a),transparent);--scrim:linear-gradient(to top,transparent,var(--scrim-c) var(--scrim-fade),var(--scrim-c) var(--scrim-hold),transparent);scroll-snap-type:y mandatory}
 /* Fades to nothing below the step's foot (the scrim runs --scrim-fade into the next step), so one step's meets the next with no hard edge. Phones show more room: lighter, and a project's scrim is solid for less of the screen;
    a service shelf is taller than that and has small muted text, so its scrim is sized to its text and denser. */
 @media (max-width:640px){[data-room]{--nav-h:100px}}
 [data-room=phone]{--scrim-a:86%;--scrim-hold:30%;--scrim-fade:64px}
-[data-room] :is(.bench-copy,[data-stop]){scroll-snap-align:start}
+[data-room] :is(.bench-copy,[data-stop],.about,.contact){scroll-snap-align:start}
+[data-room] .site-footer{scroll-snap-align:end} /* mandatory snapping must still let the page reach its foot */
 /* Only the panels take pointer events, so a tap between them reaches the room. */
 [data-room] :is(.tour,.sky,.bench,.bench-copy,.tour-steps,main,.work,.shelf){pointer-events:none}
 [data-room] :is(canvas,.bench-panel,.step-card,.drawer,.tour-card .button,.site-nav,.work>h2,.shelf-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
@@ -582,6 +583,8 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 [data-room=phone] .tour-steps li{position:relative}
 [data-room] .shelf::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
 [data-room=phone] .tour-steps li::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
+/* Wide: the shelf's captions sit on the left and its objects on the right, so the scrim covers the caption column only. */
+[data-room=wide] .shelf::after{background:linear-gradient(to right,var(--scrim-c) calc(var(--edge) + 500px),transparent calc(var(--edge) + 720px))}
 [data-room=phone] .shelf::after{display:none}
 [data-room=phone] .shelf-panel{position:relative;--shelf-c:color-mix(in srgb,var(--day) 94%,transparent)}
 [data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-96px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 96px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
