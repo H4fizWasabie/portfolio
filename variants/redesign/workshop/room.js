@@ -50,12 +50,25 @@ function nightFader(onChange) {
     return t;
   };
 }
-const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp' };
+const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp', portrait: 'hafiz-portrait.webp' };
 // Parts of a project that sit apart from it and should not steer framing.
 const OFF_FRAME = new Set(['server']);
 // Per-object camera adjustments: distance multiplier and extra turn around the vertical axis.
 // The overview looks from azimuth ~0.7 rad; these turn each close-up towards the object's front.
 const VIEW = { procura: { yaw: -0.55 }, pims: { yaw: 0.45 }, 'dd-drugs-register': { yaw: -0.3, pull: 1.1 }, theoses: { yaw: -0.35 }, map: { yaw: -0.5, dist: 1.15 }, yen: { yaw: -0.2, dist: 1.3 } };
+// Where the camera goes once the projects are done: a wide shot of the room for the services, the
+// framed portrait, the writing desk, and a pull-back for the footer. Each is a look-at point, a
+// turn around the vertical axis, a distance (in home-camera distances) and where the page's panel
+// leaves room for it: off is how far the picture is pushed, as a share of the screen's width
+// (wide) or height (phone), so the subject sits in the part of the screen the panel does not cover.
+const STOPS = {
+  services: { at: [0.4, 0.6, -0.4], yaw: 0, dist: 1.1, off: [0.26, 0.2], phone: { at: [1.0, 0.5, -0.4], dist: 0.95 } },
+  servicesEnd: { at: [3.2, 0.6, -0.4], yaw: -0.25, dist: 1.2, off: [0.26, 0.2], phone: { at: [3.6, 0.5, -0.8], dist: 0.95 } },
+  about: { at: [6.0, 1.1, -2.7], yaw: -0.45, dist: 0.5, off: [-0.3, 0.2], phone: { dist: 0.34 } },
+  contact: { at: [9.0, 0.9, -2.4], yaw: -0.5, dist: 0.5, off: [0.23, 0.2], phone: { dist: 0.34 } },
+  footer: { at: [3.4, 0.6, -0.5], yaw: -0.1, dist: 1.6, off: [0, 0.17], phone: { dist: 1.2, off: [0, 0.2] } }
+};
+const DRAWER_OFF = 0.2; // phones: an opened project sits in the top of the screen, above its sheet
 
 if (still) document.documentElement.classList.add('still');
 
@@ -64,7 +77,8 @@ const tag = (o, prefix) => [o, o.parent].some(p => p && p.name.startsWith(prefix
 
 function renderer() {
   const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: !!still });
-  r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  // The room is a full-screen background, so phones render it at a lighter pixel ratio.
+  r.setPixelRatio(Math.min(devicePixelRatio, matchMedia('(pointer: coarse)').matches ? 1.5 : 2));
   r.shadowMap.enabled = true;
   r.shadowMap.type = THREE.PCFShadowMap;
   r.outputColorSpace = THREE.SRGBColorSpace;
@@ -244,7 +258,8 @@ function startBench(stage, { root, projects }) {
   const bySlug = Object.fromEntries(projects.map(p => [p.slug, p]));
   const order = projects.map(p => p.slug);
   let r;
-  try { r = renderer(); } catch { return; } // No WebGL: poster image and index links remain.
+  const noRoom = () => document.documentElement.removeAttribute('data-room'); // back to the static page
+  try { r = renderer(); } catch { noRoom(); return; } // No WebGL: poster image and index links remain.
   const canvas = r.domElement;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -259,10 +274,11 @@ function startBench(stage, { root, projects }) {
   sun.castShadow = true;
   // Phones and touch screens get smaller shadow maps: the room stays light on weaker GPUs.
   const small = matchMedia('(pointer: coarse)').matches || innerWidth < 700;
-  sun.shadow.mapSize.setScalar(small ? 1024 : 2048);
+  sun.shadow.mapSize.setScalar(small ? 1024 : 3072);
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.02;
-  Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
+  // Wide enough for the annex at the right-hand end of the room (the sun is far off to the left).
+  Object.assign(sun.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 1, far: 45 });
   scene.add(sun, sun.target);
   const fill = new THREE.DirectionalLight();
   fill.position.set(8, 10, 10);
@@ -273,7 +289,9 @@ function startBench(stage, { root, projects }) {
   lamp.shadow.mapSize.setScalar(small ? 512 : 1024);
   lamp.shadow.bias = -0.0005;
   const lampGlow = new THREE.PointLight(0xffc68a, 0, 5, 1.5);
-  scene.add(hemi, fill, lamp, lamp.target, lampGlow);
+  // The floor lamp by the armchair lights the About and Contact corners at night.
+  const lamp2 = new THREE.PointLight(0xffc68a, 0, 7, 1.4);
+  scene.add(hemi, fill, lamp, lamp.target, lampGlow, lamp2);
   let tint = () => {};
   const light = t => {
     const m = mix(ROOM, t);
@@ -281,7 +299,7 @@ function startBench(stage, { root, projects }) {
     hemi.color.copy(m.sky); hemi.groundColor.copy(m.ground); hemi.intensity = m.hemi;
     sun.color.copy(m.sunColor); sun.intensity = m.sun;
     fill.color.copy(m.fillColor); fill.intensity = m.fill;
-    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow;
+    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow; lamp2.intensity = m.lampGlow * 2.2;
     tint(t, m.screen);
     nightT = t;
     dirty = true;
@@ -314,6 +332,7 @@ function startBench(stage, { root, projects }) {
     switcher.traverse(o => { if (o.isMesh && !o.userData.glow) o.material = o.material.clone(); });
     room.getObjectByName('lamp_head').getWorldPosition(lamp.position);
     lampGlow.position.copy(lamp.position).add(new THREE.Vector3(0, -0.15, 0));
+    room.getObjectByName('floorlamp_head')?.getWorldPosition(lamp2.position);
     // Night stills are dusk, so objects far from the desk lamp still read on a small card.
     light(isNight() ? (still ? 0.65 : 1) : 0);
     stage.classList.add('is-live');
@@ -326,14 +345,18 @@ function startBench(stage, { root, projects }) {
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
     dirty = true;
-  }).catch(err => console.warn('Workshop model failed to load; showing the still image.', err));
+  }).catch(err => { noRoom(); console.warn('Workshop model failed to load; showing the still image.', err); });
 
   // On wide screens the hero is full-bleed: the room is shifted right of the headline,
-  // and slides back to centre while a project is open.
-  const shiftFor = width => (!still && !stacked() ? width * 0.15 : 0);
-  let size = [1, 1], shift = 0, shiftGoal = 0;
+  // and slides back to centre while a project is open. During the tour every stop sets its own push.
+  const shiftFor = width => ({ x: !still && !stacked() ? width * 0.15 : 0, y: 0 });
+  let size = [1, 1], fitFov = 30;
+  const shift = { x: 0, y: 0 }, shiftGoal = { x: 0, y: 0 };
+  const setGoal = (g, jump) => { Object.assign(shiftGoal, g); if (jump) Object.assign(shift, g); };
+  // An opened project sits centred; on phones it is lifted into the top of the screen, above its sheet.
+  const openShift = () => ({ x: 0, y: tour && stacked() ? DRAWER_OFF * size[1] : 0 });
   function frame() {
-    camera.setViewOffset(size[0], size[1], -shift, 0, size[0], size[1]);
+    camera.setViewOffset(size[0], size[1], -shift.x, shift.y, size[0], size[1]);
     dirty = true;
   }
   function resize() {
@@ -343,79 +366,102 @@ function startBench(stage, { root, projects }) {
     size = [width, height];
     camera.aspect = width / height;
     // Narrow stages keep the whole room in frame; the full-bleed hero leaves air around it.
-    // Stacked stages are only a little wider than tall, so they need more than the stills' 30;
-    // 31 looked fine headless but read too close on a real phone, tour stops included.
-    camera.fov = width / height < 1.15 ? 38 : still ? 30 : stacked() ? 36 : 34;
-    shiftGoal = active ? 0 : shiftFor(width);
-    if (!flight) shift = shiftGoal;
+    // Stacked screens (phones) keep one lens however tall the stage is, 1.16 stage-widths of focal
+    // length: the room is a full-screen background there with the subject in its upper part, and
+    // every object keeps the size it had when the stage was a short strip above the copy.
+    camera.fov = still ? (width / height < 1.15 ? 38 : 30) : stacked() ? 2 * THREE.MathUtils.radToDeg(Math.atan(height / 2 / (width * 1.164))) : width / height < 1.15 ? 38 : 34;
+    fitFov = stacked() ? 36 : camera.fov; // what viewFor frames objects for
+    if (!tour) setGoal(active ? openShift() : shiftFor(width), !flight);
     frame();
     setTour();
   }
   new ResizeObserver(resize).observe(stage);
 
-  // Scrolling flies the camera through the room, resting at each project, then pulling back
-  // before the page carries on. Wide screens pin the whole hero and set each project's name
-  // beside it; stacked screens (phones) pin the room at the top while a caption per project
-  // scrolls up beneath it. Reduced motion and stills keep the bench as it was.
-  const tourBox = document.querySelector('[data-tour]');
+  // The whole page is the room. Scrolling flies the camera along one path: the hero, each project
+  // (resting at each), a wide shot for the services, the portrait wall for About, the writing desk
+  // for Contact and a pull-back at the foot. Each stop is tied to where its content sits on the page
+  // (measure), so the camera arrives as the content does. Wide screens set each project's name beside
+  // the room (tour-card); on phones a card per project rides the bottom of the screen (page.cjs).
+  // Reduced motion, ?still= and no WebGL keep the static page.
+  const html = document.documentElement;
   const card = stage.parentElement.querySelector('[data-tour-card]');
   const cardField = name => card.querySelector(`[data-t=${name}]`);
   cardField('open').addEventListener('click', () => select(cardField('open').dataset.slug));
   const stepList = stage.parentElement.querySelector('[data-steps]');
   stepList.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) select(b.dataset.open); });
-  let tour = null, shown = -1, openedAt = 0, late;
+  const nav = document.querySelector('.site-nav');
+  let tour = null, shown = -1, openedAt = 0, snap = true, lifeGap = 33;
+  const homeDist = home.pos.distanceTo(home.target);
   function setTour() {
-    const ready = !still && !reduced && !!groups[order[0]];
-    // The tour adds about two screens of captions above the shelves and hides the chip index, so
-    // it only starts for a visitor still at the hero when the room goes live. Anyone who has
-    // scrolled on keeps the page they are using, for the rest of the visit (resize included).
-    if (ready && late === undefined) late = stage.getBoundingClientRect().bottom <= 0;
-    const on = ready && !late;
-    tourBox.classList.toggle('is-on', on && !stacked());
-    tourBox.classList.toggle('is-steps', on && stacked());
-    if (!on) {
-      if (tour) { tour = null; card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); stage.classList.remove('is-pinned'); if (!active) fly(home); }
-      return;
-    }
+    // Not while the room is still, reduced or loading (the head script has the layout ready).
+    if (still || reduced || !groups[order[0]]) return;
+    const phone = stacked();
+    html.dataset.room = phone ? 'phone' : 'wide';
     history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
-    const out = { pos: home.pos.clone().sub(home.target).multiplyScalar(1.3).add(home.target), target: home.target };
-    // On phones the room is pinned only while the captions pass, so the tour ends at the last stop
-    // and the pinned room is released straight into the shelves; wide screens pull back first.
-    const views = [home, ...order.map(viewFor), ...(stacked() ? [] : [out])];
+    const stop = name => {
+      const t = { ...STOPS[name], ...(phone && STOPS[name].phone) };
+      const target = new THREE.Vector3(...t.at);
+      const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, t.yaw);
+      return { pos: target.clone().add(dir.multiplyScalar(homeDist * t.dist)), target, ox: phone ? 0 : t.off[0], oy: phone ? t.off[1] : 0 };
+    };
+    const views = [
+      { pos: home.target.clone().add(home.pos.clone().sub(home.target).multiplyScalar(phone ? 0.9 : 1.1)), target: home.target, ox: phone ? 0 : 0.15, oy: phone ? 0.2 : -0.04 },
+      ...order.map(slug => ({ ...viewFor(slug), ox: 0, oy: phone ? 0.2 : 0 })),
+      ...Object.keys(STOPS).map(stop)
+    ];
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
-    tour = { pos: curve('pos'), target: curve('target'), n: views.length - 1, steps: stacked() };
-    if (tour.steps) { card.classList.add('is-away'); stage.closest('.bench').classList.remove('is-touring'); } else stage.classList.remove('is-pinned');
-    tourBox.style.setProperty('--segments', tour.n);
+    tour = { pos: curve('pos'), target: curve('target'), views, n: views.length - 1, phone, drift: order.length + 1, keys: tour?.keys };
+    if (phone) card.classList.add('is-away');
+    measure();
   }
-  // The camera rests at each stop for the outer part of a segment and travels in the middle.
+  // Scroll position at which the camera rests on each stop, from the page's own layout: a project's
+  // card (phone) or its stretch of scrolling (wide), then the panels. Services also has an end, so the
+  // camera drifts along the shelves while they pass.
+  function measure() {
+    if (!tour) return;
+    const vh = innerHeight, y0 = scrollY;
+    const top = el => el.getBoundingClientRect().top + y0, bottom = el => el.getBoundingClientRect().bottom + y0;
+    const mid = el => (top(el) + bottom(el)) / 2 - vh / 2;
+    const [work, about, contact] = ['work', 'about', 'contact'].map(id => document.getElementById(id));
+    const keys = [0, ...[...stepList.children].map(li => (tour.phone ? top(li) - 0.3 * vh : mid(li)))];
+    keys.push(...(tour.phone
+      ? [top(work) - 0.55 * vh, bottom(work) - 0.45 * vh, top(about) - 0.55 * vh, top(contact) - 0.55 * vh]
+      : [top(work) - 0.45 * vh, bottom(work) - 0.55 * vh, mid(about), mid(contact)]), html.scrollHeight - vh);
+    for (let i = 1; i < keys.length; i++) keys[i] = Math.max(keys[i], keys[i - 1] + 1);
+    tour.keys = keys;
+    nav && html.style.setProperty('--nav-h', `${nav.offsetHeight}px`);
+    snap = true;
+  }
+  new ResizeObserver(measure).observe(document.body);
+  addEventListener('load', measure);
+  document.fonts?.ready.then(measure);
+  // The camera rests at each stop for the outer part of a segment and travels in the middle
+  // (but drifts steadily where the content is one long panel).
   const hold = f => THREE.MathUtils.smoothstep(f, 0.3, 0.7);
   const tourPos = new THREE.Vector3(), tourAim = new THREE.Vector3();
   function stepTour(dt) {
-    let s;
-    if (tour.steps) {
-      // A project's stop is reached when its caption's middle crosses the reading line. The camera
-      // rests for the middle 60% of a caption's travel (hold), so the line sits low enough that the
-      // caption's top, with its counter, is still clear of the pinned room at the end of that rest.
-      const list = stepList.getBoundingClientRect(), row = stepList.firstElementChild.offsetHeight;
-      s = THREE.MathUtils.clamp((stage.offsetHeight + row * 0.8 + 8 - list.top) / row + 0.5, 0, tour.n);
-      stage.classList.toggle('is-pinned', stage.getBoundingClientRect().top < 1);
-    } else {
-      const box = tourBox.getBoundingClientRect();
-      s = THREE.MathUtils.clamp(-box.top / (box.height - innerHeight), 0, 1) * tour.n;
-    }
-    const i = Math.min(Math.floor(s), tour.n - 1), u = i + hold(s - i);
-    tour.pos.getPoint(u / tour.n, tourPos);
-    tour.target.getPoint(u / tour.n, tourAim);
-    shiftGoal = shiftFor(size[0]) * Math.max(0, 1 - u);
+    const { keys, views, n } = tour;
+    let i = 0;
+    while (i < n - 1 && scrollY >= keys[i + 1]) i++;
+    const f = THREE.MathUtils.clamp((scrollY - keys[i]) / (keys[i + 1] - keys[i]), 0, 1);
+    const g = i === tour.drift ? f : hold(f);
+    tour.pos.getPoint((i + g) / n, tourPos);
+    tour.target.getPoint((i + g) / n, tourAim);
+    const from = views[i], to = views[i + 1];
+    setGoal({ x: (from.ox + (to.ox - from.ox) * g) * size[0], y: (from.oy + (to.oy - from.oy) * g) * size[1] }, snap);
     // Easing towards the path, not jumping onto it, is what makes the scroll feel filmed.
-    const a = 1 - Math.pow(0.9, dt / 16.7);
+    const a = snap ? 1 : 1 - Math.pow(0.9, dt / 16.7);
+    if (snap) frame();
+    snap = false;
     const moving = camera.position.distanceToSquared(tourPos) + controls.target.distanceToSquared(tourAim) > 1e-6;
     camera.position.lerp(tourPos, a);
     controls.target.lerp(tourAim, a);
     camera.lookAt(controls.target);
-    // The caption names the project the camera is resting on; it changes while hidden.
+    const s = i + f;
+    lifeGap = s > order.length + 0.6 ? 120 : 33; // the room is mostly behind panels by now: it idles
     hint.hidden = s > 0.2;
-    if (tour.steps) return moving;
+    if (tour.phone) return moving;
+    // The caption names the project the camera is resting on; it changes while hidden.
     const near = Math.round(s), p = bySlug[order[near - 1]];
     if (p && near !== shown) {
       shown = near;
@@ -530,7 +576,7 @@ function startBench(stage, { root, projects }) {
     const wide = !still && !stacked();
     // Wide screens: shift the object left of the drawer. Stacked: the drawer sits below the room.
     const target = center.clone().add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(wide ? size * 0.35 : 0));
-    const fit = size / 2 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2); // distance that fits the object
+    const fit = size / 2 / Math.sin(THREE.MathUtils.degToRad(fitFov) / 2); // distance that fits the object
     // Phones are narrow, so a close-up framed for a wide stage reads too close there: step back so
     // the object sits whole in frame, for tour stops and opened projects alike. A view whose
     // step-back would pass behind something in front of it sets its own pull in VIEW.
@@ -553,6 +599,11 @@ function startBench(stage, { root, projects }) {
   drawer.addEventListener('touchend', sheetTouch(false), { passive: true });
   drawer.addEventListener('touchcancel', sheetTouch(false), { passive: true });
   addEventListener('scroll', () => { if (tour && active && performance.now() > onSheet && Math.abs(scrollY - openedAt) > 160) back(); }, { passive: true });
+  let lastY = scrollY;
+  addEventListener('scroll', () => {
+    const y = scrollY;
+    if (Math.abs(y - lastY) > 6) { html.classList.toggle('nav-away', y > lastY && y > 120); lastY = y; }
+  }, { passive: true });
   const f = name => drawer.querySelector(`[data-f=${name}]`);
   const steps = [...drawer.querySelectorAll('[data-step]')];
   let lastTrigger = null;
@@ -571,8 +622,9 @@ function startBench(stage, { root, projects }) {
     highlight(hovered, false);
     tip.hidden = hint.hidden = true;
     active = slug;
-    shiftGoal = 0;
+    setGoal(openShift());
     openedAt = scrollY;
+    html.classList.add('is-inside');
     card.classList.add('is-away');
     stage.closest('.bench').classList.add('is-inside');
     fly(slug);
@@ -610,7 +662,8 @@ function startBench(stage, { root, projects }) {
     pushed = false;
     highlight(active, false);
     active = null;
-    shiftGoal = shiftFor(size[0]);
+    if (!tour) setGoal(shiftFor(size[0]));
+    html.classList.remove('is-inside');
     stage.closest('.bench').classList.remove('is-inside');
     drawer.hidden = true;
     stage.classList.remove('has-drawer');
@@ -651,8 +704,9 @@ function startBench(stage, { root, projects }) {
       dirty = true;
       if (t === 1) flight = null;
     }
-    if (shift !== shiftGoal) {
-      shift = reduced || Math.abs(shiftGoal - shift) < 0.5 ? shiftGoal : shift + (shiftGoal - shift) * 0.08;
+    if (shift.x !== shiftGoal.x || shift.y !== shiftGoal.y) {
+      if (reduced || (Math.abs(shiftGoal.x - shift.x) < 0.5 && Math.abs(shiftGoal.y - shift.y) < 0.5)) Object.assign(shift, shiftGoal);
+      else { shift.x += (shiftGoal.x - shift.x) * 0.08; shift.y += (shiftGoal.y - shift.y) * 0.08; }
       frame();
     }
     const dt = Math.min(64, lastNow ? now - lastNow : 16);
@@ -671,7 +725,7 @@ function startBench(stage, { root, projects }) {
       moved = true;
     }
     // Ambient life and anything that keeps moving while open, at about 30fps.
-    if (life && !document.hidden && now - lastAmbient > 33) {
+    if (life && !document.hidden && now - lastAmbient > lifeGap) {
       lastAmbient = now;
       life(now, nightT);
       for (const slug of LIVELY) if (openers[slug]) openers[slug](easeInOut(open[slug]), now);

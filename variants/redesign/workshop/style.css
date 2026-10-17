@@ -84,10 +84,10 @@ input,select{accent-color:var(--cobalt)}
 /* A veil keeps the copy readable where the back wall of the room reaches behind it. */
 .bench::after{content:"";position:absolute;inset:-90px 0 0;pointer-events:none;background:radial-gradient(62% 85% at 6% 55%,color-mix(in srgb,var(--day) 88%,transparent) 30%,transparent 100%);transition:opacity .4s}
 .bench-copy{position:relative;z-index:1;width:100%;max-width:var(--max);margin:0 auto;padding:clamp(24px,5vh,64px) var(--pad);pointer-events:none;transition:opacity .35s ease,visibility .35s}
-.bench-copy>*{pointer-events:auto;max-width:31rem}
+.bench-panel{pointer-events:auto;max-width:31rem}
 .bench.is-inside .bench-copy,.bench.is-inside::after,.bench.is-touring .bench-copy,.bench.is-touring::after{opacity:0;visibility:hidden}
 .bench-copy h1{font-size:clamp(2.2rem,3.6vw,3.4rem);max-width:15ch}
-.bench-copy>p:not(.actions){margin-top:20px;font-size:1.1875rem;color:var(--muted);max-width:40ch}
+.bench-panel>p:not(.actions){margin-top:20px;font-size:1.1875rem;color:var(--muted);max-width:40ch}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:28px}
 .bench-index{margin-top:clamp(28px,5vh,48px)}
 .bench-index p{font-size:.9375rem;color:var(--muted)}
@@ -117,11 +117,9 @@ input,select{accent-color:var(--cobalt)}
 .drawer-nav button+button{justify-items:end;text-align:right}
 .drawer-nav button span{color:var(--ink);font-size:.9375rem}
 
-/* Tour (wide screens, set by room.js): the hero pins while the scroll flies the camera
-   through the room. Each stop's name is set large on the scene, the way a film titles a shot. */
-.tour.is-on{height:calc(100svh + var(--segments) * 70svh)}
-.tour.is-on>.sky{position:sticky;top:0;height:100svh}
-.tour:not(.is-on) .tour-card{display:none}
+/* Tour captions and cards (the page is in the room: see "The room is the page" below). Each
+   stop's name is set large on the scene on wide screens, the way a film titles a shot; on phones a
+   card per project rides the bottom of the screen. */
 .drawer{overscroll-behavior:contain}
 .tour-card{position:absolute;z-index:2;right:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));bottom:clamp(40px,12vh,120px);width:min(460px,38%);
   display:grid;justify-items:start;gap:10px;transition:opacity .45s ease,transform .45s cubic-bezier(.2,.9,.3,1),visibility .45s}
@@ -134,18 +132,7 @@ input,select{accent-color:var(--cobalt)}
 /* The same veil as the headline's, mirrored, so the caption reads over the room. */
 .tour-card::before{content:"";position:absolute;inset:-40% -30% -30% -40%;z-index:-1;pointer-events:none;
   background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 93%,transparent) 58%,transparent)}
-
-/* Phone tour (room.js sets .is-steps on stacked screens): the room pins at the top and one
-   caption per project scrolls up beneath it; an opened project is a sheet over the captions. */
-.tour-steps{display:none}
-/* Short stops keep the page moving. Rows are as tall as the tallest, since room.js reads one row's height; the chip index is the no-tour path's way in, so the tour hides it. */
-.tour.is-steps .tour-steps{display:grid;grid-auto-rows:1fr;list-style:none;margin:0;padding:0 var(--pad)}
-.tour-steps li{min-height:36svh;display:grid;align-content:start;justify-items:start;gap:8px;padding-top:2svh}
-.tour.is-steps .bench-index{display:none}
-.tour.is-steps .bench-stage{position:sticky;top:0;z-index:3}
-.tour.is-steps .bench-stage.is-pinned{background:var(--day);box-shadow:0 14px 24px -18px light-dark(rgba(40,52,44,.45),rgba(0,0,0,.8))}
-.tour.is-steps .bench.is-inside .bench-copy{display:block}
-.tour.is-steps .drawer{position:fixed;inset:auto 0 0;z-index:4;width:auto;max-height:58svh;margin:0;border-radius:var(--r) var(--r) 0 0}
+.tour-card,.tour-steps{display:none}
 
 /* Touch screens have no hover, so the room says it can be tapped until the first tap. */
 .bench-hint{position:absolute;left:50%;bottom:10px;z-index:2;transform:translateX(-50%);display:flex;align-items:center;gap:8px;pointer-events:none;
@@ -456,3 +443,74 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .contact{animation:settle linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
   @keyframes settle{from{border-radius:48px;transform:translateY(80px)}to{border-radius:var(--r);transform:none}}
 }}
+
+/* The room is the page. While room.js runs it keeps html[data-room] set ("wide" or "phone"; the
+   head script sets it before first paint). The canvas is one fixed full-screen background and every
+   section is a solid panel over it; the camera follows the scroll through the room: the hero, each
+   project, services, about, contact, the footer. The panels leave part of the room showing: beside
+   them on wide screens, above them on phones. Without the attribute (no JavaScript, reduced motion,
+   no WebGL, ?still= renders) none of this applies and the page keeps its static layout. */
+[data-room]{--nav-h:76px;scroll-padding-top:calc(var(--nav-h) + 12px)}
+@media (max-width:640px){[data-room]{--nav-h:100px}}
+[data-room] :is(.tour,.sky,.bench,.bench-copy,.tour-steps,main){pointer-events:none}
+[data-room] :is(.bench-panel,.step-card,.drawer,.tour-card .button,.site-nav,main>section,.wordmark,.site-footer){pointer-events:auto}
+[data-room] .site-nav{position:fixed;inset:0 0 auto;z-index:7;max-width:none;margin:0;background:var(--day);transition:transform .3s ease;
+  padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
+/* Scrolling down tucks the bar away so it does not eat the room; scrolling up brings it back. */
+[data-room].nav-away .site-nav:not(:focus-within){transform:translateY(-100%)}
+[data-room] .sky{position:static;isolation:auto;overflow:visible;background:none}
+[data-room] .sky::before,[data-room] .sky::after{display:none}
+[data-room] .bench{display:block;min-height:0}
+[data-room] .bench-stage{position:fixed;inset:0 0 auto;height:100lvh;z-index:0;
+  background:radial-gradient(70% 80% at 12% 18%,light-dark(rgba(255,238,205,.75),rgba(126,146,255,.12)),transparent 62%),
+    radial-gradient(60% 60% at 90% 90%,light-dark(rgba(214,226,236,.55),rgba(255,178,104,.14)),transparent 70%),
+    linear-gradient(light-dark(#f2f4ef,#0f141d),var(--day))}
+[data-room=phone] .bench-poster{object-position:50% 20%}
+[data-room=wide] .bench::after{display:block;inset:-90px 0 auto;height:calc(100svh + 90px)}
+
+/* Hero: the headline panel. Wide: copy on the left over a veil. Phone: a solid card at the bottom. */
+[data-room] .bench-copy{z-index:1;min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-top:calc(var(--nav-h) + clamp(8px,3vh,40px))}
+[data-room=phone] .bench-copy{justify-content:flex-end;padding:var(--nav-h) 12px 12px}
+[data-room=phone] .bench-panel{max-width:none;width:100%;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 18px 20px}
+[data-room=phone] .bench-panel>p:not(.actions){margin-top:12px;font-size:1.0625rem}
+[data-room=phone] .actions{margin-top:18px}
+[data-room=phone] .bench-index{display:none}
+[data-room=phone] .bench-hint{bottom:auto;top:calc(var(--nav-h) + 8px)}
+
+/* One stop per project. Wide: just the scroll distance, the large caption names the stop.
+   Phone: a card rides the bottom of the screen while the camera rests on its object. */
+[data-room] .tour-steps{display:block;list-style:none;margin:0;padding:0}
+[data-room=wide] .tour-steps li{height:70svh}
+[data-room=wide] .step-card{display:none}
+[data-room=wide] .tour-card{display:grid;position:fixed;z-index:5}
+[data-room=phone] .tour-steps li{height:100svh;display:flex;align-items:flex-end;padding:0 12px}
+[data-room=phone] .step-card{position:sticky;bottom:12px;width:100%;display:grid;justify-items:start;gap:6px;padding:18px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+[data-room=phone] .step-card .tour-title{font-size:1.9rem}
+[data-room=phone] .step-card .tour-summary{font-size:1rem;margin-bottom:6px}
+
+/* An opened project: the sheet floats over the room, everything else steps aside. */
+[data-room] .drawer{position:fixed;z-index:6;margin:0}
+[data-room=wide] .drawer{top:50%;max-height:calc(100svh - var(--nav-h) - 32px)}
+[data-room=phone] .drawer{inset:auto 0 0;width:auto;max-height:58svh;transform:none;border-radius:var(--r) var(--r) 0 0;animation-name:sheet}
+[data-room] .bench.is-inside .bench-copy{display:flex} /* keeps its height: the page must not move when a project opens */
+html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibility:hidden}
+
+/* Sections: solid panels, never wider than the share of the screen the room can spare. */
+[data-room] main{position:relative;z-index:1;padding-bottom:45svh}
+[data-room] :is(.work,.about,.contact){background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:clamp(22px,3vw,40px);margin:40svh 0 0;overflow:clip}
+[data-room=wide] .work{width:min(56vw,880px)}
+[data-room=wide] .about{width:min(44vw,600px);margin-left:auto}
+[data-room=wide] .contact{width:min(54vw,800px)}
+[data-room=phone] main{padding-inline:12px}
+[data-room=phone] :is(.work,.about,.contact){margin-top:55svh;padding:20px}
+/* The portrait hangs in the room (a frame on the wall); the photo stays in the page for screen readers. */
+[data-room] .about{grid-template-columns:1fr}
+[data-room] .portrait{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;animation:none}
+[data-room] .shelves{margin-top:8px}
+[data-room] .shelf{position:relative;top:auto;min-height:0;background:none;box-shadow:none;grid-template-columns:1fr;padding:22px 0}
+[data-room=wide] .shelf-items{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+/* The room is the animation now: the panels do not also fly in. */
+[data-room] :is(.rise,.shelf-items li,.shelf-head,.shelf-note,.about>div>p,.contact>p,.contact){animation:none}
+[data-room] :is(.wordmark,.site-footer){position:relative;z-index:1;max-width:none;margin:0;background:var(--surface);border:0;
+  padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
+[data-room] .wordmark{padding-top:clamp(24px,4vw,48px);padding-bottom:clamp(8px,1.5vw,20px)}

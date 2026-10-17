@@ -28,6 +28,10 @@ const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89l
 // Sets day or night before first paint: stored choice, else the device setting.
 // Stills are day unless render-stills.cjs asks for night.
 const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
+// The whole homepage sits in the room: wide or phone layout, chosen before first paint so nothing
+// jumps when the room loads. room.js keeps it current and removes it if the room cannot start;
+// without JavaScript, with reduced motion or in ?still= renders the page keeps its static layout.
+const roomScript = `<script>(function(){if(/[?&]still=/.test(location.search)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.dataset.room=matchMedia('(max-width: 899px), (orientation: portrait)').matches?'phone':'wide'})()</script>`;
 const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>Night</button>';
 // Phones keep a short contact button in the bar, since the hero's button sits below the room;
 // the links drop to a second row there (style.css), so nothing has to be hidden.
@@ -50,12 +54,13 @@ const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(
 const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
 ${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
 
-// Phones: the room pins at the top and these captions scroll up beneath it, one stop each
-// (room.js flies the camera to whichever is passing). Shown only while the tour runs.
+// One stop per project. Phones: each card rides the bottom of the screen over the room while the
+// camera rests on its object (room.js). Wide screens: these are only the scroll distance, and the
+// large caption (tour-card) shows the name instead. Shown only while the room is the background.
 const two = n => String(n).padStart(2, '0');
-const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
+const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><div class="step-card"><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
 <p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
-<button class="button" type="button" data-open="${p.slug}">Open the project</button></li>`).join('')}</ol>`;
+<button class="button" type="button" data-open="${p.slug}">Open the project</button></div></li>`).join('')}</ol>`;
 
 // Day and night renders of the same object; the theme shows one (the hidden one is never fetched).
 const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thumb${v || '-day'}" src="${root}static/thumb-${p.slug}${v}.webp" alt="" width="640" height="480" ${attrs}>`).join('');
@@ -68,7 +73,7 @@ function home({ projects, site, esc, root }) {
     disclosure: p.disclosure, steps: p.workflow
   }));
   return `${B.head({ title: site.title, description: site.description, root, fonts,
-    route: '/', extra: `${themeScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
+    route: '/', extra: `${themeScript}${roomScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
 <body>
 <div class="tour" data-tour><div class="sky">${nav(root, site, esc)}
 <section class="bench">
@@ -85,10 +90,10 @@ function home({ projects, site, esc, root }) {
 <div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
 <div class="tour-card is-away" data-tour-card><p class="tour-count" data-t="count"></p><p class="tour-object" data-t="object"></p>
 <p class="tour-title" data-t="title"></p><p class="tour-summary" data-t="summary"></p><button class="button" type="button" data-t="open">Open the project</button></div>
-<div class="bench-copy"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
+<div class="bench-copy"><div class="bench-panel"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="#contact">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
-<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
+<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
 ${steps(projects, esc)}</section></div></div>
 <main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>

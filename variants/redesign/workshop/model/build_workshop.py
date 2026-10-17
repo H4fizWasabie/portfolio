@@ -12,6 +12,7 @@
 import math
 import sys
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -44,12 +45,18 @@ def mat(hexcolor, rough=0.85, metal=0.0, alpha=1.0, emit=0.0):
     return m
 
 
-def finish(o, material, parent, bevel, cuts=0):
+def finish(o, material, parent, bevel, cuts=0, cull=()):
     if cuts:
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.subdivide(number_cuts=cuts)
         bpy.ops.object.mode_set(mode='OBJECT')
+    if cull:  # faces the camera can never see (it stays in front of the room) are not shipped
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if any(f.normal.dot(Vector(n)) > 0.9 for n in cull)], context='FACES')
+        bm.to_mesh(o.data)
+        bm.free()
     o.data.materials.append(material)
     if bevel:
         mod = o.modifiers.new('bevel', 'BEVEL')
@@ -65,13 +72,13 @@ def M(spec):
     return spec if isinstance(spec, bpy.types.Material) else mat(spec)
 
 
-def box(name, size, loc, material, parent=None, rot=(0, 0, 0), bevel=0.015, cuts=0):
+def box(name, size, loc, material, parent=None, rot=(0, 0, 0), bevel=0.015, cuts=0, cull=()):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc, rotation=rot)
     o = bpy.context.object
     o.name = name
     o.scale = size
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    return finish(o, M(material), parent, bevel, cuts)
+    return finish(o, M(material), parent, bevel, cuts, cull)
 
 
 def cyl(name, r, depth, loc, material, parent=None, rot=(0, 0, 0), verts=32, bevel=0.008, r2=None):
@@ -93,8 +100,8 @@ def rod(name, a, b, r, material, parent=None, verts=12):
     return o
 
 
-def sphere(name, r, loc, material, parent=None, scale=(1, 1, 1), rot=(0, 0, 0)):
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=loc, rotation=rot, segments=24, ring_count=12)
+def sphere(name, r, loc, material, parent=None, scale=(1, 1, 1), rot=(0, 0, 0), seg=(24, 12)):
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=loc, rotation=rot, segments=seg[0], ring_count=seg[1])
     o = bpy.context.object
     o.name = name
     o.scale = scale
@@ -136,12 +143,13 @@ LABEL = 'f7f6f1'
 
 # Room: floor, back wall and a left wall with a window.
 room = group('room', (0, 0, 0))
-box('floor', (8.4, 6.4, 0.2), (0, 0, -0.1), FLOOR, room, bevel=0, cuts=30)
-box('wall_back', (8.4, 0.2, 3.6), (0, 3.1, 1.8), WALL, room, bevel=0, cuts=16)
+BOTTOM, BACK, LEFT, RIGHT = (0, 0, -1), (0, 1, 0), (-1, 0, 0), (1, 0, 0)
+box('floor', (8.4, 6.4, 0.2), (0, 0, -0.1), FLOOR, room, bevel=0, cuts=30, cull=(BOTTOM, BACK, LEFT, RIGHT))
+box('wall_back', (8.4, 0.2, 3.6), (0, 3.1, 1.8), WALL, room, bevel=0, cuts=16, cull=(BOTTOM, BACK, LEFT, RIGHT))
 win_y0, win_y1, win_z0, win_z1 = 0.25, 2.05, 1.0, 2.65
 for name, ys, zs in [('wall_left_low', (-3.2, 3.2), (0, win_z0)), ('wall_left_high', (-3.2, 3.2), (win_z1, 3.6)),
                      ('wall_left_front', (-3.2, win_y0), (win_z0, win_z1)), ('wall_left_back', (win_y1, 3.2), (win_z0, win_z1))]:
-    box(name, (0.2, ys[1] - ys[0], zs[1] - zs[0]), (-4.1, sum(ys) / 2, sum(zs) / 2), WALL_SIDE, room, bevel=0, cuts=8)
+    box(name, (0.2, ys[1] - ys[0], zs[1] - zs[0]), (-4.1, sum(ys) / 2, sum(zs) / 2), WALL_SIDE, room, bevel=0, cuts=8, cull=(LEFT,))
 box('skirting_back', (8.2, 0.03, 0.1), (0, 2.985, 0.05), TRIM, room, bevel=0)
 box('skirting_left', (0.03, 6.2, 0.1), (-3.985, 0, 0.05), TRIM, room, bevel=0)
 box('rug', (3.4, 2.5, 0.02), (0.4, 0.55, 0.011), RUG, room, bevel=0.008, cuts=12)
@@ -347,6 +355,111 @@ for i in range(9):
     hgt = 0.75 + 0.15 * (i % 4)
     sphere(f'leaf{i}', 0.17, (math.cos(a) * 0.17, math.sin(a) * 0.17, 0.42 + hgt * 0.6), ['5f7f55', '6f9363', '557349'][i % 3],
            plant, scale=(0.45, 0.16, 1.4), rot=(math.sin(a) * tiltv, -math.cos(a) * tiltv, a))
+
+# The room carries on to the right: a reading corner under a framed portrait for the About
+# section, and a small writing desk with a phone and a letter tray for Contact. The page flies
+# the camera here as the visitor scrolls (room.js: SECTION views). Names the page relies on:
+#   screen_portrait   the framed photo, textured by the page
+#   floorlamp_head    where the page puts the second night light
+#   glow_bulb_floor   dim by day like glow_bulb
+box('floor_annex', (7.2, 6.4, 0.2), (7.8, 0, -0.1), FLOOR, room, bevel=0, cuts=18, cull=(BOTTOM, BACK, LEFT))
+box('wall_back_annex', (7.2, 0.2, 3.6), (7.8, 3.1, 1.8), WALL, room, bevel=0, cuts=10, cull=(BOTTOM, BACK, LEFT))
+box('skirting_back_annex', (7.2, 0.03, 0.1), (7.8, 2.985, 0.05), TRIM, room, bevel=0)
+box('rug_annex', (2.6, 1.9, 0.02), (6.2, 1.35, 0.011), 'c9bda6', room, bevel=0.008, cuts=4)
+
+# About: a framed portrait, small frames, a shelf of books and an armchair.
+about = group('about', (6.0, 2.975, 0))
+box('frame_outer', (1.02, 0.025, 1.27), (0, -0.0125, 1.75), INK, about, bevel=0.01)
+box('frame_mat', (0.9, 0.01, 1.15), (0, -0.028, 1.75), LABEL, about, bevel=0)
+screen('portrait', 0.72, 0.9, (0, -0.034, 1.75), about)
+box('plaque', (0.34, 0.01, 0.07), (0, -0.005, 1.02), WHITE, about, bevel=0)
+for i, (z, c) in enumerate([(2.05, 'cfe0e6'), (1.4, 'e6d6b5')]):
+    box(f'minor_frame{i}', (0.42, 0.02, 0.52), (-1.0, -0.01, z), INK, about, bevel=0.008)
+    box(f'minor_mat{i}', (0.36, 0.008, 0.46), (-1.0, -0.022, z), LABEL, about, bevel=0)
+    box(f'minor_art{i}', (0.22, 0.008, 0.26), (-1.0, -0.028, z), c, about, bevel=0)
+box('shelf_board', (1.1, 0.22, 0.035), (1.15, -0.11, 1.45), OAK, about, bevel=0.008)
+for i, (x, h, c) in enumerate([(-0.4, 0.26, '3d5bd6'), (-0.32, 0.3, 'e6d6b5'), (-0.23, 0.24, '4d6b5f'), (-0.14, 0.28, 'c4442e')]):
+    box(f'shelf_book{i}', (0.07, 0.17, h), (1.15 + x, -0.1, 1.4675 + h / 2), c, about, rot=(0, 0, 0), bevel=0.004)
+cyl('shelf_pot', 0.07, 0.12, (1.15 + 0.2, -0.1, 1.4675 + 0.06), 'b86a52', about, verts=20, r2=0.085, bevel=0.004)
+for i in range(4):
+    a = i * math.pi / 2
+    sphere(f'shelf_leaf{i}', 0.05, (1.35 + math.cos(a) * 0.04, -0.1 + math.sin(a) * 0.04, 1.4675 + 0.2), '5f7f55', about, scale=(0.5, 0.2, 1.5),
+           rot=(math.sin(a) * 0.5, -math.cos(a) * 0.5, a), seg=(10, 6))
+box('shelf_frame', (0.4, 0.02, 0.5), (1.15, -0.01, 2.15), INK, about, bevel=0.008)
+box('shelf_frame_mat', (0.34, 0.008, 0.44), (1.15, -0.022, 2.15), LABEL, about, bevel=0)
+box('shelf_frame_art', (0.2, 0.008, 0.24), (1.15, -0.028, 2.15), 'cdb995', about, bevel=0)
+
+armchair = group('armchair', (5.9, 1.55, 0), rz=0.5)
+SAGE, SAGE_LIGHT = '86a097', 'a3b9b0'
+for x in (-0.33, 0.33):
+    for y in (-0.27, 0.27):
+        box(f'chair_leg{x}{y}', (0.05, 0.05, 0.14), (x, y, 0.07), '6b5a48', armchair, bevel=0.006)
+    box(f'arm{x}', (0.15, 0.7, 0.36), (x * 1.3, 0.0, 0.34), SAGE, armchair, bevel=0.05)
+box('armchair_seat', (0.66, 0.66, 0.2), (0, 0.0, 0.24), SAGE, armchair, bevel=0.04)
+box('armchair_cushion', (0.6, 0.58, 0.1), (0, -0.03, 0.39), SAGE_LIGHT, armchair, bevel=0.04)
+box('armchair_back', (0.9, 0.16, 0.66), (0, 0.32, 0.5), SAGE, armchair, rot=(-0.14, 0, 0), bevel=0.05)
+
+side = group('sidetable', (6.95, 2.3, 0))
+cyl('side_top', 0.24, 0.04, (0, 0, 0.56), OAK, side, verts=32, bevel=0.006)
+cyl('side_leg', 0.025, 0.54, (0, 0, 0.27), METAL, side, verts=12, bevel=0)
+cyl('side_foot', 0.17, 0.02, (0, 0, 0.01), METAL, side, verts=24, bevel=0.005)
+for i, (w, c, rz) in enumerate([(0.3, '4d6b5f', 0.2), (0.27, 'e6d6b5', -0.15), (0.24, '3d5bd6', 0.1)]):
+    box(f'side_book{i}', (w, 0.2, 0.04), (0.0, 0.0, 0.58 + 0.02 + i * 0.04), c, side, rot=(0, 0, rz), bevel=0.004)
+cup = group('side_mug', (0.0, 0.0, 0.7), parent=side)
+cyl('side_mug_body', 0.045, 0.09, (0, 0, 0.045), 'f1e3b6', cup, bevel=0.005)
+
+floorlamp = group('floorlamp', (7.6, 2.55, 0))
+cyl('floorlamp_base', 0.16, 0.03, (0, 0, 0.015), INK, floorlamp, verts=24, bevel=0.006)
+rod('floorlamp_pole', (0, 0, 0.03), (0, 0, 1.5), 0.016, INK, floorlamp)
+cyl('floorlamp_shade', 0.2, 0.3, (0, 0, 1.62), 'f1e3b6', floorlamp, verts=24, r2=0.14, bevel=0.005)
+sphere('glow_bulb_floor', 0.05, (0, 0, 1.62), mat('fff1d6', 0.3, emit=1.5), floorlamp, seg=(14, 8))
+group('floorlamp_head', (0, 0, 1.62), parent=floorlamp)
+
+# Contact: a writing desk with a phone, a letter tray and a mailbox on the wall above it.
+cdesk = group('contact_desk', (9.4, 2.5, 0))
+box('cdesk_top', (1.7, 0.8, 0.05), (0, 0, 0.95), OAK, cdesk, bevel=0.012, cuts=4)
+for x, y in [(-0.8, -0.34), (0.8, -0.34), (-0.8, 0.34), (0.8, 0.34)]:
+    box(f'cdesk_leg{x}{y}', (0.05, 0.05, 0.925), (x, y, 0.4625), METAL, cdesk, bevel=0.006)
+box('cdesk_rail', (1.6, 0.03, 0.08), (0, 0.34, 0.85), METAL, cdesk, bevel=0.005)
+RED = 'c4442e'
+phone = group('desk_phone', (-0.45, -0.02, 0.975), parent=cdesk, rz=0.25)
+box('phone_base', (0.3, 0.24, 0.08), (0, 0, 0.04), RED, phone, bevel=0.03)
+cyl('phone_dial', 0.065, 0.012, (0, -0.05, 0.088), 'f7f6f1', phone, verts=24, bevel=0.002)
+box('phone_cradle_l', (0.05, 0.05, 0.05), (-0.11, 0.05, 0.105), RED, phone, bevel=0.01)
+box('phone_cradle_r', (0.05, 0.05, 0.05), (0.11, 0.05, 0.105), RED, phone, bevel=0.01)
+box('handset_mid', (0.3, 0.05, 0.035), (0, 0.05, 0.14), RED, phone, bevel=0.015)
+box('handset_ear', (0.085, 0.075, 0.06), (-0.13, 0.05, 0.12), RED, phone, bevel=0.025)
+box('handset_mouth', (0.085, 0.075, 0.06), (0.13, 0.05, 0.12), RED, phone, bevel=0.025)
+rod('phone_cord', (0.14, 0.1, 0.03), (0.3, 0.3, 0.012), 0.008, INK, phone, verts=6)
+tray = group('letter_tray', (0.25, 0.1, 0.975), parent=cdesk, rz=-0.1)
+for k in range(2):
+    z = 0.015 + k * 0.17
+    box(f'tray_floor{k}', (0.36, 0.28, 0.02), (0, 0, z), METAL, tray, bevel=0.004)
+    box(f'tray_back{k}', (0.36, 0.02, 0.1), (0, 0.13, z + 0.05), METAL, tray, bevel=0.004)
+    for x in (-0.17, 0.17):
+        box(f'tray_side{k}{x}', (0.02, 0.28, 0.1), (x, 0, z + 0.05), METAL, tray, bevel=0.004)
+    for j in range(3 - k):
+        box(f'envelope{k}{j}', (0.3, 0.2, 0.012), (0.005 * j, 0.0, z + 0.016 + j * 0.013), ['f7f6f1', 'ede2c8', 'dfe8e6'][(j + k) % 3], tray, rot=(0, 0, 0.05 * (j - 1)), bevel=0)
+for k in range(2):
+    box(f'tray_post{k}', (0.02, 0.02, 0.17), (-0.17 if k else 0.17, 0.13, 0.095), METAL, tray, bevel=0.004)
+box('envelope_front', (0.3, 0.2, 0.008), (-0.1, -0.25, 0.979), 'f7f6f1', cdesk, rot=(0, 0, 0.35), bevel=0)
+box('envelope_flap', (0.3, 0.1, 0.01), (-0.1, -0.2, 0.983), 'ede2c8', cdesk, rot=(0, 0, 0.35), bevel=0)
+sphere('envelope_seal', 0.022, (-0.115, -0.265, 0.985), RED, cdesk, scale=(1, 1, 0.5), seg=(12, 6))
+pens = group('pen_cup', (0.7, 0.18, 0.975), parent=cdesk)
+cyl('pen_cup_body', 0.05, 0.1, (0, 0, 0.05), '3d5bd6', pens, bevel=0.004)
+rod('pen_a', (0, 0, 0.06), (0.02, 0.01, 0.2), 0.008, INK, pens, verts=8)
+rod('pen_b', (0, 0, 0.06), (-0.03, 0.0, 0.18), 0.008, RED, pens, verts=8)
+mailbox = group('mailbox', (0.0, 0.0, 1.8), parent=cdesk)
+box('mailbox_body', (0.5, 0.14, 0.32), (0, 0.46, 0), '3d5bd6', mailbox, bevel=0.04)
+box('mailbox_slot', (0.32, 0.006, 0.03), (0, 0.386, 0.06), '1f2a66', mailbox, bevel=0)
+box('mailbox_flag', (0.04, 0.02, 0.14), (0.28, 0.46, 0.0), RED, mailbox, bevel=0.006)
+box('mailbox_letter', (0.26, 0.012, 0.18), (0, 0.375, 0.02), 'f7f6f1', mailbox, rot=(0, 0, 0.1), bevel=0)
+stool = group('stool', (9.0, 1.5, 0))
+cyl('stool_seat', 0.22, 0.06, (0, 0, 0.58), '6b5a48', stool, verts=32, bevel=0.012)
+for i in range(3):
+    a = i * 2 * math.pi / 3 + 0.4
+    rod(f'stool_leg{i}', (math.cos(a) * 0.15, math.sin(a) * 0.15, 0.56), (math.cos(a) * 0.26, math.sin(a) * 0.26, 0.0), 0.016, METAL, stool, verts=8)
+box('stool_ring', (0.3, 0.3, 0.012), (0, 0, 0.25), METAL, stool, bevel=0)
 
 # Apply modifiers, then bake ambient occlusion into a colour attribute on every mesh.
 meshes = [o for o in scene.objects if o.type == 'MESH']

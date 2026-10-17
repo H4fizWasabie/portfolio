@@ -1,7 +1,12 @@
 # Redesign: the Workshop (production) and two archived candidates
 
 The live site is the **Workshop**: a small clay room, modelled in Blender, where every object is a
-project. `turntable` and `workflow` are the other two candidates. They are archived: still served,
+project. The room is also the background of the whole homepage: the canvas is fixed behind the page and
+the scroll flies the camera through it (hero, each project, services, the framed portrait for About,
+the writing desk for Contact, a pull-back at the foot) while each section sits on a solid panel over it.
+`room.js` (`STOPS`, `measure`, `stepTour`) and the `[data-room]` block at the end of `workshop/style.css`
+do this; without JavaScript, with reduced motion, without WebGL or in `?still=` renders the page keeps its
+static layout. `turntable` and `workflow` are the other two candidates. They are archived: still served,
 like the earlier variants, at `/variant-turntable/` and `/variant-workflow/` (plus the
 `/variant-workshop/` preview), all noindex.
 
