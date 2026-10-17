@@ -43,6 +43,7 @@ assert.ok(home.includes(verification), 'Google Search Console verification lost'
 assert.equal((home.match(/data-pick="/g) || []).length, projects.length, 'every project is on the bench');
 assert.equal((home.match(/<li class="work-/g) || []).length, projects.length, 'every project is in the work grid');
 assert.match(home, /href="resume\/"/, 'homepage links the résumé on this site');
+assert.match(home, /data-brief/, 'contact brief present');
 
 const theoses = fs.readFileSync(path.join(site, 'work/theoses/index.html'), 'utf8');
 assert.match(theoses, /built on the pi coding agent/, 'Theoses is described as a fork of pi');
@@ -70,4 +71,4 @@ assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
 assert.match(reader, /MAP — Android Productivity App/);
 assert.doesNotMatch(reader, /<iframe|<object|<embed/);
-console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos and résumé present; preview stays noindex`);
+console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, brief and résumé present; preview stays noindex`);

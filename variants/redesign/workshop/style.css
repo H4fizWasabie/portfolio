@@ -11,7 +11,7 @@
   --day:light-dark(#e9ece8,#171b20);--surface:light-dark(#f4f6f3,#20252c);--line:light-dark(#cdd2cb,#333a43);
   --ink:light-dark(#1f252c,#e7eaee);--muted:light-dark(#56606a,#a4adb7);
   --cobalt:light-dark(#2f4fd0,#8ea2ff);--on-cobalt:light-dark(#f4f6f3,#171b20);
-  --panel:light-dark(#2f4fd0,#1b2766);--on-panel:light-dark(#f4f6f3,#eef1ff); /* cobalt blocks: deep cobalt at night, light text on both */
+  --panel:light-dark(#D9C4A6,#4A3828);--on-panel:light-dark(#2B2118,#F2E8DA); /* About panels and the Contact block: light latte by day, walnut at night */
   --shadow:0 24px 60px -32px light-dark(rgba(40,52,44,.45),rgba(0,0,0,.7));
   --r:8px;--max:1360px;--pad:clamp(20px,4vw,56px);
 }
@@ -34,7 +34,7 @@ p{margin:0;text-wrap:pretty}
 .button:active{transform:scale(.98)}
 .button-small{min-height:44px;padding:8px 16px;font-size:.9375rem}
 /* Plain links keep their look; padding and min-height give them a thumb-sized hit area. */
-.text-link,.site-footer a,:is(.contact-actions,.contact-links,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
+.text-link,.site-footer a,:is(.contact-actions,.brief-actions,.contact-links,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
 .text-link{font-weight:700}
 
 .site-nav{max-width:var(--max);margin:0 auto;padding:18px var(--pad);display:flex;align-items:center;gap:clamp(12px,2.4vw,28px);position:relative;z-index:3}
@@ -253,6 +253,28 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .contact-mail{display:inline-block;font-size:clamp(1.5rem,4.2vw,3rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;overflow-wrap:anywhere}
 .contact-links{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:12px;font-weight:700}
 @media (min-width:900px) and (orientation:landscape){.contact-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:0 clamp(32px,6vw,96px)}.contact-block>h2{grid-column:1}.contact-block>p{grid-column:1;align-self:start}.contact-reach{grid-column:2;grid-row:1/span 2;align-self:end}}
+/* Contact brief: a few choices and one line, turned into an email the visitor sends from their own app. */
+.contact-block{--muted:light-dark(#4a3c2e,#d6c8b4);--flag:light-dark(#8a1f18,#ff8a7e)}
+.brief{display:grid;gap:22px;margin-top:28px;max-width:760px}
+.brief fieldset{border:0;margin:0;padding:0}
+.brief legend,.brief .field label{font-weight:700;margin-bottom:10px;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:var(--r);box-shadow:inset 0 0 0 1.5px var(--on-panel);font-weight:600;font-size:.9375rem;cursor:pointer;transition:box-shadow .2s,color .2s,background-color .2s}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip:has(input:checked){background:var(--cobalt);color:var(--on-cobalt);box-shadow:none}
+.chip:has(input:focus-visible){outline:3px solid var(--on-panel);outline-offset:3px}
+.brief .field{display:grid;gap:6px}
+.brief .field label{margin:0}
+.brief textarea{font:inherit;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical;min-height:96px}
+.field-help{font-size:.875rem;color:var(--muted)}
+.field-error{color:var(--flag);font-size:.9375rem;font-weight:700}
+.brief-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;font-weight:700}
+.brief-done{display:grid;gap:12px;color:var(--muted)}
+.brief-done a{color:var(--ink);font-weight:700}
+.brief-done textarea{font:inherit;font-size:.9375rem;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical}
+.brief-copy{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-weight:700;color:var(--ink)}
+.js .brief-fallback{display:none}
+.no-js .brief{display:none}
 .site-footer{max-width:var(--max);margin:0 auto;padding:24px var(--pad) 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9375rem;border-top:1px solid var(--line)}
 .site-footer p:last-child{display:flex;flex-wrap:wrap;gap:0 20px}
 
@@ -404,6 +426,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 /* Hover only where there is a pointer that hovers, so a tap on a phone leaves nothing lit. */
 @media (hover:hover){
   .button:hover{background:var(--cobalt);color:var(--on-cobalt)}
+  .chip:hover{box-shadow:inset 0 0 0 2px var(--on-panel)}
   .site-nav nav a:not(.button):hover{color:var(--cobalt)}
   .theme-toggle:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
   .bench-index a:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}

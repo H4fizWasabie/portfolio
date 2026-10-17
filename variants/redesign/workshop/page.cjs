@@ -124,7 +124,20 @@ ${colonnade(root, esc)}
 <section class="contact contact-block" id="contact" aria-labelledby="contact-title"><h2 id="contact-title" class="rise">${words(site.contactTitle, esc)}</h2>
 <p>${esc(site.contactBody)} ${esc(site.based)}</p>
 <div class="contact-reach"><a class="contact-mail" href="${site.mailto}">${site.email}</a>
-<p class="contact-links"><a href="${site.github}">GitHub</a><a href="${root}resume/">Résumé</a></p></div>
+<form class="brief" data-brief data-email="${site.email}" action="mailto:${site.email}?subject=Project%20enquiry" method="post" enctype="text/plain" novalidate>
+<fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
+<fieldset><legend>How many people would use it?</legend><div class="chips">${['Just me', '2 to 10', '11 to 50', 'More than 50'].map((n, i) => `<label class="chip"><input type="radio" name="people" value="${n}" id="people-${i}">${n}</label>`).join('')}</div></fieldset>
+<div class="field"><label for="brief-today">How does the work happen today?</label>
+<textarea id="brief-today" name="today" rows="3" aria-describedby="brief-help"></textarea>
+<p class="field-help" id="brief-help">For example: we track stock in three spreadsheets and orders get missed.</p></div>
+<p class="field-error" data-brief-error role="alert" hidden></p>
+<div class="brief-actions"><button class="button">Write the email</button><a href="mailto:${site.email}">${site.email}</a></div>
+<div class="brief-done" data-brief-done hidden><p>Your email app should open with this message. If it does not, copy it and send it to <a href="mailto:${site.email}">${site.email}</a>.</p>
+<textarea readonly rows="7" data-brief-text aria-label="Your message"></textarea>
+<p class="brief-copy"><button type="button" class="button" data-brief-copy>Copy message</button><span role="status" data-brief-copied></span></p></div>
+</form>
+<p class="contact-links"><a href="${site.github}">GitHub</a><a href="${root}resume/">Résumé</a></p>
+<p class="contact-actions brief-fallback"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a href="mailto:${site.email}">${site.email}</a></p></div>
 </section>
 </main>${B.footer(root, `${root}resume/`)}
 <script type="application/json" id="bench-data">${JSON.stringify({ root, projects: data })}</script>
