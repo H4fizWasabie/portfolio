@@ -63,13 +63,13 @@ const OFF_FRAME = new Set(['server']);
 const VIEW = {
   procura: { yaw: -0.55, phone: { pull: 0.8 } },
   pims: { yaw: 0.45, phone: { pull: 0.85 } },
-  'dd-drugs-register': { yaw: -0.3, wide: { yaw: 0 }, alt: { yaw: 0.25 }, phone: { yaw: 0, pull: 0.85 } }, // the page's views stay clear of the ring light
-  theoses: { yaw: -0.35, phone: { pull: 1 } },
-  '89lab': { phone: { pull: 0.7 } },
+  'dd-drugs-register': { yaw: -0.3, wide: { yaw: -0.4, dist: 0.8 }, alt: { yaw: 0.25 }, phone: { yaw: 0, pull: 0.85 } }, // the page's views stay clear of the ring light
+  theoses: { yaw: -0.35, wide: { dist: 0.8 }, phone: { pull: 1 } },
+  '89lab': { wide: { dist: 0.55 }, phone: { pull: 0.7 } },
   map: { yaw: -0.5, dist: 1.15, wide: { dist: 1.5 }, phone: { dist: 0.9, pull: 0.85 } },
-  yen: { yaw: -0.2, dist: 1.3, phone: { dist: 1.15, pull: 0.85 } },
+  yen: { yaw: -0.2, dist: 1.3, wide: { dist: 0.7 }, phone: { dist: 1.15, pull: 0.85 } },
   'procura pims': { yaw: -0.7, dist: 0.8, phone: { pull: 0.55 } }, // the two ends of the room, straight on
-  'theoses 89lab yen': { yaw: -0.15, phone: { pull: 0.8 } }
+  'theoses 89lab yen': { yaw: -0.15, wide: { yaw: -0.35, at: [1.11, 0.52, -1.35], dist: 0.4 }, phone: { pull: 0.8 } }
 };
 // The rest of the page, by data-look="@name": a look-at point, a turn around the vertical axis, a
 // distance (in home-camera distances) and, on wide screens, where the page's panel leaves room for
