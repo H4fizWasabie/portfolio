@@ -163,6 +163,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .work{padding:clamp(64px,9vw,120px) 0 0}
 .shelves{margin-top:28px}
 .shelf{position:relative;display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
+.shelf>*{min-width:0} /* a grid item's min-content would widen the column past a phone screen */
 .shelf-head h3{font-size:1.5rem;letter-spacing:-.02em}
 .shelf-head p{margin-top:8px;color:var(--muted);max-width:34ch}
 .shelf-items{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -250,7 +251,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .contact-block{background:var(--panel);color:var(--on-panel)}
 .contact-block>p{color:inherit}
 .contact-block :focus-visible{outline-color:var(--on-panel)}
-.contact-mail{display:inline-block;font-size:clamp(1.5rem,4.2vw,3rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;overflow-wrap:anywhere}
+.contact-mail{display:inline-block;font-size:clamp(1.5rem,4.2vw,2.5rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;overflow-wrap:anywhere}
 .contact-links{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:12px;font-weight:700}
 @media (min-width:900px) and (orientation:landscape){.contact-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:0 clamp(32px,6vw,96px)}.contact-block>h2{grid-column:1}.contact-block>p{grid-column:1;align-self:start}.contact-reach{grid-column:2;grid-row:1/span 2;align-self:end}}
 /* Contact brief: a few choices and one line, turned into an email the visitor sends from their own app. */

@@ -29,8 +29,8 @@ const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89l
 // owner's About copy, kept exactly as written.
 const chapters = [
   ['Background', 'portrait', 'Operations first, then software', 'Four years building systems, with AI automation at the core, coming from hands-on procurement, pharmacy and emergency care. PIMS, Procura and the DD Drugs Register run daily at the veterinary hospital where I work.'],
-  ['How I work', 'theoses', 'Requirements → build → measure', 'I model the data around the real workflow, put it in front of the people who use it, and let the numbers decide what\'s next. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
-  ['Now', 'yen', 'Agents that run on their own', 'Running Theoses, my self-hosted AI agent: about 30 scheduled jobs and 730+ commits in six weeks. Also building agent harnesses from scratch in Go (Neo, Fender, Mino), with more than a dozen public repositories on AI automation and agent design.']
+  ['How I work', 'pims', 'Requirements → build → measure', 'I model the data around the real workflow, put it in front of the people who use it, and let the numbers decide what\'s next. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
+  ['Now', 'theoses', 'Agents that run on their own', 'Running Theoses, my self-hosted AI agent: about 30 scheduled jobs and 730+ commits in six weeks. Also building agent harnesses from scratch in Go (Neo, Fender, Mino), with more than a dozen public repositories on AI automation and agent design.']
 ];
 // One column per chapter. Without JavaScript every chapter shows; about.js opens one at a time (style.css).
 const portrait = root => `<img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">`;
