@@ -12,6 +12,7 @@
 import math
 import sys
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -44,12 +45,18 @@ def mat(hexcolor, rough=0.85, metal=0.0, alpha=1.0, emit=0.0):
     return m
 
 
-def finish(o, material, parent, bevel, cuts=0):
+def finish(o, material, parent, bevel, cuts=0, cull=()):
     if cuts:
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.subdivide(number_cuts=cuts)
         bpy.ops.object.mode_set(mode='OBJECT')
+    if cull:  # faces the camera can never see (it stays in front of the room) are not shipped
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if any(f.normal.dot(Vector(n)) > 0.9 for n in cull)], context='FACES')
+        bm.to_mesh(o.data)
+        bm.free()
     o.data.materials.append(material)
     if bevel:
         mod = o.modifiers.new('bevel', 'BEVEL')
@@ -65,13 +72,13 @@ def M(spec):
     return spec if isinstance(spec, bpy.types.Material) else mat(spec)
 
 
-def box(name, size, loc, material, parent=None, rot=(0, 0, 0), bevel=0.015, cuts=0):
+def box(name, size, loc, material, parent=None, rot=(0, 0, 0), bevel=0.015, cuts=0, cull=()):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc, rotation=rot)
     o = bpy.context.object
     o.name = name
     o.scale = size
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    return finish(o, M(material), parent, bevel, cuts)
+    return finish(o, M(material), parent, bevel, cuts, cull)
 
 
 def cyl(name, r, depth, loc, material, parent=None, rot=(0, 0, 0), verts=32, bevel=0.008, r2=None):
@@ -136,12 +143,13 @@ LABEL = 'f7f6f1'
 
 # Room: floor, back wall and a left wall with a window.
 room = group('room', (0, 0, 0))
-box('floor', (8.4, 6.4, 0.2), (0, 0, -0.1), FLOOR, room, bevel=0, cuts=30)
-box('wall_back', (8.4, 0.2, 3.6), (0, 3.1, 1.8), WALL, room, bevel=0, cuts=16)
+BOTTOM, BACK, LEFT = (0, 0, -1), (0, 1, 0), (-1, 0, 0)
+box('floor', (8.4, 6.4, 0.2), (0, 0, -0.1), FLOOR, room, bevel=0, cuts=30, cull=(BOTTOM, BACK, LEFT))
+box('wall_back', (8.4, 0.2, 3.6), (0, 3.1, 1.8), WALL, room, bevel=0, cuts=16, cull=(BOTTOM, BACK, LEFT))
 win_y0, win_y1, win_z0, win_z1 = 0.25, 2.05, 1.0, 2.65
 for name, ys, zs in [('wall_left_low', (-3.2, 3.2), (0, win_z0)), ('wall_left_high', (-3.2, 3.2), (win_z1, 3.6)),
                      ('wall_left_front', (-3.2, win_y0), (win_z0, win_z1)), ('wall_left_back', (win_y1, 3.2), (win_z0, win_z1))]:
-    box(name, (0.2, ys[1] - ys[0], zs[1] - zs[0]), (-4.1, sum(ys) / 2, sum(zs) / 2), WALL_SIDE, room, bevel=0, cuts=8)
+    box(name, (0.2, ys[1] - ys[0], zs[1] - zs[0]), (-4.1, sum(ys) / 2, sum(zs) / 2), WALL_SIDE, room, bevel=0, cuts=8, cull=(LEFT,))
 box('skirting_back', (8.2, 0.03, 0.1), (0, 2.985, 0.05), TRIM, room, bevel=0)
 box('skirting_left', (0.03, 6.2, 0.1), (-3.985, 0, 0.05), TRIM, room, bevel=0)
 box('rug', (3.4, 2.5, 0.02), (0.4, 0.55, 0.011), RUG, room, bevel=0.008, cuts=12)

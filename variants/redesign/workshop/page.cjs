@@ -25,9 +25,26 @@ const coaching = `mailto:${site.email}?subject=${encodeURIComponent('Coaching se
 const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
 <p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p></div>`;
 
+// About: three chapters, each shown by one of the room's objects (or the portrait). The words are the
+// owner's About copy, kept exactly as written.
+const chapters = [
+  ['Background', 'portrait', 'Operations first, then software', 'Four years building systems, with AI automation at the core, coming from hands-on procurement, pharmacy and emergency care. PIMS, Procura and the DD Drugs Register run daily at the veterinary hospital where I work.'],
+  ['How I work', 'theoses', 'Requirements → build → measure', 'I model the data around the real workflow, put it in front of the people who use it, and let the numbers decide what\'s next. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
+  ['Now', 'yen', 'Agents that run on their own', 'Running Theoses, my self-hosted AI agent: about 30 scheduled jobs and 730+ commits in six weeks. Also building agent harnesses from scratch in Go (Neo, Fender, Mino), with more than a dozen public repositories on AI automation and agent design.']
+];
+// One column per chapter. Without JavaScript every chapter shows; about.js opens one at a time (style.css).
+const portrait = root => `<img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">`;
+const colonnade = (root, esc) => `<ul class="colonnade" data-colonnade>${chapters.map(([label, slug, head, text], i) => `<li class="chapter${i ? '' : ' is-open'}">
+<button class="chapter-tab" type="button" aria-expanded="true" aria-controls="chapter-${i}"><span>${two(i + 1)}</span>${esc(label)}</button>
+<div class="chapter-view" id="chapter-${i}">${slug === 'portrait' ? portrait(root) : thumb(root, { slug }, 'loading="lazy"')}<div class="chapter-panel"><h3>${esc(head)}</h3><p>${esc(text)}</p></div></div></li>`).join('')}</ul>`;
+
 // Sets day or night before first paint: stored choice, else the device setting.
 // Stills are day unless render-stills.cjs asks for night.
 const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
+// The whole homepage sits in the room: wide or phone layout, chosen before first paint so nothing
+// jumps when the room loads. room.js keeps it current and removes it if the room cannot start;
+// without JavaScript, with reduced motion or in ?still= renders the page keeps its static layout.
+const roomScript = `<script>(function(){if(/[?&]still=/.test(location.search)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.dataset.room=matchMedia('(max-width: 899px), (orientation: portrait)').matches?'phone':'wide'})()</script>`;
 const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>Night</button>';
 // Phones keep a short contact button in the bar, since the hero's button sits below the room;
 // the links drop to a second row there (style.css), so nothing has to be hidden.
@@ -37,25 +54,31 @@ const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</
 // Words, or letters, each in a clipped span so the scroll can raise them one after another (style.css).
 const rise = (parts, esc) => parts.map((w, i) => (w === ' ' ? ' ' : `<span class="w"><span style="--i:${i}">${esc(w)}</span></span>`)).join('');
 const words = (text, esc) => rise(text.split(/( )/), esc);
-// The name set large where the page ends, rising letter by letter as it comes into view.
-const footer = root => `<p class="wordmark" aria-hidden="true">${rise([...site.name], s => s)}</p>${B.footer(root, `${root}resume/`)}`;
+// The name set large where the room ends (the goodbye shot on the homepage), rising letter by letter as it comes into view.
+const wordmark = `<p class="wordmark" aria-hidden="true" data-stop data-look="@end">${rise([...site.name], s => s)}</p>`;
+const footer = root => `${wordmark}${B.footer(root, `${root}resume/`)}`;
 
-const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
-<span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
+const card = (p, root, esc, num) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
+<span class="work-text">${num ? `<span class="tour-count">${num}</span>` : ''}<span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
 
 // /projects/: every object render in one uneven grid.
 const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => card(p, root, esc)).join('')}</ul>`;
 
-// Homepage: one shelf per service, the projects that prove it beside it.
-const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
-${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
+// Homepage: one shelf per service, the projects that prove it beside it. data-look names what the
+// room shows while the shelf is on screen (room.js); teaching has no object, so it shows the desk.
+const shelves = (by, root, esc) => {
+  const all = Object.keys(by), num = s => `${two(all.indexOf(s) + 1)} / ${two(all.length)}`;
+  return `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf" data-stop data-look="${slugs.join(' ') || '@teach'}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
+${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>`).join('')}</div>`;
+};
 
-// Phones: the room pins at the top and these captions scroll up beneath it, one stop each
-// (room.js flies the camera to whichever is passing). Shown only while the tour runs.
+// One stop per project. Phones: each card rides the bottom of the screen over the room while the
+// camera rests on its object (room.js). Wide screens: these are only the scroll distance, and the
+// large caption (tour-card) shows the name instead. Shown only while the room is the background.
 const two = n => String(n).padStart(2, '0');
-const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
+const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li data-stop data-look="${p.slug}"><div class="step-card"><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
 <p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
-<button class="button" type="button" data-open="${p.slug}">Open the project</button></li>`).join('')}</ol>`;
+<button class="button" type="button" data-open="${p.slug}">Open the project</button></div></li>`).join('')}</ol>`;
 
 // Day and night renders of the same object; the theme shows one (the hidden one is never fetched).
 const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thumb${v || '-day'}" src="${root}static/thumb-${p.slug}${v}.webp" alt="" width="640" height="480" ${attrs}>`).join('');
@@ -68,7 +91,7 @@ function home({ projects, site, esc, root }) {
     disclosure: p.disclosure, steps: p.workflow
   }));
   return `${B.head({ title: site.title, description: site.description, root, fonts,
-    route: '/', extra: `${themeScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
+    route: '/', extra: `${themeScript}${roomScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
 <body>
 <div class="tour" data-tour><div class="sky">${nav(root, site, esc)}
 <section class="bench">
@@ -85,22 +108,22 @@ function home({ projects, site, esc, root }) {
 <div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
 <div class="tour-card is-away" data-tour-card><p class="tour-count" data-t="count"></p><p class="tour-object" data-t="object"></p>
 <p class="tour-title" data-t="title"></p><p class="tour-summary" data-t="summary"></p><button class="button" type="button" data-t="open">Open the project</button></div>
-<div class="bench-copy"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
+<div class="bench-copy"><div class="bench-panel"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="#contact">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
-<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div>
+<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
 ${steps(projects, esc)}</section></div></div>
 <main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>
 ${shelves(by, root, esc)}</section>
+${wordmark}
 
-<section class="about" id="about" aria-labelledby="about-title">
-<img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">
-<div><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
-${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
-<p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
-<section class="contact" id="contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
-<p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
+<section class="about" id="about" aria-labelledby="about-title"><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
+${colonnade(root, esc)}
+<p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></section>
+<section class="contact contact-block" id="contact" aria-labelledby="contact-title"><h2 id="contact-title" class="rise">${words(site.contactTitle, esc)}</h2>
+<p>${esc(site.contactBody)} ${esc(site.based)}</p>
+<div class="contact-reach"><a class="contact-mail" href="${site.mailto}">${site.email}</a>
 <form class="brief" data-brief data-email="${site.email}" action="mailto:${site.email}?subject=Project%20enquiry" method="post" enctype="text/plain" novalidate>
 <fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
 <fieldset><legend>How many people would use it?</legend><div class="chips">${['Just me', '2 to 10', '11 to 50', 'More than 50'].map((n, i) => `<label class="chip"><input type="radio" name="people" value="${n}" id="people-${i}">${n}</label>`).join('')}</div></fieldset>
@@ -113,9 +136,10 @@ ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <textarea readonly rows="7" data-brief-text aria-label="Your message"></textarea>
 <p class="brief-copy"><button type="button" class="button" data-brief-copy>Copy message</button><span role="status" data-brief-copied></span></p></div>
 </form>
-<p class="contact-actions brief-fallback"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a href="mailto:${site.email}">${site.email}</a></p>
+<p class="contact-links"><a href="${site.github}">GitHub</a><a href="${root}resume/">Résumé</a></p>
+<p class="contact-actions brief-fallback"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a href="mailto:${site.email}">${site.email}</a></p></div>
 </section>
-</main>${footer(root)}
+</main>${B.footer(root, `${root}resume/`)}
 <script type="application/json" id="bench-data">${JSON.stringify({ root, projects: data })}</script>
 <script type="module" src="${root}static/main.js"></script></body></html>`;
 }
