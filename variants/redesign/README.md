@@ -19,7 +19,7 @@ like the earlier variants, at `/variant-turntable/` and `/variant-workflow/` (pl
 - `content.cjs` site wording and project order; project facts come from `../product-launch/projects.cjs`.
 - `blocks.cjs` markup shared by all variants (head with production SEO, galleries, case-study body).
 - `demos.cjs` / `demos.js` the playable demos (fictional sample data), used by `workflow` and the Workshop project pages.
-- `workshop/` page templates, styles, `main.js` (small entry: day/night, contact brief, demos; it loads `room.js` once the page has painted), `room.js` (three.js room, tour, animations), `theme.js` (lamp switch), `brief.js` (contact brief).
+- `workshop/` page templates, styles, `main.js` (small entry: day/night, About columns, demos; it loads `room.js` once the page has painted), `room.js` (three.js room, tour, animations), `theme.js` (lamp switch).
 - `workshop/model/` `build_workshop.py` (Blender) and `build.sh` produce `workshop.glb`; `render-stills.cjs` renders `poster.webp` and the `thumb-*.webp` from a built page. All three outputs are committed.
 - `workshop/photo/hafiz-portrait.webp` owner-supplied portrait, cropped, EXIF removed.
 

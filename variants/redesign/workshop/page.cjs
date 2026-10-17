@@ -25,6 +25,19 @@ const coaching = `mailto:${site.email}?subject=${encodeURIComponent('Coaching se
 const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
 <p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p></div>`;
 
+// About: three chapters, each shown by one of the room's objects (or the portrait). The words are the
+// owner's About copy, kept exactly as written.
+const chapters = [
+  ['Background', 'portrait', 'Operations first, then software', 'Four years building systems, with AI automation at the core, coming from hands-on procurement, pharmacy and emergency care. PIMS, Procura and the DD Drugs Register run daily at the veterinary hospital where I work.'],
+  ['How I work', 'theoses', 'Requirements → build → measure', 'I model the data around the real workflow, put it in front of the people who use it, and let the numbers decide what\'s next. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
+  ['Now', 'yen', 'Agents that run on their own', 'Running Theoses, my self-hosted AI agent: about 30 scheduled jobs and 730+ commits in six weeks. Also building agent harnesses from scratch in Go (Neo, Fender, Mino), with more than a dozen public repositories on AI automation and agent design.']
+];
+// One column per chapter. Without JavaScript every chapter shows; about.js opens one at a time (style.css).
+const portrait = root => `<img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">`;
+const colonnade = (root, esc) => `<ul class="colonnade" data-colonnade>${chapters.map(([label, slug, head, text], i) => `<li class="chapter${i ? '' : ' is-open'}">
+<button class="chapter-tab" type="button" aria-expanded="true" aria-controls="chapter-${i}"><span>${two(i + 1)}</span>${esc(label)}</button>
+<div class="chapter-view" id="chapter-${i}">${slug === 'portrait' ? portrait(root) : thumb(root, { slug }, 'loading="lazy"')}<div class="chapter-panel"><h3>${esc(head)}</h3><p>${esc(text)}</p></div></div></li>`).join('')}</ul>`;
+
 // Sets day or night before first paint: stored choice, else the device setting.
 // Stills are day unless render-stills.cjs asks for night.
 const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
@@ -105,26 +118,13 @@ ${steps(projects, esc)}</section></div></div>
 ${shelves(by, root, esc)}</section>
 ${wordmark}
 
-<section class="about" id="about" aria-labelledby="about-title">
-<img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">
-<div><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
-${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
-<p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
-<section class="contact" id="contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
-<p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
-<form class="brief" data-brief data-email="${site.email}" action="mailto:${site.email}?subject=Project%20enquiry" method="post" enctype="text/plain" novalidate>
-<fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
-<fieldset><legend>How many people would use it?</legend><div class="chips">${['Just me', '2 to 10', '11 to 50', 'More than 50'].map((n, i) => `<label class="chip"><input type="radio" name="people" value="${n}" id="people-${i}">${n}</label>`).join('')}</div></fieldset>
-<div class="field"><label for="brief-today">How does the work happen today?</label>
-<textarea id="brief-today" name="today" rows="3" aria-describedby="brief-help"></textarea>
-<p class="field-help" id="brief-help">For example: we track stock in three spreadsheets and orders get missed.</p></div>
-<p class="field-error" data-brief-error role="alert" hidden></p>
-<div class="brief-actions"><button class="button">Write the email</button><a href="mailto:${site.email}">${site.email}</a></div>
-<div class="brief-done" data-brief-done hidden><p>Your email app should open with this message. If it does not, copy it and send it to <a href="mailto:${site.email}">${site.email}</a>.</p>
-<textarea readonly rows="7" data-brief-text aria-label="Your message"></textarea>
-<p class="brief-copy"><button type="button" class="button" data-brief-copy>Copy message</button><span role="status" data-brief-copied></span></p></div>
-</form>
-<p class="contact-actions brief-fallback"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a href="mailto:${site.email}">${site.email}</a></p>
+<section class="about" id="about" aria-labelledby="about-title"><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
+${colonnade(root, esc)}
+<p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></section>
+<section class="contact contact-block" id="contact" aria-labelledby="contact-title"><h2 id="contact-title" class="rise">${words(site.contactTitle, esc)}</h2>
+<p>${esc(site.contactBody)} ${esc(site.based)}</p>
+<div class="contact-reach"><a class="contact-mail" href="${site.mailto}">${site.email}</a>
+<p class="contact-links"><a href="${site.github}">GitHub</a><a href="${root}resume/">Résumé</a></p></div>
 </section>
 </main>${B.footer(root, `${root}resume/`)}
 <script type="application/json" id="bench-data">${JSON.stringify({ root, projects: data })}</script>

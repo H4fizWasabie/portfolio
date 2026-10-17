@@ -11,6 +11,7 @@
   --day:light-dark(#e9ece8,#171b20);--surface:light-dark(#f4f6f3,#20252c);--line:light-dark(#cdd2cb,#333a43);
   --ink:light-dark(#1f252c,#e7eaee);--muted:light-dark(#56606a,#a4adb7);
   --cobalt:light-dark(#2f4fd0,#8ea2ff);--on-cobalt:light-dark(#f4f6f3,#171b20);
+  --panel:light-dark(#2f4fd0,#1b2766);--on-panel:light-dark(#f4f6f3,#eef1ff); /* cobalt blocks: deep cobalt at night, light text on both */
   --shadow:0 24px 60px -32px light-dark(rgba(40,52,44,.45),rgba(0,0,0,.7));
   --r:8px;--max:1360px;--pad:clamp(20px,4vw,56px);
 }
@@ -33,7 +34,7 @@ p{margin:0;text-wrap:pretty}
 .button:active{transform:scale(.98)}
 .button-small{min-height:44px;padding:8px 16px;font-size:.9375rem}
 /* Plain links keep their look; padding and min-height give them a thumb-sized hit area. */
-.text-link,.site-footer a,:is(.contact-actions,.brief-actions,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
+.text-link,.site-footer a,:is(.contact-actions,.contact-links,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
 .text-link{font-weight:700}
 
 .site-nav{max-width:var(--max);margin:0 auto;padding:18px var(--pad);display:flex;align-items:center;gap:clamp(12px,2.4vw,28px);position:relative;z-index:3}
@@ -198,18 +199,60 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 :root[data-theme=dark] .thumb-night{display:block!important}
 :root[data-theme=dark] .thumb-day{display:none!important}
 
-/* About: portrait and words */
-.about{display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);gap:clamp(28px,5vw,72px);align-items:center;padding:clamp(64px,9vw,120px) 0 clamp(24px,4vw,48px)}
-.portrait{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:var(--r);box-shadow:var(--shadow)}
-.about>div{max-width:60ch}
-.about p{margin-top:16px;font-size:1.125rem}
+/* About: the colonnade. Without JavaScript every chapter is open, side by side (stacked on phones).
+   With it, one column is open and wide; hover or focus moves the cobalt panel up into the next one
+   while the old one leaves upward (about.js sets .is-open and .is-leaving). */
+.about{padding:clamp(64px,9vw,120px) 0 clamp(24px,4vw,48px)}
+.colonnade{list-style:none;margin:32px 0 0;padding:0;display:flex;border-block:1px solid var(--line)}
+.chapter{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
+.chapter+.chapter{border-left:1px solid var(--line)}
+.chapter-tab{display:flex;gap:10px;align-items:center;width:100%;min-height:52px;padding:0 16px;border:0;background:var(--surface);color:var(--ink);font:700 .8125rem/1.2 Schibsted,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:left;cursor:pointer;box-shadow:inset 0 -3px 0 transparent}
+.chapter-tab span{color:var(--muted);font-variant-numeric:tabular-nums}
+.chapter-view{position:relative;overflow:hidden;height:clamp(380px,56svh,520px);background:var(--surface)}
+.chapter-view img{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;border-radius:0}
+.chapter-view .portrait{object-position:50% 22%}
+.chapter-panel{position:absolute;inset:auto 0 0;padding:24px 24px 28px;background:var(--panel);color:var(--on-panel)}
+.chapter-panel h3{font-size:clamp(1.5rem,2.4vw,2.25rem)}
+.chapter-panel p{margin-top:12px}
+.about .hiring{margin-top:24px;font-size:1.125rem}
+.js .chapter-tab:focus-visible{outline-offset:-3px}
+.js .chapter.is-open .chapter-tab{box-shadow:inset 0 -3px 0 var(--cobalt)}
+.js .chapter-panel{width:max(100%,24rem)} /* keeps its wrap while the column grows */
+.js .chapter:not(.is-open){flex-grow:1}
+.js .chapter.is-open{flex-grow:3.2}
+.js .chapter:not(.is-open) .chapter-panel{transform:translateY(100%)}
+.js .chapter.is-leaving .chapter-panel{transform:translateY(-100%)}
+.js .chapter.is-open .chapter-panel{transform:none}
+@media (prefers-reduced-motion:no-preference){
+  .js .chapter{transition:flex-grow .6s cubic-bezier(.2,.8,.2,1)}
+  .js :is(.is-open,.is-leaving) .chapter-panel{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+}
+@media (max-width:899px),(orientation:portrait){
+  .colonnade{flex-direction:column}
+  .chapter+.chapter{border-left:0;border-top:1px solid var(--line)}
+  .chapter-tab{min-height:56px}
+  .chapter-view{height:360px}
+  .chapter-view:has(.portrait){height:520px} /* the caption covers the lower half; this keeps the eyes above it */
+  .js .chapter-panel{width:100%}
+  .js .chapter-tab::after{content:"+";margin-left:auto;font-size:1.25rem}
+  .js .chapter.is-open .chapter-tab::after{content:"\2212"}
+  .js .chapter:not(.is-open) .chapter-view{height:0}
+  .js .chapter,.js .chapter.is-open{flex-grow:0}
+  @media (prefers-reduced-motion:no-preference){.js .chapter-view{transition:height .5s cubic-bezier(.2,.8,.2,1)}}
+}
 .hiring{color:var(--muted)}
 .hiring a{color:var(--ink);font-weight:700;display:inline-block;padding-block:10px;margin-block:-10px}
-@media (max-width:760px){.about{grid-template-columns:1fr}.portrait{max-width:280px}}
 .contact{margin:clamp(24px,4vw,48px) 0 clamp(48px,7vw,96px);padding:clamp(28px,5vw,64px);border-radius:var(--r);background:var(--surface)}
 .contact h2{font-size:clamp(1.9rem,3.6vw,3rem);max-width:16ch}
 .contact>p{margin-top:14px;color:var(--muted);max-width:52ch}
 .contact .contact-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:28px;color:var(--ink);font-weight:700}
+/* Home contact: a cobalt block with the address set large, no form. */
+.contact-block{background:var(--panel);color:var(--on-panel)}
+.contact-block>p{color:inherit}
+.contact-block :focus-visible{outline-color:var(--on-panel)}
+.contact-mail{display:inline-block;font-size:clamp(1.5rem,4.2vw,3rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;overflow-wrap:anywhere}
+.contact-links{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:12px;font-weight:700}
+@media (min-width:900px) and (orientation:landscape){.contact-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:0 clamp(32px,6vw,96px)}.contact-block>h2{grid-column:1}.contact-block>p{grid-column:1;align-self:start}.contact-reach{grid-column:2;grid-row:1/span 2;align-self:end}}
 .site-footer{max-width:var(--max);margin:0 auto;padding:24px var(--pad) 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9375rem;border-top:1px solid var(--line)}
 .site-footer p:last-child{display:flex;flex-wrap:wrap;gap:0 20px}
 
@@ -337,27 +380,6 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 .thread span{display:block;font-size:.75rem;font-weight:700;color:var(--muted)}
 .field-row input:not([type]){flex:1;min-width:0}
 
-/* Contact brief */
-.brief{display:grid;gap:22px;margin-top:28px;max-width:760px}
-.brief fieldset{border:0;margin:0;padding:0}
-.brief legend,.brief .field label{font-weight:700;margin-bottom:10px;padding:0}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:var(--r);box-shadow:inset 0 0 0 1.5px var(--line);font-weight:600;font-size:.9375rem;cursor:pointer;transition:box-shadow .2s,color .2s,background-color .2s}
-.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
-.chip:has(input:checked){background:var(--cobalt);color:var(--on-cobalt);box-shadow:none}
-.chip:has(input:focus-visible){outline:3px solid var(--cobalt);outline-offset:3px}
-.brief .field{display:grid;gap:6px}
-.brief .field label{margin:0}
-.brief textarea{font:inherit;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical;min-height:96px}
-.field-help{font-size:.875rem;color:var(--muted)}
-.brief-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;font-weight:700}
-.brief-done{display:grid;gap:12px;color:var(--muted)}
-.brief-done a{color:var(--ink);font-weight:700}
-.brief-done textarea{font:inherit;font-size:.9375rem;color:var(--ink);background:var(--day);border:1.5px solid var(--line);border-radius:var(--r);padding:12px 14px;resize:vertical}
-.brief-copy{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-weight:700;color:var(--ink)}
-.js .brief-fallback{display:none}
-.no-js .brief{display:none}
-
 /* /projects/ and /resume/ (main keeps its side padding) */
 .index-page,.resume-page{padding-top:clamp(20px,4vw,48px)}
 .index-page h1,.resume-page h1{font-size:clamp(2.6rem,6vw,4.5rem);margin-top:18px}
@@ -392,7 +414,6 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   :is(.work-grid,.shelf-items) a:hover strong{color:var(--cobalt)}
   .next a:hover strong{color:var(--cobalt)}
   .stepper button:hover{color:var(--cobalt)}
-  .chip:hover{box-shadow:inset 0 0 0 2px var(--cobalt)}
 }
 
 /* Wordmark: the name across the foot of every page. */
@@ -429,15 +450,12 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .shelf{border-top-color:transparent}
   .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 20%}
   @keyframes draw{from{transform:scaleX(0)}to{transform:none}}
-  .shelf-head,.shelf-note,.about>div>p,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
+  .shelf-head,.shelf-note,.contact>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
   @keyframes lift{from{opacity:0;transform:translateY(110px)}to{opacity:1;transform:none}}
   .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 10%) cover calc(20% + var(--n,0) * 4%)}
   .shelf-items li:nth-child(2){--n:1}.shelf-items li:nth-child(3){--n:2}
   @keyframes card{from{opacity:0;transform:translateY(200px) scale(.82) rotate(4deg)}to{opacity:1;transform:none}}
 
-  /* The portrait unrolls upwards out of a zoom, then drifts slower than the page. */
-  .portrait{animation:portrait linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
-  @keyframes portrait{0%{clip-path:inset(60% -80px -80px);transform:translateY(140px) scale(1.3)}30%{clip-path:inset(-80px);transform:none}100%{clip-path:inset(-80px);transform:translateY(-70px)}}
   /* In a swipeable row the cards' nearest scroller is the row, so they follow their shelf. */
   @media (max-width:900px){.shelf{view-timeline:--shelf}.shelf-items li{animation-timeline:--shelf}}
   .contact{animation:settle linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
@@ -448,9 +466,8 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
    head script sets it before first paint). The canvas is one fixed full-screen background and the
    page is a run of steps, about a screen tall each, with its panel at the bottom (phone) or to one side
    (wide) and the room showing in the rest: the hero, a project per step, a service per step, then the
-   goodbye. About and Contact follow it as plain page. Scroll snapping (proximity, so the long contact
-   form is free) rests each step in place and room.js keys the camera to that same position, so the
-   panel and the object it names arrive together.
+   goodbye. About and Contact follow it as plain page. Scroll snapping (proximity) rests each step in place and room.js keys the camera to that same position,
+   so the panel and the object it names arrive together.
    Without the attribute (no JavaScript, reduced motion, no WebGL, ?still= renders) none of this applies
    and the page keeps its static layout. */
 [data-room]{--nav-h:76px;--edge:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));--scrim-a:94%;--scrim-hold:75%;--scrim-fade:24px;--scrim-c:color-mix(in srgb,var(--day) var(--scrim-a),transparent);--scrim:linear-gradient(to top,transparent,var(--scrim-c) var(--scrim-fade),var(--scrim-c) var(--scrim-hold),transparent);scroll-snap-type:y proximity}
@@ -530,7 +547,7 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 [data-room] .shelf-action{margin-top:14px}
 
 /* The room is the animation now: the captions do not also fly in. */
-[data-room] :is(.rise,.rise .w>span,.shelf-items li,.shelf-head,.shelf-note,.about>div>p,.contact>p,.contact){animation:none}
+[data-room] :is(.rise,.rise .w>span,.shelf-items li,.shelf-head,.shelf-note,.contact>p,.contact){animation:none}
 [data-room] :is(.wordmark,.site-footer){position:relative;z-index:1;max-width:none;margin:0;background:var(--surface);border:0;
   padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
 /* The goodbye: the name fills the screen's foot over the room, the camera pulls back here. */
@@ -546,8 +563,8 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 [data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-96px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 96px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
 [data-room] .wordmark::after{content:"";position:absolute;inset:auto 0 0;height:32%;z-index:-1;background:linear-gradient(to top,color-mix(in srgb,var(--day) 92%,transparent) 80%,transparent)}
 /* About and Contact are plain page below the goodbye, on a solid ground so the room does not show through. */
-[data-room] :is(.about,.contact){background:var(--day);scroll-margin-top:var(--nav-h)}
-[data-room] .about{padding:clamp(64px,9vw,120px) var(--edge) clamp(24px,4vw,48px)}
+[data-room] :is(.about,.contact){scroll-margin-top:var(--nav-h)}
+[data-room] .about{background:var(--day);padding:clamp(64px,9vw,120px) var(--edge) clamp(24px,4vw,48px)}
 [data-room] .contact{margin:0;padding:clamp(28px,5vw,64px) var(--edge);border-radius:0;box-shadow:none}
 
 /* Wide: captions sit at the foot of their shelf, the room fills the rest. */
