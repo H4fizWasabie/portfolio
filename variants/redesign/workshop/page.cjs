@@ -42,7 +42,7 @@ const nav = (root, site, esc) => `<a class="skip" href="#main">Skip to content</
 const rise = (parts, esc) => parts.map((w, i) => (w === ' ' ? ' ' : `<span class="w"><span style="--i:${i}">${esc(w)}</span></span>`)).join('');
 const words = (text, esc) => rise(text.split(/( )/), esc);
 // The name set large where the page ends, rising letter by letter as it comes into view.
-const footer = root => `<p class="wordmark" aria-hidden="true">${rise([...site.name], s => s)}</p>${B.footer(root, `${root}resume/`)}`;
+const footer = root => `<p class="wordmark" aria-hidden="true" data-stop data-look="@end">${rise([...site.name], s => s)}</p>${B.footer(root, `${root}resume/`)}`;
 
 const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
 <span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
@@ -50,15 +50,16 @@ const card = (p, root, esc) => `<li class="work-${p.slug}"><a href="${root}work/
 // /projects/: every object render in one uneven grid.
 const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => card(p, root, esc)).join('')}</ul>`;
 
-// Homepage: one shelf per service, the projects that prove it beside it.
-const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
-${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</section>`).join('')}</div>`;
+// Homepage: one shelf per service, the projects that prove it beside it. data-look names what the
+// room shows while the shelf is on screen (room.js); teaching has no object, so it shows the desk.
+const shelves = (by, root, esc) => `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf" data-stop data-look="${slugs.join(' ') || '@teach'}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
+${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc)).join('')}</ul>` : teaching(root)}</div></section>`).join('')}</div>`;
 
 // One stop per project. Phones: each card rides the bottom of the screen over the room while the
 // camera rests on its object (room.js). Wide screens: these are only the scroll distance, and the
 // large caption (tour-card) shows the name instead. Shown only while the room is the background.
 const two = n => String(n).padStart(2, '0');
-const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li><div class="step-card"><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
+const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li data-stop data-look="${p.slug}"><div class="step-card"><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
 <p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
 <button class="button" type="button" data-open="${p.slug}">Open the project</button></div></li>`).join('')}</ol>`;
 
@@ -99,12 +100,12 @@ ${steps(projects, esc)}</section></div></div>
 <section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>
 ${shelves(by, root, esc)}</section>
 
-<section class="about" id="about" aria-labelledby="about-title">
+<section class="about" id="about" aria-labelledby="about-title" data-stop data-look="@about">
 <img class="portrait" src="${root}static/hafiz-portrait.webp" alt="Hafiz Jamali" width="580" height="725" loading="lazy">
 <div><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
 ${site.about.map(t => `<p>${esc(t)}</p>`).join('')}
 <p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></div></section>
-<section class="contact" id="contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
+<section class="contact" id="contact" data-stop data-hold data-look="@contact"><h2 class="rise">${words(site.contactTitle, esc)}</h2>
 <p>Pick what fits and add a line about how the work happens today. It opens an email to me with the details filled in. ${esc(site.based)}</p>
 <form class="brief" data-brief data-email="${site.email}" action="mailto:${site.email}?subject=Project%20enquiry" method="post" enctype="text/plain" novalidate>
 <fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>

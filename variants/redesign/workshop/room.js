@@ -53,21 +53,36 @@ function nightFader(onChange) {
 const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp', portrait: 'hafiz-portrait.webp' };
 // Parts of a project that sit apart from it and should not steer framing.
 const OFF_FRAME = new Set(['server']);
-// Per-object camera adjustments: distance multiplier and extra turn around the vertical axis.
-// The overview looks from azimuth ~0.7 rad; these turn each close-up towards the object's front.
-const VIEW = { procura: { yaw: -0.55 }, pims: { yaw: 0.45 }, 'dd-drugs-register': { yaw: -0.3, pull: 1.1 }, theoses: { yaw: -0.35 }, map: { yaw: -0.5, dist: 1.15 }, yen: { yaw: -0.2, dist: 1.3 } };
-// Where the camera goes once the projects are done: a wide shot of the room for the services, the
-// framed portrait, the writing desk, and a pull-back for the footer. Each is a look-at point, a
-// turn around the vertical axis, a distance (in home-camera distances) and where the page's panel
-// leaves room for it: off is how far the picture is pushed, as a share of the screen's width
-// (wide) or height (phone), so the subject sits in the part of the screen the panel does not cover.
-const STOPS = {
-  services: { at: [0.4, 0.6, -0.4], yaw: 0, dist: 1.1, off: [0.26, 0.2], phone: { at: [1.0, 0.5, -0.4], dist: 0.95 } },
-  servicesEnd: { at: [3.2, 0.6, -0.4], yaw: -0.25, dist: 1.2, off: [0.26, 0.2], phone: { at: [3.6, 0.5, -0.8], dist: 0.95 } },
-  about: { at: [6.0, 1.1, -2.7], yaw: -0.45, dist: 0.5, off: [-0.3, 0.2], phone: { dist: 0.34 } },
-  contact: { at: [9.0, 0.9, -2.4], yaw: -0.5, dist: 0.5, off: [0.23, 0.2], phone: { dist: 0.34 } },
-  footer: { at: [3.4, 0.6, -0.5], yaw: -0.1, dist: 1.6, off: [0, 0.17], phone: { dist: 1.2, off: [0, 0.2] } }
+// Per-view camera adjustments: distance multiplier, extra turn around the vertical axis (yaw), a
+// nudge of the look-at point (at) and, on phones, a pull (step back so a close-up sits whole in the
+// narrow frame). The overview looks from azimuth ~0.7 rad; these
+// turn each close-up towards the object's front and clear it of whatever stands in front. A key is a
+// project's slug or the slugs of a service's shelf (data-look in page.cjs). The plain values are what
+// render-stills.cjs uses for the thumbnails; on top of them .wide applies on wide screens, .alt for a
+// service's view (its panel is on the left, the subject on the right) and .phone on phones.
+const VIEW = {
+  procura: { yaw: -0.55, phone: { pull: 0.8 } },
+  pims: { yaw: 0.45, phone: { pull: 0.85 } },
+  'dd-drugs-register': { yaw: -0.3, wide: { yaw: 0 }, alt: { yaw: 0.25 }, phone: { yaw: 0, pull: 0.85 } }, // the page's views stay clear of the ring light
+  theoses: { yaw: -0.35, phone: { pull: 1 } },
+  '89lab': { phone: { pull: 0.7 } },
+  map: { yaw: -0.5, dist: 1.15, wide: { dist: 1.5 }, phone: { dist: 0.9, pull: 0.85 } },
+  yen: { yaw: -0.2, dist: 1.3, phone: { dist: 1.15, pull: 0.85 } },
+  'procura pims': { yaw: -0.7, dist: 0.8, phone: { pull: 0.55 } }, // the two ends of the room, straight on
+  'theoses 89lab yen': { yaw: -0.15, phone: { pull: 0.8 } }
 };
+// The rest of the page, by data-look="@name": a look-at point, a turn around the vertical axis, a
+// distance (in home-camera distances) and, on wide screens, where the page's panel leaves room for
+// it: off is how far the picture is pushed, as a share of the screen's width, so the subject sits in
+// the part of the screen the panel does not cover. .phone overrides on phones.
+const STOPS = {
+  hero: { at: [0.2, 0.55, 0.1], yaw: 0, dist: 1.1, off: 0.15, phone: { at: [1.1, 0.45, 0.1], dist: 0.46 } },
+  teach: { at: [0.4, 1.3, -2.2], yaw: -0.2, dist: 0.4, off: 0.22, phone: { dist: 0.34 } },
+  about: { at: [6.0, 1.1, -2.7], yaw: -0.45, dist: 0.5, off: -0.3, phone: { dist: 0.34 } },
+  contact: { at: [9.0, 0.9, -2.4], yaw: -0.5, dist: 0.5, off: 0.23, phone: { dist: 0.34 } },
+  end: { at: [3.4, 0.6, -0.5], yaw: -0.1, dist: 1.6, off: 0, phone: { dist: 1.2 } }
+};
+const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom of the screen
 const DRAWER_OFF = 0.2; // phones: an opened project sits in the top of the screen, above its sheet
 
 if (still) document.documentElement.classList.add('still');
@@ -317,9 +332,10 @@ function startBench(stage, { root, projects }) {
 
   let groups = {}, switcher = null, dirty = true, flight = null, active = null, hovered = null;
   let refresh = () => {}, life = null, intro = null, nightT = 0, lastNow = 0, lastAmbient = 0;
-  const openers = {}, open = {};
+  const openers = {}, open = {}, boxes = {}; // boxes: each project's frame, taken before it moves or the room builds in
   loadRoom(root, () => { dirty = true; }).then(({ room, groups: g, tint: t, refresh: rf }) => {
     groups = g;
+    for (const slug of order) boxes[slug] = frameBox(g[slug]);
     tint = t;
     refresh = rf;
     for (const slug of order) {
@@ -339,8 +355,8 @@ function startBench(stage, { root, projects }) {
     stage.prepend(canvas);
     hint.hidden = fine || !!still;
     resize();
-    // Objects are only 20-25px wide on a phone, so there the hint offers the tour and not the taps.
-    if (tour) hint.textContent = tour.steps ? 'Scroll for a tour' : fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
+    land();
+    if (tour) hint.textContent = fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
     if (still && still !== 'poster') fly(still, true);
     else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
     else if (!reduced) buildIn(room);
@@ -377,12 +393,13 @@ function startBench(stage, { root, projects }) {
   }
   new ResizeObserver(resize).observe(stage);
 
-  // The whole page is the room. Scrolling flies the camera along one path: the hero, each project
-  // (resting at each), a wide shot for the services, the portrait wall for About, the writing desk
-  // for Contact and a pull-back at the foot. Each stop is tied to where its content sits on the page
-  // (measure), so the camera arrives as the content does. Wide screens set each project's name beside
-  // the room (tour-card); on phones a card per project rides the bottom of the screen (page.cjs).
-  // Reduced motion, ?still= and no WebGL keep the static page.
+  // The whole page is the room. Scrolling flies the camera along one path with a stop for every
+  // [data-stop] element of the page (page.cjs): the hero, a project per screen, a service per screen,
+  // the portrait wall for About, the writing desk for Contact and a pull-back at the foot. Each stop
+  // names what the room should show (data-look) and is tied to the scroll position where the browser's
+  // own scroll snapping rests that element (measure), so the object on the card is the one in frame.
+  // Wide screens set each project's name beside the room (tour-card); on phones a card per project rides
+  // the bottom of the screen. Reduced motion, ?still= and no WebGL keep the static page.
   const html = document.documentElement;
   const card = stage.parentElement.querySelector('[data-tour-card]');
   const cardField = name => card.querySelector(`[data-t=${name}]`);
@@ -393,8 +410,9 @@ function startBench(stage, { root, projects }) {
   let tour = null, shown = -1, openedAt = 0, snap = true, lifeGap = 33;
   const homeDist = home.pos.distanceTo(home.target);
   function setTour() {
-    // Not while the room is still, reduced or loading (the head script has the layout ready).
-    if (still || reduced || !groups[order[0]]) return;
+    // Not while the room is still, reduced or loading (the head script has the layout ready), nor while
+    // it builds itself in (the pieces are tiny then, so nothing could be framed).
+    if (still || reduced || intro || !groups[order[0]]) return;
     const phone = stacked();
     html.dataset.room = phone ? 'phone' : 'wide';
     history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
@@ -402,49 +420,57 @@ function startBench(stage, { root, projects }) {
       const t = { ...STOPS[name], ...(phone && STOPS[name].phone) };
       const target = new THREE.Vector3(...t.at);
       const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, t.yaw);
-      return { pos: target.clone().add(dir.multiplyScalar(homeDist * t.dist)), target, ox: phone ? 0 : t.off[0], oy: phone ? t.off[1] : 0 };
+      return { pos: target.clone().add(dir.multiplyScalar(homeDist * t.dist)), target, ox: phone ? 0 : t.off, oy: phone ? PHONE_OY : 0 };
     };
-    const views = [
-      { pos: home.target.clone().add(home.pos.clone().sub(home.target).multiplyScalar(phone ? 0.9 : 1.1)), target: home.target, ox: phone ? 0 : 0.15, oy: phone ? 0.2 : -0.04 },
-      ...order.map(slug => ({ ...viewFor(slug), ox: 0, oy: phone ? 0.2 : 0 })),
-      ...Object.keys(STOPS).map(stop)
-    ];
+    // The hero first, then every stop of the page in order; a tall one (the contact form) is held
+    // along its whole length, so it has a second stop at its end.
+    const els = [null, ...document.querySelectorAll('[data-stop]')].flatMap(el => (el?.hasAttribute('data-hold') ? [{ el }, { el, end: true }] : [{ el }]));
+    const views = els.map(({ el }) => {
+      const look = el ? el.dataset.look : '@hero';
+      if (!el) return stop('hero');
+      if (look[0] === '@') return stop(look.slice(1));
+      // A project's object sits beside its caption; a service's objects sit beside its panel (the other side).
+      return { ...viewFor(look, el.matches('.shelf') ? -1 : 1), ox: 0, oy: phone ? PHONE_OY : 0 };
+    });
     const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
-    tour = { pos: curve('pos'), target: curve('target'), views, n: views.length - 1, phone, drift: order.length + 1, keys: tour?.keys };
+    tour = { pos: curve('pos'), target: curve('target'), views, els, n: views.length - 1, phone, keys: tour?.keys };
     if (phone) card.classList.add('is-away');
     measure();
   }
-  // Scroll position at which the camera rests on each stop, from the page's own layout: a project's
-  // card (phone) or its stretch of scrolling (wide), then the panels. Services also has an end, so the
-  // camera drifts along the shelves while they pass.
+  // The scroll position at which each stop rests, from the page's own layout: where scroll snapping
+  // puts its element (top, less its scroll-margin), the very end for the foot.
   function measure() {
     if (!tour) return;
-    const vh = innerHeight, y0 = scrollY;
-    const top = el => el.getBoundingClientRect().top + y0, bottom = el => el.getBoundingClientRect().bottom + y0;
-    const mid = el => (top(el) + bottom(el)) / 2 - vh / 2;
-    const [work, about, contact] = ['work', 'about', 'contact'].map(id => document.getElementById(id));
-    const keys = [0, ...[...stepList.children].map(li => (tour.phone ? top(li) - 0.3 * vh : mid(li)))];
-    keys.push(...(tour.phone
-      ? [top(work) - 0.55 * vh, bottom(work) - 0.45 * vh, top(about) - 0.55 * vh, top(contact) - 0.55 * vh]
-      : [top(work) - 0.45 * vh, bottom(work) - 0.55 * vh, mid(about), mid(contact)]), html.scrollHeight - vh);
-    for (let i = 1; i < keys.length; i++) keys[i] = Math.max(keys[i], keys[i - 1] + 1);
+    const vh = innerHeight, y0 = scrollY, max = html.scrollHeight - vh;
+    const top = el => el.getBoundingClientRect().top + y0;
+    const keys = tour.els.map(({ el, end }) => (!el ? 0 : el.dataset.look === '@end' ? max : end ? el.getBoundingClientRect().bottom + y0 - vh : top(el) - parseFloat(getComputedStyle(el).scrollMarginTop)));
+    for (let i = 1; i < keys.length; i++) keys[i] = Math.min(Math.max(keys[i], keys[i - 1] + 1), Math.max(max, keys[i - 1] + 1));
     tour.keys = keys;
     nav && html.style.setProperty('--nav-h', `${nav.offsetHeight}px`);
     snap = true;
   }
+  // The browser jumps to a hash link (#contact) while fonts and images are still arriving, and the
+  // sections move afterwards; so land on it again once the layout is final, unless the visitor has
+  // already scrolled or pressed something.
+  let moved = false;
+  for (const ev of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(ev, () => { moved = true; }, { once: true, passive: true });
+  const land = () => {
+    const el = !moved && !intro && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (el && !(el.id in bySlug)) { el.scrollIntoView(); snap = true; }
+  };
   new ResizeObserver(measure).observe(document.body);
-  addEventListener('load', measure);
-  document.fonts?.ready.then(measure);
-  // The camera rests at each stop for the outer part of a segment and travels in the middle
-  // (but drifts steadily where the content is one long panel).
-  const hold = f => THREE.MathUtils.smoothstep(f, 0.3, 0.7);
+  addEventListener('load', () => { measure(); land(); });
+  document.fonts?.ready.then(() => { measure(); land(); });
+  // The camera rests at each stop for the outer part of a segment and travels in the middle, which is
+  // where one card has gone and the next has not yet arrived.
+  const hold = f => THREE.MathUtils.smoothstep(f, 0.35, 0.65);
   const tourPos = new THREE.Vector3(), tourAim = new THREE.Vector3();
   function stepTour(dt) {
     const { keys, views, n } = tour;
     let i = 0;
     while (i < n - 1 && scrollY >= keys[i + 1]) i++;
     const f = THREE.MathUtils.clamp((scrollY - keys[i]) / (keys[i + 1] - keys[i]), 0, 1);
-    const g = i === tour.drift ? f : hold(f);
+    const g = hold(f);
     tour.pos.getPoint((i + g) / n, tourPos);
     tour.target.getPoint((i + g) / n, tourAim);
     const from = views[i], to = views[i + 1];
@@ -458,7 +484,7 @@ function startBench(stage, { root, projects }) {
     controls.target.lerp(tourAim, a);
     camera.lookAt(controls.target);
     const s = i + f;
-    lifeGap = s > order.length + 0.6 ? 120 : 33; // the room is mostly behind panels by now: it idles
+    lifeGap = s > order.length + 0.6 ? 120 : 33; // past the projects the room mostly idles
     hint.hidden = s > 0.2;
     if (tour.phone) return moving;
     // The caption names the project the camera is resting on; it changes while hidden.
@@ -516,7 +542,7 @@ function startBench(stage, { root, projects }) {
       p.position.y = p.userData.restY + (1 - easeOutBack(t)) * 1.4;
       p.scale.copy(p.userData.restScale).multiplyScalar(Math.max(0.0001, Math.min(1, t * 1.6)));
     });
-    if (done) { intro = null; sweep(); }
+    if (done) { intro = null; sweep(); setTour(); }
   }
 
   const tip = stage.querySelector('[data-tip]');
@@ -567,21 +593,29 @@ function startBench(stage, { root, projects }) {
   });
 
   const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  function viewFor(slug) {
-    const box = frameBox(groups[slug]);
+  // look: a project's slug, or the slugs of a service's shelf; side: 1 puts the subject left of
+  // centre on wide screens (the drawer or caption is on the right), -1 right of centre.
+  function viewFor(look, side = 1) {
+    const slugs = look.split(' ');
+    const box = new THREE.Box3();
+    for (const slug of slugs) box.union(boxes[slug]);
     const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3()).length();
-    const tune = VIEW[slug] || {};
-    const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, tune.yaw || 0);
+    const diag = box.getSize(new THREE.Vector3()).length();
+    const phone = stacked() && !still;
     const wide = !still && !stacked();
-    // Wide screens: shift the object left of the drawer. Stacked: the drawer sits below the room.
-    const target = center.clone().add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(wide ? size * 0.35 : 0));
-    const fit = size / 2 / Math.sin(THREE.MathUtils.degToRad(fitFov) / 2); // distance that fits the object
+    const tune = { ...VIEW[look], ...(wide && VIEW[look]?.wide), ...(side < 0 && VIEW[look]?.alt), ...(phone && VIEW[look]?.phone) };
+    const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, tune.yaw || 0);
+    const right = new THREE.Vector3().crossVectors(camera.up, dir).normalize();
+    const fit = diag / 2 / Math.sin(THREE.MathUtils.degToRad(fitFov) / 2); // distance that fits the object
     // Phones are narrow, so a close-up framed for a wide stage reads too close there: step back so
     // the object sits whole in frame, for tour stops and opened projects alike. A view whose
     // step-back would pass behind something in front of it sets its own pull in VIEW.
-    const pull = stacked() && !still ? tune.pull ?? 1.4 : 1;
+    const pull = phone ? tune.pull ?? 1.4 : 1;
     const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1) * pull;
+    // Wide screens: shift the object away from the drawer, caption or panel, by a share of what the
+    // screen shows at its distance. Stacked: the drawer sits below the room.
+    const shown = 2 * dist * Math.tan(THREE.MathUtils.degToRad(fitFov) / 2) * (size[0] / size[1]);
+    const target = center.clone().add(new THREE.Vector3(...(tune.at || [0, 0, 0]))).add(right.multiplyScalar(wide ? shown * 0.21 * side : 0));
     return { pos: target.clone().add(dir.multiplyScalar(dist)), target };
   }
   function fly(to, instant) {
@@ -704,13 +738,14 @@ function startBench(stage, { root, projects }) {
       dirty = true;
       if (t === 1) flight = null;
     }
+    const dt = Math.min(250, lastNow ? now - lastNow : 16); // a long frame (slow GPU) moves the camera as far as its time, not less
+    lastNow = now;
     if (shift.x !== shiftGoal.x || shift.y !== shiftGoal.y) {
+      const k = 1 - Math.pow(0.92, dt / 16.7); // by time, not by frame, so slow devices arrive as soon as fast ones
       if (reduced || (Math.abs(shiftGoal.x - shift.x) < 0.5 && Math.abs(shiftGoal.y - shift.y) < 0.5)) Object.assign(shift, shiftGoal);
-      else { shift.x += (shiftGoal.x - shift.x) * 0.08; shift.y += (shiftGoal.y - shift.y) * 0.08; }
+      else { shift.x += (shiftGoal.x - shift.x) * k; shift.y += (shiftGoal.y - shift.y) * k; }
       frame();
     }
-    const dt = Math.min(64, lastNow ? now - lastNow : 16);
-    lastNow = now;
     controls.enabled = !tour || !!active;
     if (tour && !active && !flight) { if (stepTour(dt)) dirty = true; } else if (controls.update()) dirty = true;
     fade(now);

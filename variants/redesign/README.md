@@ -2,11 +2,15 @@
 
 The live site is the **Workshop**: a small clay room, modelled in Blender, where every object is a
 project. The room is also the background of the whole homepage: the canvas is fixed behind the page and
-the scroll flies the camera through it (hero, each project, services, the framed portrait for About,
-the writing desk for Contact, a pull-back at the foot) while each section sits on a solid panel over it.
-`room.js` (`STOPS`, `measure`, `stepTour`) and the `[data-room]` block at the end of `workshop/style.css`
-do this; without JavaScript, with reduced motion, without WebGL or in `?still=` renders the page keeps its
-static layout. `turntable` and `workflow` are the other two candidates. They are archived: still served,
+the scroll flies the camera through it. The page is a run of steps about a screen tall (the hero, one per
+project, one per service, About, Contact, the foot), each a `[data-stop]` in `page.cjs` whose `data-look`
+names what the room shows; its panel sits at the bottom on phones and to one side on wide screens, and
+native scroll snapping (`y proximity`) rests each step in place. `room.js` (`VIEW`, `STOPS`, `measure`,
+`stepTour`) keys the camera to that same scroll position, so the object on a panel is the one in frame;
+the `[data-room]` block at the end of `workshop/style.css` lays it out. Without JavaScript, with reduced
+motion, without WebGL or in `?still=` renders the page keeps its static layout.
+
+`turntable` and `workflow` are the other two candidates. They are archived: still served,
 like the earlier variants, at `/variant-turntable/` and `/variant-workflow/` (plus the
 `/variant-workshop/` preview), all noindex.
 
