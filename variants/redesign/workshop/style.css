@@ -232,9 +232,13 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
   .colonnade{flex-direction:column}
   .chapter+.chapter{border-left:0;border-top:1px solid var(--line)}
   .chapter-tab{min-height:56px}
-  .chapter-view{height:360px}
-  .chapter-view:has(.portrait){height:520px} /* the caption covers the lower half; this keeps the eyes above it */
-  .js .chapter-panel{width:100%}
+  /* The image first, the caption below it, never over it. 3:2 shows the same 387px band of the
+     portrait at any phone width: hair to collar, so the whole face stays in. */
+  .chapter-view{height:auto;interpolate-size:allow-keywords}
+  .chapter-view img{position:static;display:block;height:auto;aspect-ratio:3/2;max-height:520px}
+  .chapter-view .portrait{object-position:50% 14%}
+  .chapter-panel{position:static}
+  .js .chapter .chapter-panel{width:100%;transform:none!important}
   .js .chapter-tab::after{content:"+";margin-left:auto;font-size:1.25rem}
   .js .chapter.is-open .chapter-tab::after{content:"\2212"}
   .js .chapter:not(.is-open) .chapter-view{height:0}

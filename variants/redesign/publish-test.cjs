@@ -6,7 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const assert = require('assert/strict');
+const http = require('http');
 const { execFileSync } = require('child_process');
+const { chromium } = require('playwright-core');
 
 const here = __dirname;
 const origin = 'https://portfolio.wasabietech.com';
@@ -71,4 +73,31 @@ assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
 assert.match(reader, /MAP — Android Productivity App/);
 assert.doesNotMatch(reader, /<iframe|<object|<embed/);
+// Browser step: serve the production build locally and check the layout where a phone would see it.
+async function browserChecks() {
+  const server = http.createServer((req, res) => {
+    const file = path.join(site, decodeURIComponent(new URL(req.url, 'http://x').pathname).replace(/\/$/, '/index.html'));
+    if (!file.startsWith(site) || !fs.existsSync(file)) return res.writeHead(404).end();
+    res.end(fs.readFileSync(file));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  try {
+    for (const width of [360, 390, 430]) {
+      const page = await browser.newPage({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
+      await page.goto(`http://127.0.0.1:${server.address().port}/`, { waitUntil: 'networkidle' });
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `/: no sideways scroll at ${width}px`);
+      assert.ok(await page.evaluate(() => { // About on phones: the open Chapter's caption sits below its image, never over it
+        const open = document.querySelector('.chapter.is-open, .chapter');
+        return open.querySelector('.chapter-panel').getBoundingClientRect().top >= open.querySelector('.chapter-view img').getBoundingClientRect().bottom - 0.5;
+      }), `/: About caption sits below the image at ${width}px`);
+      await page.close();
+    }
+  } finally {
+    await browser.close();
+    server.close();
+  }
+}
+
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, brief and résumé present; preview stays noindex`);
+browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image and nothing scrolls sideways at 360, 390 and 430px'));
