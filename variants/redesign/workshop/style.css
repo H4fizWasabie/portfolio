@@ -137,7 +137,7 @@ input,select{accent-color:var(--cobalt)}
 
 /* Touch screens have no hover, so the room says it can be tapped until the first tap. */
 .bench-hint{position:absolute;left:50%;bottom:10px;z-index:2;transform:translateX(-50%);display:flex;align-items:center;gap:8px;pointer-events:none;
-  padding:6px 12px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font-weight:600;font-size:.875rem;white-space:nowrap}
+  padding:6px 12px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font-weight:600;font-size:.875rem;width:max-content;max-width:calc(100% - 2 * var(--pad));text-align:center}
 .bench-hint::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cobalt)}
 @media (prefers-reduced-motion:no-preference){.bench-hint::before{animation:hint 1.6s ease-in-out 3}}
 @keyframes hint{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--cobalt) 25%,transparent)}}
@@ -163,6 +163,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .work{padding:clamp(64px,9vw,120px) 0 0}
 .shelves{margin-top:28px}
 .shelf{position:relative;display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
+.shelf-panel{display:contents} /* the head and the cards (or note) are the grid's two columns; [data-room] makes the panel a box again */
 .shelf>*{min-width:0} /* a grid item's min-content would widen the column past a phone screen */
 .shelf-head h3{font-size:1.5rem;letter-spacing:-.02em}
 .shelf-head p{margin-top:8px;color:var(--muted);max-width:34ch}
@@ -170,6 +171,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .shelf-note{align-self:center;max-width:58ch;font-size:1.125rem}
 .shelf-action{margin-top:20px}
 .shelf-note a{font-weight:700}
+.shelf-all{margin-top:8px}
 @media (max-width:900px){.shelf{grid-template-columns:1fr}.shelf-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* Phones: each shelf's cards are a swipeable row that snaps card by card, the next one peeking in.
    (They once stacked like a deck; the next shelf slid over the text of the one before.) */

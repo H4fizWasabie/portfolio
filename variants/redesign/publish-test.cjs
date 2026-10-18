@@ -45,6 +45,7 @@ assert.ok(home.includes(verification), 'Google Search Console verification lost'
 assert.equal((home.match(/data-pick="/g) || []).length, projects.length, 'every project is on the bench');
 assert.equal((home.match(/<li class="work-/g) || []).length, projects.length, 'every project is in the work grid');
 assert.match(home, /href="resume\/"/, 'homepage links the résumé on this site');
+assert.match(home, /href="projects\/"/, 'homepage links all projects');
 assert.match(home, /data-enquiry/, 'Enquiry form present');
 
 const theoses = fs.readFileSync(path.join(site, 'work/theoses/index.html'), 'utf8');
@@ -152,6 +153,7 @@ async function browserChecks() {
       const open = document.querySelector('.chapter.is-open');
       return open.querySelector('.chapter-panel').getBoundingClientRect().left >= open.querySelector('.portrait').getBoundingClientRect().right - 0.5;
     }), '/: About caption sits beside the portrait at 1440px');
+    assert.ok(await desktop.evaluate(() => [...document.querySelector('.shelf-items').children].every(li => li.getBoundingClientRect().width >= 200)), '/: Shelf cards stay at least 200px wide without the Room (1440px)');
     await desktop.close();
     await enquiryChecks(browser, `http://127.0.0.1:${server.address().port}/`);
   } finally {
@@ -161,4 +163,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, Enquiry form and résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
+browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px, the Shelf cards stay 200px or wider without the Room; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
