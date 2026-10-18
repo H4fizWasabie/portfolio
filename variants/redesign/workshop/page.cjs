@@ -59,7 +59,7 @@ const words = (text, esc) => rise(text.split(/( )/), esc);
 const wordmark = `<p class="wordmark" aria-hidden="true" data-stop data-look="@end">${rise([...site.name], s => s)}</p>`;
 const footer = root => `${wordmark}${B.footer(root, `${root}resume/`)}`;
 
-const card = (p, root, esc, num) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/">${thumb(root, p, 'loading="lazy"')}
+const card = (p, root, esc, num) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
 <span class="work-text">${num ? `<span class="tour-count">${num}</span>` : ''}<span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
 
 // /projects/: every object render in one uneven grid.
