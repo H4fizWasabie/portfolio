@@ -61,11 +61,11 @@ const OFF_FRAME = new Set(['server']);
 // render-stills.cjs uses for the thumbnails; on top of them .wide applies on wide screens, .alt for a
 // service's view (its panel is on the left, the subject on the right) and .phone on phones.
 const VIEW = {
-  procura: { yaw: -0.55, phone: { pull: 0.8 } },
-  pims: { yaw: 0.45, phone: { pull: 0.85 } },
+  procura: { yaw: -0.55, phone: { pull: 0.6 } },
+  pims: { yaw: 0.45, phone: { pull: 0.6 } },
   'dd-drugs-register': { yaw: -0.3, wide: { yaw: -0.4, dist: 0.8 }, alt: { yaw: 0.25 }, phone: { yaw: 0, pull: 0.85 } }, // the page's views stay clear of the ring light
-  theoses: { yaw: -0.35, wide: { dist: 0.8 }, phone: { pull: 1 } },
-  '89lab': { wide: { dist: 0.55 }, phone: { pull: 0.7 } },
+  theoses: { yaw: -0.35, wide: { dist: 0.8 }, phone: { pull: 0.7 } },
+  '89lab': { wide: { dist: 0.55 }, phone: { pull: 0.5 } },
   map: { yaw: -0.5, dist: 1.15, wide: { dist: 1.5 }, phone: { dist: 0.9, pull: 0.85 } },
   yen: { yaw: -0.2, dist: 1.3, wide: { dist: 0.7 }, phone: { dist: 1.15, pull: 0.85 } },
   'procura pims': { yaw: -0.7, dist: 0.8, phone: { pull: 0.55 } }, // the two ends of the room, straight on
