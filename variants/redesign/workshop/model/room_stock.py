@@ -4,7 +4,8 @@
 # accent: the kraft cartons of a delivery. Its objects, by the page's conventions:
 #   obj_procura   the workstation against the partition, its monitor screen_procura (Procura's screenshots)
 #   obj_pims      the wall tablet where stock requests arrive, its screen screen_pims (PIMS's screenshots)
-#   glow_*        the ceiling panels
+#   glow_stock_panels  the ceiling panels (off at night)
+#   glow_stock_lamp    the task lamp on the workstation (on day and night)
 # Coordinates as in build_house.py: the Room runs from the back wall (y = YB + 0.4) to the wing's back wall, on the ground floor.
 
 X0, X1 = -FX + 0.4, -0.5          # inside the wing's left wall to the partition with the records Room
@@ -19,9 +20,10 @@ BIN = mat('bin', None, color=(0.86, 0.88, 0.9), rough=0.6)
 BIN_BLUE = mat('bin_blue', None, color=(0.36, 0.5, 0.66), rough=0.6)  # the bins' labels
 KRAFT = mat('kraft', None, color=(0.66, 0.5, 0.33), rough=0.95)
 LAMINATE = mat('laminate', None, color=(0.9, 0.9, 0.89), rough=0.5)
-SCREEN = mat('screen', None, color=(0.02, 0.02, 0.025), rough=0.2)  # the page puts the screenshot on it
+SCREEN = mat('screen', None, color=(0.02, 0.02, 0.025), rough=0.2, emit=float(os.environ.get('SCREEN', 3.0)), emit_color=(0.85, 0.9, 1.0))  # lit, so it lights the desk in the bake; the page puts the screenshot on it
 RUBBER = mat('rubber', None, color=(0.04, 0.04, 0.045), rough=0.9)
 PANEL = mat('panel_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('PANEL', 24.0)), emit_color=(0.97, 0.98, 1.0))  # LED panels, cool white
+PANEL['panel'] = True  # off in the night bake (build_house.py)
 
 room_parts = []
 
@@ -140,11 +142,13 @@ desk.cyl(X1 - 1.15, DY, FL0, FL0 + 0.02, 0.28, RUBBER, seg=10)                  
 desk.cyl(X1 - 1.15, DY, FL0 + 0.02, FL0 + 0.44, 0.025, STEEL, seg=8)
 desk.box(X1 - 1.38, X1 - 0.92, DY - 0.24, DY + 0.24, FL0 + 0.44, FL0 + 0.52, FABRIC, bevel=0.03, segments=3)
 desk.box(X1 - 1.42, X1 - 1.36, DY - 0.22, DY + 0.22, FL0 + 0.6, FL0 + 1.05, FABRIC, bevel=0.025, segments=3)
-screen = part('screen_procura', procura_root, weight=0.6)
-v = [screen.bm.verts.new(p) for p in ((X1 - 0.265, DY + 0.33, MZ - 0.21), (X1 - 0.265, DY - 0.33, MZ - 0.21), (X1 - 0.265, DY - 0.33, MZ + 0.21), (X1 - 0.265, DY + 0.33, MZ + 0.21))]
-f = screen.bm.faces.new(v)
-f.material_index = screen.slot(SCREEN)
-screen.face_uv[f] = [(0, 0), (1, 0), (1, 1), (0, 1)]
+lamp = part('glow_stock_lamp', procura_root)                                              # a task lamp at the desk's far end
+desk.cyl(X1 - 0.2, DY + 0.62, FL0 + 0.75, FL0 + 0.77, 0.08, RUBBER, seg=12)
+desk.cyl(X1 - 0.2, DY + 0.62, FL0 + 0.77, FL0 + 1.2, 0.008, STEEL, seg=6)
+desk.box(X1 - 0.5, X1 - 0.2, DY + 0.61, DY + 0.63, FL0 + 1.19, FL0 + 1.21, STEEL)
+desk.cyl(X1 - 0.52, DY + 0.62, FL0 + 1.1, FL0 + 1.2, 0.06, RUBBER, seg=12, r_top=0.03, caps=(False, True))
+lamp.cyl(X1 - 0.52, DY + 0.62, FL0 + 1.095, FL0 + 1.1, 0.05, GLOW, seg=12)
+quad(part('screen_procura', procura_root, weight=0.6), ((X1 - 0.265, DY + 0.33, MZ - 0.21), (X1 - 0.265, DY - 0.33, MZ - 0.21), (X1 - 0.265, DY - 0.33, MZ + 0.21), (X1 - 0.265, DY + 0.33, MZ + 0.21)), SCREEN)
 
 # --- PIMS's wall tablet by the door, on the left wall, where stock requests arrive
 TZ, TYc = FL0 + 1.45, Y0 + 1.5
@@ -153,11 +157,7 @@ tablet = part('pims_tablet', pims_root, weight=1.4)
 tablet.box(X0, X0 + 0.03, TYc - 0.32, TYc + 0.32, TZ - 0.21, TZ + 0.21, RUBBER, bevel=0.008)
 tablet.box(X0, X0 + 0.25, TYc - 0.2, TYc + 0.2, TZ - 0.52, TZ - 0.5, POWDER)                # a small shelf under it, with a scanner
 tablet.box(X0 + 0.06, X0 + 0.18, TYc + 0.04, TYc + 0.14, TZ - 0.5, TZ - 0.42, RUBBER, bevel=0.01)
-screen = part('screen_pims', pims_root, weight=0.6)
-v = [screen.bm.verts.new(p) for p in ((X0 + 0.032, TYc - 0.3, TZ - 0.19), (X0 + 0.032, TYc + 0.3, TZ - 0.19), (X0 + 0.032, TYc + 0.3, TZ + 0.19), (X0 + 0.032, TYc - 0.3, TZ + 0.19))]
-f = screen.bm.faces.new(v)
-f.material_index = screen.slot(SCREEN)
-screen.face_uv[f] = [(0, 0), (1, 0), (1, 1), (0, 1)]
+quad(part('screen_pims', pims_root, weight=0.6), ((X0 + 0.032, TYc - 0.3, TZ - 0.19), (X0 + 0.032, TYc + 0.3, TZ - 0.19), (X0 + 0.032, TYc + 0.3, TZ + 0.19), (X0 + 0.032, TYc - 0.3, TZ + 0.19)), SCREEN)
 
 room_root = empty('room_stock', (0, 0, 0))
 procura_root.parent = pims_root.parent = room_root

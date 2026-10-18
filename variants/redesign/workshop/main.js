@@ -23,8 +23,9 @@ for (const img of document.querySelectorAll('img[loading=lazy]')) {
 if (document.querySelector('[data-stage], [data-object]')) {
   const room = () => {
     // Fetch the model alongside the script instead of after it; room.js's loaders pick the preloads up. The homepage
-    // shows the House; a project page its object from the old room model.
-    const files = document.querySelector('[data-stage]') ? [['fetch', 'house.glb'], ['image', 'house-light.webp'], ['image', 'backdrop.webp'], ['image', 'house-wet.webp'], ['image', 'water-normal.webp']] : [['fetch', 'workshop.glb']];
+    // shows the House; a project page its object from its Room's asset.
+    const asset = document.querySelector('[data-object]')?.dataset.asset;
+    const files = asset ? [['fetch', `room-${asset}.glb`], ['image', `room-${asset}-light.webp`]] : [['fetch', 'house.glb'], ['image', 'house-light.webp'], ['image', 'backdrop.webp'], ['image', 'house-wet.webp'], ['image', 'water-normal.webp']];
     for (const [as, file] of files) document.head.append(Object.assign(document.createElement('link'), { rel: 'preload', as, crossOrigin: '', href: new URL(file, import.meta.url).href }));
     // If the room cannot start the page falls back to its static layout (room.js does the same for no WebGL).
     import('./room.js').catch(() => document.documentElement.removeAttribute('data-room'));

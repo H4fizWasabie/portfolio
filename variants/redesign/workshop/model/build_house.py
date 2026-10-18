@@ -10,7 +10,8 @@
 # overcast sky (the CC0 HDRI below, only at bake time, white-balanced cooler) and the inside by lamps at 2700 K (a Blackbody
 # node), so warm light spills out through the glass onto the terrace, the plinth edge and the cantilever's underside.
 # The lake and the backdrop (mountain, mist) are not in the glb: room.js makes the water, build_backdrop.py renders the
-# backdrop. A night bake (ticket #110) would swap in a second lighting texture.
+# backdrop. A second bake, at night (a faint overcast glow, the lamps on), goes into house-light-night-raw.png beside the glb; the
+# page swaps it in with the desk-lamp switch.
 #
 # The concrete (board_formed) is poured, board-formed concrete made here: boards with their own tone and a faint grain, seams, an
 # even grid of recessed tie holes and the runoff below them, pores. A second bake in UV set 2 finds where rain runs down from
@@ -26,15 +27,16 @@
 # Conventions the page relies on (workshop/room.js):
 #   land, plinth, house, ...    the lit, baked structure (the lighting texture is applied to every mesh that has TEXCOORD_1)
 #   glass_*                     transparent, never casts shadows; no lighting texture
-#   glow_*                      emissive parts (lamps, downlights, candle flames); they brighten at night
+#   glow_*                      emissive parts (lamps, downlights, candle flames, LEDs); glow_<room>_panels, a
+#                               Room's ceiling lights, are off at night
 #   trees, rocks                dark, unlit (vertex colours carry their shading); the page shows them with basic materials
 #   trees_cards                 the near trees' branch cards: the same, with the branch texture cut out by its alpha
 #   sheer                       the sheer curtains, baked like the rest; the page makes them see-through
 #   poster_<step>               the How I work posters on the stair wall (requirements, build, measure): the page draws them
 #   doorway_<slug>              empty on the sill of a Room's doorway, on the back wall, where Rooms attach
 #                               (stock and records on the ground floor, ai and android upstairs)
-#   door_<slug>                 the closed door leaf in that doorway (a Room's asset replaces it)
-#   balcony                     empty on the upstairs balcony floor, where the teaching stop looks
+#   door_<slug>                 the closed door leaf in that doorway (taken away once its Room is in)
+#   obj_<project>, screen_<project>  in a Room's asset (room_<slug>.py): a project's object and its screen(s)
 #
 # Coordinates: Blender Z up, the lake in front at y < 0, the front of the House on the plane y=1 facing -y, the back wall
 # on y=12. The water is at z=0. (glTF: x, z, -y, so the House's front faces +z and its depth runs along -z.)
@@ -863,11 +865,56 @@ objects = [p.build() for p in parts] + [d.build() for d in doors]
 
 for slug, x, st in DOORS:
     empty(f'doorway_{slug}', (x, YB, FL1 if st else FL0))
-empty('balcony', (0, -0.2, FL1))
 
 # --- the Rooms behind the doorways (room_<slug>.py, run here so a Room and the House light each other), each its own asset
+def quad(part, corners, material):
+    """A flat face through four corners (bottom left, bottom right, top right, top left as seen from its front), mapped 0..1:
+    a screen, whose picture the page puts on it."""
+    f = part.bm.faces.new([part.bm.verts.new(c) for c in corners])
+    f.material_index = part.slot(material)
+    part.face_uv[f] = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    return f
+
+
+def rod(part, a, b, r, material, seg=12, r_b=None):
+    """A cylinder (a cone, with r_b) from point a to point b."""
+    a, d = Vector(a), Vector(b) - Vector(a)
+    before = set(part.bm.verts)
+    part.cyl(0, 0, 0, d.length, r, material, seg=seg, r_top=r_b)
+    q = d.to_track_quat('Z', 'Y' if abs(d.normalized().x) > 0.9 else 'X')  # turns +z onto d
+    for v in set(part.bm.verts) - before:
+        v.co = a + q @ v.co
+    part.bm.normal_update()
+
+
+def ring(part, centre, normal, R, r, material, seg=40, tube=8):
+    """A torus round `normal` at `centre`: radius R, tube radius r."""
+    q = Vector(normal).to_track_quat('Z', 'Y' if abs(Vector(normal).normalized().x) > 0.9 else 'X')
+    rows = [[part.bm.verts.new(Vector(centre) + q @ Vector(((R + r * math.cos(b)) * math.cos(a), (R + r * math.cos(b)) * math.sin(a), r * math.sin(b))))
+             for b in np.linspace(0, 2 * math.pi, tube, endpoint=False)] for a in np.linspace(0, 2 * math.pi, seg, endpoint=False)]
+    mi = part.slot(material)
+    for i in range(seg):
+        for j in range(tube):
+            f = part.bm.faces.new((rows[i][j], rows[(i + 1) % seg][j], rows[(i + 1) % seg][(j + 1) % tube], rows[i][(j + 1) % tube]))
+            f.material_index = mi
+    part.bm.normal_update()
+
+
+def turned(parts, centre, angle, make):
+    """Runs make() and turns what it added to these parts by `angle` radians about the upright through centre (x, y)."""
+    before = [set(p.bm.verts) for p in parts]
+    make()
+    c, s_ = math.cos(angle), math.sin(angle)
+    for p, old in zip(parts, before):
+        for v in set(p.bm.verts) - old:
+            x, y = v.co.x - centre[0], v.co.y - centre[1]
+            v.co.x, v.co.y = centre[0] + x * c - y * s_, centre[1] + x * s_ + y * c
+        p.bm.normal_update()
+
+
 ROOMS = {}
-exec(open(os.path.join(here, 'room_stock.py')).read())
+for room in ('stock', 'records', 'ai', 'android'):
+    exec(open(os.path.join(here, f'room_{room}.py')).read())
 ROOM_OBJS = {o for objs in ROOMS.values() for o in objs}
 
 # --- boulders at the waterline and trees on the land
@@ -1209,17 +1256,6 @@ try:
 except Exception as e:  # CPU is just slower
     print('bake on CPU:', e)
 
-img = bpy.data.images.new('lightmap', LIGHT_RES, LIGHT_RES, alpha=False, float_buffer=True)
-img.colorspace_settings.name = 'Non-Color'
-baked = set()
-for o in bake_objs:
-    for m in o.data.materials:
-        baked.add(m)
-for m in baked:
-    n = m.node_tree.nodes.new('ShaderNodeTexImage')
-    n.image = img
-    n.name = 'bake'
-    m.node_tree.nodes.active = n
 # Glass lets light through while baking
 clear = bpy.data.materials.new('clear')
 clear.use_nodes = True
@@ -1233,26 +1269,56 @@ glass_users = [o for o in scene.objects if o.type == 'MESH' and o.name.startswit
 for o in glass_users:
     o.data.materials[0] = clear
 
-bpy.ops.object.bake(type='DIFFUSE', pass_filter={'DIRECT', 'INDIRECT'}, margin=12, margin_type='EXTEND', use_clear=True)
+baked = set()
 
-# Each Room into its own lighting texture, in the same light, with its door open (the page takes the door away once the Room is in).
-room_imgs = {}
-for slug, objs in ROOMS.items():
-    targets = [o for o in objs if o.type == 'MESH' and not o.name.startswith(('glow_', 'screen_', 'glass_'))]
-    lightmap_uvs(targets)
-    rimg = bpy.data.images.new(f'lightmap_{slug}', LIGHT_RES, LIGHT_RES, alpha=False, float_buffer=True)
-    rimg.colorspace_settings.name = 'Non-Color'
-    for m in {m for o in targets for m in o.data.materials}:
+
+def lightmap_image(name):
+    i = bpy.data.images.new(name, LIGHT_RES, LIGHT_RES, alpha=False, float_buffer=True)
+    i.colorspace_settings.name = 'Non-Color'
+    return i
+
+
+def bake_into(objs, image):
+    """Bakes the light falling on these objects into `image`, through their lighting UV set."""
+    for m in {m for o in objs for m in o.data.materials}:
         n = m.node_tree.nodes.get('bake') or m.node_tree.nodes.new('ShaderNodeTexImage')
-        n.name, n.image = 'bake', rimg
+        n.name, n.image = 'bake', image
         m.node_tree.nodes.active = n
         baked.add(m)
-    door = bpy.data.objects[f'door_{slug}']
-    door.hide_render = True
-    select(targets)
+    select(objs)
     bpy.ops.object.bake(type='DIFFUSE', pass_filter={'DIRECT', 'INDIRECT'}, margin=12, margin_type='EXTEND', use_clear=True)
-    door.hide_render = False
-    room_imgs[slug] = rimg
+
+
+# Each Room bakes into its own lighting texture, in the same light, with its door open (the page takes the door away once the
+# Room is in). Its ceiling panels (glow_<slug>_panels) light it by day; at night they are off and its lamps and screens light it.
+room_targets = {slug: [o for o in objs if o.type == 'MESH' and not o.name.startswith(('glow_', 'screen_', 'glass_'))] for slug, objs in ROOMS.items()}
+for targets in room_targets.values():
+    lightmap_uvs(targets)
+
+
+def bake_all(suffix):
+    house_img = lightmap_image('lightmap' + suffix)
+    bake_into(bake_objs, house_img)
+    imgs = {}
+    for slug, targets in room_targets.items():
+        door = bpy.data.objects[f'door_{slug}']
+        door.hide_render = True
+        imgs[slug] = lightmap_image(f'lightmap_{slug}{suffix}')
+        bake_into(targets, imgs[slug])
+        door.hide_render = False
+    return house_img, imgs
+
+
+img, room_imgs = bake_all('')
+# Night: no bright sky, only a faint cool glow in the overcast; the House's lamps stay on and the Rooms' panels go off.
+NIGHT_SKY = float(os.environ.get('NIGHT_SKY', 0.04))  # of the day sky's radiance
+gain.inputs[7].default_value = (*(SKY_LEVEL * NIGHT_SKY * np.array((0.7, 0.85, 1.25)) / sky_mean), 1)
+panels = [(m.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'], m.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value) for m in materials.values() if m.get('panel')]
+for strength, _ in panels:
+    strength.default_value = 0.0
+img_night, room_imgs_night = bake_all('_night')
+for strength, day in panels:  # the glb carries the day's
+    strength.default_value = day
 select(bake_objs)
 
 for o in glass_users:
@@ -1365,21 +1431,16 @@ for o, ms in originals.items():
 
 # Store irradiance for three: the baked value is a white surface's radiance (E / pi); keep it linear in 8 bits as sRGB.
 # Damp concrete is darker and a worn corner paler, so that goes in here; the wet map is the concrete's roughness.
-px = np.empty(LIGHT_RES * LIGHT_RES * 4, np.float32)
-img.pixels.foreach_get(px)
-rgb = px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, :3]
-print('lightmap: mean %.3f p99 %.3f max %.3f' % (rgb.mean(), np.percentile(rgb, 99), rgb.max()))
-px = np.empty(LIGHT_RES * LIGHT_RES * 4, np.float32)
-mimg.pixels.foreach_get(px)
-damp, wear, algae = (px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, i] for i in (0, 1, 2))
-print('damp: mean %.3f on concrete %.3f; wear mean %.4f' % (damp.mean(), damp[damp > 0.01].mean() if (damp > 0.01).any() else 0, wear.mean()))
-rgb = rgb * (1 - np.array((0.56, 0.53, 0.56)) * damp[:, :, None]) * (1 + 0.22 * wear[:, :, None])
-rgb = rgb * (1 - np.array((0.55, 0.3, 0.62)) * algae[:, :, None])  # the waterline's algae: darker, and green
-v = np.clip(rgb / LIGHT_RANGE, 0, 1)
-v = np.where(v <= 0.0031308, v * 12.92, 1.055 * np.power(v, 1 / 2.4) - 0.055)
-rows = (np.round(v * 255).astype(np.uint8))[::-1]  # Blender's rows run bottom to top; images run top to bottom
-wet = np.clip(0.9 - 0.52 * damp, 0, 1)             # roughness: 0.9 dry, 0.38 where it is damp
-wet_rows = np.repeat(np.round(wet * 255).astype(np.uint8)[:, :, None], 3, 2)[::-1]
+def pixels(image):
+    px = np.empty(LIGHT_RES * LIGHT_RES * 4, np.float32)
+    image.pixels.foreach_get(px)
+    return px.reshape(LIGHT_RES, LIGHT_RES, 4)
+
+
+def encode(rgb):
+    v = np.clip(rgb / LIGHT_RANGE, 0, 1)
+    v = np.where(v <= 0.0031308, v * 12.92, 1.055 * np.power(v, 1 / 2.4) - 0.055)
+    return np.round(v * 255).astype(np.uint8)[::-1]  # Blender's rows run bottom to top; images run top to bottom
 
 
 def png(path, a):
@@ -1389,16 +1450,22 @@ def png(path, a):
     open(path, 'wb').write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw, 9)) + chunk(b'IEND', b''))
 
 
-png(out_light, rows)
-png(out_wet, wet_rows)
-for slug, rimg in room_imgs.items():  # a Room's lighting texture: irradiance as for the House, without the weather
-    px = np.empty(LIGHT_RES * LIGHT_RES * 4, np.float32)
-    rimg.pixels.foreach_get(px)
-    rgb = px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, :3]
-    print('room %s lightmap: mean %.3f p99 %.3f' % (slug, rgb.mean(), np.percentile(rgb, 99)))
-    v = np.clip(rgb / LIGHT_RANGE, 0, 1)
-    v = np.where(v <= 0.0031308, v * 12.92, 1.055 * np.power(v, 1 / 2.4) - 0.055)
-    png(os.path.join(os.path.dirname(out_glb), f'room-{slug}-light-raw.png'), np.round(v * 255).astype(np.uint8)[::-1])
+damp, wear, algae = (pixels(mimg)[:, :, i] for i in (0, 1, 2))
+print('damp: mean %.3f on concrete %.3f; wear mean %.4f' % (damp.mean(), damp[damp > 0.01].mean() if (damp > 0.01).any() else 0, wear.mean()))
+out_dir = os.path.dirname(out_glb)
+for image, path in ((img, out_light), (img_night, os.path.join(out_dir, 'house-light-night-raw.png'))):
+    rgb = pixels(image)[:, :, :3]
+    print('%s: mean %.3f p99 %.3f max %.3f' % (image.name, rgb.mean(), np.percentile(rgb, 99), rgb.max()))
+    rgb = rgb * (1 - np.array((0.56, 0.53, 0.56)) * damp[:, :, None]) * (1 + 0.22 * wear[:, :, None])
+    rgb = rgb * (1 - np.array((0.55, 0.3, 0.62)) * algae[:, :, None])  # the waterline's algae: darker, and green
+    png(path, encode(rgb))
+wet = np.clip(0.9 - 0.52 * damp, 0, 1)  # roughness: 0.9 dry, 0.38 where it is damp
+png(out_wet, np.repeat(np.round(wet * 255).astype(np.uint8)[:, :, None], 3, 2)[::-1])
+for suffix, imgs in (('', room_imgs), ('-night', room_imgs_night)):  # a Room's lighting textures: irradiance as for the House, without the weather
+    for slug, rimg in imgs.items():
+        rgb = pixels(rimg)[:, :, :3]
+        print('room %s%s lightmap: mean %.3f p99 %.3f' % (slug, suffix, rgb.mean(), np.percentile(rgb, 99)))
+        png(os.path.join(out_dir, f'room-{slug}-light{suffix}-raw.png'), encode(rgb))
 if os.environ.get('HOUSE_MASK_PNG'):  # to look at where it is damp (red) and worn (green)
     png(os.environ['HOUSE_MASK_PNG'], np.round(np.clip(np.stack([damp, wear, np.zeros_like(damp)], 2), 0, 1) * 255).astype(np.uint8)[::-1])
 
