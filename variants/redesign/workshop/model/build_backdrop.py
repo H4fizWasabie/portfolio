@@ -1,10 +1,10 @@
-# Renders the House's backdrop plate (backdrop-raw.png) in Cycles: one large mountain mass in low cloud above a distant forest, in
+# Renders the House's backdrop plate (backdrop-raw.png) in Cycles: one broad mountain flank under a thick blanket of low cloud above a distant forest, in
 # an overcast dusk, as seen from across the lake. room.js maps the plate onto the sky dome by azimuth and elevation: columns run
 # from AZ0 to AZ1 degrees (0 = straight ahead, towards -z in glTF), rows from EL1 (top) down to EL0. The camera is an
 # equirectangular panorama limited to exactly that window, so the mapping is the plate's own.
-# The scene: a heightfield mountain (a massif with a long shoulder, ridged noise for the gullies that run downslope) at 2-8 km;
+# The scene: a heightfield mountain (one long slope climbing to the right, ridged noise for the gullies that run downslope) at 2-8 km;
 # below the tree line it is forest, and nearer than 2.3 km every tree is a real (simple) conifer, tens of thousands of them as one
-# mesh; above it heath and bare rock by slope. Cloud is a real volume: a thick layer on the upper mountain with a ragged base,
+# mesh; above it heath and bare rock by slope. Cloud is a real volume: a thick layer that hides the upper mountain, with a ragged base,
 # thin bands of mist lying on the slopes; and a haze over the land and the trees that thickens with distance (aerial perspective, in their shaders). The light is the overcast
 # HDRI (Poly Haven kloofendal_overcast_puresky, CC0, see build_house.py), which the camera itself does not see: it sees a plain
 # grey sky, so the plate ends in the colour the dome carries on with above and around it.
@@ -78,15 +78,15 @@ def ss(a, b, x):
 
 
 def height(x, y):
-    """The land at ground position (x, y) in metres (y runs away from the camera): forested foothills, then a massif whose crest climbs
-    to the right (its face towards us), a shoulder on the left and a further range behind."""
-    crest = 280 + 1650 * ss(-6500, 4200, x) ** 1.3 + 600 * np.exp(-(((x + 2700) / 1900) ** 2))
-    crest = crest * (0.82 + 0.36 * (fbm(x / 3400, y / 3400, 3, 3) * 0.5 + 0.5))                        # not one smooth bump
-    face = ss(700, 4300, y) * (1 - 0.8 * ss(4300, 6500, y))                                           # rises to the crest, falls behind it
-    gully = 0.55 * fbm(x / 640 + 0.4 * fbm(x / 1500, y / 1500, 40, 3), y / 2200, 11, 7, 0.42, ridged=True) + 0.45 * fbm(x / 1100, y / 2400, 12, 4, 0.45)   # ridges and gullies that run downslope (stretched along y)
-    mountain = crest * face * (0.88 + 0.3 * gully * (1 - 0.65 * np.exp(-(((y - 4300) / 1300) ** 2))))  # (rounder along the crest) + 600 * np.exp(-(((x - 500) / 3600) ** 2 + ((y - 7600) / 1400) ** 2)) * (0.95 + 0.08 * gully)
+    """The land at ground position (x, y) in metres (y runs away from the camera): forested foothills, then one broad mountain flank
+    that climbs to the right and on up into the cloud, its face towards us furrowed by gullies that run downslope."""
+    crest = 500 + 3600 * ss(-9000, 6000, x) ** 1.3                                                # one long slope, highest on the right
+    crest = crest * (0.9 + 0.2 * (fbm(x / 5200, y / 5200, 3, 2) * 0.5 + 0.5))                         # not one smooth ramp
+    face = ss(600, 5200, y) ** 1.15                                                                  # rises steadily away from us, its top lost in cloud
+    gully = 0.55 * fbm(x / 640 + 0.4 * fbm(x / 1500, y / 1500, 40, 3), y / 2200, 11, 6, 0.42, ridged=True) + 0.45 * fbm(x / 1100, y / 2400, 12, 4, 0.45)   # ridges and gullies that run downslope (stretched along y)
+    mountain = crest * face * (0.94 + 0.12 * gully)
     fine = fbm(x / 170, y / 300, 51, 5, 0.5, ridged=True)                                           # small gullies and knolls on every slope
-    mountain = mountain + crest * face * 0.032 * fine
+    mountain = mountain + crest * face * 0.012 * fine
     hills = (0.045 * np.clip(y - 300, 0, None) + 70 * (fbm(x / 700, y / 700, 21, 5) + 0.4)) * ss(250, 700, y)  # forested foothills, rising away from the shore
     return np.maximum(0.0, hills + mountain)
 
@@ -335,7 +335,7 @@ print('trees:', T)
 # --- cloud: a real volume (a box over the mountain) with a thick layer high up, ragged below, and thin bands of mist on the slopes
 box = bpy.data.objects.new('cloud', bpy.data.meshes.new('cloud'))
 bpy.context.scene.collection.objects.link(box)
-bx = [(-9500, 900, 150), (9500, 900, 150), (9500, 9200, 150), (-9500, 9200, 150), (-9500, 900, 2400), (9500, 900, 2400), (9500, 9200, 2400), (-9500, 9200, 2400)]
+bx = [(-9500, 900, 150), (9500, 900, 150), (9500, 9200, 150), (-9500, 9200, 150), (-9500, 900, 4200), (9500, 900, 4200), (9500, 9200, 4200), (-9500, 9200, 4200)]
 box.data.from_pydata(bx, [], [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
 cm = bpy.data.materials.new('cloud')
 cm.use_nodes = True
@@ -349,10 +349,10 @@ zz = new('ShaderNodeSeparateXYZ')
 nt.links.new(pos, zz.inputs[0])
 z = zz.outputs['Z']
 big = noise(pos, (0.00035, 0.00035, 0.0009), 5, 0.6, 2.0)  # large masses
-base_z = M('ADD', float(os.environ.get('CLOUD_BASE', 1050.0)), M('MULTIPLY', M('SUBTRACT', big, 0.5), 900.0))
-layer = step(z, base_z, M('ADD', base_z, 380.0))
+base_z = M('ADD', float(os.environ.get('CLOUD_BASE', 1100.0)), M('MULTIPLY', M('SUBTRACT', big, 0.5), 500.0))
+layer = step(z, base_z, M('ADD', base_z, 260.0))
 fluff = M('ADD', 0.55, M('MULTIPLY', noise(pos, (0.0011, 0.0011, 0.0016), 6, 0.62, 8.0), 0.9))
-dens_cloud = M('MULTIPLY', M('MULTIPLY', layer, fluff), float(os.environ.get('CLOUD_DENS', 0.0022)))
+dens_cloud = M('MULTIPLY', M('MULTIPLY', layer, fluff), float(os.environ.get('CLOUD_DENS', 0.004)))
 band_a = M('MULTIPLY', step(noise(pos, (0.0007, 0.0007, 0.004), 5, 0.6, 14.0), 0.5, 0.68), M('POWER', 2.718, M('MULTIPLY', M('DIVIDE', M('MULTIPLY', M('SUBTRACT', z, 520.0), M('SUBTRACT', z, 520.0)), 28000.0), -1.0)))
 band_b = M('MULTIPLY', step(noise(pos, (0.0006, 0.0006, 0.005), 5, 0.6, 31.0), 0.52, 0.7), M('POWER', 2.718, M('MULTIPLY', M('DIVIDE', M('MULTIPLY', M('SUBTRACT', z, 250.0), M('SUBTRACT', z, 250.0)), 9000.0), -1.0)))
 band_c = M('MULTIPLY', step(noise(pos, (0.0009, 0.0009, 0.006), 5, 0.6, 47.0), 0.56, 0.72), M('POWER', 2.718, M('MULTIPLY', M('DIVIDE', M('MULTIPLY', M('SUBTRACT', z, 880.0), M('SUBTRACT', z, 880.0)), 22000.0), -1.0)))

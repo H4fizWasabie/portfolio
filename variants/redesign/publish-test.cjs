@@ -146,7 +146,7 @@ async function homeChecks(browser, url) {
   const content = () => ({
     headline: document.querySelector('h1').textContent.length > 10,
     door: !!document.querySelector('.work-door h2'),
-    services: document.querySelectorAll('.shelf h3').length,
+    services: document.querySelectorAll('.shelf:not(.shelf-stairs) h3').length,
     cards: document.querySelectorAll('.shelf-items li').length,
     hero: [...document.querySelectorAll('.bench-poster, .bench-stage canvas')].some(e => e.getBoundingClientRect().height > 100),
     room: document.documentElement.dataset.room || ''

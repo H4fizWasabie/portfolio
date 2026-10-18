@@ -2,6 +2,11 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { isNight } from './theme.js';
 // The House and the project-page object viewer, loaded by main.js once the page has painted (it is most of the bytes).
 
@@ -138,13 +143,20 @@ const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom 
 // to that stop from the one before, to keep the path clear of walls and slabs.
 // Up the oak stairs on the right of the ground floor (treads climb 0.18 m per 0.27 m along -z from z=-6), with the eye 1.7 m above a tread.
 const STAIRS = [{ pos: [4.6, 2.8, -3.4], at: [6.45, 3.6, -7] }, { pos: [6.45, 2.78, -6.2], at: [6.45, 4.4, -9.5] }, { pos: [6.45, 4.5, -8.8], at: [6.4, 6.3, -12] }, { pos: [6.4, 6.4, -11.2], at: [2, 6.2, -6] }];
+// A poster on the stair wall (poster_<step>): the camera stands on the flight about 1.6 m above the tread, back down the stairs
+// from it, and looks at it across the treads; dy lowers it (the second keeps under the slab's edge, which it has just passed).
+const poster = (step, dy = 0.12) => ({ near: `poster_${step}`, from: [-1.42, dy, 1.15], look: [0, -0.02, 0], hfov: 58, off: 0.12, exp: 1.1, phone: { hfov: 50, up: 0.26, from: [-1.42, dy, 1.3] } });
 const doorway = (slug, from) => ({ near: `doorway_${slug}`, from, look: [0, 1.3, 0], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 44, up: 0.28, from: [from[0] * 0.5, from[1], from[2] - 3] } });
 const STOPS = {
   hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
   door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], hfov: 42, up: 0.26 } },
   stock: doorway('stock', [3.4, 1.8, 10.5]),
   records: doorway('records', [-2.6, 1.8, 10.5]),
-  ai: { ...doorway('ai', [3.4, 1.7, 10.5]), via: STAIRS },
+  // Up the stairs one poster at a time (How I work, on the stair wall), then on up to the first floor.
+  requirements: poster('requirements'),
+  build: poster('build', -0.43),
+  measure: poster('measure'),
+  ai: { ...doorway('ai', [3.4, 1.7, 10.5]), via: STAIRS.slice(3) },
   android: doorway('android', [-2.6, 1.7, 10.5]),
   teach: { near: 'balcony', from: [0, 1.75, -4.6], look: [-1.8, 0.9, 6], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 52, up: 0.2 } },
   end: { via: [{ pos: [0.3, 6.5, 2.8], at: [0, 6, 20] }], pos: [18, 17, 62], at: [0, 4, -8], hfov: 38, off: 0, up: 0.2, exp: 1.0, phone: { pos: [14, 13, 52], at: [0, 4, -8], hfov: 30 } }
@@ -178,9 +190,9 @@ void main(){
   return dome;
 }
 // Trees, dark and unlit: the vertex colours carry the shading, a leafy mottling in world space breaks it up, mist lies on the ground
-// beneath them, and the fog does the distance.
-function foliageMaterial() {
-  const m = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide });
+// beneath them, and the fog does the distance. The near trees' branch cards bring their branch texture (map), cut out by its alpha.
+function foliageMaterial(map) {
+  const m = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide, map, alphaTest: map ? 0.45 : 0 });
   m.onBeforeCompile = s => {
     s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vLeaf;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvLeaf = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     s.fragmentShader = s.fragmentShader.replace('#include <common>', `#include <common>
@@ -252,6 +264,77 @@ void main(){
 }`
 };
 
+// The How I work posters on the stair wall: step, then a line drawing of it, drawn in the page's own type onto each poster
+// (poster_<step> in the glb is blank paper, mapped 0..1, under the baked light).
+const POSTERS = { requirements: ['Requirements', 1], build: ['Build', 2], measure: ['Measure', 3] };
+function drawPoster(mesh, step, aniso) {
+  const [word, n] = POSTERS[step];
+  return document.fonts.load('700 40px Schibsted').catch(() => {}).then(() => {
+    const W = 512, H = 695, c = document.createElement('canvas');
+    c.width = 512; c.height = 1024; // drawn at the poster's own proportions
+    const g = c.getContext('2d');
+    g.scale(1, 1024 / H);
+    const ink = '#1f252c', cobalt = '#2f4fd0';
+    g.fillStyle = '#efede7'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#5b646d'; g.font = '600 26px Schibsted, sans-serif';
+    g.fillText('How I work', 44, 66);
+    g.textAlign = 'right'; g.fillText(`${n} / 3`, W - 44, 66); g.textAlign = 'left';
+    g.strokeStyle = cobalt; g.fillStyle = cobalt; g.lineWidth = 7; g.lineJoin = g.lineCap = 'round';
+    const box = (x, y, w, h) => { g.beginPath(); g.roundRect(x, y, w, h, 10); g.stroke(); };
+    const arrow = (x0, y0, x1, y1) => { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); const a = Math.atan2(y1 - y0, x1 - x0); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x1 - 16 * Math.cos(a - 0.5), y1 - 16 * Math.sin(a - 0.5)); g.lineTo(x1 - 16 * Math.cos(a + 0.5), y1 - 16 * Math.sin(a + 0.5)); g.closePath(); g.fill(); };
+    if (step === 'requirements') { // a workflow mapped out: steps and where they lead
+      box(56, 180, 120, 80); box(336, 180, 120, 80); box(196, 330, 120, 80); box(56, 430, 120, 80); box(336, 430, 120, 80);
+      arrow(176, 220, 326, 220); arrow(396, 260, 300, 324); arrow(212, 410, 150, 424); arrow(300, 410, 366, 424);
+    } else if (step === 'build') { // parts put together, one on another
+      box(96, 400, 320, 110); box(136, 290, 240, 110); box(186, 180, 140, 110);
+      g.beginPath(); g.moveTo(256, 180); g.lineTo(256, 150); g.stroke();
+    } else { // a line that rises, read off its points
+      g.strokeStyle = ink; g.lineWidth = 5;
+      g.beginPath(); g.moveTo(64, 160); g.lineTo(64, 520); g.lineTo(456, 520); g.stroke();
+      g.strokeStyle = cobalt; g.lineWidth = 7;
+      const pts = [[100, 470], [180, 430], [260, 445], [340, 330], [420, 220]];
+      g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke();
+      for (const [x, y] of pts) { g.beginPath(); g.arc(x, y, 11, 0, 7); g.fill(); }
+    }
+    g.fillStyle = ink;
+    let size = 84;
+    do { g.font = `700 ${size}px Schibsted, sans-serif`; size -= 2; } while (g.measureText(word).width > W - 88);
+    g.fillText(word, 44, H - 58);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.flipY = false;
+    t.anisotropy = aniso;
+    mesh.material = mesh.material.clone();
+    mesh.material.map = t;
+    mesh.material.color.setScalar(1);
+    Object.assign(mesh.material, { emissiveMap: t, emissiveIntensity: 0.22 }); // a little light of its own, so the paper is not all lamp-amber
+    mesh.material.emissive.setScalar(1);
+  });
+}
+
+// The last pass, on the tone-mapped picture: a colour grade (shadows a touch cool, the lamplit highlights a touch warm, a soft
+// S-curve), a vignette centred on the subject (centre: where the camera's axis lands, which the panel pushes off-centre) and on
+// desktop a faint, fixed film grain.
+const GRADE = {
+  name: 'GradeShader',
+  uniforms: { tDiffuse: { value: null }, center: { value: new THREE.Vector2(0.5, 0.5) }, aspect: { value: 1 }, vignette: { value: 0.22 }, grain: { value: 0 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 center; uniform float aspect, vignette, grain;
+varying vec2 vUv;
+void main(){
+  vec4 t = texture2D(tDiffuse, vUv);
+  vec3 c = t.rgb;
+  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  c *= mix(vec3(0.97, 0.995, 1.03), vec3(1.035, 1.0, 0.95), smoothstep(0.15, 0.75, l));
+  c = mix(c, c * c * (3.0 - 2.0 * c), 0.22);
+  vec2 q = (vUv - center) * vec2(aspect, 1.0);
+  c *= 1.0 - vignette * smoothstep(0.35, 1.25, length(q));
+  float n = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+  c += n * grain * (0.35 + l * (1.0 - l) * 2.6);
+  gl_FragColor = vec4(clamp(c, 0.0, 1.0), t.a);
+}`
+};
+
 function startHouse(stage, { root }) {
   const noRoom = () => document.documentElement.removeAttribute('data-room'); // back to the static page
   let r;
@@ -262,6 +345,15 @@ function startHouse(stage, { root }) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 900);
   scene.fog = new THREE.FogExp2(SKY.mist, 0.0075);
+  // The picture is rendered in linear light, the windows' glow blooms (desktop), then tone mapping and the grade (GRADE).
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const composer = new EffectComposer(r, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
+  composer.addPass(new RenderPass(scene, camera));
+  if (!coarse) composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.32, 0.55, 1.4));
+  composer.addPass(new OutputPass());
+  const grade = new ShaderPass(GRADE);
+  grade.uniforms.grain.value = coarse ? 0 : 0.03;
+  composer.addPass(grade);
 
   let nodes = {}, loaded = false, dirty = true, size = [1, 1], tour = null, lastNow = 0, lake = null, dome = null;
   const shift = { x: 0, y: 0 }, shiftGoal = { x: 0, y: 0 };
@@ -285,8 +377,9 @@ function startHouse(stage, { root }) {
       if (!o.isMesh) return;
       if (tag(o, 'glass_')) { o.material = glass; o.renderOrder = 2; return; }
       const m = o.material;
-      if (tag(o, 'trees')) { o.material = foliageMaterial(); return; }
-      if (tag(o, 'rocks')) { o.material = new THREE.MeshBasicMaterial({ map: m.map, color: 0x4d5750 }); return; } // unlit, dark
+      if (tag(o, 'trees')) { o.material = foliageMaterial(m.map); if (m.map) m.map.anisotropy = aniso; return; }
+      if (tag(o, 'rocks')) { o.material = new THREE.MeshBasicMaterial({ map: m.map, color: 0x6a746c, vertexColors: true }); return; } // unlit; the vertex colours carry the moss and the wet waterline
+      if (tag(o, 'sheer')) { Object.assign(m, { transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide }); o.renderOrder = 1; } // sheer curtains: the light comes through
       if (tag(o, 'glow_')) { o.material = m.clone(); o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : 2; return; }
       if (m.map) m.map.anisotropy = aniso;
       if (m.name === 'concrete' || m.name === 'roof') { m.roughnessMap = wet; m.roughness = 1; m.envMap = env; m.envMapIntensity = 1.5; } // house-wet.webp is its roughness: damp where it rained and at the waterline, so it shines there
@@ -296,6 +389,11 @@ function startHouse(stage, { root }) {
     });
     scene.add(gltf.scene);
     for (const name of ['doorway_stock', 'doorway_records', 'doorway_ai', 'doorway_android', 'balcony']) nodes[name] = gltf.scene.getObjectByName(name);
+    for (const step of Object.keys(POSTERS)) {
+      const o = gltf.scene.getObjectByName(`poster_${step}`);
+      nodes[`poster_${step}`] = { getWorldPosition: v => new THREE.Box3().setFromObject(o).getCenter(v) };
+      o.traverse(m => { if (m.isMesh) drawPoster(m, step, aniso).then(() => { dirty = true; }); });
+    }
     // Beyond the land that was modelled the ground carries on, dark, into the mist.
     const far = new THREE.Mesh(new THREE.PlaneGeometry(1800, 700), new THREE.MeshBasicMaterial({ color: 0x1d2420 }));
     far.rotation.x = -Math.PI / 2;
@@ -336,6 +434,7 @@ function startHouse(stage, { root }) {
   }
   function frame() {
     camera.setViewOffset(size[0], size[1], -shift.x, shift.y, size[0], size[1]);
+    grade.uniforms.center.value.set(0.5 + shift.x / size[0], 0.5 + shift.y / size[1]);
     dirty = true;
   }
   function place(v) { // a view at once
@@ -351,6 +450,9 @@ function startHouse(stage, { root }) {
     const { width, height } = stage.getBoundingClientRect();
     if (!width || !height || !loaded) return;
     r.setSize(width, height, false);
+    composer.setPixelRatio(r.getPixelRatio());
+    composer.setSize(width, height);
+    grade.uniforms.aspect.value = width / height;
     lake?.getRenderTarget().setSize(Math.round(width * r.getPixelRatio() * 0.6), Math.round(height * r.getPixelRatio() * 0.6)); // the lake's mirror needs less than the picture
     size = [width, height];
     camera.aspect = width / height;
@@ -462,7 +564,7 @@ function startHouse(stage, { root }) {
     }
     if (tour && stepTour(dt)) dirty = true;
     if (!dirty) return;
-    r.render(scene, camera);
+    composer.render();
     dirty = false;
     if (still) html.dataset.ready = '1';
   };

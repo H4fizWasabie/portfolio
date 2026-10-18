@@ -28,11 +28,18 @@ const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89l
 <p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p>
 <p class="shelf-all"><a class="text-link" href="${root}projects/">All projects →</a></p></div>`;
 
-// About: three chapters, each shown by one of the room's objects (or the portrait). The words are the
+// How I work, on the stair wall between the floors: a poster per step, each a stop (data-look="@<step>", room.js draws the posters).
+// The owner's About copy, a sentence to a step.
+const howIWork = [
+  ['Requirements', 'requirements', 'I model the data around the real workflow.'],
+  ['Build', 'build', 'I put it in front of the people who use it. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
+  ['Measure', 'measure', 'I let the numbers decide what\'s next.']
+];
+
+// About: two chapters, each shown by one of the room's objects (or the portrait). The words are the
 // owner's About copy, kept exactly as written.
 const chapters = [
   ['Background', 'portrait', 'Operations first, then software', 'Four years building systems, with AI automation at the core, coming from hands-on procurement, pharmacy and emergency care. PIMS, Procura and the DD Drugs Register run daily at the veterinary hospital where I work.'],
-  ['How I work', 'pims', 'Requirements → build → measure', 'I model the data around the real workflow, put it in front of the people who use it, and let the numbers decide what\'s next. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
   ['Now', 'theoses', 'Agents that run on their own', 'Running Theoses, my self-hosted AI agent: about 30 scheduled jobs and 730+ commits in six weeks. Also building agent harnesses from scratch in Go (Neo, Fender, Mino), with more than a dozen public repositories on AI automation and agent design.']
 ];
 // One column per chapter. Without JavaScript every chapter shows; about.js opens one at a time (style.css).
@@ -73,9 +80,12 @@ const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(
 
 // Homepage: one shelf per service, the projects that prove it beside it. Each is a stop, and data-look names
 // what the House shows while it is on screen (room.js): the service's doorway, or the balcony for teaching.
+// Between the ground floor's services and the upstairs ones the tour climbs the stairs, a poster of How I work at a time.
+const stairs = esc => howIWork.map(([h, look, text], i) => `<section class="shelf shelf-stairs" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${esc(h)}</h3><p>How I work, ${i + 1} of ${howIWork.length}</p></div>
+<div class="shelf-note"><p>${esc(text)}</p></div></div></section>`).join('');
 const shelves = (by, root, esc) => {
   const all = Object.keys(by), num = s => `${two(all.indexOf(s) + 1)} / ${two(all.length)}`;
-  return `<div class="shelves">${services.map(([h, d, slugs, look]) => `<section class="shelf" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
+  return `<div class="shelves">${services.map(([h, d, slugs, look]) => `${look === 'ai' ? stairs(esc) : ''}<section class="shelf" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
 ${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>`).join('')}</div>`;
 };
 

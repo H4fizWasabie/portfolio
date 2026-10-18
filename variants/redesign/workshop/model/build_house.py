@@ -28,6 +28,9 @@
 #   glass_*                     transparent, never casts shadows; no lighting texture
 #   glow_*                      emissive parts (lamps, downlights, candle flames); they brighten at night
 #   trees, rocks                dark, unlit (vertex colours carry their shading); the page shows them with basic materials
+#   trees_cards                 the near trees' branch cards: the same, with the branch texture cut out by its alpha
+#   sheer                       the sheer curtains, baked like the rest; the page makes them see-through
+#   poster_<step>               the How I work posters on the stair wall (requirements, build, measure): the page draws them
 #   doorway_<slug>              empty on the sill of a Room's doorway, on the back wall, where Rooms attach
 #                               (stock and records on the ground floor, ai and android upstairs)
 #   door_<slug>                 the closed door leaf in that doorway (a Room's asset replaces it)
@@ -114,10 +117,10 @@ def board_formed(size=1536, tile=TILE, board=0.15, tie=(1.2, 0.6)):
         butt[k] = np.exp(-(np.abs((ax[None, :] - cuts[:, None] + tile / 2) % tile - tile / 2).min(0) / 0.0018) ** 2)
     d = y % board
     t = 1 + seg_tone[row] + 0.03 * (0.5 - d / board) * r.uniform(0.4, 1.6, nb)[row][:, None]  # each board a touch lighter at its top (the form's lower board bleeds)
-    t = t + 0.05 * field(60) + 0.05 * field(220) + 0.015 * field(1.0)
+    t = t + 0.07 * field(60) + 0.08 * field(220) + 0.015 * field(1.0)
     # the grain the planks leave: wavy lines along each board, a little different on every one
-    grain = np.sin(2 * np.pi * (d / board * r.uniform(5, 12, nb)[row][:, None] + r.uniform(0, 1, nb)[row][:, None]) + 2.4 * field(260, 3))
-    t = t * (1 + 0.018 * grain + 0.014 * field(40, 0.9))
+    grain = np.sin(2 * np.pi * (d / board * r.uniform(3, 6, nb)[row][:, None] + r.uniform(0, 1, nb)[row][:, None]) + 2.4 * field(260, 3))
+    t = t * (1 + 0.008 * grain + 0.01 * field(40, 0.9))
     # pitting: two copies of the photograph's high-pass at different scales and turns, so no repeat shows
     p = np.tile(pores(size // 4), (4, 4)) + np.roll(np.rot90(np.tile(pores(size // 3), (3, 3))), (211, 97), (0, 1))
     t = t * (1 + 0.035 * p)
@@ -142,8 +145,7 @@ def board_formed(size=1536, tile=TILE, board=0.15, tie=(1.2, 0.6)):
             ring += np.exp(-((q - 0.047) / 0.011) ** 2)
             run += np.exp(-(dx / (0.02 + 0.006 * np.sin(dy * 40))) ** 2) * (dy > 0) * np.exp(-np.clip(dy, 0, None) / 0.32) * (dy < 0.7)
     t = t * (1 - np.clip(hole, 0, 1)) * (1 + 0.1 * ring) * (1 - 0.17 * np.clip(run, 0, 1) * (1 + 0.3 * field(2, 12)))
-    t = t * (1 + 0.035 * field(5, 200))  # streaks of damp run down, long and faint
-    t = t / t.mean() * 0.44
+    t = t / t.mean() * 0.34  # dark, weathered concrete; the rain streaks are the wet bake's (they follow gravity, the tile does not)
     rgb = np.clip(np.stack([t * 0.985, t, t * 1.0], 2), 0, 1)
     out = np.ones((size, size, 4), np.float32)
     out[:, :, :3] = rgb[::-1]
@@ -155,6 +157,101 @@ def board_formed(size=1536, tile=TILE, board=0.15, tie=(1.2, 0.6)):
 
 
 BOARD_IMG = board_formed()
+
+
+def image(name, rgba):
+    """A packed image from an (h, w, 4) array whose first row is the top."""
+    h, w, _ = rgba.shape
+    img = bpy.data.images.new(name, w, h, alpha=True)
+    img.pixels.foreach_set(np.ascontiguousarray(rgba[::-1], np.float32).ravel())
+    img.pack()
+    img.colorspace_settings.name = 'sRGB'
+    return img
+
+
+def branch_card(w=512, h=256):
+    """A spruce branch seen from above, for the near trees' cards: the stem runs from the trunk (left) to the tip (right) along the
+    middle, twigs leave it angled forward, longest near the trunk, and every twig and the stem carry short needles. Grey tones in
+    the colour (the cards' vertex colours give the green and the light), the needles in the alpha."""
+    r = np.random.default_rng(17)
+    a, tone = np.zeros((h, w)), np.ones((h, w))
+    yy, xx = np.mgrid[0:h, 0:w] + 0.5
+
+    def seg(x0, y0, x1, y1, rad, t):
+        i0, i1 = int(max(0, min(y0, y1) - rad - 2)), int(min(h, max(y0, y1) + rad + 3))
+        j0, j1 = int(max(0, min(x0, x1) - rad - 2)), int(min(w, max(x0, x1) + rad + 3))
+        if i0 >= i1 or j0 >= j1:
+            return
+        px, py = xx[i0:i1, j0:j1] - x0, yy[i0:i1, j0:j1] - y0
+        dx, dy = x1 - x0, y1 - y0
+        k = np.clip((px * dx + py * dy) / max(dx * dx + dy * dy, 1e-6), 0, 1)
+        cov = np.clip(rad + 0.5 - np.hypot(px - k * dx, py - k * dy), 0, 1)
+        sa = a[i0:i1, j0:j1]
+        tone[i0:i1, j0:j1] = np.where(cov > sa, t, tone[i0:i1, j0:j1])
+        a[i0:i1, j0:j1] = np.maximum(sa, cov)
+
+    def needles(x0, y0, x1, y1, n_len, gap):
+        L = math.hypot(x1 - x0, y1 - y0)
+        ux, uy = (x1 - x0) / L, (y1 - y0) / L
+        for s_ in np.arange(0, L, gap):
+            for side in (-1, 1):
+                ang = side * r.uniform(0.75, 1.15)
+                c, sn = math.cos(ang), math.sin(ang)
+                nx, ny = ux * c - uy * sn, ux * sn + uy * c
+                ln = n_len * r.uniform(0.7, 1.15) * (1 - 0.5 * s_ / L)
+                bx, by = x0 + ux * s_, y0 + uy * s_
+                seg(bx, by, bx + nx * ln, by + ny * ln, r.uniform(0.6, 0.95), r.uniform(0.55, 1.0) * (0.75 + 0.25 * s_ / L))
+
+    cy = h / 2
+    tip = w - 14
+    for t in np.linspace(0.03, 0.92, 22):
+        x = 10 + t * (tip - 10)
+        for side in (-1, 1):
+            ang = side * r.uniform(0.6, 0.9)
+            ln = (0.2 + 0.36 * (1 - t) ** 0.8) * h * r.uniform(0.85, 1.1)
+            ex, ey = x + math.cos(ang) * ln, cy + math.sin(ang) * ln
+            needles(x, cy, ex, ey, 13, 2.4)
+            seg(x, cy, ex, ey, 1.0, 0.3)
+    needles(10, cy, tip, cy, 13, 2.4)
+    seg(6, cy, tip, cy, 1.6, 0.25)
+    rgba = np.ones((h, w, 4))
+    rgba[:, :, :3] = tone[:, :, None] * np.array((0.92, 1.0, 0.94))
+    rgba[:, :, 3] = a
+    return image('branch', rgba)
+
+
+def print_art(w, h, seed, kind):
+    """A framed print for the walls: 'ridges' is an ink-wash of misty ridgelines (the lake's own hills), 'fields' soft
+    blocks of ochre and charcoal. Both on paper with a pale mat."""
+    r = np.random.default_rng(seed)
+    y, x = np.mgrid[0:h, 0:w] / h
+    paper = np.array((0.9, 0.88, 0.84))
+    img = np.broadcast_to(paper, (h, w, 3)).copy()
+    def smooth_line(n, amp, fq):
+        u = np.linspace(0, 1, w)
+        return sum(amp / (k + 1) * np.sin(2 * np.pi * (fq * (k + 1) * u + r.uniform(0, 1))) for k in range(n))
+    if kind == 'ridges':
+        for i, (base, ink) in enumerate(((0.42, 0.72), (0.52, 0.55), (0.64, 0.36), (0.78, 0.18))):
+            line = base + smooth_line(5, 0.06 + 0.02 * i, 0.6 + 0.3 * i)
+            below = y > line[None, :]
+            fade = np.clip((y - line[None, :]) / 0.25, 0, 1)
+            col = np.array((0.16, 0.19, 0.2)) * (1 - ink) + paper * ink
+            img = np.where(below[..., None], col * (1 - 0.25 * fade[..., None]) + paper * 0.25 * fade[..., None], img)
+    else:
+        img[:] = (0.8, 0.74, 0.62)
+        for (y0, y1, c) in ((0.08, 0.5, (0.62, 0.42, 0.22)), (0.56, 0.92, (0.16, 0.16, 0.17))):
+            edge = np.clip(np.minimum(y - y0, y1 - y) / 0.03, 0, 1) * np.clip(np.minimum(x - 0.08, (w / h - 0.08) - x) / 0.03, 0, 1)
+            img = img * (1 - edge[..., None]) + np.array(c) * edge[..., None]
+    img = img * (1 + 0.03 * r.normal(0, 1, (h, w, 1)))
+    mat_w = 0.09
+    inner = (np.minimum(np.minimum(x, w / h - x), np.minimum(y, 1 - y)) > mat_w)
+    img = np.where(inner[..., None], img, np.array((0.93, 0.92, 0.89)))
+    rgba = np.ones((h, w, 4))
+    rgba[:, :, :3] = np.clip(img, 0, 1)
+    return image('print_' + kind, rgba)
+
+
+BRANCH_IMG = branch_card()
 
 
 # ---------------------------------------------------------------- materials
@@ -211,13 +308,20 @@ TERRACE = mat('terrace', 'floor', 2.0, (0.36, 0.38, 0.38), 0.55, size=384)
 GROUND = mat('ground', 'grass', 4.0, (0.2, 0.23, 0.2), 1.0, size=256)
 ROCK = mat('rock', 'moss-rock', 1.6, (0.8, 0.85, 0.78), 0.95, size=256)
 FOLIAGE = mat('foliage', None, color=(0.2, 0.24, 0.22), rough=1.0, double=True)  # trees: dark in the bake; in the page the vertex colours are all of it, unlit
+FOLIAGE_CARD = mat('foliage_card', BRANCH_IMG, color=(0.2, 0.24, 0.22), rough=1.0, double=True)  # the near trees' branch cards: the same, through the branch's alpha
+FOLIAGE_CARD.node_tree.links.new(next(n for n in FOLIAGE_CARD.node_tree.nodes if n.type == 'TEX_IMAGE').outputs['Alpha'], FOLIAGE_CARD.node_tree.nodes['Principled BSDF'].inputs['Alpha'])
 FRAME = mat('frame', None, color=(0.03, 0.032, 0.036), rough=0.45, metal=1.0)  # black steel
 BRASS = mat('brass', None, color=(0.55, 0.4, 0.22), rough=0.35, metal=1.0)
 FABRIC = mat('fabric', None, color=(0.2, 0.205, 0.2), rough=1.0)
 FABRIC_PALE = mat('fabric_pale', None, color=(0.78, 0.74, 0.68), rough=1.0)
-CANVAS = mat('canvas', None, color=(0.7, 0.67, 0.62), rough=0.9)
-CANVAS_DARK = mat('canvas_dark', None, color=(0.22, 0.27, 0.3), rough=0.9)
+FABRIC_OAT = mat('fabric_oat', None, color=(0.6, 0.57, 0.52), rough=1.0)
+SHEER = mat('sheer', None, color=(0.97, 0.95, 0.9), rough=1.0, double=True)  # the page shows it see-through
+PRINT_RIDGES = mat('print_ridges', print_art(384, 256, 3, 'ridges'), 1.0, rough=0.9)
+PRINT_FIELDS = mat('print_fields', print_art(256, 320, 4, 'fields'), 1.0, rough=0.9)
+POSTER = mat('poster', image('poster', np.full((4, 4, 4), 1.0)), 1.0, (0.93, 0.92, 0.89), rough=0.9)  # paper; the page draws each poster onto it
+GRAVEL = mat('gravel', 'floor', 1.2, (0.3, 0.31, 0.31), 0.95, size=384)
 CHARCOAL = mat('charcoal', None, color=(0.05, 0.052, 0.055), rough=0.8)
+CANVAS_DARK = mat('canvas_dark', None, color=(0.22, 0.27, 0.3), rough=0.9)  # book cloth
 WARM = (1.0, 0.46, 0.14)
 # Blender's Blackbody node is paler than the CIE colour at the same temperature (its 2700 K is a pale peach), and the tone
 # mapping in the page pales a bright amber further: 2000 K in the node is the deep amber of a 2700 K lamp as photographed.
@@ -228,6 +332,7 @@ GLOW = mat('glow', None, color=WARM, rough=0.5, emit=28.0, emit_color=LAMP)
 GLOW_FLAME = mat('glow_flame', None, color=WARM, rough=0.5, emit=150.0, emit_color=LAMP)
 GLOW_WASH = mat('glow_wash', None, color=WARM, rough=0.5, emit=8.0, emit_color=LAMP)  # the strips along the ceiling that wash the back walls
 GLOW_COVE = mat('glow_cove', None, color=WARM, rough=0.5, emit=float(os.environ.get('COVE', 10.0)), emit_color=LAMP)  # the strip behind the glass head of each floor: it washes the floor and spills out onto the terrace and the balcony
+GLOW_SHADE = mat('glow_shade', None, color=WARM, rough=0.5, emit=9.0, emit_color=LAMP)  # a linen lampshade lit from inside
 GLOW_SOFFIT = mat('glow_soffit', None, color=WARM, rough=0.5, emit=45.0, emit_color=LAMP)  # downlights under the cantilever
 GLASS = bpy.data.materials.new('glass')
 GLASS.use_nodes = True
@@ -249,6 +354,7 @@ class Part:
         self.bm = bmesh.new()
         self.slots = []
         self.colors = {}  # vertex -> rgb, for parts whose shading is painted per vertex (the trees)
+        self.face_uv = {}  # face -> its corners' uvs, for parts that map a texture by hand (branch cards, pictures); uv=False
         self.top = self.bm.faces.layers.float.new('top')    # per face: the height rain runs down from (a ledge), for the wet bake
         self.wetk = self.bm.faces.layers.float.new('wetk')  # per face: how much rain reaches it (1 in the open)
 
@@ -257,7 +363,7 @@ class Part:
             self.slots.append(material)
         return self.slots.index(material)
 
-    def box(self, x0, x1, y0, y1, z0, z1, material, drop=(), keep=None, bevel=0.0, top=None, wet=1.0):
+    def box(self, x0, x1, y0, y1, z0, z1, material, drop=(), keep=None, bevel=0.0, top=None, wet=1.0, segments=2):
         """An axis-aligned box. drop: face normals that are never seen; keep: only these normals are made; top: where rain
         starts running down its sides (its own top by default); wet: how much rain reaches it."""
         bm = self.bm
@@ -274,7 +380,7 @@ class Part:
             f[self.wetk] = wet
         if bevel:
             edges = list({e for v in verts for e in v.link_edges})
-            bmesh.ops.bevel(bm, geom=edges, offset=bevel, segments=2, affect='EDGES')
+            bmesh.ops.bevel(bm, geom=edges, offset=bevel, segments=segments, affect='EDGES')
             return self
         gone = [f for f in faces if (keep is not None and tuple(round(c) for c in f.normal) != tuple(keep)) or tuple(round(c) for c in f.normal) in [tuple(d) for d in drop]]
         if gone:
@@ -325,6 +431,11 @@ class Part:
                     l[uv].uv = ((u + 0.6) / tile, (v - (1.0 if ax != 2 else 0.0)) / tile)
                 else:
                     l[uv].uv = (u / tile + ou, v / tile + ov)
+        if self.face_uv:
+            uv = bm.loops.layers.uv.get('uv0') or bm.loops.layers.uv.new('uv0')
+            for f, uvs in self.face_uv.items():
+                for l, c in zip(f.loops, uvs):
+                    l[uv].uv = c
         ledge, wetk = bm.loops.layers.float.new('ledge'), bm.loops.layers.float.new('wetk')  # for the wet bake: how far below its ledge each corner is
         for f in bm.faces:
             top = f[self.top] or max(v.co.z for v in f.verts)
@@ -412,7 +523,7 @@ def land_height(x, y):
         return -0.4  # under the plinth
     bank = lerp(-0.55, TERR - 0.1, (y - s) / 2.6)
     rise = 0.03 * max(0.0, y - 22) + 0.0009 * max(0.0, abs(x) - 24) ** 2
-    return bank + (rise if y > s + 2.6 else 0) + 0.12 * noise.noise(Vector((x * 0.17, y * 0.17, 1.0))) * (1 if y > s + 2 else 0.3)
+    return bank + (rise if y > s + 2.6 else 0) + 0.07 * noise.noise(Vector((x * 0.12, y * 0.12, 1.0))) * (1 if y > s + 2 else 0.3)
 
 
 land = Part('land', 0.1, vcol=lambda c: (lerp(0.4, 1.0, (c.z + 0.5) * 1.1) * (0.75 + 0.5 * noise.noise(Vector((c.x * 0.05, c.y * 0.05, 4.0)))),) * 3)
@@ -459,6 +570,12 @@ for sx in (-1, 1):
     house.box(a, b, BAL, YB + 0.4, FL1, CE1, CONCRETE, drop=[UP, DOWN, NORTH], top=ROOF)
 upper_doors = [(x, OPEN_W, OPEN_H) for slug, x, st in DOORS if st == 1]
 walls_with_openings(house, -HX1, HX1, YB, YB + 0.4, FL1, CE1, upper_doors, CONCRETE, drop=[DOWN, UP, NORTH, SOUTH])
+# The roof: a parapet round its edge, gravel inside it, two flat rooflights
+for a, b, c, d in ((-FX, FX, BAL, BAL + 0.25), (-FX, FX, YB + 0.15, YB + 0.4), (-FX, -FX + 0.25, BAL, YB + 0.4), (FX - 0.25, FX, BAL, YB + 0.4)):
+    house.box(a, b, c, d, ROOF, ROOF + 0.3, CONCRETE, drop=[DOWN])
+house.box(-FX + 0.25, FX - 0.25, BAL + 0.25, YB + 0.15, ROOF, ROOF + 0.04, GRAVEL, keep=UP)
+for x0, x1 in ((-5.6, -2.6), (-1.4, 1.6)):
+    house.box(x0, x1, 6.2, 8.8, ROOF + 0.04, ROOF + 0.32, FRAME, drop=[DOWN])
 # The chimney tower, with a cap
 house.box(6.0, 8.2, 3.0, 5.4, ROOF, 11.2, CONCRETE, drop=[DOWN])
 house.box(5.9, 8.3, 2.9, 5.5, 11.2, 11.4, ROOF_CONCRETE, drop=[DOWN])
@@ -467,7 +584,9 @@ house.box(6.5, 7.7, 3.5, 4.9, 11.4, 11.41, CHARCOAL, keep=UP)
 # --- interior: floors, plaster, ceilings
 inside = Part('house_interior', 1.1)
 inside.box(-HX0, HX0, YF, YB, TERR, FL0, FLOOR, keep=UP)                           # ground floor (a slab of polished concrete)
-inside.box(-HX0 + 0.02, HX0 - 0.02, YF, YB, CE0 - 0.03, CE0, OAK_MID, keep=DOWN)   # oak ceiling
+inside.box(-HX0 + 0.02, HX0 - 0.02, YF, 7.4, CE0 - 0.03, CE0, OAK_MID, keep=DOWN)  # oak ceiling, round the stairwell
+inside.box(-HX0 + 0.02, 5.5, 7.4, YB, CE0 - 0.03, CE0, OAK_MID, keep=DOWN)
+inside.box(5.5, HX0 - 0.02, STAIR_TOP_Y, YB, CE0 - 0.03, CE0, OAK_MID, keep=DOWN)
 for sx in (-1, 1):
     a, b = sorted((sx * HX0, sx * (HX0 - 0.02)))
     inside.box(a, b, YF, YB, FL0, CE0, PLASTER, keep=(-sx, 0, 0))                    # plaster side walls
@@ -554,20 +673,31 @@ furn = Part('furniture', 1.1, smooth=True)
 fx = Part('furniture_hard', 1.1)
 
 
-def chair(part_s, part_h, cx, cy, face):
-    """A dining chair at (cx, cy) whose back is on the side opposite `face` (+1 faces +y)."""
-    z = FL0
-    part_s.box(cx - 0.22, cx + 0.22, cy - 0.22, cy + 0.22, z + 0.43, z + 0.48, FABRIC, bevel=0.012)
-    part_s.box(cx - 0.22, cx + 0.22, cy - face * 0.22 - 0.03, cy - face * 0.22 + 0.03, z + 0.48, z + 0.9, FABRIC, bevel=0.012)
-    for dx in (-0.19, 0.19):
-        for dy in (-0.19, 0.19):
-            part_h.box(cx + dx - 0.015, cx + dx + 0.015, cy + dy - 0.015, cy + dy + 0.015, z, z + 0.43, FRAME)
+def chair(part_s, part_h, cx, cy, face, z=FL0, along_x=False):
+    """A chair at (cx, cy) on the floor z, facing +y (face=1) or -y (face=-1), or along x with along_x: an upholstered seat
+    on four oak legs, the back two rising to an oak rail."""
+    def piece(part, a0, a1, b0, b1, z0, z1, m, **kw):  # a across the chair, b front to back, both from its centre
+        if along_x:
+            part.box(cx + b0, cx + b1, cy + a0, cy + a1, z0, z1, m, **kw)
+        else:
+            part.box(cx + a0, cx + a1, cy + b0, cy + b1, z0, z1, m, **kw)
+    piece(part_s, -0.22, 0.22, -0.21, 0.21, z + 0.42, z + 0.48, FABRIC, bevel=0.025, segments=3)
+    back = -face * 0.2
+    piece(part_h, -0.21, 0.21, back - 0.012, back + 0.012, z + 0.64, z + 0.84, OAK, bevel=0.008)
+    for a in (-0.19, 0.19):
+        for b in (-0.18, 0.18):
+            top = z + 0.84 if abs(b - back) < 0.05 else z + 0.42
+            piece(part_h, a - 0.014, a + 0.014, b - 0.014, b + 0.014, z, top, OAK_DARK)
 
 
-def picture(part, x0, x1, z0, z1):
-    """A framed canvas flat on the back wall."""
-    part.box(x0, x1, YB - 0.05, YB - 0.025, z0, z1, CANVAS, keep=SOUTH)
-    part.box(x0, x1, YB - 0.055, YB - 0.05, z0, z0 + (z1 - z0) * 0.38, CANVAS_DARK, keep=SOUTH)  # a dark band, like a horizon
+def picture(part, x0, x1, z0, z1, print_mat):
+    """A framed print flat on the back wall (its texture fills the frame)."""
+    y = YB - 0.05
+    vs = [part.bm.verts.new(p) for p in ((x0, y, z0), (x1, y, z0), (x1, y, z1), (x0, y, z1))]
+    f = part.bm.faces.new(vs)
+    f.material_index = part.slot(print_mat)
+    f[part.top], f[part.wetk] = z1, 1.0
+    part.face_uv[f] = [(0, 0), (1, 0), (1, 1), (0, 1)]
     for a, b, c, d in ((x0 - 0.03, x1 + 0.03, z1, z1 + 0.03), (x0 - 0.03, x1 + 0.03, z0 - 0.03, z0), (x0 - 0.03, x0, z0, z1), (x1, x1 + 0.03, z0, z1)):
         part.box(a, b, YB - 0.06, YB - 0.02, c, d, FRAME)
 
@@ -590,29 +720,64 @@ for x in (-4.6, -3.4):  # pendants
     fx.cyl(x, 3.5, FL0 + 2.0, FL0 + 2.3, 0.16, FRAME, seg=16, r_top=0.05, caps=(False, True))
     glows.cyl(x, 3.5, FL0 + 1.99, FL0 + 2.0, 0.14, GLOW, seg=16)
 
+def sofa(x0, x1, y0, y1, z, cloth, seats=3):
+    """A low sofa facing -y (the lake): an oak plinth, one long seat cushion, `seats` back cushions, rounded arms."""
+    fx.box(x0 + 0.05, x1 - 0.05, y0 + 0.08, y1 - 0.05, z, z + 0.1, OAK_DARK, bevel=0.01)
+    furn.box(x0, x0 + 0.2, y0, y1, z + 0.1, z + 0.62, cloth, bevel=0.07, segments=4)
+    furn.box(x1 - 0.2, x1, y0, y1, z + 0.1, z + 0.62, cloth, bevel=0.07, segments=4)
+    furn.box(x0 + 0.2, x1 - 0.2, y1 - 0.3, y1, z + 0.1, z + 0.42, cloth, bevel=0.03)
+    furn.box(x0 + 0.2, x1 - 0.2, y0 + 0.02, y1 - 0.28, z + 0.1, z + 0.44, cloth, bevel=0.05, segments=4)  # one long seat cushion
+    w = (x1 - x0 - 0.4) / seats
+    for i in range(seats):
+        a = x0 + 0.2 + i * w
+        furn.box(a + 0.005, a + w - 0.005, y1 - 0.3, y1 - 0.04, z + 0.4, z + 0.82, cloth, bevel=0.07, segments=4)    # back cushion
+
+
 # the lounge, right: a low sofa facing the lake, a coffee table, a rug, a floor lamp
-furn.box(1.6, 5.2, 4.7, 5.95, FL0 + 0.05, FL0 + 0.45, FABRIC, bevel=0.04)       # base and seat
-furn.box(1.6, 5.2, 5.55, 5.95, FL0 + 0.45, FL0 + 0.88, FABRIC, bevel=0.04)      # back
-furn.box(1.6, 2.0, 4.7, 5.95, FL0 + 0.45, FL0 + 0.68, FABRIC, bevel=0.04)       # arms
-furn.box(4.8, 5.2, 4.7, 5.95, FL0 + 0.45, FL0 + 0.68, FABRIC, bevel=0.04)
+sofa(1.6, 5.2, 4.7, 5.95, FL0, FABRIC_OAT)
 fx.box(2.4, 4.4, 2.8, 3.6, FL0 + 0.3, FL0 + 0.36, OAK_DARK, bevel=0.01)
 fx.box(2.45, 2.5, 2.85, 2.9, FL0, FL0 + 0.3, FRAME)
 fx.box(4.3, 4.35, 3.5, 3.55, FL0, FL0 + 0.3, FRAME)
 fx.cyl(6.2, 2.4, FL0, FL0 + 1.55, 0.012, FRAME, seg=6)
 fx.cyl(6.2, 2.4, FL0, FL0 + 0.02, 0.16, FRAME, seg=14)
-glows.cyl(6.2, 2.4, FL0 + 1.35, FL0 + 1.7, 0.18, GLOW, seg=16)
-# a low shelf between the two doors, a picture over it
-fx.box(-1.9, -0.1, 11.5, 11.98, FL0, FL0 + 0.55, OAK_DARK)
-picture(fx, -1.7, -0.3, FL0 + 1.0, FL0 + 2.1)
-# curtains, pale, at both ends of the glazing
-for x0 in (-7.15, 6.35):
-    furn.box(x0, x0 + 0.8, YF + 0.12, YF + 0.3, FL0, CE0 - 0.05, FABRIC_PALE, bevel=0.02)
+glows.cyl(6.2, 2.4, FL0 + 1.35, FL0 + 1.7, 0.18, GLOW_SHADE, seg=20, r_top=0.15)
+def console(z):
+    """A slim oak console hung on the back wall between the two doors (they leave x -2.45..-0.35), a shadow gap under it,
+    with a ceramic jar, two books and a small lamp."""
+    fx.box(-2.2, -0.6, YB - 0.42, YB - 0.04, z + 0.3, z + 0.62, OAK_DARK, bevel=0.006)
+    fx.box(-2.17, -0.63, YB - 0.4, YB - 0.04, z + 0.28, z + 0.3, CHARCOAL)
+    fx.cyl(-1.95, YB - 0.22, z + 0.62, z + 0.9, 0.09, FABRIC_PALE, seg=16, r_top=0.06)
+    fx.box(-1.55, -1.25, YB - 0.33, YB - 0.12, z + 0.62, z + 0.66, CANVAS_DARK, bevel=0.003)
+    fx.box(-1.52, -1.28, YB - 0.31, YB - 0.14, z + 0.66, z + 0.69, FABRIC_OAT, bevel=0.003)
+    fx.cyl(-0.85, YB - 0.22, z + 0.62, z + 0.64, 0.07, BRASS, seg=12)
+    fx.cyl(-0.85, YB - 0.22, z + 0.64, z + 0.9, 0.008, BRASS, seg=6)
+    glows.cyl(-0.85, YB - 0.22, z + 0.88, z + 1.06, 0.1, GLOW, seg=14, r_top=0.07)
+
+
+console(FL0)
+picture(fx, -2.15, -0.65, FL0 + 1.15, FL0 + 2.15, PRINT_RIDGES)
+# sheer curtains, pleated, at both ends of the glazing on each floor and one drawn part way upstairs
+sheer = Part('sheer', 0.9)
+
+
+def curtain(x0, x1, z0, z1):
+    n = int((x1 - x0) / 0.06)
+    top, bot = [], []
+    for i in range(n + 1):
+        x = x0 + (x1 - x0) * i / n
+        y = YF + 0.22 + 0.05 * math.sin(i * math.pi / 2)  # a pleat every 0.24 m
+        bot.append(sheer.bm.verts.new((x, y, z0 + 0.02)))
+        top.append(sheer.bm.verts.new((x, y, z1)))
+    for i in range(n):
+        f = sheer.bm.faces.new([bot[i], bot[i + 1], top[i + 1], top[i]])
+        f.material_index = sheer.slot(SHEER)
+
+
+for x0, x1 in ((-7.15, -5.75), (5.75, 7.15)):
+    curtain(x0, x1, FL0, CE0 - 0.05)
 
 # upstairs: sofa facing the glass, rug, desk with a lamp, a picture between the doors, curtains
-furn.box(-2.4, 1.4, 4.4, 5.65, FL1 + 0.05, FL1 + 0.45, FABRIC, bevel=0.04)
-furn.box(-2.4, 1.4, 5.25, 5.65, FL1 + 0.45, FL1 + 0.88, FABRIC, bevel=0.04)
-furn.box(-2.4, -2.0, 4.4, 5.65, FL1 + 0.45, FL1 + 0.68, FABRIC, bevel=0.04)
-furn.box(1.0, 1.4, 4.4, 5.65, FL1 + 0.45, FL1 + 0.68, FABRIC, bevel=0.04)
+sofa(-2.4, 1.4, 4.4, 5.65, FL1, FABRIC)
 fx.box(-1.5, 0.5, 2.5, 3.3, FL1 + 0.28, FL1 + 0.34, OAK_DARK, bevel=0.01)
 fx.box(-1.45, -1.4, 2.55, 2.6, FL1, FL1 + 0.28, FRAME)
 fx.box(0.4, 0.45, 3.2, 3.25, FL1, FL1 + 0.28, FRAME)
@@ -622,17 +787,52 @@ fx.box(-5.65, -5.6, 8.3, 8.35, FL1, FL1 + 0.72, FRAME)
 glows.cyl(-6.8, 8.0, FL1 + 0.77, FL1 + 1.12, 0.1, GLOW, seg=12, r_top=0.06)
 fx.cyl(5.0, 2.4, FL1, FL1 + 1.5, 0.012, FRAME, seg=6)
 fx.cyl(5.0, 2.4, FL1, FL1 + 0.02, 0.16, FRAME, seg=14)
-glows.cyl(5.0, 2.4, FL1 + 1.3, FL1 + 1.65, 0.18, GLOW, seg=16)
-picture(fx, -2.9, -0.9, FL1 + 1.0, FL1 + 2.15)
-for x0 in (-7.25, 6.45):
-    furn.box(x0, x0 + 0.8, YF + 0.12, YF + 0.3, FL1, CE1 - 0.05, FABRIC_PALE, bevel=0.02)
+glows.cyl(5.0, 2.4, FL1 + 1.3, FL1 + 1.65, 0.18, GLOW_SHADE, seg=20, r_top=0.15)
+console(FL1)
+picture(fx, -2.15, -0.65, FL1 + 1.15, FL1 + 2.15, PRINT_RIDGES)
+picture(fx, -6.6, -5.6, FL1 + 0.9, FL1 + 2.15, PRINT_FIELDS)
+
+
+# The stair wall: one plaster face the full height of the flight (below it the ground floor's wall, above it the upstairs one),
+# and on it the three posters of How I work, each at eye height above its tread. The page draws what is on them (room.js).
+STAIR_WALL = HX0 - 0.04
+inside.box(STAIR_WALL, HX0 - 0.02, STAIR_Y0, STAIR_TOP_Y, FL0, CE1, PLASTER, keep=WEST)
+
+
+def poster(step, yc, zc, w=0.7, h=0.95):
+    """A framed poster on the stair wall (facing -x), centred at (yc, zc): its own object, poster_<step>, mapped 0..1."""
+    part = Part(f'poster_{step}', 1.6)
+    x, y0, y1, z0, z1 = STAIR_WALL - 0.03, yc - w / 2, yc + w / 2, zc - h / 2, zc + h / 2
+    vs = [part.bm.verts.new(p) for p in ((x, y1, z0), (x, y0, z0), (x, y0, z1), (x, y1, z1))]
+    f = part.bm.faces.new(vs)
+    f.material_index = part.slot(POSTER)
+    part.face_uv[f] = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    for a, b, c, d in ((y0 - 0.025, y1 + 0.025, z1, z1 + 0.025), (y0 - 0.025, y1 + 0.025, z0 - 0.025, z0), (y0 - 0.025, y0, z0, z1), (y1, y1 + 0.025, z0, z1)):
+        fx.box(STAIR_WALL - 0.045, STAIR_WALL, a, b, c, d, FRAME)
+    doors.append(part)
+
+
+def tread_top(y):
+    return FL0 + RISE * (math.floor((y - STAIR_Y0) / GOING) + 1)
+
+
+for step, yc in (('requirements', 7.1), ('build', 8.75), ('measure', 10.35)):
+    poster(step, yc, tread_top(yc) + 1.4)
+for x0, x1 in ((-7.35, -5.95), (-3.6, -2.5), (5.95, 7.35)):
+    curtain(x0, x1, FL1, CE1 - 0.05)
 # the balcony: a round table and two chairs
 fx.cyl(-1.9, -0.3, FL1, FL1 + 0.72, 0.02, FRAME, seg=6)
 fx.cyl(-1.9, -0.3, FL1 + 0.72, FL1 + 0.75, 0.42, FRAME, seg=20)
-for dx in (-0.7, 0.7):
-    cx = -1.9 + dx
-    furn.box(cx - 0.22, cx + 0.22, -0.52, -0.08, FL1 + 0.43, FL1 + 0.48, FABRIC, bevel=0.012)
-    furn.box(cx + math.copysign(0.2, dx) - 0.03, cx + math.copysign(0.2, dx) + 0.03, -0.52, -0.08, FL1 + 0.48, FL1 + 0.9, FABRIC, bevel=0.012)
+chair(furn, fx, -2.6, -0.3, 1, FL1, along_x=True)
+chair(furn, fx, -1.2, -0.3, -1, FL1, along_x=True)
+
+# the terrace: a low outdoor sofa and table right of the open door, a long oak bench on the left, a planter of grasses at the corner
+sofa(2.8, 5.6, -2.3, -1.3, TERR, FABRIC)
+fx.box(3.4, 5.0, -3.25, -2.65, TERR, TERR + 0.32, TERRACE, bevel=0.02, segments=3)
+fx.box(-6.2, -3.4, -2.9, -2.45, TERR + 0.36, TERR + 0.42, OAK, bevel=0.01)
+for x in (-5.95, -3.65):
+    fx.box(x - 0.08, x + 0.08, -2.85, -2.5, TERR, TERR + 0.36, TERRACE)
+fx.box(7.4, 10.2, -3.4, -2.2, TERR, TERR + 0.45, CONCRETE, drop=[DOWN])
 
 # ceiling downlights (a grid inside, a row under the overhang), strips washing the back walls
 down = Part('glow_downlights', 1.3)
@@ -651,8 +851,11 @@ terrace_lights = Part('glow_soffit', 1.0)
 for x in np.arange(-6.3, 6.4, 1.8):
     for y in (-0.6, 0.2):
         terrace_lights.cyl(x, y, CE0 - 0.03, CE0, 0.06, GLOW_SOFFIT, seg=10, caps=(True, False))
+# and over the balcony, under the roof's overhang: a row along it, one over the table
+for x in (-5.4, -1.8, 1.8, 5.4):
+    terrace_lights.cyl(x, -0.2, CE1 - 0.03, CE1, 0.06, GLOW_SOFFIT, seg=10, caps=(True, False))
 
-parts = [land, plinth, house, inside, frames, stairs, furn, fx, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r]
+parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r]
 objects = [p.build() for p in parts] + [d.build() for d in doors]
 
 for slug, x, st in DOORS:
@@ -660,7 +863,7 @@ for slug, x, st in DOORS:
 empty('balcony', (0, -0.2, FL1))
 
 # --- boulders at the waterline and trees on the land
-ROCK_SPECS = [(-9.8, -5.0, 1.5), (-13.6, -3.0, 1.0), (11.8, -5.0, 1.85), (14.8, -2.8, 1.05), (8.6, -5.4, 0.7), (-6.4, -5.8, 0.55), (-17.5, 0.0, 1.5), (19.5, 1.5, 1.7), (-24, 5.5, 1.3), (25, 6.5, 1.1), (16.5, -4.3, 0.55)]
+ROCK_SPECS = [(-9.8, -5.0, 1.5), (-13.6, -3.0, 1.0), (11.8, -5.0, 1.85), (14.8, -2.8, 1.05), (8.6, -5.4, 0.7), (-6.4, -5.8, 0.55), (-17.5, 0.0, 1.5), (19.5, 1.5, 1.7), (-24, 5.5, 1.3), (25, 6.5, 1.1), (16.5, -4.3, 0.55), (-7.8, -4.4, 0.45), (13.6, -4.1, 0.6), (-11.2, -5.9, 0.4)]
 
 
 rocks = Part('rocks', 0.0, smooth=True)
@@ -677,6 +880,13 @@ for x, y, r in ROCK_SPECS:
         v.co.z = max(v.co.z, -0.4)
     for f in {f for v in res['verts'] for f in v.link_faces}:
         f.material_index = mi
+# Their shading per vertex (the page shows them unlit, over the moss-rock photograph): moss on what faces up, dark and wet at the
+# waterline, darker underneath and in the hollows.
+bm.normal_update()
+for v in bm.verts:
+    moss = lerp(0.0, 1.0, (v.normal.z - 0.25) / 0.45) * lerp(0.0, 1.0, (v.co.z - 0.2) / 0.3) * (0.7 + 0.6 * noise.noise(v.co * 1.7))
+    k = lerp(0.42, 1.0, (v.co.z + 0.05) / 0.35) * lerp(0.55, 1.0, (v.normal.z + 0.6) / 0.8) * (0.85 + 0.3 * noise.noise(v.co * 2.3 + Vector((5, 0, 0))))
+    rocks.colors[v] = tuple(k * lerp(g, m_, moss) for g, m_ in zip((0.9, 0.92, 0.95), (0.62, 0.95, 0.38)))
 rocks.build()
 
 
@@ -712,10 +922,28 @@ def trunk(part, x, y, z0, z1, r0, r1, lean, seg=6, color=BARK):
         tree_face(part, [ring0[i], ring0[(i + 1) % seg], ring1[(i + 1) % seg], ring1[i]])
 
 
-def tiers(part, x, y, z0, h, seed, bare, n, spread, flat, notch, wander, trunk_top=0.1):
+def card(part, base, tip_dir, length, droop, roll, colors):
+    """A branch card (the branch texture, trunk end at u=0) from base, `length` along the horizontal tip_dir, its tip `droop` lower
+    on a curve, turned `roll` radians about its own length so it shows from the side too. colors: at the trunk and at the tip."""
+    side = Vector((-tip_dir.y, tip_dir.x, 0)) * (length * 0.25)
+    axis = (tip_dir * length - Vector((0, 0, droop))).normalized()
+    side = side * math.cos(roll) + axis.cross(side) * math.sin(roll)
+    rows = []
+    for t in (0.0, 0.5, 1.0):
+        p = base + tip_dir * (length * t) - Vector((0, 0, droop * t ** 1.6))
+        c = tuple(a + (b - a) * t for a, b in zip(*colors))
+        rows.append(tree_ring(part, [p - side, p + side], [c, c]))
+    for i, t in enumerate((0.0, 0.5)):
+        f = part.bm.faces.new([rows[i][0], rows[i + 1][0], rows[i + 1][1], rows[i][1]])
+        f.material_index = part.slot(FOLIAGE_CARD)
+        part.face_uv[f] = [(t, 0.0), (t + 0.5, 0.0), (t + 0.5, 1.0), (t, 1.0)]
+
+
+def tiers(part, x, y, z0, h, seed, bare, n, spread, flat, notch, wander, trunk_top=0.1, cards=None):
     """A tree as stacked, ragged skirts of foliage on a bare lower trunk: `bare` of the height is trunk, `n` skirts above it,
     `spread` their reach (of the height), `flat` how shallow each is, `notch` how deep the ragged edge cuts back (0..1) and
-    `wander` how far a skirt strays off the trunk (of its reach). The outline is lopsided, and thins towards the tip."""
+    `wander` how far a skirt strays off the trunk (of its reach). The outline is lopsided, and thins towards the tip.
+    With `cards` (a part), the skirts shrink to a dark core and each carries a ring of drooping branch cards out to its full reach."""
     r = np.random.default_rng(seed)
     tone, hue = r.uniform(0.75, 1.3), r.uniform(-0.06, 0.1)
     lean = (r.normal(0, 0.02) * h, r.normal(0, 0.02) * h)
@@ -727,8 +955,19 @@ def tiers(part, x, y, z0, h, seed, bare, n, spread, flat, notch, wander, trunk_t
         zb = z0 + h * (bare + (0.9 - bare) * t ** 0.95)
         th = h * flat * (1 - 0.45 * t)
         R = (rmax * (1 - t) ** 0.8 + 0.25) * r.uniform(0.8, 1.15)
-        m = int(np.clip(10 + R * 2.0, 12, 20))
         sh = (lean[0] * (zb - z0) / h + r.normal(0, wander * R), lean[1] * (zb - z0) / h + r.normal(0, wander * R))
+        if cards:
+            g = tone * (0.8 + 0.55 * t)
+            nb = int(np.clip(5 + R * 1.6, 6, 11))
+            for i in range(nb):
+                a = r.uniform(0, 6.28) if t > 0.8 else 2 * math.pi * (i + r.uniform(-0.3, 0.3)) / nb
+                card(cards, Vector((x + sh[0], y + sh[1], zb + th * 0.25)), Vector((math.cos(a), math.sin(a), 0)), R * r.uniform(0.85, 1.15),
+                     th * r.uniform(0.6, 1.1), r.uniform(-0.9, 0.9), (tint(TREE, 0.45 * g, hue), tint(TREE, 1.45 * g * r.uniform(0.85, 1.15), hue)))
+            R *= 0.5
+            tone_k = 0.7
+        else:
+            tone_k = 1.0
+        m = int(np.clip(10 + R * 2.0, 12, 20))
         a0 = r.uniform(0, 6.28)
         pts, topc, botc = [], [], []
         for i in range(m):
@@ -736,7 +975,7 @@ def tiers(part, x, y, z0, h, seed, bare, n, spread, flat, notch, wander, trunk_t
             body = 1 + 0.22 * math.sin(2 * a + ph1) + 0.12 * math.sin(3 * a + ph2)
             rr = R * body * (r.uniform(0.9, 1.15) if i % 2 else r.uniform(notch, notch + 0.25))
             pts.append((x + sh[0] + rr * math.cos(a), y + sh[1] + rr * math.sin(a), zb - th * (0.15 + 0.55 * rr / R) + r.normal(0, 0.1 * th)))
-            g = tone * (0.8 + 0.55 * t) * r.uniform(0.8, 1.2)
+            g = tone * tone_k * (0.8 + 0.55 * t) * r.uniform(0.8, 1.2)
             topc.append(tint(TREE, 1.15 * g, hue))
             botc.append(tint(TREE, 0.45 * g, hue))
         top = tree_ring(part, pts, topc)
@@ -750,18 +989,20 @@ def tiers(part, x, y, z0, h, seed, bare, n, spread, flat, notch, wander, trunk_t
             tree_face(part, [inner, bot[(i + 1) % m], bot[i]])
 
 
-def spruce(part, x, y, z0, h, seed):
+def spruce(part, x, y, z0, h, seed, cards=None):
     r = np.random.default_rng(seed + 1)
-    tiers(part, x, y, z0, h, seed, r.uniform(0.08, 0.2), int(9 + h / 6 + r.integers(0, 3)), r.uniform(0.11, 0.17), 0.14, 0.35, 0.08)
+    tiers(part, x, y, z0, h, seed, r.uniform(0.08, 0.2), int(9 + h / 6 + r.integers(0, 3)), r.uniform(0.11, 0.17), 0.14, 0.35, 0.08, cards=cards)
 
 
-def fir(part, x, y, z0, h, seed):
+def fir(part, x, y, z0, h, seed, cards=None):
     """A broader fir: fewer, deeper skirts that droop further and stray a little off the trunk."""
     r = np.random.default_rng(seed + 1)
-    tiers(part, x, y, z0, h, seed, r.uniform(0.1, 0.25), int(7 + h / 7 + r.integers(0, 3)), r.uniform(0.17, 0.23), 0.2, 0.45, 0.18)
+    tiers(part, x, y, z0, h, seed, r.uniform(0.1, 0.25), int(7 + h / 7 + r.integers(0, 3)), r.uniform(0.17, 0.23), 0.2, 0.45, 0.18, cards=cards)
 
 
 trees = Part('trees', 0.0, smooth=181, uv=False)  # smooth all the way, so the vertices are shared and the file stays small
+tree_cards = Part('trees_cards', 0.0, smooth=181, uv=False)  # the near trees' branches (uvs by hand)
+NEAR = 70.0  # trees nearer the House than this (metres, centre to trunk) get branch cards; beyond it the fog leaves only their shape
 tr = np.random.default_rng(23)
 placed = []
 
@@ -774,7 +1015,7 @@ def plant(x, y, h, kind=None):
         return
     seed = len(placed) + 100
     kind = kind or tr.choice(['spruce', 'fir'], p=[0.65, 0.35])
-    {'spruce': spruce, 'fir': fir}[kind](trees, x, y, z - 0.4, h, seed)
+    {'spruce': spruce, 'fir': fir}[kind](trees, x, y, z - 0.4, h, seed, tree_cards if math.hypot(x, y - 6) < NEAR else None)
     placed.append((x, y, h))
 
 
@@ -793,8 +1034,42 @@ for gx in np.arange(-78, 79, 6.0):
         if d < 0.55 or any((x - px) ** 2 + (y - py) ** 2 < (0.14 * (h + ph)) ** 2 for px, py, ph in placed):
             continue  # a gap in the forest, or no room beside a neighbour
         plant(x, y, h)
-print('trees:', len(placed))
+print('trees:', len(placed), 'with cards:', sum(math.hypot(x, y - 6) < NEAR for x, y, h in placed), 'card vertices:', len(tree_cards.bm.verts))
 trees.build()
+tree_cards.build()
+
+# --- grasses: tufts of thin blades, unlit like the trees (vertex colours), in the planter and along the shore by the plinth
+grass = Part('trees_grass', 0.0, smooth=181, uv=False)
+gr = np.random.default_rng(41)
+
+
+def tuft(x, y, z, h, n=26):
+    for _ in range(n):
+        a, lean = gr.uniform(0, 6.28), gr.uniform(0.15, 0.6)
+        hh = h * gr.uniform(0.6, 1.1)
+        w = 0.012 + 0.01 * gr.random()
+        bx, by = x + gr.normal(0, 0.06), y + gr.normal(0, 0.06)
+        tx, ty = bx + math.cos(a) * lean * hh, by + math.sin(a) * lean * hh
+        straw = gr.random() < 0.3  # some blades gone straw-coloured
+        base = (0.012, 0.016, 0.01)
+        tip = (0.09, 0.075, 0.035) if straw else (0.035, 0.05, 0.025)
+        vs = tree_ring(grass, [(bx - w * math.sin(a), by + w * math.cos(a), z), (bx + w * math.sin(a), by - w * math.cos(a), z), (tx, ty, z + hh)], [base, base, tip])
+        f = grass.bm.faces.new(vs)
+        f.material_index = grass.slot(FOLIAGE)
+
+
+for i in range(7):
+    tuft(7.7 + i * 0.38 + gr.normal(0, 0.05), -2.8 + gr.normal(0, 0.18), TERR + 0.4, 0.75)
+for _ in range(22):
+    x = gr.uniform(10.7, 15.0)
+    y = gr.uniform(shore(x) + 0.2, shore(x) + 4.0)
+    if y < 16:
+        tuft(x, y, land_height(x, y) - 0.05, gr.uniform(0.5, 0.95), 20)
+for _ in range(14):
+    x = gr.uniform(-15.0, -10.7)
+    y = gr.uniform(shore(x) + 0.2, shore(x) + 3.5)
+    tuft(x, y, land_height(x, y) - 0.05, gr.uniform(0.45, 0.8), 18)
+grass.build()
 
 # bake-only water: a dark plane so the bounce off the lake is dark rather than the world's sky
 water = bpy.data.objects.new('bake_water', bpy.data.meshes.new('bake_water'))
@@ -996,7 +1271,7 @@ def mask_material():
 
     ledge, wetk = attr('ledge'), attr('wetk')
     streak = M('MULTIPLY', M('SUBTRACT', noise((6, 6, 0.55), 3), 0.5), 7.0, clamp=True)    # fine across (about 15 cm), long down, and only some of the wall
-    length = M('ADD', 0.6, M('MULTIPLY', noise((0.7, 0.7, 0.3), 2, 5.0), 3.5))            # how far each runs from its ledge
+    length = M('ADD', 1.0, M('MULTIPLY', noise((0.7, 0.7, 0.3), 2, 5.0), 4.5))            # how far each runs from its ledge
     reach = M('POWER', 0.2, M('DIVIDE', ledge, length))
     lip = M('MULTIPLY', M('POWER', 0.02, M('DIVIDE', ledge, 0.22)), 0.55)                    # a drip band just under the edge
     z = new('ShaderNodeSeparateXYZ')
@@ -1017,9 +1292,12 @@ def mask_material():
     nt.links.new(bevel.outputs['Normal'], dot.inputs[0])
     nt.links.new(geo.outputs['Normal'], dot.inputs[1])
     wear = M('MULTIPLY', M('MULTIPLY', M('SUBTRACT', 1.0, dot.outputs['Value']), 14.0, clamp=True), M('ADD', 0.3, noise((22, 22, 22), 4, 3.0)), clamp=True)
+    algae = M('MULTIPLY', M('DIVIDE', M('ADD', M('SUBTRACT', 0.42, z.outputs['Z']), M('MULTIPLY', M('SUBTRACT', noise((2.5, 2.5, 4.0), 4, 23.0), 0.5), 0.45)), 0.4, clamp=True),
+               M('MULTIPLY', M('SUBTRACT', 1.0, M('ABSOLUTE', nz_.outputs['Z'])), 3.0, clamp=True))  # green slime low on the plinth's walls, blotchy
     col = new('ShaderNodeCombineColor')
     put(col.inputs['Red'], damp)
     put(col.inputs['Green'], wear)
+    put(col.inputs['Blue'], algae)
     emit = new('ShaderNodeEmission')
     nt.links.new(col.outputs['Color'], emit.inputs['Color'])
     out = new('ShaderNodeOutputMaterial')
@@ -1056,9 +1334,10 @@ rgb = px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, :3]
 print('lightmap: mean %.3f p99 %.3f max %.3f' % (rgb.mean(), np.percentile(rgb, 99), rgb.max()))
 px = np.empty(LIGHT_RES * LIGHT_RES * 4, np.float32)
 mimg.pixels.foreach_get(px)
-damp, wear = (px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, i] for i in (0, 1))
+damp, wear, algae = (px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, i] for i in (0, 1, 2))
 print('damp: mean %.3f on concrete %.3f; wear mean %.4f' % (damp.mean(), damp[damp > 0.01].mean() if (damp > 0.01).any() else 0, wear.mean()))
-rgb = rgb * (1 - np.array((0.40, 0.37, 0.41)) * damp[:, :, None]) * (1 + 0.22 * wear[:, :, None])
+rgb = rgb * (1 - np.array((0.56, 0.53, 0.56)) * damp[:, :, None]) * (1 + 0.22 * wear[:, :, None])
+rgb = rgb * (1 - np.array((0.55, 0.3, 0.62)) * algae[:, :, None])  # the waterline's algae: darker, and green
 v = np.clip(rgb / LIGHT_RANGE, 0, 1)
 v = np.where(v <= 0.0031308, v * 12.92, 1.055 * np.power(v, 1 / 2.4) - 0.055)
 rows = (np.round(v * 255).astype(np.uint8))[::-1]  # Blender's rows run bottom to top; images run top to bottom
