@@ -25,8 +25,8 @@ addEventListener('themechange', () => accent.copy(cssColor('--cobalt')));
 
 // Lighting presets: every value fades between day (0) and night (1).
 const ROOM = {
-  day: { exposure: 1.08, sky: 0xffffff, ground: 0xcfc6b8, hemi: 1.15, sunColor: 0xfff0d8, sun: 2.6, fillColor: 0xe6eeff, fill: 0.75, lamp: 0, lampGlow: 0, screen: 1 },
-  night: { exposure: 0.95, sky: 0x7d8aa8, ground: 0x1d2126, hemi: 0.35, sunColor: 0x9fb0ff, sun: 0.55, fillColor: 0x6f7d99, fill: 0.12, lamp: 30, lampGlow: 4, screen: 0.85 }
+  day: { exposure: 1.08, sky: 0xffffff, ground: 0xcfc6b8, hemi: 1.15, sunColor: 0xfff0d8, sun: 2.6, fillColor: 0xe6eeff, fill: 0.75, lamp: 0, lampGlow: 0, safe: 0, screen: 1 },
+  night: { exposure: 0.95, sky: 0x7d8aa8, ground: 0x1d2126, hemi: 0.35, sunColor: 0x9fb0ff, sun: 0.55, fillColor: 0x6f7d99, fill: 0.12, lamp: 30, lampGlow: 4, safe: 2.5, screen: 0.85 }
 };
 const OBJECT = {
   day: { exposure: 1.08, ground: 0xcfc6b8, hemi: 1.3, keyColor: 0xfff0d8, key: 2.4, fill: 0.6, shade: 0.16, screen: 1 },
@@ -301,7 +301,9 @@ function startBench(stage, { root, projects }) {
   lamp.shadow.mapSize.setScalar(small ? 512 : 1024);
   lamp.shadow.bias = -0.0005;
   const lampGlow = new THREE.PointLight(0xffc68a, 0, 5, 1.5);
-  scene.add(hemi, fill, lamp, lamp.target, lampGlow);
+  // Night-only warm spot on the drug safe's corner, which sits far from the lamp.
+  const safeGlow = new THREE.SpotLight(0xffd2a0, 0, 4, 0.5, 1, 2);
+  scene.add(hemi, fill, lamp, lamp.target, lampGlow, safeGlow, safeGlow.target);
   let tint = () => {};
   const light = t => {
     const m = mix(ROOM, t);
@@ -309,7 +311,7 @@ function startBench(stage, { root, projects }) {
     hemi.color.copy(m.sky); hemi.groundColor.copy(m.ground); hemi.intensity = m.hemi;
     sun.color.copy(m.sunColor); sun.intensity = m.sun;
     fill.color.copy(m.fillColor); fill.intensity = m.fill;
-    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow;
+    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow; safeGlow.intensity = m.safe;
     tint(t, m.screen);
     nightT = t;
     dirty = true;
@@ -343,6 +345,9 @@ function startBench(stage, { root, projects }) {
     switcher.traverse(o => { if (o.isMesh && !o.userData.glow) o.material = o.material.clone(); });
     room.getObjectByName('lamp_head').getWorldPosition(lamp.position);
     lampGlow.position.copy(lamp.position).add(new THREE.Vector3(0, -0.15, 0));
+    // Above and in front of the safe, on the lamp's side of the room.
+    boxes['dd-drugs-register'].getCenter(safeGlow.target.position);
+    safeGlow.position.copy(safeGlow.target.position).add(new THREE.Vector3(0.5, 1.05, 0.45));
     // Night stills are dusk, so objects far from the desk lamp still read on a small card.
     light(isNight() ? (still ? 0.65 : 1) : 0);
     stage.classList.add('is-live');

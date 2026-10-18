@@ -204,6 +204,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
    With it, one column is open and wide; hover or focus moves the cobalt panel up into the next one
    while the old one leaves upward (about.js sets .is-open and .is-leaving). */
 .about{padding:clamp(64px,9vw,120px) 0 clamp(24px,4vw,48px)}
+@media (max-width:640px){.about{padding-bottom:48px}} /* with Contact's top margin, clear air between the two sections on a phone */
 .colonnade{list-style:none;margin:32px 0 0;padding:0;display:flex;border-block:1px solid var(--line)}
 .chapter{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
 .chapter+.chapter{border-left:1px solid var(--line)}
@@ -226,6 +227,16 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 @media (prefers-reduced-motion:no-preference){
   .js .chapter{transition:flex-grow .6s cubic-bezier(.2,.8,.2,1)}
   .js :is(.is-open,.is-leaving) .chapter-panel{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+}
+/* Desktop, Background Chapter wide enough (open, or the no-JS columns): the whole 4:5 portrait on the left,
+   the caption beside it, never over it. Narrower (closed) it stays a cropped cover with the caption over it. */
+@media (min-width:900px) and (orientation:landscape){
+  .chapter:has(.portrait){container-type:inline-size}
+  @container (min-width:560px){
+    .chapter-view:has(.portrait){display:flex}
+    .chapter-view .portrait{position:static;flex:none;width:auto;aspect-ratio:4/5}
+    .chapter-view .portrait+.chapter-panel{position:static;flex:1;width:auto;display:flex;flex-direction:column;justify-content:flex-end}
+  }
 }
 @media (max-width:899px),(orientation:portrait){
   .colonnade{flex-direction:column}
@@ -600,9 +611,12 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 [data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-96px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 96px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
 [data-room] .wordmark::after{content:"";position:absolute;inset:auto 0 0;height:32%;z-index:-1;background:linear-gradient(to top,color-mix(in srgb,var(--day) 92%,transparent) 80%,transparent)}
 /* About and Contact are plain page below the goodbye, on a solid ground so the room does not show through. */
-[data-room] :is(.about,.contact){scroll-margin-top:var(--nav-h)}
-[data-room] .about{background:var(--day);padding:clamp(64px,9vw,120px) var(--edge) clamp(48px,7vw,96px)}
-[data-room] .contact{margin:0;padding:clamp(28px,5vw,64px) var(--edge);border-radius:0;box-shadow:none}
+/* Each starts its own stop: it is at least a screen tall, rests with its top at the screen's top (the bar covers its
+   own top padding, so nothing of the section above shows behind or beside it), and cannot be skipped over. lvh, not svh:
+   with a phone's address bar hidden the section must still fill the screen, so the next one never peeks in below. */
+[data-room] :is(.about,.contact){min-height:100lvh;scroll-snap-stop:always}
+[data-room] .about{background:var(--day);padding:max(clamp(64px,9vw,120px),calc(var(--nav-h) + 16px)) var(--edge) clamp(48px,7vw,96px)}
+[data-room] .contact{margin:0;padding:calc(var(--nav-h) + clamp(28px,5vw,64px)) var(--edge) clamp(28px,5vw,64px);border-radius:0;box-shadow:none}
 
 /* Wide: captions sit at the foot of their shelf, the room fills the rest. */
 [data-room=wide] .shelf{justify-content:flex-end;padding:0 var(--edge) clamp(24px,6svh,72px)}
