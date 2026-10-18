@@ -146,6 +146,13 @@ async function browserChecks() {
       assert.ok(await page.evaluate(() => !document.querySelector('#about .hiring') && document.querySelectorAll('#contact a[href^="mailto:"]:not(.enquiry-failed a)').length === 1 && !!document.querySelector('#contact .hiring a[href$="resume/"]')), `/: Contact has the Hiring line and one email, About has no Hiring line at ${width}px`);
       await page.close();
     }
+    const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    await desktop.goto(`http://127.0.0.1:${server.address().port}/`, { waitUntil: 'networkidle' });
+    assert.ok(await desktop.evaluate(() => { // About on desktop: the open Background Chapter's caption sits beside its portrait, not over it
+      const open = document.querySelector('.chapter.is-open');
+      return open.querySelector('.chapter-panel').getBoundingClientRect().left >= open.querySelector('.portrait').getBoundingClientRect().right - 0.5;
+    }), '/: About caption sits beside the portrait at 1440px');
+    await desktop.close();
     await enquiryChecks(browser, `http://127.0.0.1:${server.address().port}/`);
   } finally {
     await browser.close();
@@ -154,4 +161,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, Enquiry form and résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image, Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
+browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
