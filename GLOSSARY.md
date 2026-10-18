@@ -1,22 +1,22 @@
 # Portfolio
 
-Hafiz Jamali's portfolio: a homepage that tours a small clay room of his projects, then tells who he is and how to reach him.
+Hafiz Jamali's portfolio: a homepage that tours a house of his projects, room by room, then tells who he is and how to reach him.
 
 ## Language
 
 ### The homepage
 
+**House**:
+The 3D lakeside villa behind the homepage: seen from across the water first, then entered and walked through, Room by Room.
+_Avoid_: building, scene, workshop (the Workshop is the design's name, not the scene)
+
 **Room**:
-The 3D clay scene behind the homepage, where every object stands for a project.
-_Avoid_: scene, workshop (the Workshop is the design's name, not the scene)
+One themed space in the House for one service Hafiz offers, holding an object for each project that proves it. A project's case study is told at its object.
+_Avoid_: shelf, level, section
 
 **Stop**:
 One screen of the room tour, showing one thing in the room with its caption.
 _Avoid_: step, slide
-
-**Shelf**:
-One service Hafiz offers, shown with the projects that prove it.
-_Avoid_: service card, category
 
 **Chapter**:
 One of the three panels in About: Background, How I work, Now.

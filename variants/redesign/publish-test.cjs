@@ -42,7 +42,7 @@ for (const route of routes) {
 const verification = fs.readFileSync(path.join(here, '../../apps/web/index.html'), 'utf8').match(/<meta\b[^>]*name="google-site-verification"[^>]*>/)[0];
 const home = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
 assert.ok(home.includes(verification), 'Google Search Console verification lost');
-assert.equal((home.match(/data-pick="/g) || []).length, projects.length, 'every project is on the bench');
+assert.equal((home.match(/<ul aria-labelledby="index-label">.*?<\/ul>/s)[0].match(/<li>/g) || []).length, projects.length, 'every project is in the hero index');
 assert.equal((home.match(/<li class="work-/g) || []).length, projects.length, 'every project is in the work grid');
 assert.match(home, /href="resume\/"/, 'homepage links the résumé on this site');
 assert.match(home, /href="projects\/"/, 'homepage links all projects');
@@ -64,11 +64,25 @@ assert.ok(robots.includes(`Sitemap: ${origin}/sitemap.xml`));
 const manifest = JSON.parse(fs.readFileSync(path.join(site, 'runtime-manifest.json'), 'utf8'));
 const listed = new Set(manifest.map(e => e.file));
 for (const route of routes) assert.ok(listed.has(rel(route)), `manifest lists ${rel(route)}`);
-for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', 'static/workshop.glb', 'static/poster.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
+// The House's outside: everything it needs before it shows (page.cjs lists them as statics, main.js preloads them).
+const outside = ['house.glb', 'house-light.webp', 'house-wet.webp', 'backdrop.webp', 'water-normal.webp'];
+for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', 'static/workshop.glb', ...outside.map(f => `static/${f}`), 'static/poster.webp', 'static/poster-phone.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
 for (const e of manifest) {
   assert.equal(hash(fs.readFileSync(path.join(site, e.file))), e.sha256, e.file);
   assert.doesNotMatch(e.file, /^(assets\/|\.impeccable|evidence|FICTIONAL|.*\.cjs$)/, `${e.file}: no source or reserved paths`);
 }
+
+// The House's outside loads first, so it stays small: the model, its lighting and wet textures, the backdrop plate and the lake's ripples together.
+const houseBytes = outside.reduce((total, f) => total + fs.statSync(path.join(site, 'static', f)).size, 0);
+assert.ok(houseBytes < 2500 * 1000, `the House (${outside.join(', ')}) is ${houseBytes} bytes; the ceiling is 2.5 MB`);
+// No texture of the House is larger than 2048 px on a side (the GPU memory of phones).
+function webpSize(file) {
+  const b = fs.readFileSync(file), kind = b.toString('latin1', 12, 16);
+  if (kind === 'VP8X') return [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)];
+  if (kind === 'VP8L') return [1 + (b.readUInt16LE(21) & 0x3fff), 1 + ((b.readUInt32LE(21) >> 14) & 0x3fff)];
+  return [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff]; // 'VP8 '
+}
+for (const f of outside.filter(f => f.endsWith('.webp'))) assert.ok(webpSize(path.join(site, 'static', f)).every(n => n <= 2048), `${f} is ${webpSize(path.join(site, 'static', f))} px; textures stay within 2048`);
 
 assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf')), fs.readFileSync(path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf')));
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
@@ -126,6 +140,35 @@ async function enquiryChecks(browser, url) {
   }
   await page.close();
 }
+// The homepage keeps all its content as a static page (no JavaScript, reduced motion), and when the House runs it
+// takes over the page; where the browser has no WebGL the page falls back to the static layout with the poster.
+async function homeChecks(browser, url) {
+  const content = () => ({
+    headline: document.querySelector('h1').textContent.length > 10,
+    door: !!document.querySelector('.work-door h2'),
+    services: document.querySelectorAll('.shelf h3').length,
+    cards: document.querySelectorAll('.shelf-items li').length,
+    hero: [...document.querySelectorAll('.bench-poster, .bench-stage canvas')].some(e => e.getBoundingClientRect().height > 100),
+    room: document.documentElement.dataset.room || ''
+  });
+  for (const [what, options] of [['no JavaScript', { javaScriptEnabled: false }], ['reduced motion', { reducedMotion: 'reduce' }]]) {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, ...options });
+    await page.goto(url, { waitUntil: 'networkidle' });
+    const c = await page.evaluate(content);
+    assert.deepEqual(c, { headline: true, door: true, services: 5, cards: projects.length, hero: true, room: '' }, `/: ${what} keeps the static layout with every service and project`);
+    await page.close();
+  }
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.bench-stage.is-live') || !document.documentElement.dataset.room, null, { timeout: 60000 });
+  const live = await page.evaluate(() => !!document.querySelector('.bench-stage.is-live canvas'));
+  const c = await page.evaluate(content);
+  assert.ok(live ? c.room === 'phone' : c.room === '', `/: the House runs with its tour layout, or without WebGL the page keeps the static layout (live: ${live}, room: "${c.room}")`);
+  assert.equal(c.services, 5);
+  assert.equal(c.cards, projects.length);
+  await page.close();
+  console.log(live ? 'note: the House started (WebGL available)' : 'note: no WebGL here, so the House was not started; the static fallback was checked');
+}
 // Browser step: serve the production build locally and check the layout where a phone would see it.
 async function browserChecks() {
   const server = http.createServer((req, res) => {
@@ -134,7 +177,7 @@ async function browserChecks() {
     res.writeHead(200, { 'content-type': { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' }[path.extname(file)] || 'application/octet-stream' }).end(fs.readFileSync(file)); // module scripts need a JavaScript type
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--disable-dev-shm-usage', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   try {
     for (const width of [360, 390, 430]) {
       const page = await browser.newPage({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
@@ -153,8 +196,9 @@ async function browserChecks() {
       const open = document.querySelector('.chapter.is-open');
       return open.querySelector('.chapter-panel').getBoundingClientRect().left >= open.querySelector('.portrait').getBoundingClientRect().right - 0.5;
     }), '/: About caption sits beside the portrait at 1440px');
-    assert.ok(await desktop.evaluate(() => [...document.querySelector('.shelf-items').children].every(li => li.getBoundingClientRect().width >= 200)), '/: Shelf cards stay at least 200px wide without the Room (1440px)');
+    assert.ok(await desktop.evaluate(() => [...document.querySelector('.shelf-items').children].every(li => li.getBoundingClientRect().width >= 200)), '/: Shelf cards stay at least 200px wide without the House (1440px)');
     await desktop.close();
+    await homeChecks(browser, `http://127.0.0.1:${server.address().port}/`);
     await enquiryChecks(browser, `http://127.0.0.1:${server.address().port}/`);
   } finally {
     await browser.close();
@@ -163,4 +207,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, Enquiry form and résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px, the Shelf cards stay 200px or wider without the Room; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
+browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px, the Shelf cards stay 200px or wider without the House; the homepage keeps every service and project without JavaScript or with reduced motion and starts the House or falls back to that layout; the Enquiry form sends, validates and falls back to the mail app when sending fails'));

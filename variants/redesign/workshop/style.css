@@ -23,7 +23,7 @@
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--day);color:var(--ink);font:400 1.0625rem/1.6 Schibsted,system-ui,sans-serif}
-@media (prefers-reduced-motion:no-preference){body,.contact,.drawer,.case-facts dl,.object-view{transition:background-color .6s ease,color .6s ease}}
+@media (prefers-reduced-motion:no-preference){body,.contact,.case-facts dl,.object-view{transition:background-color .6s ease,color .6s ease}}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px;transition:color .2s var(--ease),text-decoration-color .2s var(--ease),text-decoration-thickness .2s var(--ease)}
 :focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
@@ -80,15 +80,16 @@ input,select{accent-color:var(--cobalt)}
 
 .bench{position:relative;display:flex;align-items:center;min-height:calc(100svh - 76px)}
 .bench-stage{position:absolute;inset:0}
-.bench-stage canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
-.bench-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:78% 50%}
-.bench-stage.is-live .bench-poster{display:none}
-.bench-tip{position:absolute;left:0;top:0;z-index:3;pointer-events:none;padding:4px 10px;border-radius:var(--r);background:var(--cobalt);color:var(--on-cobalt);font-weight:700;font-size:.875rem;white-space:nowrap}
+.bench-stage canvas{position:absolute;inset:0;width:100%;height:100%}
+.bench-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bench-poster-phone,.bench-stage.is-live .bench-poster{display:none}
+[data-room=phone] .bench-poster-phone{display:block}
+[data-room=phone] .bench-poster-wide{display:none}
 /* A veil keeps the copy readable where the back wall of the room reaches behind it. */
 .bench::after{content:"";position:absolute;inset:-90px 0 0;pointer-events:none;background:radial-gradient(62% 85% at 6% 55%,color-mix(in srgb,var(--day) 88%,transparent) 30%,transparent 100%);transition:opacity .4s}
 .bench-copy{position:relative;z-index:1;width:100%;max-width:var(--max);margin:0 auto;padding:clamp(24px,5vh,64px) var(--pad);pointer-events:none;transition:opacity .35s ease,visibility .35s}
 .bench-panel{pointer-events:auto;max-width:31rem}
-.bench.is-inside .bench-copy,.bench.is-inside::after,.bench.is-touring .bench-copy,.bench.is-touring::after{opacity:0;visibility:hidden}
+.bench.is-touring .bench-copy,.bench.is-touring::after{opacity:0;visibility:hidden}
 .bench-copy h1{font-size:clamp(2.2rem,3.6vw,3.4rem);max-width:15ch}
 .bench-panel>p:not(.actions){margin-top:20px;font-size:1.1875rem;color:var(--muted);max-width:40ch}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:28px}
@@ -98,51 +99,6 @@ input,select{accent-color:var(--cobalt)}
 .bench-index a{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);text-decoration:none;font-weight:600;font-size:.9375rem;transition:box-shadow .2s var(--ease),color .2s var(--ease),transform .15s var(--ease)}
 .bench-index a[aria-current]{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
 
-/* Drawer: slides over the right side of the room when an object is picked (below it when stacked) */
-.drawer{position:absolute;z-index:2;top:50%;right:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));width:min(380px,92%);max-height:100%;overflow:auto;transform:translateY(-50%);
-  background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:10px;
-  animation:drawer .45s cubic-bezier(.2,.9,.3,1) both}
-@keyframes drawer{from{opacity:0;transform:translate(24px,-50%)}to{opacity:1;transform:translate(0,-50%)}}
-@media (prefers-reduced-motion:reduce){.drawer{animation:none}}
-.drawer-close{align-self:flex-start;min-height:44px;padding:6px 14px;border:0;border-radius:var(--r);background:var(--day);color:var(--ink);font:600 .9375rem Schibsted,sans-serif;cursor:pointer}
-.drawer-kind{color:var(--muted);font-size:.9375rem;font-weight:600}
-.drawer h2{font-size:2rem;margin-top:4px}
-.drawer-summary{font-weight:700}
-.drawer p:not([class]){color:var(--muted);font-size:.9375rem}
-.drawer figure{margin:4px 0}
-.drawer figure img{border-radius:var(--r);border:1px solid var(--line)}
-.drawer figure.is-phone img{max-height:300px;width:auto;margin:0 auto}
-.drawer figcaption{font-size:.8125rem;color:var(--muted);margin-top:6px}
-.drawer ol{margin:0;padding:12px 12px 12px 34px;background:var(--day);border-radius:var(--r);display:grid;gap:4px;font-size:.9375rem}
-.drawer .button{align-self:flex-start;margin-top:4px}
-.drawer-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
-.drawer-nav button{display:grid;justify-items:start;gap:0;min-height:48px;padding:6px 10px;border:0;border-radius:var(--r);background:none;color:var(--muted);font:600 .8125rem Schibsted,sans-serif;cursor:pointer;text-align:left}
-.drawer-nav button+button{justify-items:end;text-align:right}
-.drawer-nav button span{color:var(--ink);font-size:.9375rem}
-
-/* Tour captions and cards (the page is in the room: see "The room is the page" below). Each
-   stop's name is set large on the scene on wide screens, the way a film titles a shot; on phones a
-   card per project rides the bottom of the screen. */
-.drawer{overscroll-behavior:contain}
-.tour-card{position:absolute;z-index:2;right:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));bottom:clamp(40px,12vh,120px);width:min(460px,38%);
-  display:grid;justify-items:start;gap:10px;transition:opacity .45s ease,transform .45s cubic-bezier(.2,.9,.3,1),visibility .45s}
-.tour-card.is-away{opacity:0;visibility:hidden;transform:translateY(20px)}
-.tour-count{font-weight:700;font-size:.875rem;letter-spacing:.08em;font-variant-numeric:tabular-nums;color:var(--cobalt)}
-.tour-object{font-weight:600;color:var(--muted)}
-.tour-card .tour-object{color:var(--ink)} /* over the scene, not the page */
-.tour-title{font-weight:800;font-size:clamp(2.6rem,5.2vw,4.75rem);line-height:.95;letter-spacing:-.045em}
-.tour-summary{font-size:1.0625rem;max-width:34ch;margin-bottom:8px}
-/* The caption sits on a small solid panel, so it reads over any part of the room. */
-.tour-card{padding:22px 24px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
-.tour-card,.tour-steps{display:none}
-
-/* Touch screens have no hover, so the room says it can be tapped until the first tap. */
-.bench-hint{position:absolute;left:50%;bottom:10px;z-index:2;transform:translateX(-50%);display:flex;align-items:center;gap:8px;pointer-events:none;
-  padding:6px 12px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font-weight:600;font-size:.875rem;width:max-content;max-width:calc(100% - 2 * var(--pad));text-align:center}
-.bench-hint::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cobalt)}
-@media (prefers-reduced-motion:no-preference){.bench-hint::before{animation:hint 1.6s ease-in-out 3}}
-@keyframes hint{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--cobalt) 25%,transparent)}}
-.bench-stage.has-drawer .bench-hint{display:none}
 
 /* Stacked hero: narrow screens, and any portrait screen (a phone in desktop mode reports a
    desktop width, but the full-bleed hero needs a landscape stage). room.js uses the same query. */
@@ -151,14 +107,9 @@ input,select{accent-color:var(--cobalt)}
   .bench::after{display:none}
   .bench-stage{position:relative;height:35svh;min-height:240px}
   .bench-copy{padding-top:8px;padding-bottom:48px}
-  /* The drawer takes the copy's place below the room, so the opened object stays in view. */
-  .bench.is-inside .bench-copy{display:none}
-  .drawer{position:relative;top:auto;right:auto;width:min(640px,calc(100% - 2 * var(--pad)));max-height:none;margin:8px auto 48px;transform:none;padding:18px;animation-name:sheet}
-  @keyframes sheet{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-  .drawer h2{font-size:1.75rem}
 }
 
-section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
+section>h2,.about h2,.work-door h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 
 /* What I can do: one shelf per service, the projects that prove it beside it */
 .work{padding:clamp(64px,9vw,120px) 0 0}
@@ -457,9 +408,6 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .site-nav nav a:not(.button):hover{color:var(--cobalt)}
   .theme-toggle:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
   .bench-index a:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
-  .drawer-close:hover{color:var(--cobalt)}
-  .drawer-nav button:hover{background:var(--day)}
-  .drawer-nav button:hover span{color:var(--cobalt)}
   :is(.work-grid,.shelf-items) a:hover{transform:translateY(-3px);box-shadow:var(--lift)}
   [data-room] .shelf-items a:hover{box-shadow:none}
   .site-footer a:hover,.hiring a:hover,.shelf-note a:hover,.text-link:hover,.case-head p>a:hover,.index-page>p>a:hover{color:var(--cobalt)}
@@ -520,12 +468,12 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   @keyframes settle{from{border-radius:48px;transform:translateY(80px)}to{border-radius:var(--r);transform:none}}
 }}
 
-/* The room is the page. While room.js runs it keeps html[data-room] set ("wide" or "phone"; the
+/* The House is the page. While room.js runs it keeps html[data-room] set ("wide" or "phone"; the
    head script sets it before first paint). The canvas is one fixed full-screen background and the
    page is a run of steps, about a screen tall each, with its panel at the bottom (phone) or to one side
-   (wide) and the room showing in the rest: the hero, a project per step, a service per step, then the
-   goodbye. About and Contact follow it as plain page. Scroll snapping (mandatory) rests every step in place and room.js keys the camera to that same position,
-   so the panel and the object it names arrive together.
+   (wide) and the House showing in the rest: the hero across the lake, the sliding glass, a doorway per service, the balcony
+   for teaching, then the goodbye. About and Contact follow it as plain page. Scroll snapping (mandatory) rests every step in place and room.js keys the camera to that same position,
+   so the panel and the view it names arrive together.
    Without the attribute (no JavaScript, reduced motion, no WebGL, ?still= renders) none of this applies
    and the page keeps its static layout. */
 [data-room]{--nav-h:76px;--edge:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));--scrim-a:94%;--scrim-hold:75%;--scrim-fade:24px;--scrim-c:color-mix(in srgb,var(--day) var(--scrim-a),transparent);--scrim:linear-gradient(to top,transparent,var(--scrim-c) var(--scrim-fade),var(--scrim-c) var(--scrim-hold),transparent);scroll-snap-type:y mandatory}
@@ -536,8 +484,8 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 [data-room] :is(.bench-copy,[data-stop],.about,.contact){scroll-snap-align:start}
 [data-room] .site-footer{scroll-snap-align:end} /* mandatory snapping must still let the page reach its foot */
 /* Only the panels take pointer events, so a tap between them reaches the room. */
-[data-room] :is(.tour,.sky,.bench,.bench-copy,.tour-steps,main,.work,.shelf){pointer-events:none}
-[data-room] :is(canvas,.bench-panel,.step-card,.drawer,.tour-card .button,.site-nav,.work>h2,.shelf-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
+[data-room] :is(.tour,.sky,.bench,.bench-copy,main,.work,.shelf){pointer-events:none}
+[data-room] :is(canvas,.bench-panel,.site-nav,.work-door h2,.shelf-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
 [data-room] .site-nav{position:fixed;inset:0 0 auto;z-index:7;max-width:none;margin:0;background:var(--day);transition:transform .3s ease;
   padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
 /* Scrolling down tucks the bar away so it does not eat the room; scrolling up brings it back. */
@@ -549,7 +497,6 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   background:radial-gradient(70% 80% at 12% 18%,light-dark(rgba(255,238,205,.75),rgba(126,146,255,.12)),transparent 62%),
     radial-gradient(60% 60% at 90% 90%,light-dark(rgba(214,226,236,.55),rgba(255,178,104,.14)),transparent 70%),
     linear-gradient(light-dark(#f2f4ef,#0f141d),var(--day))}
-[data-room=phone] .bench-poster{object-position:50% 20%}
 [data-room=wide] .bench::after{display:block;inset:-90px 0 auto;height:calc(100svh + 90px)}
 
 /* Hero: the headline panel. Wide: copy on the left over a veil. Phone: a solid card at the bottom. */
@@ -560,34 +507,17 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 [data-room=phone] .bench-panel>p:not(.actions){margin-top:10px;font-size:1rem}
 [data-room=phone] .actions{margin-top:16px}
 [data-room=phone] .bench-index{display:none}
-[data-room=phone] .bench-hint{bottom:auto;top:calc(var(--nav-h) + 8px)}
-
-/* One step per project. Wide: just the scroll distance, the large caption names the stop.
-   Phone: a card rides the bottom of the screen while the camera rests on its object. */
-[data-room] .tour-steps{display:block;list-style:none;margin:0;padding:0}
-[data-room] .tour-steps li{height:100svh}
-[data-room=wide] .step-card{display:none}
-[data-room=wide] .tour-card{display:grid;position:fixed;z-index:5}
-[data-room=phone] .tour-steps li{display:flex;align-items:flex-end;padding:0 12px 12px}
-[data-room=phone] .step-card{position:relative;width:100%;display:grid;justify-items:start;gap:4px;padding:16px 18px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
-[data-room=phone] .step-card .tour-object{color:var(--ink)}
-[data-room=phone] .step-card .tour-title{font-size:1.75rem}
-[data-room=phone] .step-card .tour-summary{font-size:1rem;margin-bottom:6px}
-
-/* An opened project: the sheet floats over the room, everything else steps aside. */
-[data-room] .drawer{position:fixed;z-index:6;margin:0}
-[data-room=wide] .drawer{top:50%;max-height:calc(100svh - var(--nav-h) - 32px)}
-[data-room=phone] .drawer{inset:auto 0 0;width:auto;max-height:58svh;transform:none;border-radius:var(--r) var(--r) 0 0;animation-name:sheet}
-[data-room] .bench.is-inside .bench-copy{display:flex} /* keeps its height: the page must not move when a project opens */
-html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibility:hidden}
 
 /* Services: "What I can do for you" is a small label that stays under the bar while the shelves pass;
    each shelf is a stop with its captions on the room, the camera turns to its objects. A caption is the
    count, object, title, one line and an Open link, over a soft scrim (--scrim) that keeps the text readable. */
 [data-room] main{position:relative;z-index:1;max-width:none;padding:0}
 [data-room] .work{padding:0}
-[data-room] .work>h2{position:sticky;z-index:2;top:calc(var(--nav-h) + 8px);width:max-content;max-width:100%;height:36px;margin:0 0 -36px var(--edge);padding:0 14px;
-  font-size:1rem;line-height:36px;letter-spacing:-.01em;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+/* The doorway: "What I can do for you" is the stop where the camera stands at the sliding glass, its heading a panel like a shelf's. */
+[data-room] .work-door{min-height:100svh;display:flex;align-items:flex-end;padding:0 var(--edge) 12px}
+[data-room] .work-door h2{width:100%;margin:0;padding:16px 18px;font-size:1.5rem;letter-spacing:-.02em;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+[data-room=wide] .work-door{padding-bottom:clamp(24px,6svh,72px)}
+[data-room=wide] .work-door h2{width:min(30rem,42vw)}
 [data-room] .shelves{margin:0}
 [data-room] .shelf{position:relative;top:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--edge) 12px;
   background:none;box-shadow:none;border:0;grid-template-columns:1fr}
@@ -636,15 +566,15 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 
 /* Polish: small details that make the page feel finished. Every transition names its properties and
    shares one ease (--ease); motion that plays by itself is behind no-preference. */
-.tour-title,.contact-mail{text-wrap:balance}
+.contact-mail{text-wrap:balance}
 :is(li,dd,figcaption,.hint,.field-help){text-wrap:pretty}
 /* Image edges and the gallery, the thumbnails and the next-project card: a hairline keeps pale renders from melting into pale cards. */
 .next img,.gallery-panel img,.object-view img{outline:1px solid var(--img-line);outline-offset:-1px}
 .enquiry .field :is(input,textarea),.enquiry-failed textarea{transition:border-color .2s var(--ease)}
 .enquiry .field :is(input,textarea):focus,.enquiry-failed textarea:focus{border-color:var(--on-panel)}
-.theme-toggle,.drawer-close,.drawer-nav button,.drawer-nav span,.gallery-tabs button,.stepper button,.channels button,.link-button{transition:color .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease),transform .15s var(--ease)}
+.theme-toggle,.gallery-tabs button,.stepper button,.channels button,.link-button{transition:color .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease),transform .15s var(--ease)}
 .theme-toggle::before{transition:background-color .3s var(--ease),box-shadow .3s var(--ease)}
-:is(.theme-toggle,.bench-index a,.chip,.gallery-tabs button,.stepper button,.channels button,.drawer-close):active{transform:scale(.96)}
+:is(.theme-toggle,.bench-index a,.chip,.gallery-tabs button,.stepper button,.channels button):active{transform:scale(.96)}
 @media (prefers-reduced-motion:no-preference){
   /* The first screen of every page arrives in order, a beat apart, instead of all at once. */
   @keyframes enter{from{opacity:0;transform:translateY(14px);filter:blur(4px)}}
@@ -654,8 +584,6 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
   :is(.bench-panel,.case-head>div:first-child,.index-page)>:nth-child(4){--k:3}
   :is(.case-head>div:first-child,.index-page)>:nth-child(5){--k:4}
   .case-head>div:last-child{animation:enter .8s var(--ease) .25s both}
-  .bench-hint{animation:fade-in .6s ease .8s both}
-  @keyframes fade-in{from{opacity:0}}
   /* Screenshot tabs: the new panel settles in rather than swapping. */
   .gallery-panel{animation:enter .35s var(--ease) both}
   /* Pictures arrive softly (main.js marks the ones still loading). */

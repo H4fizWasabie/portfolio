@@ -1,33 +1,18 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { isNight, toggleTheme } from './theme.js';
-// The room itself, loaded by main.js once the page has painted (it is most of the bytes).
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { isNight } from './theme.js';
+// The House and the project-page object viewer, loaded by main.js once the page has painted (it is most of the bytes).
 
 const params = new URLSearchParams(location.search);
-const still = params.get('still'); // render-stills.cjs: "poster" or a project slug
+const still = params.get('still'); // render-stills.cjs: "poster", "poster-phone"
 const reduced = !!still || matchMedia('(prefers-reduced-motion: reduce)').matches;
-const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 // Same query as the stacked hero in style.css: the room sits above the copy, not beside it.
 const stackedQuery = matchMedia('(max-width: 899px), (orientation: portrait)');
-const stacked = () => !still && stackedQuery.matches;
-// CSS tokens use light-dark(), so resolve them through a real element.
-const cssColor = name => {
-  const probe = document.body.appendChild(document.createElement('i'));
-  probe.style.color = `var(${name})`;
-  const c = new THREE.Color(getComputedStyle(probe).color);
-  probe.remove();
-  return c;
-};
-const accent = cssColor('--cobalt');
-addEventListener('themechange', () => accent.copy(cssColor('--cobalt')));
+const stacked = () => still === 'poster-phone' || (!still && stackedQuery.matches);
 
-// Lighting presets: every value fades between day (0) and night (1).
-const ROOM = {
-  day: { exposure: 1.08, sky: 0xffffff, ground: 0xcfc6b8, hemi: 1.15, sunColor: 0xfff0d8, sun: 2.6, fillColor: 0xe6eeff, fill: 0.75, lamp: 0, lampGlow: 0, safe: 0, screen: 1 },
-  night: { exposure: 0.95, sky: 0x7d8aa8, ground: 0x1d2126, hemi: 0.35, sunColor: 0x9fb0ff, sun: 0.55, fillColor: 0x6f7d99, fill: 0.12, lamp: 30, lampGlow: 4, safe: 2.5, screen: 0.85 }
-};
+// Lighting presets of the project-page viewer: every value fades between day (0) and night (1).
 const OBJECT = {
   day: { exposure: 1.08, ground: 0xcfc6b8, hemi: 1.3, keyColor: 0xfff0d8, key: 2.4, fill: 0.6, shade: 0.16, screen: 1 },
   night: { exposure: 1, ground: 0x2a3038, hemi: 0.95, keyColor: 0xdfe6ff, key: 2, fill: 0.45, shade: 0.35, screen: 0.85 }
@@ -53,35 +38,6 @@ function nightFader(onChange) {
 const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp' };
 // Parts of a project that sit apart from it and should not steer framing.
 const OFF_FRAME = new Set(['server']);
-// Per-view camera adjustments: distance multiplier, extra turn around the vertical axis (yaw), a
-// nudge of the look-at point (at) and, on phones, a pull (step back so a close-up sits whole in the
-// narrow frame). The overview looks from azimuth ~0.7 rad; these
-// turn each close-up towards the object's front and clear it of whatever stands in front. A key is a
-// project's slug or the slugs of a service's shelf (data-look in page.cjs). The plain values are what
-// render-stills.cjs uses for the thumbnails; on top of them .wide applies on wide screens, .alt for a
-// service's view (its panel is on the left, the subject on the right) and .phone on phones.
-const VIEW = {
-  procura: { yaw: -0.55, phone: { pull: 0.6 } },
-  pims: { yaw: 0.45, phone: { pull: 0.6 } },
-  'dd-drugs-register': { yaw: -0.3, wide: { yaw: -0.4, dist: 0.8 }, alt: { yaw: 0.25 }, phone: { yaw: 0, pull: 0.85 } }, // the page's views stay clear of the ring light
-  theoses: { yaw: -0.35, wide: { dist: 0.8 }, phone: { pull: 0.7 } },
-  '89lab': { wide: { dist: 0.55 }, phone: { pull: 0.5 } },
-  map: { yaw: -0.5, dist: 1.15, wide: { dist: 1.5 }, phone: { dist: 0.9, pull: 0.85 } },
-  yen: { yaw: -0.2, dist: 1.3, wide: { dist: 0.7 }, phone: { dist: 1.15, pull: 0.85 } },
-  'procura pims': { yaw: -0.7, dist: 0.8, phone: { pull: 0.55 } }, // the two ends of the room, straight on
-  'theoses 89lab yen': { yaw: -0.15, wide: { yaw: -0.35, at: [1.11, 0.52, -1.35], dist: 0.4 }, phone: { pull: 0.8 } }
-};
-// The rest of the page, by data-look="@name": a look-at point, a turn around the vertical axis, a
-// distance (in home-camera distances) and, on wide screens, where the page's panel leaves room for
-// it: off is how far the picture is pushed, as a share of the screen's width, so the subject sits in
-// the part of the screen the panel does not cover. .phone overrides on phones.
-const STOPS = {
-  hero: { at: [0.2, 0.55, 0.1], yaw: 0, dist: 1.1, off: 0.15, phone: { at: [1.1, 0.45, 0.1], dist: 0.46 } },
-  teach: { at: [0.4, 1.3, -2.2], yaw: -0.2, dist: 0.4, off: 0.22, phone: { dist: 0.34 } },
-  end: { at: [3.4, 0.6, -0.5], yaw: -0.1, dist: 1.6, off: 0, phone: { at: [0.5, 0.6, 0], dist: 1.15 } }
-};
-const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom of the screen
-const DRAWER_OFF = 0.2; // phones: an opened project sits in the top of the screen, above its sheet
 
 if (still) document.documentElement.classList.add('still');
 
@@ -157,282 +113,277 @@ function loadRoom(root, onTexture) {
   });
 }
 
-// First mesh at or under a named node (gltfpack puts meshes one level down).
-function meshUnder(scope, name) {
-  let found = null;
-  scope.getObjectByName(name)?.traverse(o => { if (!found && o.isMesh) found = o; });
-  return found;
+// ---------------------------------------------------------------------------------------------------------
+// The House. house.glb (build_house.py) is a two-storey concrete villa on a plinth by a lake, inside and out, with its
+// lighting baked into house-light.webp (a second UV set), so the page has no lights to run; house-wet.webp, on the same
+// UV set, is the concrete's roughness (damp where rain runs down it and at the waterline, so it catches the sky there).
+// What it does not hold: the sky with its mountain in the mist is the backdrop plate (build_backdrop.py) on the sky dome,
+// and the lake is a mirror of the scene (a Reflector) rippled by a small normal map, so the warm windows run down the
+// water. The scroll glides the camera along one path with a stop for every [data-stop] element of the page.
+
+// build_house.py stores the baked irradiance as E / (pi * LIGHT_RANGE); three's lightMap wants E.
+const LIGHT_SCALE = Math.PI * 4.0;
+// The plate (build_backdrop.py): its columns run from az0 to az1 degrees either side of straight ahead (towards -z), its
+// rows from el1 at the top down to el0. mist is the horizon's colour, which the fog fades the land and the lake into.
+const BACKDROP = { az0: -50, az1: 50, el0: -6, el1: 34 };
+const SKY = { mist: 0x667a82, zenith: 0x56646c };
+const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom of the screen
+
+// Where the camera rests, in glTF axes (x right, y up, z towards the lake; the House's depth runs along -z). A stop's
+// data-look names one (page.cjs). pos and at: the camera and what it looks at; hfov: horizontal field of view in
+// degrees; off: on wide screens how far the picture is pushed right of the panel, as a share of the screen's width; exp:
+// exposure. A stop with near names a node of the House (doorway_<slug>, balcony): the camera stands from that far away
+// and looks at it plus look. .phone overrides on phones, where the card sits at the bottom and up lifts the picture
+// clear of it (a share of the screen's height). via lists waypoints (pos, at: in the House's axes) the camera passes on its way
+// to that stop from the one before, to keep the path clear of walls and slabs.
+// Up the oak stairs on the right of the ground floor (treads climb 0.18 m per 0.27 m along -z from z=-6), with the eye 1.7 m above a tread.
+const STAIRS = [{ pos: [4.6, 2.8, -3.4], at: [6.45, 3.6, -7] }, { pos: [6.45, 2.78, -6.2], at: [6.45, 4.4, -9.5] }, { pos: [6.45, 4.5, -8.8], at: [6.4, 6.3, -12] }, { pos: [6.4, 6.4, -11.2], at: [2, 6.2, -6] }];
+const doorway = (slug, from) => ({ near: `doorway_${slug}`, from, look: [0, 1.3, 0], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 44, up: 0.28, from: [from[0] * 0.5, from[1], from[2] - 3] } });
+const STOPS = {
+  hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
+  door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], hfov: 42, up: 0.26 } },
+  stock: doorway('stock', [3.4, 1.8, 10.5]),
+  records: doorway('records', [-2.6, 1.8, 10.5]),
+  ai: { ...doorway('ai', [3.4, 1.7, 10.5]), via: STAIRS },
+  android: doorway('android', [-2.6, 1.7, 10.5]),
+  teach: { near: 'balcony', from: [0, 1.75, -4.6], look: [-1.8, 0.9, 6], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 52, up: 0.2 } },
+  end: { via: [{ pos: [0.3, 6.5, 2.8], at: [0, 6, 20] }], pos: [18, 17, 62], at: [0, 4, -8], hfov: 38, off: 0, up: 0.2, exp: 1.0, phone: { pos: [14, 13, 52], at: [0, 4, -8], hfov: 30 } }
+};
+
+// The sky dome: the backdrop plate by direction, mist below and around it, a darker overcast above it.
+function skyDome(plate) {
+  const c = hex => new THREE.Color(hex);
+  const rad = d => THREE.MathUtils.degToRad(d);
+  const m = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: { plate: { value: plate }, mist: { value: c(SKY.mist) }, zenith: { value: c(SKY.zenith) }, az: { value: new THREE.Vector2(rad(BACKDROP.az0), rad(BACKDROP.az1)) }, el: { value: new THREE.Vector2(rad(BACKDROP.el0), rad(BACKDROP.el1)) } },
+    vertexShader: 'varying vec3 d; void main(){ d = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform sampler2D plate; uniform vec3 mist, zenith; uniform vec2 az, el;
+varying vec3 d;
+void main(){
+  float a = atan(d.x, -d.z), e = asin(clamp(d.y, -1.0, 1.0));
+  if (abs(a) > 1.5708) a = a > 0.0 ? 3.14159 - a : -3.14159 - a; // behind the camera's lake the same far shore, mirrored
+  vec2 uv = vec2((a - az.x) / (az.y - az.x), 1.0 - (e - el.x) / (el.y - el.x));
+  vec3 c = texture2D(plate, clamp(uv, 0.001, 0.999)).rgb;
+  if (e > el.y) c = mix(c, zenith, smoothstep(0.0, 1.0, (e - el.y) / (1.57 - el.y)));
+  if (e < el.x) c = mist;
+  if (abs(a) > az.y) c = mix(c, mist, smoothstep(0.0, 0.35, abs(a) - az.y));
+  gl_FragColor = vec4(c, 1.0);
+#include <colorspace_fragment>
+}`
+  });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(600, 32, 16), m);
+  dome.renderOrder = -1;
+  dome.frustumCulled = false;
+  return dome;
 }
-
-// What each object does when it is opened; k runs 0..1 (eased), now is the frame time.
-function opener(scope, slug) {
-  const keep = name => { const o = scope.getObjectByName(name); return o && { o, x: o.rotation.x, y: o.rotation.y, z: o.rotation.z }; };
-  switch (slug) {
-    case 'dd-drugs-register': { const d = keep('safe_hinge'); return d && (k => { d.o.rotation.y = d.y - 1.75 * k; }); }
-    case 'pims': {
-      const l = keep('cab_hinge_l'), r = keep('cab_hinge_r');
-      return l && r && (k => { l.o.rotation.y = l.y - 1.9 * k; r.o.rotation.y = r.y + 1.9 * k; });
-    }
-    case 'procura': { const t = keep('tablet_tilt'); return t && (k => { t.o.rotation.x = t.x + 0.3 * k; }); }
-    case 'yen': { const a = keep('yen_arm_r'); return a && ((k, now) => { a.o.rotation.z = a.z + k * (2.3 + 0.35 * Math.sin(now / 140)); }); }
-    case '89lab': { const ring = meshUnder(scope, 'glow_ring'); return ring && (k => { ring.userData.boost = 2.6 * k; }); }
-    case 'map': { const phone = meshUnder(scope, 'screen_map'); return phone && (k => { phone.userData.bright = 0.3 + 0.7 * k; }); }
-    case 'theoses': { const led = meshUnder(scope, 'glow_server'); return led && ((k, now) => { led.userData.boost = k * (1.5 + 1.5 * Math.sin(now / 90)); }); }
-  }
-  return null;
-}
-// Projects whose open state keeps moving (waving, blinking) need every frame while open.
-const LIVELY = new Set(['yen', 'theoses']);
-const easeOutBack = t => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
-const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-
-// Small signs of life: Yen looks at the cursor and blinks, the plant sways, dust floats
-// in the window light by day. Returns update(now, night), called at ~30fps while visible.
-function roomLife(scene, room, camera, canvas) {
-  const head = room.getObjectByName('yen_head_pivot');
-  const eyes = room.getObjectByName('yen_eyes');
-  const plant = room.getObjectByName('plant');
-  const plantRest = plant.rotation.clone();
-  const pointer = { x: 0, y: 0, active: false };
-  if (fine) {
-    addEventListener('pointermove', e => {
-      const r = canvas.getBoundingClientRect();
-      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-      pointer.active = true;
-    });
-    document.addEventListener('pointerleave', () => { pointer.active = false; });
-  }
-  // Dust: a few motes along the sunbeam from the window to the floor patch.
-  const from = new THREE.Vector3(-3.9, 1.85, -1.15), to = new THREE.Vector3(-1.2, 0.05, -1.25);
-  const count = 70, base = new Float32Array(count * 3), seed = new Float32Array(count);
-  for (let i = 0; i < count; i++) {
-    const p = from.clone().lerp(to, Math.random());
-    base.set([p.x + (Math.random() - 0.5) * 0.5, p.y + (Math.random() - 0.5) * 0.9, p.z + (Math.random() - 0.5) * 1.6], i * 3);
-    seed[i] = Math.random() * 1000;
-  }
-  const dot = document.createElement('canvas');
-  dot.width = dot.height = 32;
-  const g = dot.getContext('2d');
-  const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
-  grad.addColorStop(0, 'rgba(255,255,255,1)');
-  grad.addColorStop(1, 'rgba(255,255,255,0)');
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 32, 32);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(base.slice(), 3));
-  const dust = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.045, map: new THREE.CanvasTexture(dot), color: 0xfff1d6, transparent: true, depthWrite: false, opacity: 0 }));
-  scene.add(dust);
-
-  const headPos = new THREE.Vector3();
-  let nextBlink = performance.now() + 2500;
-  const look = { x: 0, y: 0 };
-  return (now, night) => {
-    // Yen follows the cursor; on touch screens it glances around now and then.
-    head.getWorldPosition(headPos);
-    const h = headPos.project(camera);
-    const want = pointer.active
-      ? { x: -THREE.MathUtils.clamp((pointer.x - h.x) * 1.8, -0.8, 0.8), y: -THREE.MathUtils.clamp((pointer.y - h.y) * 0.9, -0.3, 0.3) }
-      : { x: 0.45 * Math.sin(now / 2600) * Math.max(0, Math.sin(now / 5200)), y: 0 };
-    look.x += (want.x - look.x) * 0.12;
-    look.y += (want.y - look.y) * 0.12;
-    head.rotation.y = look.x;
-    head.rotation.x = look.y;
-    if (now > nextBlink) nextBlink = now + 2600 + Math.random() * 2600;
-    eyes.scale.y = nextBlink - now < 120 ? 0.12 : 1;
-    plant.rotation.z = plantRest.z + 0.018 * Math.sin(now / 1700);
-    plant.rotation.x = plantRest.x + 0.012 * Math.sin(now / 2300);
-    const pos = geo.attributes.position;
-    for (let i = 0; i < count; i++) {
-      const t = now / 1000 + seed[i];
-      pos.setXYZ(i, base[i * 3] + 0.08 * Math.sin(t * 0.3), base[i * 3 + 1] + 0.1 * Math.sin(t * 0.21), base[i * 3 + 2] + 0.08 * Math.cos(t * 0.27));
-    }
-    pos.needsUpdate = true;
-    dust.material.opacity = 0.6 * (1 - night);
-    dust.visible = night < 1;
+// Trees, dark and unlit: the vertex colours carry the shading, a leafy mottling in world space breaks it up, mist lies on the ground
+// beneath them, and the fog does the distance.
+function foliageMaterial() {
+  const m = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide });
+  m.onBeforeCompile = s => {
+    s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vLeaf;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvLeaf = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    s.fragmentShader = s.fragmentShader.replace('#include <common>', `#include <common>
+varying vec3 vLeaf;
+float leaf3(vec3 p){ return fract(sin(dot(floor(p), vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
+float leafNoise(vec3 p){
+  vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(leaf3(i), leaf3(i + vec3(1, 0, 0)), f.x), mix(leaf3(i + vec3(0, 1, 0)), leaf3(i + vec3(1, 1, 0)), f.x), f.y),
+             mix(mix(leaf3(i + vec3(0, 0, 1)), leaf3(i + vec3(1, 0, 1)), f.x), mix(leaf3(i + vec3(0, 1, 1)), leaf3(i + vec3(1, 1, 1)), f.x), f.y), f.z);
+}`).replace('#include <color_fragment>', `#include <color_fragment>
+  diffuseColor.rgb *= 0.4 + 1.2 * (leafNoise(vLeaf * 0.8) * 0.35 + leafNoise(vLeaf * 2.6) * 0.3 + leafNoise(vLeaf * 8.0) * 0.35);
+  diffuseColor.rgb = mix(diffuseColor.rgb, fogColor, 0.55 * exp(-max(vLeaf.y, 0.0) / 2.2));`);
   };
+  return m;
+}
+// What metal and glass reflect: the same sky.
+function skyEnvironment(r, plate) {
+  const s = new THREE.Scene();
+  s.add(skyDome(plate));
+  const pmrem = new THREE.PMREMGenerator(r);
+  const env = pmrem.fromScene(s, 0.02, 1, 1000).texture;
+  pmrem.dispose();
+  return env;
+}
+// Glass shows the sky's reflection over whatever is behind it, and tints that a little.
+function glassMaterial(env) {
+  const m = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0x05080a, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.12, premultipliedAlpha: true, depthWrite: false, side: THREE.DoubleSide, envMap: env, envMapIntensity: 0.4 });
+  m.onBeforeCompile = s => { s.fragmentShader = s.fragmentShader.replace('#include <premultiplied_alpha_fragment>', ''); };
+  return m;
 }
 
-// Bounding box of a project, ignoring parts that live elsewhere in the room.
-function frameBox(group) {
-  const box = new THREE.Box3();
-  group.updateWorldMatrix(true, true);
-  for (const c of group.children) if (!OFF_FRAME.has(c.name)) box.expandByObject(c);
-  return box;
-}
+// The lake: a dark mountain lake. A planar reflection of the scene (a Reflector) at reduced resolution, pushed about by a small tiling ripple
+// normal map (water-normal.webp, from build_water.py): two layers, stretched across the lake and drifting slowly against each other, so a
+// window's light runs down the water in long, smooth, softly broken streaks. A few taps blur the reflection down the picture. Fresnel
+// keeps it dark when looked down on and mirror-like at a low angle.
+const WATER = {
+  name: 'LakeShader',
+  uniforms: { color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null }, tRipple: { value: null }, time: { value: 0 }, deep: { value: new THREE.Color(0x020507) }, fogColor: { value: new THREE.Color(SKY.mist) }, fogDensity: { value: 0 } },
+  vertexShader: `uniform mat4 textureMatrix; varying vec4 vUv; varying vec3 vWorld;
+void main(){ vUv = textureMatrix * vec4(position, 1.0); vWorld = (modelMatrix * vec4(position, 1.0)).xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse, tRipple; uniform float time, fogDensity; uniform vec3 deep, fogColor;
+varying vec4 vUv; varying vec3 vWorld;
+void main(){
+  vec3 toCam = cameraPosition - vWorld;
+  float dist = length(toCam);
+  vec3 view = toCam / dist;
+  // Ripples: rows across the lake (the map is stretched along x), two scales drifting in different directions. Far away they are smaller
+  // than a pixel and only shimmer, so they fade.
+  vec2 w = vWorld.xz;
+  vec2 a = texture2D(tRipple, w * vec2(0.07, 0.34) + vec2(time * 0.004, time * 0.009)).xy - 0.5;
+  vec2 b = texture2D(tRipple, w * vec2(0.17, 0.83) + vec2(-time * 0.006, time * 0.013) + 0.37).xy - 0.5;
+  vec2 n = (a + 0.6 * b) * 2.0 / (1.0 + dist * 0.012);
+  vec2 p = vUv.xy / vUv.w + vec2(n.x * 0.003, n.y * 0.038);
+  vec3 refl = vec3(0.0);
+  float sum = 0.0;
+  for (int i = -6; i <= 6; i++) {
+    float wt = exp(-float(i * i) / 16.0);
+    refl += wt * texture2D(tDiffuse, p + vec2(0.0, float(i) * 0.006)).rgb;
+    sum += wt;
+  }
+  refl /= sum;
+  float f = 0.04 + 0.96 * pow(1.0 - max(view.y, 0.0), 5.0);
+  vec3 c = mix(deep, refl * vec3(0.62, 0.66, 0.67), clamp(f * 1.15, 0.0, 1.0));
+  float fogF = 1.0 - exp(-fogDensity * fogDensity * dist * dist);
+  c = mix(c, fogColor, fogF);
+  gl_FragColor = vec4(c, 1.0);
+#include <tonemapping_fragment>
+#include <colorspace_fragment>
+}`
+};
 
-const bench = document.querySelector('[data-stage]');
-const benchData = document.getElementById('bench-data');
-if (bench && benchData) startBench(bench, JSON.parse(benchData.textContent));
-const viewer = document.querySelector('[data-object]');
-if (viewer) startObject(viewer);
-
-function startBench(stage, { root, projects }) {
-  const bySlug = Object.fromEntries(projects.map(p => [p.slug, p]));
-  const order = projects.map(p => p.slug);
-  let r;
+function startHouse(stage, { root }) {
   const noRoom = () => document.documentElement.removeAttribute('data-room'); // back to the static page
+  let r;
   try { r = renderer(); } catch { noRoom(); return; } // No WebGL: poster image and index links remain.
+  r.shadowMap.enabled = false; // the lighting is baked
+  r.toneMapping = THREE.NeutralToneMapping;
   const canvas = r.domElement;
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
-  const home = { pos: new THREE.Vector3(9.6, 7.9, 11.2), target: new THREE.Vector3(0.2, 0.55, 0.1) };
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 900);
+  scene.fog = new THREE.FogExp2(SKY.mist, 0.0075);
 
-  // Daylight comes in low through the window; a soft fill keeps the desk readable.
-  // At night the window light turns to moonlight and the desk lamp takes over.
-  const hemi = new THREE.HemisphereLight();
-  const sun = new THREE.DirectionalLight();
-  sun.position.set(-13, 8.5, 1.2);
-  sun.target.position.set(-1, 0, -1.2);
-  sun.castShadow = true;
-  // Phones and touch screens get smaller shadow maps: the room stays light on weaker GPUs.
-  const small = matchMedia('(pointer: coarse)').matches || innerWidth < 700;
-  sun.shadow.mapSize.setScalar(small ? 1024 : 3072);
-  sun.shadow.bias = -0.0004;
-  sun.shadow.normalBias = 0.02;
-  Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
-  scene.add(sun, sun.target);
-  const fill = new THREE.DirectionalLight();
-  fill.position.set(8, 10, 10);
-  // The desk lamp: a warm spot on the desk plus a soft glow around the shade.
-  const lamp = new THREE.SpotLight(0xffd6a0, 0, 7, 0.95, 0.65, 1.4);
-  lamp.target.position.set(0.4, 1.03, -2.1);
-  lamp.castShadow = true;
-  lamp.shadow.mapSize.setScalar(small ? 512 : 1024);
-  lamp.shadow.bias = -0.0005;
-  const lampGlow = new THREE.PointLight(0xffc68a, 0, 5, 1.5);
-  // Night-only warm spot on the drug safe's corner, which sits far from the lamp.
-  const safeGlow = new THREE.SpotLight(0xffd2a0, 0, 4, 0.5, 1, 2);
-  scene.add(hemi, fill, lamp, lamp.target, lampGlow, safeGlow, safeGlow.target);
-  let tint = () => {};
-  const light = t => {
-    const m = mix(ROOM, t);
-    r.toneMappingExposure = m.exposure;
-    hemi.color.copy(m.sky); hemi.groundColor.copy(m.ground); hemi.intensity = m.hemi;
-    sun.color.copy(m.sunColor); sun.intensity = m.sun;
-    fill.color.copy(m.fillColor); fill.intensity = m.fill;
-    lamp.intensity = m.lamp; lampGlow.intensity = m.lampGlow; safeGlow.intensity = m.safe;
-    tint(t, m.screen);
-    nightT = t;
-    dirty = true;
-  };
-  const fade = nightFader(light);
+  let nodes = {}, loaded = false, dirty = true, size = [1, 1], tour = null, lastNow = 0, lake = null, dome = null;
+  const shift = { x: 0, y: 0 }, shiftGoal = { x: 0, y: 0 };
+  const aim = new THREE.Vector3(); // what the camera looks at
+  const setGoal = (g, jump) => { Object.assign(shiftGoal, g); if (jump) Object.assign(shift, g); };
 
-  const controls = new OrbitControls(camera, canvas);
-  Object.assign(controls, {
-    enableDamping: true, dampingFactor: 0.08, enableZoom: false, enablePan: false, enableRotate: fine,
-    minPolarAngle: 0.7, maxPolarAngle: 1.25, minAzimuthAngle: -0.3, maxAzimuthAngle: 1.5
-  });
-  camera.position.copy(home.pos);
-  controls.target.copy(home.target);
-  if (!fine) canvas.style.touchAction = 'pan-y';
-
-  let groups = {}, switcher = null, dirty = true, flight = null, active = null, hovered = null;
-  let refresh = () => {}, life = null, intro = null, nightT = 0, lastNow = 0, lastAmbient = 0;
-  const openers = {}, open = {}, boxes = {}; // boxes: each project's frame, taken before it moves or the room builds in
-  loadRoom(root, () => { dirty = true; }).then(({ room, groups: g, tint: t, refresh: rf }) => {
-    groups = g;
-    for (const slug of order) boxes[slug] = frameBox(g[slug]);
-    tint = t;
-    refresh = rf;
-    for (const slug of order) {
-      const f = opener(room, slug);
-      if (f) { openers[slug] = f; open[slug] = 0; }
-    }
-    if (!reduced) life = roomLife(scene, room, camera, canvas);
-    scene.add(room);
-    switcher = room.getObjectByName('lamp');
-    switcher.traverse(o => { if (o.isMesh && !o.userData.glow) o.material = o.material.clone(); });
-    room.getObjectByName('lamp_head').getWorldPosition(lamp.position);
-    lampGlow.position.copy(lamp.position).add(new THREE.Vector3(0, -0.15, 0));
-    // Above and in front of the safe, on the lamp's side of the room.
-    boxes['dd-drugs-register'].getCenter(safeGlow.target.position);
-    safeGlow.position.copy(safeGlow.target.position).add(new THREE.Vector3(0.5, 1.05, 0.45));
-    // Night stills are dusk, so objects far from the desk lamp still read on a small card.
-    light(isNight() ? (still ? 0.65 : 1) : 0);
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const textures = new THREE.TextureLoader();
+  Promise.all([loader.loadAsync(`${root}static/house.glb`), ...['house-light', 'backdrop', 'house-wet', 'water-normal'].map(f => textures.loadAsync(`${root}static/${f}.webp`))]).then(([gltf, light, plate, wet, ripple]) => {
+    for (const t of [light, plate]) { t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; }
+    light.channel = wet.channel = 1; // both follow the second UV set (the baked lighting's layout)
+    wet.flipY = false;
+    ripple.wrapS = ripple.wrapT = THREE.RepeatWrapping;
+    ripple.anisotropy = 4;
+    plate.generateMipmaps = false;
+    plate.minFilter = THREE.LinearFilter;
+    const env = skyEnvironment(r, plate), glass = glassMaterial(env), aniso = Math.min(8, r.capabilities.getMaxAnisotropy());
+    dome = skyDome(plate);
+    scene.add(dome);
+    gltf.scene.traverse(o => {
+      if (!o.isMesh) return;
+      if (tag(o, 'glass_')) { o.material = glass; o.renderOrder = 2; return; }
+      const m = o.material;
+      if (tag(o, 'trees')) { o.material = foliageMaterial(); return; }
+      if (tag(o, 'rocks')) { o.material = new THREE.MeshBasicMaterial({ map: m.map, color: 0x4d5750 }); return; } // unlit, dark
+      if (tag(o, 'glow_')) { o.material = m.clone(); o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : 2; return; }
+      if (m.map) m.map.anisotropy = aniso;
+      if (m.name === 'concrete' || m.name === 'roof') { m.roughnessMap = wet; m.roughness = 1; m.envMap = env; m.envMapIntensity = 1.5; } // house-wet.webp is its roughness: damp where it rained and at the waterline, so it shines there
+      if (o.geometry.attributes.uv1) { m.lightMap = light; m.lightMapIntensity = LIGHT_SCALE; }
+      if (m.metalness > 0.5) { m.envMap = env; m.envMapIntensity = 0.5; }
+      if (m.name === 'floor' || m.name === 'terrace') { m.envMap = env; m.envMapIntensity = 0.3; }
+    });
+    scene.add(gltf.scene);
+    for (const name of ['doorway_stock', 'doorway_records', 'doorway_ai', 'doorway_android', 'balcony']) nodes[name] = gltf.scene.getObjectByName(name);
+    // Beyond the land that was modelled the ground carries on, dark, into the mist.
+    const far = new THREE.Mesh(new THREE.PlaneGeometry(1800, 700), new THREE.MeshBasicMaterial({ color: 0x1d2420 }));
+    far.rotation.x = -Math.PI / 2;
+    far.position.set(0, 0.85, -490);
+    scene.add(far);
+    lake = new Reflector(new THREE.PlaneGeometry(2400, 2400), { color: 0x777777, textureWidth: 512, textureHeight: 512, clipBias: 0.003, shader: WATER, multisample: 0 });
+    lake.material.uniforms.fogDensity.value = scene.fog.density;
+    lake.material.uniforms.tRipple.value = ripple;
+    lake.rotation.x = -Math.PI / 2;
+    scene.add(lake);
+    gltf.scene.updateMatrixWorld(true);
+    loaded = true;
     stage.classList.add('is-live');
     stage.prepend(canvas);
-    hint.hidden = fine || !!still;
     resize();
     land();
-    if (tour) hint.textContent = fine ? 'Scroll to walk through the room, or click anything to open it' : 'Scroll for a tour, or tap anything';
-    if (still && still !== 'poster') fly(still, true);
-    else if (location.hash.slice(1) in bySlug) select(location.hash.slice(1), true);
-    else if (!reduced) buildIn(room);
     dirty = true;
-  }).catch(err => { noRoom(); console.warn('Workshop model failed to load; showing the still image.', err); });
+  }).catch(err => { noRoom(); console.warn('The House failed to load; showing the still image.', err); });
 
-  // On wide screens the hero is full-bleed: the room is shifted right of the headline,
-  // and slides back to centre while a project is open. During the tour every stop sets its own push.
-  const shiftFor = width => ({ x: !still && !stacked() ? width * 0.15 : 0, y: 0 });
-  let size = [1, 1], fitFov = 30;
-  const shift = { x: 0, y: 0 }, shiftGoal = { x: 0, y: 0 };
-  const setGoal = (g, jump) => { Object.assign(shiftGoal, g); if (jump) Object.assign(shift, g); };
-  // An opened project sits centred; on phones it is lifted into the top of the screen, above its sheet.
-  const openShift = () => ({ x: 0, y: tour && stacked() ? DRAWER_OFF * size[1] : 0 });
+  // One view of a stop: where the camera stands, what it looks at, its lens and where the picture sits.
+  function viewOf(name) {
+    const phone = stacked();
+    const t = { ...STOPS[name], ...(phone && STOPS[name].phone) };
+    let pos, at;
+    if (t.near) {
+      const n = nodes[t.near].getWorldPosition(new THREE.Vector3());
+      pos = n.clone().add(new THREE.Vector3(...t.from));
+      at = n.clone().add(new THREE.Vector3(...t.look));
+    } else {
+      pos = new THREE.Vector3(...t.pos);
+      at = new THREE.Vector3(...t.at);
+    }
+    const via = (t.via || []).map(w => ({ pos: new THREE.Vector3(...w.pos), at: new THREE.Vector3(...w.at) }));
+    return { pos, target: at, via, hfov: t.hfov || 50, exp: t.exp || 1, ox: phone ? 0 : t.off || 0, oy: t.up ?? (phone ? PHONE_OY : 0) };
+  }
+  function lens(hfov) {
+    camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(hfov) / 2) / camera.aspect));
+  }
   function frame() {
     camera.setViewOffset(size[0], size[1], -shift.x, shift.y, size[0], size[1]);
     dirty = true;
   }
+  function place(v) { // a view at once
+    camera.position.copy(v.pos);
+    aim.copy(v.target);
+    camera.lookAt(aim);
+    lens(v.hfov);
+    r.toneMappingExposure = v.exp;
+    setGoal({ x: v.ox * size[0], y: v.oy * size[1] }, true);
+    frame();
+  }
   function resize() {
     const { width, height } = stage.getBoundingClientRect();
-    if (!width || !height) return;
+    if (!width || !height || !loaded) return;
     r.setSize(width, height, false);
+    lake?.getRenderTarget().setSize(Math.round(width * r.getPixelRatio() * 0.6), Math.round(height * r.getPixelRatio() * 0.6)); // the lake's mirror needs less than the picture
     size = [width, height];
     camera.aspect = width / height;
-    // Narrow stages keep the whole room in frame; the full-bleed hero leaves air around it.
-    // Stacked screens (phones) keep one lens however tall the stage is, 1.16 stage-widths of focal
-    // length: the room is a full-screen background there with the subject in its upper part, and
-    // every object keeps the size it had when the stage was a short strip above the copy.
-    camera.fov = still ? (width / height < 1.15 ? 38 : 30) : stacked() ? 2 * THREE.MathUtils.radToDeg(Math.atan(height / 2 / (width * 1.164))) : width / height < 1.15 ? 38 : 34;
-    fitFov = stacked() ? 36 : camera.fov; // what viewFor frames objects for
-    if (!tour) setGoal(active ? openShift() : shiftFor(width), !flight);
-    frame();
     setTour();
+    if (!tour) place(viewOf('hero'));
+    frame();
   }
   new ResizeObserver(resize).observe(stage);
 
-  // The whole page is the room. Scrolling flies the camera along one path with a stop for every
-  // [data-stop] element of the page (page.cjs): the hero, a project per screen, a service per screen and
-  // a pull-back at the goodbye, where the room ends; About and Contact are plain page below it. Each stop
-  // names what the room should show (data-look) and is tied to the scroll position where the browser's
-  // own scroll snapping rests that element (measure), so the object on the card is the one in frame.
-  // Wide screens set each project's name beside the room (tour-card); on phones a card per project rides
-  // the bottom of the screen. Reduced motion, ?still= and no WebGL keep the static page.
+  // The whole page is the House. Every stop of the page (page.cjs) names what the camera shows (data-look) and
+  // is tied to the scroll position where the browser's own scroll snapping rests that element (measure), so the
+  // panel and the view arrive together. Reduced motion, ?still= and no WebGL keep the static page.
   const html = document.documentElement;
-  const card = stage.parentElement.querySelector('[data-tour-card]');
-  const cardField = name => card.querySelector(`[data-t=${name}]`);
-  cardField('open').addEventListener('click', () => select(cardField('open').dataset.slug));
-  const stepList = stage.parentElement.querySelector('[data-steps]');
-  stepList.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) select(b.dataset.open); });
   const nav = document.querySelector('.site-nav');
-  let tour = null, shown = -1, openedAt = 0, snap = true, lifeGap = 33;
-  const homeDist = home.pos.distanceTo(home.target);
+  let snap = true;
   function setTour() {
-    // Not while the room is still, reduced or loading (the head script has the layout ready), nor while
-    // it builds itself in (the pieces are tiny then, so nothing could be framed).
-    if (still || reduced || intro || !groups[order[0]]) return;
+    // Not while the room is still or reduced (the head script has the layout ready, or leaves the static one).
+    if (still || reduced || !loaded) return;
     const phone = stacked();
     html.dataset.room = phone ? 'phone' : 'wide';
-    history.scrollRestoration = 'manual'; // Back closes a project; it must not also scroll the tour
-    const stop = name => {
-      const t = { ...STOPS[name], ...(phone && STOPS[name].phone) };
-      const target = new THREE.Vector3(...t.at);
-      const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, t.yaw);
-      return { pos: target.clone().add(dir.multiplyScalar(homeDist * t.dist)), target, ox: phone ? 0 : t.off, oy: phone ? PHONE_OY : 0 };
-    };
-    // The hero first, then every stop of the page in order.
+    history.scrollRestoration = 'manual';
     const els = [null, ...document.querySelectorAll('[data-stop]')].map(el => ({ el }));
-    const views = els.map(({ el }) => {
-      const look = el ? el.dataset.look : '@hero';
-      if (!el) return stop('hero');
-      if (look[0] === '@') return stop(look.slice(1));
-      // A project's object sits beside its caption; a service's objects sit beside its panel (the other side).
-      return { ...viewFor(look, el.matches('.shelf') ? -1 : 1), ox: 0, oy: phone ? PHONE_OY : 0 };
-    });
-    const curve = key => new THREE.CatmullRomCurve3(views.map(v => v[key]), false, 'centripetal');
-    tour = { pos: curve('pos'), target: curve('target'), views, els, n: views.length - 1, phone, keys: tour?.keys };
-    if (phone) card.classList.add('is-away');
+    const views = els.map(({ el }) => viewOf(el ? el.dataset.look.slice(1) : 'hero'));
+    // One path through every stop, and through the waypoints that lead to it; knots[i] is where stop i sits along it.
+    const knots = [], pos = [], at = [];
+    for (const v of views) {
+      for (const w of v.via) { pos.push(w.pos); at.push(w.at); }
+      knots.push(pos.length);
+      pos.push(v.pos);
+      at.push(v.target);
+    }
+    const curve = pts => new THREE.CatmullRomCurve3(pts, false, 'centripetal');
+    tour = { pos: curve(pos), target: curve(at), views, els, knots, along: pos.length - 1, n: views.length - 1, keys: tour?.keys };
     measure();
   }
   // The scroll position at which each stop rests, from the page's own layout: where scroll snapping
@@ -453,289 +404,54 @@ function startBench(stage, { root, projects }) {
   let moved = false;
   for (const ev of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(ev, () => { moved = true; }, { once: true, passive: true });
   const land = () => {
-    const el = !moved && !intro && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-    if (el && !(el.id in bySlug)) { el.scrollIntoView(); snap = true; }
+    const el = !moved && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (el) { el.scrollIntoView(); snap = true; }
   };
   new ResizeObserver(measure).observe(document.body);
   addEventListener('load', () => { measure(); land(); });
   document.fonts?.ready.then(() => { measure(); land(); });
   // The camera rests at each stop for the outer part of a segment and travels in the middle, which is
-  // where one card has gone and the next has not yet arrived.
+  // where one panel has gone and the next has not yet arrived.
   const hold = f => THREE.MathUtils.smoothstep(f, 0.35, 0.65);
   const tourPos = new THREE.Vector3(), tourAim = new THREE.Vector3();
   function stepTour(dt) {
-    const { keys, views, n } = tour;
+    const { keys, views, n, knots, along } = tour;
     let i = 0;
     while (i < n - 1 && scrollY >= keys[i + 1]) i++;
     const f = THREE.MathUtils.clamp((scrollY - keys[i]) / (keys[i + 1] - keys[i]), 0, 1);
     const g = hold(f);
-    tour.pos.getPoint((i + g) / n, tourPos);
-    tour.target.getPoint((i + g) / n, tourAim);
+    const u = (knots[i] + (knots[i + 1] - knots[i]) * g) / along;
+    tour.pos.getPoint(u, tourPos);
+    tour.target.getPoint(u, tourAim);
     const from = views[i], to = views[i + 1];
     setGoal({ x: (from.ox + (to.ox - from.ox) * g) * size[0], y: (from.oy + (to.oy - from.oy) * g) * size[1] }, snap);
     // Easing towards the path, not jumping onto it, is what makes the scroll feel filmed.
     const a = snap ? 1 : 1 - Math.pow(0.9, dt / 16.7);
-    if (snap) frame();
-    snap = false;
-    const moving = camera.position.distanceToSquared(tourPos) + controls.target.distanceToSquared(tourAim) > 1e-6;
+    const hfov = from.hfov + (to.hfov - from.hfov) * g;
+    const moving = camera.position.distanceToSquared(tourPos) + aim.distanceToSquared(tourAim) > 1e-6;
     camera.position.lerp(tourPos, a);
-    controls.target.lerp(tourAim, a);
-    camera.lookAt(controls.target);
-    const s = i + f;
-    lifeGap = s > order.length + 0.6 ? 120 : 33; // past the projects the room mostly idles
-    hint.hidden = s > 0.2;
-    if (tour.phone) return moving;
-    // The caption names the project the camera is resting on; it changes while hidden.
-    const near = Math.round(s), p = bySlug[order[near - 1]];
-    if (p && near !== shown) {
-      shown = near;
-      cardField('count').textContent = `${String(near).padStart(2, '0')} / ${String(order.length).padStart(2, '0')}`;
-      cardField('object').textContent = p.object;
-      cardField('title').textContent = p.title;
-      cardField('summary').textContent = p.summary;
-      cardField('open').dataset.slug = p.slug;
-    }
-    card.classList.toggle('is-away', !p || Math.abs(s - near) > 0.32);
-    stage.closest('.bench').classList.toggle('is-touring', s > 0.35);
+    aim.lerp(tourAim, a);
+    camera.lookAt(aim);
+    lens(hfov);
+    r.toneMappingExposure = from.exp + (to.exp - from.exp) * g; // the eye adjusts to the daylight outside and the lights inside
+    frame();
+    snap = false;
+    stage.closest('.bench').classList.toggle('is-touring', i + f > 0.35);
     return moving;
   }
-  // Highlight in the accent colour; glowing parts keep their own light.
-  function highlight(slug, on) {
-    const target = slug === 'lamp' ? switcher : groups[slug];
-    if (!target) return;
-    target.traverse(o => {
-      if (!o.isMesh || o.userData.glow || !o.material.emissive) return;
-      o.material.emissive.copy(on ? accent : new THREE.Color(0));
-      o.material.emissiveIntensity = on ? 0.32 : 1;
-    });
-    dirty = true;
-  }
 
-  // First view: each object lights up in turn, so phones without hover learn what is clickable.
-  // First load: the room builds itself, furniture landing back to front with a small bounce;
-  // then each object lights up in turn so phones without hover learn what is clickable.
-  function buildIn(room) {
-    const pieces = room.children.filter(c => c.name !== 'room').sort((a, b) => a.position.z - b.position.z);
-    for (const p of pieces) {
-      p.userData.restY = p.position.y;
-      p.userData.restScale = p.scale.clone();
-      p.scale.setScalar(0.0001);
-    }
-    intro = { t0: performance.now() + 200, pieces };
-  }
-  // The sweep names each object as it lights up, slow enough to read.
-  function sweep() {
-    const all = [...order, 'lamp'];
-    all.forEach((slug, i) => {
-      setTimeout(() => { if (!active && hovered !== slug) { highlight(slug, true); if (!hovered) tipOver(slug); } }, 150 + i * 450);
-      setTimeout(() => { if (!active && hovered !== slug) highlight(slug, false); }, 150 + i * 450 + 600);
-    });
-    setTimeout(() => { if (!hovered) tip.hidden = true; }, 150 + all.length * 450 + 150);
-  }
-  function stepIntro(now) {
-    let done = true;
-    intro.pieces.forEach((p, i) => {
-      const t = THREE.MathUtils.clamp((now - intro.t0 - i * 80) / 650, 0, 1);
-      if (t < 1) done = false;
-      p.position.y = p.userData.restY + (1 - easeOutBack(t)) * 1.4;
-      p.scale.copy(p.userData.restScale).multiplyScalar(Math.max(0.0001, Math.min(1, t * 1.6)));
-    });
-    if (done) { intro = null; sweep(); setTour(); }
-  }
-
-  const tip = stage.querySelector('[data-tip]');
-  const hint = stage.querySelector('[data-hint]');
-  const label = slug => (slug === 'lamp' ? (isNight() ? 'Turn the lights on' : 'Turn the lights off') : bySlug[slug].title);
-  // Places the tip just above an object, for when there is no cursor to follow.
-  const above = new THREE.Vector3();
-  function tipOver(slug) {
-    const box = slug === 'lamp' ? new THREE.Box3().setFromObject(switcher) : frameBox(groups[slug]);
-    box.getCenter(above).setY(box.max.y).project(camera);
-    tip.textContent = label(slug);
-    tip.hidden = false;
-    tip.style.transform = `translate(${((above.x + 1) / 2) * size[0]}px, ${((1 - above.y) / 2) * size[1]}px) translate(-50%, -130%)`;
-  }
-  const ray = new THREE.Raycaster();
-  const pick = e => {
-    const rect = canvas.getBoundingClientRect();
-    ray.setFromCamera(new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1), camera);
-    const hit = ray.intersectObjects([...Object.values(groups), switcher].filter(Boolean), true).find(h => !tag(h.object, 'glass_'));
-    if (!hit) return null;
-    for (let o = hit.object; o; o = o.parent) if (o === switcher) return 'lamp';
-    return hit.object.userData.slug;
-  };
-  canvas.addEventListener('pointermove', e => {
-    if (!fine || e.buttons) return;
-    const slug = pick(e) || null;
-    if (slug !== hovered) {
-      highlight(hovered, false);
-      if (slug !== active) highlight(slug, true);
-      hovered = slug;
-    }
-    canvas.style.cursor = slug ? 'pointer' : tour && !active ? '' : 'grab';
-    tip.hidden = !slug;
-    if (slug) {
-      const rect = stage.getBoundingClientRect();
-      tip.textContent = label(slug);
-      tip.style.transform = `translate(${e.clientX - rect.left + 14}px, ${e.clientY - rect.top + 14}px)`;
-    }
-  });
-  canvas.addEventListener('pointerleave', () => { highlight(hovered, false); hovered = null; tip.hidden = true; });
-
-  let downAt = null;
-  canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
-  canvas.addEventListener('pointerup', e => {
-    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
-    const slug = pick(e);
-    if (slug === 'lamp') { toggleTheme(); tip.hidden = hint.hidden = true; } else if (slug) select(slug); else if (active) back();
-  });
-
-  const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  // look: a project's slug, or the slugs of a service's shelf; side: 1 puts the subject left of
-  // centre on wide screens (the drawer or caption is on the right), -1 right of centre.
-  function viewFor(look, side = 1) {
-    const slugs = look.split(' ');
-    const box = new THREE.Box3();
-    for (const slug of slugs) box.union(boxes[slug]);
-    const center = box.getCenter(new THREE.Vector3());
-    const diag = box.getSize(new THREE.Vector3()).length();
-    const phone = stacked() && !still;
-    const wide = !still && !stacked();
-    const tune = { ...VIEW[look], ...(wide && VIEW[look]?.wide), ...(side < 0 && VIEW[look]?.alt), ...(phone && VIEW[look]?.phone) };
-    const dir = home.pos.clone().sub(home.target).normalize().applyAxisAngle(camera.up, tune.yaw || 0);
-    const right = new THREE.Vector3().crossVectors(camera.up, dir).normalize();
-    const fit = diag / 2 / Math.sin(THREE.MathUtils.degToRad(fitFov) / 2); // distance that fits the object
-    // Phones are narrow, so a close-up framed for a wide stage reads too close there: step back so
-    // the object sits whole in frame, for tour stops and opened projects alike. A view whose
-    // step-back would pass behind something in front of it sets its own pull in VIEW.
-    const pull = phone ? tune.pull ?? 1.4 : 1;
-    const dist = fit * (still ? 0.9 : 1.6) * (tune.dist || 1) * pull;
-    // Wide screens: shift the object away from the drawer, caption or panel, by a share of what the
-    // screen shows at its distance. Stacked: the drawer sits below the room.
-    const shown = 2 * dist * Math.tan(THREE.MathUtils.degToRad(fitFov) / 2) * (size[0] / size[1]);
-    const target = center.clone().add(new THREE.Vector3(...(tune.at || [0, 0, 0]))).add(right.multiplyScalar(wide ? shown * 0.21 * side : 0));
-    return { pos: target.clone().add(dir.multiplyScalar(dist)), target };
-  }
-  function fly(to, instant) {
-    const v = typeof to === 'string' ? viewFor(to) : to;
-    flight = { from: { pos: camera.position.clone(), target: controls.target.clone() }, to: v, t0: performance.now(), ms: instant || reduced ? 0 : 1000 };
-    dirty = true;
-  }
-
-  const drawer = document.querySelector('[data-drawer]');
-  // Scrolling away from an open project closes it, but not while a finger is on the sheet itself
-  // (reading its text) or just after it lifts, when the sheet's own scroll is still gliding.
-  let onSheet = 0;
-  const sheetTouch = on => () => { onSheet = on ? Infinity : performance.now() + 600; };
-  drawer.addEventListener('touchstart', sheetTouch(true), { passive: true });
-  drawer.addEventListener('touchend', sheetTouch(false), { passive: true });
-  drawer.addEventListener('touchcancel', sheetTouch(false), { passive: true });
-  addEventListener('scroll', () => { if (tour && active && performance.now() > onSheet && Math.abs(scrollY - openedAt) > 160) back(); }, { passive: true });
-  let lastY = scrollY;
   addEventListener('scroll', () => {
     const y = scrollY;
     if (Math.abs(y - lastY) > 6) { html.classList.toggle('nav-away', y > lastY && y > 120); lastY = y; }
   }, { passive: true });
-  const f = name => drawer.querySelector(`[data-f=${name}]`);
-  const steps = [...drawer.querySelectorAll('[data-step]')];
-  let lastTrigger = null;
-  // Opening an object adds one history entry, so the browser's Back closes it instead of
-  // leaving the site; moving between objects replaces that entry. fromHistory: Back/Forward.
-  let pushed = false;
-  function select(slug, fromHistory) {
-    const p = bySlug[slug];
-    if (!p || !groups[slug]) return;
-    if (!fromHistory) {
-      if (active) history.replaceState(null, '', `#${slug}`);
-      else { history.pushState(null, '', `#${slug}`); pushed = true; }
-    }
-    if (!active) lastTrigger = document.activeElement;
-    highlight(active, false);
-    highlight(hovered, false);
-    tip.hidden = hint.hidden = true;
-    active = slug;
-    setGoal(openShift());
-    openedAt = scrollY;
-    html.classList.add('is-inside');
-    card.classList.add('is-away');
-    stage.closest('.bench').classList.add('is-inside');
-    fly(slug);
-    f('category').textContent = p.category;
-    f('title').textContent = p.title;
-    f('summary').textContent = p.summary;
-    f('description').textContent = p.description;
-    f('link').href = `${root}work/${p.slug}/`;
-    const fig = f('figure');
-    fig.replaceChildren();
-    if (p.image) {
-      fig.append(Object.assign(document.createElement('img'), { src: `${root}static/${p.image}`, alt: `${p.title} screen with fictional sample data` }));
-    } else {
-      const ol = document.createElement('ol');
-      for (const s of p.steps) ol.append(Object.assign(document.createElement('li'), { textContent: s }));
-      fig.append(ol);
-    }
-    fig.append(Object.assign(document.createElement('figcaption'), { textContent: p.image ? p.disclosure : 'Workflow outline, not a screenshot' }));
-    fig.classList.toggle('is-phone', p.image === 'map-home-demo.webp');
-    const i = order.indexOf(slug);
-    steps.forEach(b => {
-      const to = bySlug[order[(i + +b.dataset.step + order.length) % order.length]];
-      b.dataset.to = to.slug;
-      b.querySelector('span').textContent = to.title;
-    });
-    drawer.hidden = false;
-    stage.classList.add('has-drawer');
-    document.querySelectorAll('[data-pick]').forEach(a => a.toggleAttribute('aria-current', a.dataset.pick === slug));
-    if (!drawer.contains(document.activeElement)) drawer.querySelector('[data-close]').focus({ preventScroll: true });
-  }
-  function back(fromHistory) {
-    if (!active) return;
-    if (!fromHistory && pushed) { pushed = false; history.back(); return; } // popstate finishes closing
-    if (!fromHistory) history.replaceState(null, '', location.pathname + location.search);
-    pushed = false;
-    highlight(active, false);
-    active = null;
-    if (!tour) setGoal(shiftFor(size[0]));
-    html.classList.remove('is-inside');
-    stage.closest('.bench').classList.remove('is-inside');
-    drawer.hidden = true;
-    stage.classList.remove('has-drawer');
-    if (tour) flight = null; else fly(home); // the tour eases back onto its path
-    document.querySelectorAll('[data-pick]').forEach(a => a.removeAttribute('aria-current'));
-    if (lastTrigger && lastTrigger.matches('[data-pick]')) lastTrigger.focus({ preventScroll: true });
-  }
-  addEventListener('popstate', () => {
-    const slug = location.hash.slice(1);
-    if (slug in bySlug) select(slug, true); else back(true);
-  });
-  drawer.querySelector('[data-close]').addEventListener('click', () => back());
-  steps.forEach(b => b.addEventListener('click', () => select(b.dataset.to)));
-  addEventListener('keydown', e => {
-    if (!active || e.target.closest('input, textarea, select')) return;
-    if (e.key === 'Escape') back();
-    const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
-    if (step) { e.preventDefault(); steps.find(b => +b.dataset.step === step).click(); }
-  });
-  document.querySelectorAll('[data-pick]').forEach(a => a.addEventListener('click', e => {
-    if (!groups[a.dataset.pick]) return; // model not loaded: follow the link
-    e.preventDefault();
-    if (stacked() && !tour) stage.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-    select(a.dataset.pick);
-  }));
+  let lastY = scrollY;
 
   let visible = true;
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; dirty = true; }).observe(stage);
-  controls.addEventListener('change', () => { dirty = true; });
   const loop = now => {
     requestAnimationFrame(loop);
-    if (!visible) return;
-    if (flight) {
-      const t = flight.ms ? Math.min(1, (now - flight.t0) / flight.ms) : 1;
-      const k = ease(t);
-      camera.position.lerpVectors(flight.from.pos, flight.to.pos, k);
-      controls.target.lerpVectors(flight.from.target, flight.to.target, k);
-      dirty = true;
-      if (t === 1) flight = null;
-    }
+    if (!visible || !loaded) return;
+    lake.material.uniforms.time.value = still ? 11 : now / 1000; // the ripples drift while the page tours (it renders every frame then); reduced motion and stills keep them still
     const dt = Math.min(250, lastNow ? now - lastNow : 16); // a long frame (slow GPU) moves the camera as far as its time, not less
     lastNow = now;
     if (shift.x !== shiftGoal.x || shift.y !== shiftGoal.y) {
@@ -744,31 +460,11 @@ function startBench(stage, { root, projects }) {
       else { shift.x += (shiftGoal.x - shift.x) * k; shift.y += (shiftGoal.y - shift.y) * k; }
       frame();
     }
-    controls.enabled = !tour || !!active;
-    if (tour && !active && !flight) { if (stepTour(dt)) dirty = true; } else if (controls.update()) dirty = true;
-    fade(now);
-    if (intro) { stepIntro(now); dirty = true; }
-    // Opening and closing the active object.
-    let moved = false;
-    for (const slug in openers) {
-      const goal = slug === active ? 1 : 0;
-      if (open[slug] === goal) continue;
-      open[slug] = reduced ? goal : goal > open[slug] ? Math.min(goal, open[slug] + dt / 650) : Math.max(goal, open[slug] - dt / 650);
-      openers[slug](easeInOut(open[slug]), now);
-      moved = true;
-    }
-    // Ambient life and anything that keeps moving while open, at about 30fps.
-    if (life && !document.hidden && now - lastAmbient > lifeGap) {
-      lastAmbient = now;
-      life(now, nightT);
-      for (const slug of LIVELY) if (openers[slug]) openers[slug](easeInOut(open[slug]), now);
-      moved = true;
-    }
-    if (moved) { refresh(); dirty = true; }
+    if (tour && stepTour(dt)) dirty = true;
     if (!dirty) return;
     r.render(scene, camera);
     dirty = false;
-    if (still && !flight) document.documentElement.dataset.ready = '1';
+    if (still) html.dataset.ready = '1';
   };
   requestAnimationFrame(loop);
 }
@@ -864,3 +560,8 @@ function startObject(box) {
   };
   requestAnimationFrame(loop);
 }
+
+const bench = document.querySelector('[data-stage]');
+if (bench) startHouse(bench, { root: JSON.parse(document.getElementById('bench-data').textContent).root });
+const viewer = document.querySelector('[data-object]');
+if (viewer) startObject(viewer);
