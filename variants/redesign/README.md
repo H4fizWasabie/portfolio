@@ -7,7 +7,11 @@ project, one per service, then the goodbye where the room ends; About and Contac
 names what the room shows; its panel sits at the bottom on phones and to one side on wide screens, and
 native scroll snapping (`y mandatory`) rests each step in place. `room.js` (`VIEW`, `STOPS`, `measure`,
 `stepTour`) keys the camera to that same scroll position, so the object on a panel is the one in frame;
-the `[data-room]` block at the end of `workshop/style.css` lays it out. Without JavaScript, with reduced
+the `[data-room]` block at the end of `workshop/style.css` lays it out. About and Contact are
+stops too: each is at least a screen tall (`100lvh`), has `scroll-snap-stop: always`, and rests with its
+top at the top of the screen, the navigation bar covering its own top padding (no `scroll-margin`: a margin would
+leave the end of the section above showing, most visibly while the bar is tucked away). A section taller than the
+screen (About and Contact on phones) can rest anywhere inside itself, never beside its neighbour. Without JavaScript, with reduced
 motion, without WebGL or in `?still=` renders the page keeps its static layout.
 
 `turntable` and `workflow` are the other two candidates. They are archived: still served,
