@@ -11,7 +11,7 @@ X0, X1 = -FX + 0.4, -0.5          # inside the wing's left wall to the partition
 Y0, Y1 = YB + 0.4, YW - 0.4       # the House's back wall to the wing's
 DOOR_X = next(x for slug, x, st in DOORS if slug == 'stock')
 
-WHITE = mat('clinic_white', 'plaster', 2.0, (0.93, 0.94, 0.94), 0.9, size=256)
+WHITE = mat('clinic_white', None, color=(0.93, 0.94, 0.94), rough=0.9)  # smooth painted walls
 VINYL = mat('vinyl', 'floor', 2.0, (0.8, 0.81, 0.81), 0.35, size=384)
 STEEL = mat('steel', None, color=(0.62, 0.64, 0.66), rough=0.35, metal=1.0)
 POWDER = mat('powder_white', None, color=(0.88, 0.89, 0.9), rough=0.5)
@@ -21,7 +21,7 @@ KRAFT = mat('kraft', None, color=(0.66, 0.5, 0.33), rough=0.95)
 LAMINATE = mat('laminate', None, color=(0.9, 0.9, 0.89), rough=0.5)
 SCREEN = mat('screen', None, color=(0.02, 0.02, 0.025), rough=0.2)  # the page puts the screenshot on it
 RUBBER = mat('rubber', None, color=(0.04, 0.04, 0.045), rough=0.9)
-PANEL = mat('panel_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('PANEL', 14.0)), emit_color=(0.97, 0.98, 1.0))  # LED panels, cool white
+PANEL = mat('panel_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('PANEL', 24.0)), emit_color=(0.97, 0.98, 1.0))  # LED panels, cool white
 
 room_parts = []
 

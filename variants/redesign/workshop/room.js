@@ -154,7 +154,7 @@ const ROOMS = { stock: ['procura', 'pims'] };
 // Through the stock Room's doorway (x -3.8, 1.3 m wide, 2.55 m high): its middle, a step either side of the wall.
 const STOCK_DOOR = [{ pos: [-3.8, 2.6, -11.0], at: [-3.8, 2.4, -16] }, { pos: [-3.8, 2.65, -13.0], at: [-1.5, 2.2, -16] }];
 // A stop in a Room: where the camera stands and what it looks at (a project's object), in the House's axes.
-const roomStop = (pos, at, phone = {}) => ({ pos, at, hfov: 58, off: 0.12, exp: 1.0, phone: { hfov: 46, up: 0.26, ...phone } });
+const roomStop = (pos, at, phone = {}) => ({ pos, at, hfov: 58, off: 0.12, exp: 1.15, phone: { hfov: 46, up: 0.26, ...phone } });
 const STOPS = {
   hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
   door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], hfov: 42, up: 0.26 } },
@@ -629,18 +629,29 @@ function startHouse(stage, { root }) {
   // where one panel has gone and the next has not yet arrived.
   const hold = f => THREE.MathUtils.smoothstep(f, 0.35, 0.65);
   const tourPos = new THREE.Vector3(), tourAim = new THREE.Vector3();
-  function stepTour(dt) {
-    const { keys, views, n, knots, along } = tour;
+  // Where the scroll is along the stops: the stop before it (i) and how far on to the next (f).
+  function along() {
+    const { keys, n } = tour;
     let i = 0;
     while (i < n - 1 && scrollY >= keys[i + 1]) i++;
-    const f = THREE.MathUtils.clamp((scrollY - keys[i]) / (keys[i + 1] - keys[i]), 0, 1);
+    return [i, THREE.MathUtils.clamp((scrollY - keys[i]) / (keys[i + 1] - keys[i]), 0, 1)];
+  }
+  // A Room away from its doorway stop, start fetching it (from the scroll itself, so a slow first frame cannot hold it up).
+  function fetchNear() {
+    if (!tour?.keys) return;
+    const [i, f] = along();
+    for (const [slug, at] of tour.doors) if (at >= 0 && i + f >= at - 1.5) fetchRoom(slug);
+  }
+  function stepTour(dt) {
+    const { views, knots } = tour;
+    const [i, f] = along();
+    fetchNear();
     const g = hold(f);
-    const u = (knots[i] + (knots[i + 1] - knots[i]) * g) / along;
+    const u = (knots[i] + (knots[i + 1] - knots[i]) * g) / tour.along;
     tour.pos.getPoint(u, tourPos);
     tour.target.getPoint(u, tourAim);
     const from = views[i], to = views[i + 1];
     tour.here = (g < 0.5 ? tour.els[i] : tour.els[i + 1]).el?.dataset.look.slice(1) || 'hero';
-    for (const [slug, at] of tour.doors) if (at >= 0 && i + f >= at - 1.5) fetchRoom(slug); // a Room away: start fetching it
     setGoal({ x: (from.ox + (to.ox - from.ox) * g) * size[0], y: (from.oy + (to.oy - from.oy) * g) * size[1] }, snap);
     // Easing towards the path, not jumping onto it, is what makes the scroll feel filmed.
     const a = snap ? 1 : 1 - Math.pow(0.9, dt / 16.7);
@@ -658,6 +669,7 @@ function startHouse(stage, { root }) {
   }
 
   addEventListener('scroll', () => {
+    if (loaded) fetchNear();
     const y = scrollY;
     if (Math.abs(y - lastY) > 6) { html.classList.toggle('nav-away', y > lastY && y > 120); lastY = y; }
   }, { passive: true });

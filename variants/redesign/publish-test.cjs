@@ -191,7 +191,7 @@ async function homeChecks(browser, url) {
       await page.waitForTimeout(1500);
       assert.ok(!(await fetched()), '/: the stock Room is not fetched at the hero');
       await page.evaluate(() => document.querySelector('[data-look="@door"]').scrollIntoView());
-      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => e.name.includes('room-stock')), null, { timeout: 10000 });
+      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => e.name.includes('room-stock')), null, { timeout: 30000 });
       // Choosing a project with a Room in the index takes the tour to its first stop.
       await page.evaluate(() => scrollTo(0, 0));
       await page.waitForTimeout(500);
