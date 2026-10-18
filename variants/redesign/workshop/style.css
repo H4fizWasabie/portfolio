@@ -132,9 +132,8 @@ input,select{accent-color:var(--cobalt)}
 .tour-card .tour-object{color:var(--ink)} /* over the scene, not the page */
 .tour-title{font-weight:800;font-size:clamp(2.6rem,5.2vw,4.75rem);line-height:.95;letter-spacing:-.045em}
 .tour-summary{font-size:1.0625rem;max-width:34ch;margin-bottom:8px}
-/* The same veil as the headline's, mirrored, so the caption reads over the room. */
-.tour-card::before{content:"";position:absolute;inset:-40% -30% -30% -40%;z-index:-1;pointer-events:none;
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--day) 93%,transparent) 75%,transparent)}
+/* The caption sits on a small solid panel, so it reads over any part of the room. */
+.tour-card{padding:22px 24px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
 .tour-card,.tour-steps{display:none}
 
 /* Touch screens have no hover, so the room says it can be tapped until the first tap. */
@@ -189,10 +188,12 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .work-grid li{grid-column:span 2}
 .work-procura,.work-pims,.work-map,.work-yen{grid-column:span 3!important}
 .shelf-items li{grid-column:auto!important}
-.work-grid a,.shelf-items a{display:grid;align-content:start;gap:14px;height:100%;padding:12px 12px 18px;border-radius:var(--r);background:var(--surface);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
-.work-grid img,.shelf-items img{width:100%;border-radius:var(--r);aspect-ratio:4/3;object-fit:cover}
-.work-grid :is(.work-procura,.work-pims,.work-map,.work-yen) img{aspect-ratio:16/10}
-.work-text{display:grid;gap:2px;padding:0 6px}
+.work-grid a,.shelf-items a{display:grid;align-content:start;gap:14px;height:100%;padding:0 0 18px;border-radius:var(--r);background:var(--surface);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.work-img{position:relative;display:block;overflow:hidden;border-radius:var(--r) var(--r) 0 0} /* the image runs to the card's top and side edges, so its corners share the card's radius */
+.work-img::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px var(--img-line);pointer-events:none} /* the hairline stays on the frame while the image zooms */
+.work-img img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.work-grid :is(.work-procura,.work-pims,.work-map,.work-yen) .work-img img{aspect-ratio:16/10}
+.work-text{display:grid;gap:2px;padding:0 18px}
 .work-object{font-size:.875rem;color:var(--muted);font-weight:600}
 .work-text strong{font-size:1.375rem;letter-spacing:-.02em;transition:color .2s var(--ease)}
 .work-text span:last-child{color:var(--muted)}
@@ -465,6 +466,10 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .contact-block a:not(.button):hover{text-decoration-thickness:2px}
   .enquiry .field :is(input,textarea):hover,.enquiry-failed textarea:hover{border-color:var(--on-panel)}
   :is(.work-grid,.shelf-items) a:hover strong{color:var(--cobalt)}
+  @media (pointer:fine) and (prefers-reduced-motion:no-preference){
+    .work-img img{transition:transform .55s var(--ease),opacity .5s var(--ease)}
+    :is(.work-grid,.shelf-items) a:hover .work-img img{transform:scale(1.03)}
+  }
   .next a:hover strong{color:var(--cobalt)}
   .stepper button:hover{color:var(--cobalt)}
 }
@@ -564,7 +569,7 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 [data-room=wide] .step-card{display:none}
 [data-room=wide] .tour-card{display:grid;position:fixed;z-index:5}
 [data-room=phone] .tour-steps li{display:flex;align-items:flex-end;padding:0 12px 12px}
-[data-room=phone] .step-card{position:relative;width:100%;display:grid;justify-items:start;gap:4px;padding:0 6px}
+[data-room=phone] .step-card{position:relative;width:100%;display:grid;justify-items:start;gap:4px;padding:16px 18px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
 [data-room=phone] .step-card .tour-object{color:var(--ink)}
 [data-room=phone] .step-card .tour-title{font-size:1.75rem}
 [data-room=phone] .step-card .tour-summary{font-size:1rem;margin-bottom:6px}
@@ -593,6 +598,7 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 [data-room] .shelf-head p{margin-top:6px;max-width:none}
 [data-room] .shelf-items{grid-template-columns:1fr;grid-auto-flow:row;grid-auto-columns:auto;overflow:visible;overscroll-behavior:auto;scroll-snap-type:none;margin:0;padding:0;gap:8px}
 [data-room] .shelf-items a{display:grid;gap:2px;height:auto;padding:0;background:none}
+[data-room] .shelf-items .work-img{display:none}
 [data-room] .shelf-items a::after{content:"Open \2192";justify-self:start;margin-top:8px;font-weight:700;color:var(--cobalt)}
 [data-room] .work-text{padding:0}
 [data-room] .shelf-items .work-text strong{font-size:1.25rem}
@@ -608,15 +614,13 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 [data-room] .wordmark{padding-top:calc(100svh - 1em);padding-bottom:clamp(8px,1.5vw,20px);background:none}
 /* The scrim is a layer behind each caption (z -1 inside its own stacking context): a screen-high fade for
    the captions, a shorter one under the goodbye's name so the room still shows above it. */
-[data-room] :is(.shelf,.wordmark),[data-room=phone] .tour-steps li{isolation:isolate}
-[data-room=phone] .tour-steps li{position:relative}
+[data-room] :is(.shelf,.wordmark){isolation:isolate}
 [data-room] .shelf::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
-[data-room=phone] .tour-steps li::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
 /* Wide: the shelf's captions sit on the left and its objects on the right, so the scrim covers the caption column only. */
 [data-room=wide] .shelf::after{background:linear-gradient(to right,var(--scrim-c) calc(var(--edge) + 500px),transparent calc(var(--edge) + 720px))}
 [data-room=phone] .shelf::after{display:none}
 [data-room=phone] .shelf-panel{position:relative;--shelf-c:color-mix(in srgb,var(--day) 94%,transparent)}
-[data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-96px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 96px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
+[data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-24px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 24px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
 [data-room] .wordmark::after{content:"";position:absolute;inset:auto 0 0;height:32%;z-index:-1;background:linear-gradient(to top,color-mix(in srgb,var(--day) 92%,transparent) 80%,transparent)}
 /* About and Contact are plain page below the goodbye, on a solid ground so the room does not show through. */
 /* Each starts its own stop: it is at least a screen tall, rests with its top at the screen's top (the bar covers its
@@ -635,7 +639,7 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 .tour-title,.contact-mail{text-wrap:balance}
 :is(li,dd,figcaption,.hint,.field-help){text-wrap:pretty}
 /* Image edges and the gallery, the thumbnails and the next-project card: a hairline keeps pale renders from melting into pale cards. */
-:is(.work-grid,.shelf-items) img,.next img,.gallery-panel img,.object-view img{outline:1px solid var(--img-line);outline-offset:-1px}
+.next img,.gallery-panel img,.object-view img{outline:1px solid var(--img-line);outline-offset:-1px}
 .enquiry .field :is(input,textarea),.enquiry-failed textarea{transition:border-color .2s var(--ease)}
 .enquiry .field :is(input,textarea):focus,.enquiry-failed textarea:focus{border-color:var(--on-panel)}
 .theme-toggle,.drawer-close,.drawer-nav button,.drawer-nav span,.gallery-tabs button,.stepper button,.channels button,.link-button{transition:color .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease),transform .15s var(--ease)}
