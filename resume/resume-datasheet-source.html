@@ -13,7 +13,7 @@
   .mono { font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace; }
   .page { padding: 34px 40px 30px 40px; }
   /* Scale the datasheet onto one A4 page in the Chromium PDF build (resume/pdf.cjs). */
-  @media print { .page { zoom: 0.8; padding: 36px 80px 24px; } }
+  @media print { .page { zoom: 0.78; padding: 36px 80px 24px; } }
   a { color: inherit; text-decoration: none; }
 
   /* ---------- header ---------- */
@@ -21,7 +21,7 @@
   .idrow { width: 100%; }
   h1 { font-size: 23pt; font-weight: 700; }
   .role { font-size: 10.5pt; color: #4a4d3a; margin-top: 2px; }
-  .meta { text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: bottom; }
+  .meta { text-align: right; font-size: 7.6pt; color: #4a4d3a; vertical-align: top; position: relative; top: 6px; }
   .meta span { display: block; }
   .certline {
     margin-top: 10px; padding: 5px 8px; border-top: 1px solid #17190f; border-bottom: 1px solid #17190f;
@@ -33,7 +33,6 @@
   /* No letter-spacing on labels: tracked capitals extract as "P R O F I L E" in résumé parsers. */
   .sec { margin-top: 14px; }
   .sechead { border-bottom: 2px solid #17190f; padding-bottom: 3px; margin-bottom: 8px; }
-  .secno { font-size: 8pt; font-weight: 700; color: #5a7a22; }
   .sectitle { font-size: 8pt; font-weight: 700; color: #17190f; }
 
   /* ---------- profile ---------- */
@@ -92,15 +91,15 @@
     </div>
   </div>
 
-  <!-- ================= 01 PROFILE ================= -->
+  <!-- ================= PROFILE ================= -->
   <div class="sec">
-    <div class="sechead"><span class="secno mono">01 /</span> <span class="sectitle mono">PROFILE</span></div>
+    <div class="sechead"><span class="sectitle mono">PROFILE</span></div>
     <p class="profile">Internal tools developer from an operations background. I build the systems my own workplace runs on — procurement, inventory and dangerous-drugs software in daily use at a veterinary hospital — and the AI automation around them.</p>
   </div>
 
-  <!-- ================= 02 SYSTEMS ================= -->
+  <!-- ================= PROJECTS ================= -->
   <div class="sec">
-    <div class="sechead"><span class="secno mono">02 /</span> <span class="sectitle mono">SYSTEMS DESIGNED &amp; BUILT</span></div>
+    <div class="sechead"><span class="sectitle mono">PROJECTS</span></div>
 
     <table class="sys"><tr>
       <td class="sysname">PIMS — Hospital Stock &amp; Inventory <span class="kind mono">· PRODUCTION · LIVE</span></td>
@@ -110,9 +109,7 @@
     <p class="sysdesc">Replaced paper workflows for stock requests, approvals, receipt and stock control at a veterinary hospital.</p>
     <ul class="sysul">
       <li>Designed the data model around the real workflow: PRFs, POs, GRNs, stock movement, expiry and critical-item tracking.</li>
-      <li>Replaced paper stock checks with system-tracked counts and critical-item alerts.</li>
       <li>Auto Pilot ordering module for pharmacy requirement ordering, cutting manual workload for operations.</li>
-      <li>Moved purchase request (PRF) creation from paper into the system.</li>
     </ul>
 
     <table class="sys"><tr>
@@ -150,7 +147,7 @@
       <li>Social media content pipeline: daily research → scripts → narrated videos → Facebook and Instagram posts.</li>
       <li>Daily research and coding assistant; ships changes to my systems, including this portfolio, through reviewed pull requests.</li>
       <li>Added shared long-term memory, a bounded context window and self-verification (plans, cross-model review, claim checks).</li>
-      <li><b>730+ commits and 360+ merged PRs in six weeks</b>; runs about 30 scheduled jobs.</li>
+      <li><b>730+ commits and 360+ merged PRs in six weeks</b>; runs about 30 scheduled jobs. Successor to Mino, a Go agent runtime I built from scratch (graph memory, MCP, playbooks, evals).</li>
     </ul>
 
     <table class="sys"><tr>
@@ -161,13 +158,13 @@
     <p class="sysdesc">Offline app replacing several: tasks with Done/Snooze reminders, calendar, scan-to-PDF, documents, music; no account.</p>
   </div>
 
-  <!-- ================= 03 EXPERIENCE ================= -->
+  <!-- ================= EXPERIENCE ================= -->
   <div class="sec">
-    <div class="sechead"><span class="secno mono">03 /</span> <span class="sectitle mono">EXPERIENCE</span></div>
+    <div class="sechead"><span class="sectitle mono">EXPERIENCE</span></div>
 
     <div class="job">
       <table class="jobrow"><tr>
-        <td class="jt">Procurement Officer <span class="jloc">— Starlight Veterinary Medical Centre, Ampang</span></td>
+        <td class="jt">Procurement Officer / Internal Tools Developer <span class="jloc">— Starlight Veterinary Medical Centre, Ampang</span></td>
         <td class="jd mono">DEC 2025 – PRESENT</td>
       </tr></table>
       <p class="jdesc">Owner of the full procurement-to-inventory operation; designed and shipped PIMS, Procura and the DD Drugs Register above. Digitized the entire procurement lifecycle; negotiated payment terms; run supplier consolidation and KPI programs.</p>
@@ -198,12 +195,14 @@
     </div>
   </div>
 
-  <!-- ================= 04 SKILLS ================= -->
+  <!-- ================= SKILLS ================= -->
   <div class="sec">
-    <div class="sechead"><span class="secno mono">04 /</span> <span class="sectitle mono">SKILLS</span></div>
+    <div class="sechead"><span class="sectitle mono">SKILLS</span></div>
     <table class="skills">
-      <tr><td class="sklabel mono">TECHNICAL</td><td class="sk">Go · TypeScript · Kotlin · PostgreSQL/SQLite · JavaScript · AI agents &amp; automation · Self-hosting (Linux VPS, Caddy, systemd)</td></tr>
-      <tr><td class="sklabel mono">SYSTEMS</td><td class="sk">Workflow design · Data modeling · Requirements → build → measure loop · AI-assisted development</td></tr>
+      <tr><td class="sklabel mono">AI AGENTS</td><td class="sk">Agent runtimes &amp; harnesses (built from scratch in Go) · Agent loop design (ReAct, OODA-style poll/act/verify) &amp; tool calling · Context engineering (compaction, bounded context windows, prompt caching) · Memory &amp; retrieval (RAG, embeddings, graph memory, consolidation, dedup) · Tool management &amp; MCP · Subagent orchestration · Agent evals · Agent verification · Multi-provider LLMs</td></tr>
+      <tr><td class="sklabel mono">ARCHITECTURE</td><td class="sk">System design from scratch · Zero-trust design (least privilege, approval gates, fail-closed auth) · GraphRAG / knowledge graphs · ICM stage-based workflows · Client/server protocol design · Domain &amp; data modeling</td></tr>
+      <tr><td class="sklabel mono">AUTOMATION</td><td class="sk">Business process automation (procurement → inventory) · Scheduled AI workflows · Telegram AI bots · AI stock-take vision · Approval workflows &amp; RBAC</td></tr>
+      <tr><td class="sklabel mono">TECHNICAL</td><td class="sk">Go · TypeScript · Python · Kotlin · PostgreSQL/SQLite · JavaScript · Linux VPS deployment (Caddy, systemd) · GitHub Actions CI</td></tr>
       <tr><td class="sklabel mono">DOMAIN</td><td class="sk">Procurement &amp; sourcing · Inventory management · SRM &amp; supplier negotiation · Healthcare ops · AutoCount (e-invoicing) · Excel</td></tr>
     </table>
   </div>

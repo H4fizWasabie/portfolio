@@ -5,13 +5,13 @@
 .resume-paper h2{font-size:clamp(21px,3vw,31px);line-height:1.25;letter-spacing:.02em;text-wrap:initial}
 .resume-paper h3{font-size:14px;font-weight:700;line-height:1.5;margin:0 0 14px;letter-spacing:0}
 .resume-paper .sec{margin-top:30px}
-.resume-paper .secno,.resume-paper .sectitle{font-size:13px;letter-spacing:.08em}
+.resume-paper .sectitle{font-size:13px;letter-spacing:.08em}
 .resume-paper table,.resume-paper tbody,.resume-paper tr,.resume-paper td{display:block;width:100%;max-width:100%}
 .resume-paper .meta,.resume-paper td.sysurl,.resume-paper td.jd{text-align:left;font-size:13px;line-height:1.6;margin-top:6px}
 .resume-paper .meta{margin-top:14px}.resume-paper .meta span{display:inline-block;margin-right:16px}
 .resume-paper .role{font-size:14px;line-height:1.6;margin-top:8px}
 .resume-paper .certline{font-size:12px;line-height:1.7;margin-top:18px;padding:12px 0;letter-spacing:0}
-.resume-paper .certline b,.resume-paper .secno,.resume-paper td.sysname .kind,.resume-paper td.sklabel{color:#4c6720}
+.resume-paper .certline b,.resume-paper td.sysname .kind,.resume-paper td.sklabel{color:#4c6720}
 .resume-paper td.sysname,.resume-paper td.jt{font-size:16px;line-height:1.5;padding-top:8px}
 .resume-paper td.sysname .kind{display:block;font-size:12px;line-height:1.6;letter-spacing:.04em;margin-top:3px}
 .resume-paper .tags,.resume-paper .jloc{font-size:13px;line-height:1.6;letter-spacing:0}
