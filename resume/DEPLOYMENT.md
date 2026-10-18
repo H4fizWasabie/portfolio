@@ -4,11 +4,13 @@ The canonical site is served by Caddy from `/var/www/portfolio-releases/current`
 
 ## Release
 
-On the VPS, as root, from a clean checkout of the merged `main`:
+On the VPS, as root, from the release checkout `/root/portfolio-release` (a clone of this repo used only for site releases; never the API's clone at `/var/www/portfolio-app`, where `npm ci` as root would break the API's packages):
 
 ```sh
-variants/redesign/release.sh [release-name]
+cd /root/portfolio-release && git pull --ff-only origin main && variants/redesign/release.sh [release-name]
 ```
+
+If it is missing, recreate it with `git clone https://github.com/H4fizWasabie/portfolio /root/portfolio-release`.
 
 It runs `npm ci` (repo root and `variants/redesign`) and `variants/redesign/publish-test.cjs` (which prints the résumé PDF and builds both the noindex preview and the production site), refuses to continue if the checkout is dirty, copies the production runtime manifest into `/var/www/portfolio-releases/<name>-<timestamp>-<commit>`, verifies every file hash, switches `current` atomically, then runs `variants/redesign/verify-public.cjs` against `https://portfolio.wasabietech.com`. If public verification fails it switches `current` back to the previous release.
 
