@@ -19,7 +19,7 @@ One screen of the room tour, showing one thing in the room with its caption.
 _Avoid_: step, slide
 
 **Chapter**:
-One of the three panels in About: Background, How I work, Now.
+One of the two panels in About: Background and Now. (How I work moved to the stair wall: a poster per step, each a Stop.)
 _Avoid_: tab, column
 
 **Hiring line**:

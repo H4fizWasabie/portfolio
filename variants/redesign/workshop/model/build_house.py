@@ -489,6 +489,7 @@ FL1, CE1 = 4.65, 7.45       # upstairs
 ROOF = 8.05                 # roof top
 YF = 1.0                    # the glass line at the front
 YB = 12.0                   # the back wall's inner face
+YW = 19.6                   # the back of the rear wing behind it, where the Rooms are (outer face)
 HX0, HX1, FX = 7.2, 7.4, 8.6   # inner half widths (ground, upstairs) and the concrete frame's outer half width
 BAL = -1.4                  # the balcony's front edge
 DOORS = [('stock', -3.8, 0), ('records', 1.0, 0), ('ai', -3.8, 1), ('android', 1.0, 1)]  # slug, x, storey
@@ -507,8 +508,8 @@ def walls_with_openings(part, x0, x1, y0, y1, z0, z1, openings, material, **kw):
     cuts.append((x, x1))
     for a, b in cuts:
         part.box(a, b, y0, y1, z0, z1, material, **kw)
-    for xc, hw, h in openings:
-        part.box(xc - hw, xc + hw, y0, y1, z0 + h, z1, material, **kw)
+    for xc, hw, h in openings:  # the lintel keeps its underside: the tour walks under it
+        part.box(xc - hw, xc + hw, y0, y1, z0 + h, z1, material, **{**kw, 'drop': [d for d in kw.get('drop', ()) if d != DOWN]})
 
 
 # --- the ground: land with a shore, bake-only water
@@ -519,7 +520,7 @@ def shore(x):
 
 def land_height(x, y):
     s = shore(x)
-    if abs(x) < 11.5 and y < 16.5:
+    if abs(x) < 11.5 and y < YW + 1.9:
         return -0.4  # under the plinth
     bank = lerp(-0.55, TERR - 0.1, (y - s) / 2.6)
     rise = 0.03 * max(0.0, y - 22) + 0.0009 * max(0.0, abs(x) - 24) ** 2
@@ -548,8 +549,8 @@ def wet(c):
 
 plinth = Part('plinth', 1.4, vcol=wet)
 for za, zb in ((-1.2, -0.4), (-0.4, 0.0), (0.0, 0.4), (0.4, TERR)):
-    plinth.box(-10.5, 10.5, -3.6, 15.5, za, zb, CONCRETE, drop=[DOWN, UP, NORTH], top=TERR)
-plinth.box(-10.5, 10.5, -3.6, 15.5, TERR, TERR + 0.002, TERRACE, keep=UP)
+    plinth.box(-10.5, 10.5, -3.6, YW + 1.0, za, zb, CONCRETE, drop=[DOWN, UP, NORTH], top=TERR)
+plinth.box(-10.5, 10.5, -3.6, YW + 1.0, TERR, TERR + 0.002, TERRACE, keep=UP)
 
 # --- the House: ground floor, the cantilevered upper frame, the chimney
 house = Part('house', 1.8)
@@ -570,10 +571,12 @@ for sx in (-1, 1):
     house.box(a, b, BAL, YB + 0.4, FL1, CE1, CONCRETE, drop=[UP, DOWN, NORTH], top=ROOF)
 upper_doors = [(x, OPEN_W, OPEN_H) for slug, x, st in DOORS if st == 1]
 walls_with_openings(house, -HX1, HX1, YB, YB + 0.4, FL1, CE1, upper_doors, CONCRETE, drop=[DOWN, UP, NORTH, SOUTH])
-# The roof: a parapet round its edge, gravel inside it, two flat rooflights
-for a, b, c, d in ((-FX, FX, BAL, BAL + 0.25), (-FX, FX, YB + 0.15, YB + 0.4), (-FX, -FX + 0.25, BAL, YB + 0.4), (FX - 0.25, FX, BAL, YB + 0.4)):
+# The rear wing behind the back wall, two storeys, where the four Rooms are (each Room's asset holds its inside): its outside only
+house.box(-FX, FX, YB + 0.4, YW, TERR, ROOF, CONCRETE, drop=[DOWN, SOUTH, UP], top=ROOF)
+# The roof, over the House and the wing: a parapet round its edge, gravel inside it, two flat rooflights
+for a, b, c, d in ((-FX, FX, BAL, BAL + 0.25), (-FX, FX, YW - 0.25, YW), (-FX, -FX + 0.25, BAL, YW), (FX - 0.25, FX, BAL, YW)):
     house.box(a, b, c, d, ROOF, ROOF + 0.3, CONCRETE, drop=[DOWN])
-house.box(-FX + 0.25, FX - 0.25, BAL + 0.25, YB + 0.15, ROOF, ROOF + 0.04, GRAVEL, keep=UP)
+house.box(-FX + 0.25, FX - 0.25, BAL + 0.25, YW - 0.25, ROOF, ROOF + 0.04, GRAVEL, keep=UP)
 for x0, x1 in ((-5.6, -2.6), (-1.4, 1.6)):
     house.box(x0, x1, 6.2, 8.8, ROOF + 0.04, ROOF + 0.32, FRAME, drop=[DOWN])
 # The chimney tower, with a cap
@@ -862,6 +865,11 @@ for slug, x, st in DOORS:
     empty(f'doorway_{slug}', (x, YB, FL1 if st else FL0))
 empty('balcony', (0, -0.2, FL1))
 
+# --- the Rooms behind the doorways (room_<slug>.py, run here so a Room and the House light each other), each its own asset
+ROOMS = {}
+exec(open(os.path.join(here, 'room_stock.py')).read())
+ROOM_OBJS = {o for objs in ROOMS.values() for o in objs}
+
 # --- boulders at the waterline and trees on the land
 ROCK_SPECS = [(-9.8, -5.0, 1.5), (-13.6, -3.0, 1.0), (11.8, -5.0, 1.85), (14.8, -2.8, 1.05), (8.6, -5.4, 0.7), (-6.4, -5.8, 0.55), (-17.5, 0.0, 1.5), (19.5, 1.5, 1.7), (-24, 5.5, 1.3), (25, 6.5, 1.1), (16.5, -4.3, 0.55), (-7.8, -4.4, 0.45), (13.6, -4.1, 0.6), (-11.2, -5.9, 0.4)]
 
@@ -1008,7 +1016,7 @@ placed = []
 
 
 def plant(x, y, h, kind=None):
-    if abs(x) < 12.5 and y < 19:
+    if abs(x) < 12.5 and y < YW + 3.5:
         return  # the House and its plinth
     z = land_height(x, y)
     if z < 0.0 or y < shore(x) + 2.0:
@@ -1063,7 +1071,7 @@ for i in range(7):
 for _ in range(22):
     x = gr.uniform(10.7, 15.0)
     y = gr.uniform(shore(x) + 0.2, shore(x) + 4.0)
-    if y < 16:
+    if y < YW + 0.5:
         tuft(x, y, land_height(x, y) - 0.05, gr.uniform(0.5, 0.95), 20)
 for _ in range(14):
     x = gr.uniform(-15.0, -10.7)
@@ -1085,42 +1093,51 @@ scene.collection.objects.link(water)
 
 # ---------------------------------------------------------------- lighting texture (UV set 2) and bake
 
-bake_objs = [o for o in scene.objects if o.type == 'MESH' and not o.name.startswith(('glass_', 'glow_', 'trees', 'rocks', 'bake_'))]
-for o in bake_objs:
-    uvs = o.data.uv_layers
-    lm = uvs.new(name='lightmap')
-    uvs.active = lm
-for o in scene.objects:
-    o.select_set(False)
-for o in bake_objs:
-    o.select_set(True)
-bpy.context.view_layer.objects.active = bake_objs[0]
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.004, area_weight=0.0, correct_aspect=True, scale_to_bounds=False)
-bpy.ops.uv.average_islands_scale()
-bpy.ops.object.mode_set(mode='OBJECT')
-# Texel density per object: the lawn and the roof, which are seen from far away, get fewer texels than the rooms.
-for o in bake_objs:
-    d = o.data.uv_layers['lightmap'].data
-    pts = np.empty(len(d) * 2, np.float32)
-    d.foreach_get('uv', pts)
-    pts = pts.reshape(-1, 2)
-    pts = (pts - pts.mean(0)) * float(o.get('weight', 1.0)) + pts.mean(0)
-    d.foreach_set('uv', pts.ravel())
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.uv.pack_islands(margin=0.008, rotate=False)
-bpy.ops.object.mode_set(mode='OBJECT')
-for o in bake_objs:  # how big a texel of the lighting texture is on each object (centimetres)
-    m = o.data
-    m.calc_loop_triangles()
-    uv = np.empty(len(m.loops) * 2, np.float32)
-    m.uv_layers['lightmap'].data.foreach_get('uv', uv)
-    uv = uv.reshape(-1, 2)
-    ua = sum(abs(np.cross(uv[t.loops[1]] - uv[t.loops[0]], uv[t.loops[2]] - uv[t.loops[0]])) / 2 for t in m.loop_triangles)
-    ma = sum(t.area for t in m.loop_triangles)
-    print('texel %-18s %5.1f cm' % (o.name, 100 * math.sqrt(ma / max(ua * LIGHT_RES ** 2, 1e-9))))
+bake_objs = [o for o in scene.objects if o.type == 'MESH' and o not in ROOM_OBJS and not o.name.startswith(('glass_', 'glow_', 'trees', 'rocks', 'bake_'))]
+def select(objs):
+    for o in scene.objects:
+        o.select_set(False)
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]
+
+
+def lightmap_uvs(objs):
+    """A second UV set, 'lightmap', laid out over these objects together: one lighting texture's worth."""
+    for o in objs:
+        uvs = o.data.uv_layers
+        lm = uvs.new(name='lightmap')
+        uvs.active = lm
+    select(objs)
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.004, area_weight=0.0, correct_aspect=True, scale_to_bounds=False)
+    bpy.ops.uv.average_islands_scale()
+    bpy.ops.object.mode_set(mode='OBJECT')
+    # Texel density per object: the lawn and the roof, which are seen from far away, get fewer texels than the rooms.
+    for o in objs:
+        d = o.data.uv_layers['lightmap'].data
+        pts = np.empty(len(d) * 2, np.float32)
+        d.foreach_get('uv', pts)
+        pts = pts.reshape(-1, 2)
+        pts = (pts - pts.mean(0)) * float(o.get('weight', 1.0)) + pts.mean(0)
+        d.foreach_set('uv', pts.ravel())
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.pack_islands(margin=0.008, rotate=False)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    for o in objs:  # how big a texel of the lighting texture is on each object (centimetres)
+        m = o.data
+        m.calc_loop_triangles()
+        uv = np.empty(len(m.loops) * 2, np.float32)
+        m.uv_layers['lightmap'].data.foreach_get('uv', uv)
+        uv = uv.reshape(-1, 2)
+        ua = sum(abs(np.cross(uv[t.loops[1]] - uv[t.loops[0]], uv[t.loops[2]] - uv[t.loops[0]])) / 2 for t in m.loop_triangles)
+        ma = sum(t.area for t in m.loop_triangles)
+        print('texel %-18s %5.1f cm' % (o.name, 100 * math.sqrt(ma / max(ua * LIGHT_RES ** 2, 1e-9))))
+
+
+lightmap_uvs(bake_objs)
 
 # Overcast dusk: a soft, cool sky (a CC0 HDRI, white-balanced cooler) and the warm lamps of the House (a Blackbody node).
 SKY_LEVEL = float(os.environ.get('SKY', 2.0))  # the sky's mean radiance above the horizon
@@ -1217,6 +1234,26 @@ for o in glass_users:
     o.data.materials[0] = clear
 
 bpy.ops.object.bake(type='DIFFUSE', pass_filter={'DIRECT', 'INDIRECT'}, margin=12, margin_type='EXTEND', use_clear=True)
+
+# Each Room into its own lighting texture, in the same light, with its door open (the page takes the door away once the Room is in).
+room_imgs = {}
+for slug, objs in ROOMS.items():
+    targets = [o for o in objs if o.type == 'MESH' and not o.name.startswith(('glow_', 'screen_', 'glass_'))]
+    lightmap_uvs(targets)
+    rimg = bpy.data.images.new(f'lightmap_{slug}', LIGHT_RES, LIGHT_RES, alpha=False, float_buffer=True)
+    rimg.colorspace_settings.name = 'Non-Color'
+    for m in {m for o in targets for m in o.data.materials}:
+        n = m.node_tree.nodes.get('bake') or m.node_tree.nodes.new('ShaderNodeTexImage')
+        n.name, n.image = 'bake', rimg
+        m.node_tree.nodes.active = n
+        baked.add(m)
+    door = bpy.data.objects[f'door_{slug}']
+    door.hide_render = True
+    select(targets)
+    bpy.ops.object.bake(type='DIFFUSE', pass_filter={'DIRECT', 'INDIRECT'}, margin=12, margin_type='EXTEND', use_clear=True)
+    door.hide_render = False
+    room_imgs[slug] = rimg
+select(bake_objs)
 
 for o in glass_users:
     o.data.materials[0] = GLASS
@@ -1354,6 +1391,14 @@ def png(path, a):
 
 png(out_light, rows)
 png(out_wet, wet_rows)
+for slug, rimg in room_imgs.items():  # a Room's lighting texture: irradiance as for the House, without the weather
+    px = np.empty(LIGHT_RES * LIGHT_RES * 4, np.float32)
+    rimg.pixels.foreach_get(px)
+    rgb = px.reshape(LIGHT_RES, LIGHT_RES, 4)[:, :, :3]
+    print('room %s lightmap: mean %.3f p99 %.3f' % (slug, rgb.mean(), np.percentile(rgb, 99)))
+    v = np.clip(rgb / LIGHT_RANGE, 0, 1)
+    v = np.where(v <= 0.0031308, v * 12.92, 1.055 * np.power(v, 1 / 2.4) - 0.055)
+    png(os.path.join(os.path.dirname(out_glb), f'room-{slug}-light-raw.png'), np.round(v * 255).astype(np.uint8)[::-1])
 if os.environ.get('HOUSE_MASK_PNG'):  # to look at where it is damp (red) and worn (green)
     png(os.environ['HOUSE_MASK_PNG'], np.round(np.clip(np.stack([damp, wear, np.zeros_like(damp)], 2), 0, 1) * 255).astype(np.uint8)[::-1])
 
@@ -1364,6 +1409,16 @@ bpy.ops.object.select_all(action='DESELECT')
 for o in list(scene.objects):
     if o.type in ('LIGHT',):
         bpy.data.objects.remove(o)
-bpy.ops.export_scene.gltf(filepath=out_glb, export_format='GLB', export_image_format='WEBP', export_image_quality=82, export_texcoords=True,
-                          export_normals=True, export_vertex_color='ACTIVE', export_materials='EXPORT', export_apply=True, export_cameras=False,
-                          export_lights=False)
+
+
+
+def export(path, objs):
+    select(objs)
+    bpy.ops.export_scene.gltf(filepath=path, use_selection=True, export_format='GLB', export_image_format='WEBP', export_image_quality=82, export_texcoords=True,
+                              export_normals=True, export_vertex_color='ACTIVE', export_materials='EXPORT', export_apply=True, export_cameras=False,
+                              export_lights=False)
+
+
+export(out_glb, [o for o in scene.objects if o not in ROOM_OBJS])
+for slug, objs in ROOMS.items():  # beside house.glb: room-<slug>-raw.glb
+    export(os.path.join(os.path.dirname(out_glb), f'room-{slug}-raw.glb'), objs)

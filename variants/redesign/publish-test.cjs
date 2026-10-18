@@ -12,7 +12,7 @@ const { chromium } = require('playwright-core');
 
 const here = __dirname;
 const origin = 'https://portfolio.wasabietech.com';
-const { projects } = require('./content.cjs');
+const { projects, esc } = require('./content.cjs');
 const routes = ['/', '/projects/', '/resume/', ...projects.map(p => `/work/${p.slug}/`)];
 const rel = route => (route === '/' ? 'index.html' : route.slice(1) + 'index.html');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -43,7 +43,7 @@ const verification = fs.readFileSync(path.join(here, '../../apps/web/index.html'
 const home = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
 assert.ok(home.includes(verification), 'Google Search Console verification lost');
 assert.equal((home.match(/<ul aria-labelledby="index-label">.*?<\/ul>/s)[0].match(/<li>/g) || []).length, projects.length, 'every project is in the hero index');
-assert.equal((home.match(/<li class="work-/g) || []).length, projects.length, 'every project is in the work grid');
+assert.equal(new Set([...home.matchAll(/data-project="([^"]+)"/g)].map(m => m[1])).size, projects.length, 'every project is on the homepage, as a card or as its stops in a Room');
 assert.match(home, /href="resume\/"/, 'homepage links the résumé on this site');
 assert.match(home, /href="projects\/"/, 'homepage links all projects');
 assert.match(home, /data-enquiry/, 'Enquiry form present');
@@ -83,6 +83,22 @@ function webpSize(file) {
   return [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff]; // 'VP8 '
 }
 for (const f of outside.filter(f => f.endsWith('.webp'))) assert.ok(webpSize(path.join(site, 'static', f)).every(n => n <= 2048), `${f} is ${webpSize(path.join(site, 'static', f))} px; textures stay within 2048`);
+// Each Room is its own download, under 2 MB with its lighting texture, which stays within 2048 px too.
+const rooms = { stock: ['procura', 'pims'] };
+for (const slug of Object.keys(rooms)) {
+  const files = [`room-${slug}.glb`, `room-${slug}-light.webp`];
+  for (const f of files) assert.ok(listed.has(`static/${f}`), `manifest lists static/${f}`);
+  const bytes = files.reduce((total, f) => total + fs.statSync(path.join(site, 'static', f)).size, 0);
+  assert.ok(bytes < 2000 * 1000, `the ${slug} Room is ${bytes} bytes; the ceiling is 2 MB`);
+  assert.ok(webpSize(path.join(site, 'static', files[1])).every(n => n <= 2048), `${files[1]} stays within 2048 px`);
+}
+// The homepage HTML holds every Room's heading and all of its stops' words, so search engines and visitors without the House read them.
+const homeHtml = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
+assert.ok(homeHtml.includes('<h3>Stock and purchasing apps</h3>'), 'the stock Room has its heading');
+for (const p of Object.values(rooms).flat().map(slug => projects.find(x => x.slug === slug))) {
+  for (const text of [p.title, p.category, p.description, p.proof, p.problem, ...p.workflow, ...p.scenes.map(s => s[2]), p.disclosure, ...p.facts]) assert.ok(homeHtml.includes(esc(text)), `/: ${p.slug}'s stops include "${text}"`);
+  assert.ok(homeHtml.includes(`href="#${p.slug}"`) && homeHtml.includes(`id="${p.slug}"`), `/: the index sends ${p.slug} to its first stop`);
+}
 
 assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf')), fs.readFileSync(path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf')));
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
@@ -147,7 +163,7 @@ async function homeChecks(browser, url) {
     headline: document.querySelector('h1').textContent.length > 10,
     door: !!document.querySelector('.work-door h2'),
     services: document.querySelectorAll('.shelf:not(.shelf-stairs) h3').length,
-    cards: document.querySelectorAll('.shelf-items li').length,
+    projects: new Set([...document.querySelectorAll('[data-project]')].map(e => e.dataset.project)).size,
     hero: [...document.querySelectorAll('.bench-poster, .bench-stage canvas')].some(e => e.getBoundingClientRect().height > 100),
     room: document.documentElement.dataset.room || ''
   });
@@ -155,7 +171,7 @@ async function homeChecks(browser, url) {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, ...options });
     await page.goto(url, { waitUntil: 'networkidle' });
     const c = await page.evaluate(content);
-    assert.deepEqual(c, { headline: true, door: true, services: 5, cards: projects.length, hero: true, room: '' }, `/: ${what} keeps the static layout with every service and project`);
+    assert.deepEqual(c, { headline: true, door: true, services: 5, projects: projects.length, hero: true, room: '' }, `/: ${what} keeps the static layout with every service and project`);
     await page.close();
   }
   // ?probe has the House report where its tour's path is not clear of walls, floors, ceilings and glass (room.js probePath).
@@ -168,7 +184,21 @@ async function homeChecks(browser, url) {
     const c = await page.evaluate(content);
     assert.ok(live ? c.room === layout : c.room === '', `/: the House runs with its tour layout, or without WebGL the page keeps the static layout (live: ${live}, room: "${c.room}")`);
     assert.equal(c.services, 5);
-    assert.equal(c.cards, projects.length);
+    assert.equal(c.projects, projects.length);
+    if (live && layout === 'wide') {
+      // A Room is fetched only once the visitor is a Room away: not at the hero, by the sliding glass.
+      const fetched = () => page.evaluate(() => performance.getEntriesByType('resource').some(e => e.name.includes('room-stock')));
+      await page.waitForTimeout(1500);
+      assert.ok(!(await fetched()), '/: the stock Room is not fetched at the hero');
+      await page.evaluate(() => document.querySelector('[data-look="@door"]').scrollIntoView());
+      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => e.name.includes('room-stock')), null, { timeout: 10000 });
+      // Choosing a project with a Room in the index takes the tour to its first stop.
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.waitForTimeout(500);
+      await page.click('.bench-index a[href="#procura"]');
+      await page.waitForTimeout(1500);
+      assert.ok(await page.evaluate(() => { const el = document.getElementById('procura'); return Math.abs(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop)) < 2; }), '/: choosing Procura in the index rests the tour on its first stop');
+    }
     if (live) assert.deepEqual(await page.evaluate(() => window.houseProbe()), [], `/: the tour's camera path (${layout}) keeps clear of every wall, floor, ceiling and pane of glass`);
     await page.close();
   }

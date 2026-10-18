@@ -147,11 +147,28 @@ const STAIRS = [{ pos: [4.6, 2.8, -3.4], at: [6.45, 3.6, -7] }, { pos: [6.45, 2.
 // from it, and looks at it across the treads; dy lowers it (the second keeps under the slab's edge, which it has just passed).
 const poster = (step, dy = 0.12) => ({ near: `poster_${step}`, from: [-1.42, dy, 1.15], look: [0, -0.02, 0], hfov: 58, off: 0.12, exp: 1.1, phone: { hfov: 50, up: 0.26, from: [-1.42, dy, 1.3] } });
 const doorway = (slug, from) => ({ near: `doorway_${slug}`, from, look: [0, 1.3, 0], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 44, up: 0.28, from: [from[0] * 0.5, from[1], from[2] - 3] } });
+// The Rooms: each its own asset (room-<slug>.glb, lit by room-<slug>-light.webp, model/room_<slug>.py) behind the House's
+// doorway_<slug>, fetched once the visitor is a Room away; then its door is taken away. A Room's project objects are obj_<slug>
+// (a click opens the case study) and their screens screen_<slug>, which show the project's screenshots from its stops in the page.
+const ROOMS = { stock: ['procura', 'pims'] };
+// Through the stock Room's doorway (x -3.8, 1.3 m wide, 2.55 m high): its middle, a step either side of the wall.
+const STOCK_DOOR = [{ pos: [-3.8, 2.6, -11.0], at: [-3.8, 2.4, -16] }, { pos: [-3.8, 2.65, -13.0], at: [-1.5, 2.2, -16] }];
+// A stop in a Room: where the camera stands and what it looks at (a project's object), in the House's axes.
+const roomStop = (pos, at, phone = {}) => ({ pos, at, hfov: 58, off: 0.12, exp: 1.0, phone: { hfov: 46, up: 0.26, ...phone } });
 const STOPS = {
   hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
   door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], hfov: 42, up: 0.26 } },
   stock: { ...doorway('stock', [3.4, 1.8, 10.5]), via: [{ pos: [0, 2.5, -1.4], at: [-2.4, 2.4, -12] }] }, // in through the middle of the open door
-  records: doorway('records', [-2.6, 1.8, 10.5]),
+  // The stock Room: Procura's workstation against the partition, PIMS's tablet on the wall by the door.
+  'procura-1': { ...roomStop([-3.6, 2.75, -14.2], [-0.9, 2.0, -16.2]), via: STOCK_DOOR },
+  'procura-2': roomStop([-2.4, 2.6, -17.9], [-0.9, 2.1, -15.8]),
+  'procura-3': roomStop([-2.05, 2.3, -16.0], [-0.77, 2.26, -16.0]),
+  'procura-4': roomStop([-4.8, 2.95, -13.4], [-2.0, 1.8, -17.0]),
+  'pims-1': roomStop([-5.4, 2.7, -15.8], [-7.8, 2.25, -14.3]),
+  'pims-2': roomStop([-5.6, 2.6, -12.9], [-8.2, 2.2, -14.8]),
+  'pims-3': roomStop([-7.0, 2.52, -13.9], [-8.17, 2.5, -13.9]),
+  'pims-4': roomStop([-1.6, 2.9, -18.1], [-6.0, 1.9, -14.2]),
+  records: { ...doorway('records', [-2.6, 1.8, 10.5]), via: [{ pos: [-3.8, 2.65, -13.0], at: [-3.8, 2.4, -8] }, { pos: [-3.8, 2.6, -11.0], at: [-1.5, 2.4, -6] }] }, // back out of the stock Room's doorway
   // Up the stairs one poster at a time (How I work, on the stair wall), then on up to the first floor.
   requirements: poster('requirements'),
   build: poster('build', -0.6),
@@ -355,6 +372,57 @@ function startHouse(stage, { root }) {
   grade.uniforms.grain.value = coarse ? 0 : 0.03;
   composer.addPass(grade);
 
+  let house = null, dress = null, anisotropy = 1;
+  const rooms = {}, roomScenes = [], screens = [];
+  // A Room, once: its asset dressed like the House, its screens given their screenshots, its door taken away.
+  function fetchRoom(slug) {
+    return (rooms[slug] ||= Promise.all([loader.loadAsync(`${root}static/room-${slug}.glb`), textures.loadAsync(`${root}static/room-${slug}-light.webp`)]).then(([g, light]) => {
+      light.colorSpace = THREE.SRGBColorSpace;
+      light.flipY = false;
+      light.channel = 1;
+      dress(g.scene, light, 1);
+      g.scene.traverse(o => {
+        const name = [o, o.parent].find(p => p?.name.startsWith('screen_'))?.name;
+        if (!o.isMesh || !name) return;
+        const slug = name.slice(7);
+        const shots = [...document.querySelectorAll(`[data-project="${slug}"] .stop-shots img`)].map(img => {
+          const t = textures.load(img.getAttribute('src'), () => { dirty = true; });
+          Object.assign(t, { colorSpace: THREE.SRGBColorSpace, flipY: false, anisotropy });
+          return t;
+        });
+        o.material = new THREE.MeshBasicMaterial({ map: shots[0], color: 0xe8e8e8 });
+        Object.assign(o.userData, { slug, shots, shown: 0 });
+        screens.push(o);
+      });
+      scene.add(g.scene);
+      g.scene.updateMatrixWorld(true);
+      house.getObjectByName(`door_${slug}`).visible = false;
+      roomScenes.push(g.scene);
+      dirty = true;
+      return g.scene;
+    }).catch(err => console.warn(`The ${slug} Room failed to load.`, err)));
+  }
+  // At a project's screens stop (<slug>-3) its screen shows each of its screenshots in turn; elsewhere the first.
+  function turnScreens(now) {
+    for (const o of screens) {
+      const { slug, shots } = o.userData;
+      const want = tour?.here === `${slug}-3` ? Math.floor(now / 2600) % shots.length : 0;
+      if (want !== o.userData.shown) { o.userData.shown = want; o.material.map = shots[want]; dirty = true; }
+    }
+  }
+  // A click on a project's object opens its case study.
+  const picker = new THREE.Raycaster();
+  function pick(e) {
+    if (!roomScenes.length) return null;
+    const b = canvas.getBoundingClientRect();
+    picker.setFromCamera(new THREE.Vector2(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1), camera);
+    let o = picker.intersectObjects(roomScenes, true)[0]?.object;
+    while (o && !o.name.startsWith('obj_')) o = o.parent;
+    return o ? o.name.slice(4) : null;
+  }
+  canvas.addEventListener('click', e => { const slug = pick(e); if (slug) location.href = `${root}work/${slug}/`; });
+  canvas.addEventListener('pointermove', e => { canvas.style.cursor = pick(e) ? 'pointer' : ''; }, { passive: true });
+
   let nodes = {}, loaded = false, dirty = true, size = [1, 1], tour = null, lastNow = 0, lake = null, dome = null;
   const shift = { x: 0, y: 0 }, shiftGoal = { x: 0, y: 0 };
   const aim = new THREE.Vector3(); // what the camera looks at
@@ -373,20 +441,24 @@ function startHouse(stage, { root }) {
     const env = skyEnvironment(r, plate), glass = glassMaterial(env), aniso = Math.min(8, r.capabilities.getMaxAnisotropy());
     dome = skyDome(plate);
     scene.add(dome);
-    gltf.scene.traverse(o => {
+    // Materials for the House or a Room (its own lighting texture): baked light, glass, foliage, glows, the wet concrete.
+    dress = (root, light, glow = 2) => root.traverse(o => {
       if (!o.isMesh) return;
       if (tag(o, 'glass_')) { o.material = glass; o.renderOrder = 2; return; }
       const m = o.material;
       if (tag(o, 'trees')) { o.material = foliageMaterial(m.map); if (m.map) m.map.anisotropy = aniso; return; }
       if (tag(o, 'rocks')) { o.material = new THREE.MeshBasicMaterial({ map: m.map, color: 0x6a746c, vertexColors: true }); return; } // unlit; the vertex colours carry the moss and the wet waterline
       if (tag(o, 'sheer')) { Object.assign(m, { transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide }); o.renderOrder = 1; } // sheer curtains: the light comes through
-      if (tag(o, 'glow_')) { o.material = m.clone(); o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : 2; return; }
+      if (tag(o, 'glow_')) { o.material = m.clone(); o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : glow; return; }
       if (m.map) m.map.anisotropy = aniso;
       if (m.name === 'concrete' || m.name === 'roof') { m.roughnessMap = wet; m.roughness = 1; m.envMap = env; m.envMapIntensity = 1.5; } // house-wet.webp is its roughness: damp where it rained and at the waterline, so it shines there
       if (o.geometry.attributes.uv1) { m.lightMap = light; m.lightMapIntensity = LIGHT_SCALE; }
       if (m.metalness > 0.5) { m.envMap = env; m.envMapIntensity = 0.5; }
-      if (m.name === 'floor' || m.name === 'terrace') { m.envMap = env; m.envMapIntensity = 0.3; }
+      if (m.name === 'floor' || m.name === 'terrace' || m.name === 'vinyl') { m.envMap = env; m.envMapIntensity = 0.3; }
     });
+    dress(gltf.scene, light);
+    house = gltf.scene;
+    anisotropy = aniso;
     scene.add(gltf.scene);
     for (const name of ['doorway_stock', 'doorway_records', 'doorway_ai', 'doorway_android', 'balcony']) nodes[name] = gltf.scene.getObjectByName(name);
     for (const step of Object.keys(POSTERS)) {
@@ -405,7 +477,7 @@ function startHouse(stage, { root }) {
     lake.rotation.x = -Math.PI / 2;
     scene.add(lake);
     gltf.scene.updateMatrixWorld(true);
-    if (params.has('probe')) window.houseProbe = () => probePath(gltf.scene); // publish-test: is the tour's path clear?
+    if (params.has('probe')) window.houseProbe = () => Promise.all(Object.keys(ROOMS).map(fetchRoom)).then(() => probePath([gltf.scene, ...roomScenes])); // publish-test: is the tour's path clear?
     loaded = true;
     stage.classList.add('is-live');
     stage.prepend(canvas);
@@ -418,10 +490,11 @@ function startHouse(stage, { root }) {
   // crosses a surface (a wall, floor, ceiling, door or pane of glass), or a surface nearer than CLEAR, which the camera's near
   // plane would cut. The path starts in open air over the lake, so a path that crosses nothing is never inside anything.
   // (The camera eases after the path, a little behind it; CLEAR leaves room for that.)
-  function probePath(house) {
-    const CLEAR = 0.15, N = 4000;
+  function probePath(roots) {
+    const CLEAR = 0.15, N = 6000;
     const solids = [];
-    house.traverse(o => { if (o.isMesh && !['trees', 'rocks', 'land'].some(t => tag(o, t))) solids.push(o); });
+    const shown = o => { let v = o.visible; o.traverseAncestors(a => { v &&= a.visible; }); return v; }; // a Room's door, taken away, is not in the way
+    for (const root of roots) root.traverse(o => { if (o.isMesh && shown(o) && !['trees', 'rocks', 'land'].some(t => tag(o, t))) solids.push(o); });
     const box = new THREE.Box3();
     for (const o of solids) box.expandByObject(o);
     box.expandByScalar(1);
@@ -524,7 +597,8 @@ function startHouse(stage, { root }) {
       at.push(v.target);
     }
     const curve = pts => new THREE.CatmullRomCurve3(pts, false, 'centripetal');
-    tour = { pos: curve(pos), target: curve(at), views, els, knots, along: pos.length - 1, n: views.length - 1, keys: tour?.keys };
+    tour = { pos: curve(pos), target: curve(at), views, els, knots, along: pos.length - 1, n: views.length - 1, keys: tour?.keys, here: tour?.here,
+      doors: Object.keys(ROOMS).map(slug => [slug, els.findIndex(({ el }) => el?.dataset.look === `@${slug}`)]) };
     measure();
   }
   // The scroll position at which each stop rests, from the page's own layout: where scroll snapping
@@ -565,6 +639,8 @@ function startHouse(stage, { root }) {
     tour.pos.getPoint(u, tourPos);
     tour.target.getPoint(u, tourAim);
     const from = views[i], to = views[i + 1];
+    tour.here = (g < 0.5 ? tour.els[i] : tour.els[i + 1]).el?.dataset.look.slice(1) || 'hero';
+    for (const [slug, at] of tour.doors) if (at >= 0 && i + f >= at - 1.5) fetchRoom(slug); // a Room away: start fetching it
     setGoal({ x: (from.ox + (to.ox - from.ox) * g) * size[0], y: (from.oy + (to.oy - from.oy) * g) * size[1] }, snap);
     // Easing towards the path, not jumping onto it, is what makes the scroll feel filmed.
     const a = snap ? 1 : 1 - Math.pow(0.9, dt / 16.7);
@@ -602,6 +678,7 @@ function startHouse(stage, { root }) {
       frame();
     }
     if (tour && stepTour(dt)) dirty = true;
+    turnScreens(now);
     if (!dirty) return;
     composer.render();
     dirty = false;

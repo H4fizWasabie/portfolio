@@ -8,7 +8,7 @@ const { site } = require('../content.cjs');
 const fonts = ['schibsted-grotesk-latin-wght-normal.woff2'];
 const licenses = ['OFL-schibsted-grotesk.txt'];
 const thumbs = ['procura', 'pims', 'dd-drugs-register', 'theoses', '89lab', 'map', 'yen'].flatMap(s => [`model/thumb-${s}.webp`, `model/thumb-${s}-night.webp`]);
-const statics = ['model/house.glb', 'model/house-light.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', 'model/workshop.glb', 'photo/hafiz-portrait.webp', ...thumbs];
+const statics = ['model/room-stock.glb', 'model/room-stock-light.webp', 'model/house.glb', 'model/house-light.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', 'model/workshop.glb', 'photo/hafiz-portrait.webp', ...thumbs];
 
 // What each project is on the bench, so the index can name the object.
 const objectName = { procura: 'Trolley of deliveries', pims: 'Supply cabinet', 'dd-drugs-register': 'Drug safe', theoses: 'Monitor and home server', '89lab': 'Camera, light and microphone', map: 'Phone on its charger', yen: 'Little robot' };
@@ -72,7 +72,7 @@ const words = (text, esc) => rise(text.split(/( )/), esc);
 const wordmark = `<p class="wordmark" aria-hidden="true" data-stop data-look="@end">${rise([...site.name], s => s)}</p>`;
 const footer = root => `${wordmark}${B.footer(root, `${root}resume/`)}`;
 
-const card = (p, root, esc, num) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
+const card = (p, root, esc, num) => `<li class="work-${p.slug}" data-project="${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
 <span class="work-text">${num ? `<span class="tour-count">${num}</span>` : ''}<span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
 
 // /projects/: every object render in one uneven grid.
@@ -83,11 +83,26 @@ const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(
 // Between the ground floor's services and the upstairs ones the tour climbs the stairs, a poster of How I work at a time.
 const stairs = esc => howIWork.map(([h, look, text], i) => `<section class="shelf shelf-stairs" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${esc(h)}</h3><p>How I work, ${i + 1} of ${howIWork.length}</p></div>
 <div class="shelf-note"><p>${esc(text)}</p></div></div></section>`).join('');
+// A service whose Room is built (room.js ROOMS) opens on its doorway, and then each of its projects is told in four
+// stops at its object, from the project's own data: what it is, what it solves, its screens, and in use. The index
+// sends a visitor to the first of them (id = the project's slug). Without the House they read as plain sections.
+const rooms = new Set(['stock']);
+const stop = (p, i, look, title, body) => `<section class="shelf shelf-stop" data-stop data-look="@${look}" data-project="${p.slug}"${i === 1 ? ` id="${p.slug}"` : ''}><div class="shelf-panel"><div class="shelf-head"><h4>${title}</h4><p>${i === 1 ? '' : `${p.title}, `}${i} of 4</p></div>
+<div class="shelf-note">${body}</div></div></section>`;
+const projectStops = (p, root, esc) => [
+  stop(p, 1, `${p.slug}-1`, esc(p.title), `<p class="stop-kind">${esc(p.category)}</p><p>${esc(p.description)}</p><p>${esc(p.proof)}</p>`),
+  stop(p, 2, `${p.slug}-2`, 'What it solves', `<p>${esc(p.problem)}</p><ol class="stop-list">${p.workflow.map(w => `<li>${esc(w)}</li>`).join('')}</ol>`),
+  stop(p, 3, `${p.slug}-3`, 'Its screens', `<ul class="stop-list">${p.scenes.map(([name, , caption]) => `<li><strong>${esc(name)}.</strong> ${esc(caption)}</li>`).join('')}</ul><p class="stop-small">${esc(p.disclosure)}</p>
+<div class="stop-shots">${p.scenes.map(([name, img]) => `<img src="${root}static/${img}" alt="${esc(`${p.title}: ${name}`)}" width="1360" height="860" loading="lazy">`).join('')}</div>`),
+  stop(p, 4, `${p.slug}-4`, 'In use', `<ul class="stop-list">${p.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
+<p class="shelf-action"><a class="button" href="${root}work/${p.slug}/">Read the case study</a> <a class="text-link" href="${root}work/${p.slug}/#try-title">Try the demo</a></p>`)
+].join('');
 const shelves = (by, root, esc) => {
   const all = Object.keys(by), num = s => `${two(all.indexOf(s) + 1)} / ${two(all.length)}`;
-  return `<div class="shelves">${services.map(([h, d, slugs, look]) => `${look === 'ai' ? stairs(esc) : ''}<section class="shelf" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
-${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>`).join('')}</div>`;
+  return `<div class="shelves">${services.map(([h, d, slugs, look]) => `${look === 'ai' ? stairs(esc) : ''}<section class="shelf${rooms.has(look) ? ' shelf-door' : ''}" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
+${rooms.has(look) ? '' : slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>${rooms.has(look) ? slugs.map(s => projectStops(by[s], root, esc)).join('') : ''}`).join('')}</div>`;
 };
+const inRoom = slug => services.some(([, , slugs, look]) => rooms.has(look) && slugs.includes(slug));
 
 const two = n => String(n).padStart(2, '0');
 
@@ -108,7 +123,7 @@ function home({ projects, site, esc, root }) {
 <div class="bench-copy"><div class="bench-panel"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="#contact">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Pick a project to read its case study:</p>
-<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
+<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${inRoom(p.slug) ? `#${p.slug}` : `${root}work/${p.slug}/`}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
 </section></div></div>
 <main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><div class="work-door" data-stop data-look="@door"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2></div>
