@@ -150,11 +150,11 @@ const doorway = (slug, from) => ({ near: `doorway_${slug}`, from, look: [0, 1.3,
 const STOPS = {
   hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
   door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], hfov: 42, up: 0.26 } },
-  stock: doorway('stock', [3.4, 1.8, 10.5]),
+  stock: { ...doorway('stock', [3.4, 1.8, 10.5]), via: [{ pos: [0, 2.5, -1.4], at: [-2.4, 2.4, -12] }] }, // in through the middle of the open door
   records: doorway('records', [-2.6, 1.8, 10.5]),
   // Up the stairs one poster at a time (How I work, on the stair wall), then on up to the first floor.
   requirements: poster('requirements'),
-  build: poster('build', -0.43),
+  build: poster('build', -0.6),
   measure: poster('measure'),
   ai: { ...doorway('ai', [3.4, 1.7, 10.5]), via: STAIRS.slice(3) },
   android: doorway('android', [-2.6, 1.7, 10.5]),
@@ -405,6 +405,7 @@ function startHouse(stage, { root }) {
     lake.rotation.x = -Math.PI / 2;
     scene.add(lake);
     gltf.scene.updateMatrixWorld(true);
+    if (params.has('probe')) window.houseProbe = () => probePath(gltf.scene); // publish-test: is the tour's path clear?
     loaded = true;
     stage.classList.add('is-live');
     stage.prepend(canvas);
@@ -412,6 +413,44 @@ function startHouse(stage, { root }) {
     land();
     dirty = true;
   }).catch(err => { noRoom(); console.warn('The House failed to load; showing the still image.', err); });
+
+  // Walks the tour's path (this layout's) in small steps through the House and reports where it is not clear: a step that
+  // crosses a surface (a wall, floor, ceiling, door or pane of glass), or a surface nearer than CLEAR, which the camera's near
+  // plane would cut. The path starts in open air over the lake, so a path that crosses nothing is never inside anything.
+  // (The camera eases after the path, a little behind it; CLEAR leaves room for that.)
+  function probePath(house) {
+    const CLEAR = 0.15, N = 4000;
+    const solids = [];
+    house.traverse(o => { if (o.isMesh && !['trees', 'rocks', 'land'].some(t => tag(o, t))) solids.push(o); });
+    const box = new THREE.Box3();
+    for (const o of solids) box.expandByObject(o);
+    box.expandByScalar(1);
+    const sides = solids.map(o => o.material.side);
+    for (const o of solids) o.material.side = THREE.DoubleSide; // a surface counts from either side
+    const ray = new THREE.Raycaster(), dirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].map(d => new THREE.Vector3(...d));
+    const name = o => [o, o.parent].find(p => p.name && !/^mesh_/i.test(p.name))?.name || o.name;
+    const leg = u => { const k = u * tour.along; let i = 0; while (i < tour.n - 1 && tour.knots[i + 1] <= k) i++; return `${tour.els[i].el?.dataset.look.slice(1) || 'hero'} → ${tour.els[i + 1].el.dataset.look.slice(1)}`; };
+    const problems = [];
+    let prev = tour.pos.getPoint(0);
+    for (let i = 1; i <= N; i++) {
+      const u = i / N, p = tour.pos.getPoint(u), step = p.clone().sub(prev), len = step.length();
+      if (box.containsPoint(p) || box.containsPoint(prev)) {
+        ray.set(prev, step.normalize());
+        ray.far = len;
+        const crossed = ray.intersectObjects(solids, false)[0];
+        if (crossed) problems.push(`${leg(u)}: crosses ${name(crossed.object)} at ${p.toArray().map(v => v.toFixed(2))}`);
+        ray.far = CLEAR;
+        for (const d of dirs) {
+          ray.set(p, d);
+          const near = ray.intersectObjects(solids, false)[0];
+          if (near) { problems.push(`${leg(u)}: ${near.distance.toFixed(2)} m from ${name(near.object)} at ${p.toArray().map(v => v.toFixed(2))}`); break; }
+        }
+      }
+      prev = p;
+    }
+    solids.forEach((o, i) => { o.material.side = sides[i]; });
+    return [...new Set(problems)];
+  }
 
   // One view of a stop: where the camera stands, what it looks at, its lens and where the picture sits.
   function viewOf(name) {

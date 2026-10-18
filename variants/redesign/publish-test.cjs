@@ -158,16 +158,21 @@ async function homeChecks(browser, url) {
     assert.deepEqual(c, { headline: true, door: true, services: 5, cards: projects.length, hero: true, room: '' }, `/: ${what} keeps the static layout with every service and project`);
     await page.close();
   }
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  await page.goto(url, { waitUntil: 'networkidle' });
-  await page.waitForFunction(() => document.querySelector('.bench-stage.is-live') || !document.documentElement.dataset.room, null, { timeout: 60000 });
-  const live = await page.evaluate(() => !!document.querySelector('.bench-stage.is-live canvas'));
-  const c = await page.evaluate(content);
-  assert.ok(live ? c.room === 'phone' : c.room === '', `/: the House runs with its tour layout, or without WebGL the page keeps the static layout (live: ${live}, room: "${c.room}")`);
-  assert.equal(c.services, 5);
-  assert.equal(c.cards, projects.length);
-  await page.close();
-  console.log(live ? 'note: the House started (WebGL available)' : 'note: no WebGL here, so the House was not started; the static fallback was checked');
+  // ?probe has the House report where its tour's path is not clear of walls, floors, ceilings and glass (room.js probePath).
+  let live;
+  for (const [layout, viewport] of [['phone', { width: 390, height: 844 }], ['wide', { width: 1440, height: 900 }]]) {
+    const page = await browser.newPage({ viewport });
+    await page.goto(`${url}?probe`, { waitUntil: 'networkidle' });
+    await page.waitForFunction(() => document.querySelector('.bench-stage.is-live') || !document.documentElement.dataset.room, null, { timeout: 60000 });
+    live = await page.evaluate(() => !!document.querySelector('.bench-stage.is-live canvas'));
+    const c = await page.evaluate(content);
+    assert.ok(live ? c.room === layout : c.room === '', `/: the House runs with its tour layout, or without WebGL the page keeps the static layout (live: ${live}, room: "${c.room}")`);
+    assert.equal(c.services, 5);
+    assert.equal(c.cards, projects.length);
+    if (live) assert.deepEqual(await page.evaluate(() => window.houseProbe()), [], `/: the tour's camera path (${layout}) keeps clear of every wall, floor, ceiling and pane of glass`);
+    await page.close();
+  }
+  console.log(live ? 'note: the House started (WebGL available) and its tour path is clear at both layouts' : 'note: no WebGL here, so the House was not started; the static fallback was checked');
 }
 // Browser step: serve the production build locally and check the layout where a phone would see it.
 async function browserChecks() {
