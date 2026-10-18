@@ -24,6 +24,7 @@ app.post('/api/contact', async (req, res) => {
   const body = req.body as ContactPayload;
   if (body?.website) return { ok: true };
   if (!body?.name || !body.email || !body.message) return res.code(400).send({ error: 'Invalid contact details' });
+  if (typeof body.name !== 'string' || typeof body.email !== 'string' || typeof body.message !== 'string' || body.name.length > 200 || body.message.length > 5000 || body.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) return res.code(400).send({ error: 'Invalid contact details' });
   const ip = req.ip; const now = Date.now(); const hit = hits.get(ip);
   if (hit && now - hit.at >= 3600000) hits.delete(ip);
   const current = hits.get(ip);

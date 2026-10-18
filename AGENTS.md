@@ -6,8 +6,11 @@ Hafiz Jamali's portfolio, live at https://portfolio.wasabietech.com.
 
 - `variants/redesign/` is the live site (the Workshop). Its README covers the layout; `resume/DEPLOYMENT.md` covers releases.
   The other `variants/*` folders are archived previews, as is `variants/redesign`'s `turntable` and `workflow`.
-- `apps/web`, `apps/api`, `packages/shared`, `infra/` are the React/Fastify rebuild scaffold. Not deployed.
-  `apps/api` already has `POST /api/contact` and the `contact_messages` table (`infra/schema.sql`).
+- `apps/api` is live: systemd unit `portfolio-api` behind Caddy at `/api/*`, built in place from the VPS clone at
+  `/var/www/portfolio-app`. It serves `POST /api/contact` and the `contact_messages` table (`infra/schema.sql`).
+  Its release is separate from the static site: see "API release" in `resume/DEPLOYMENT.md`.
+- `apps/web`, `packages/shared`, `infra/` are the React/Fastify rebuild scaffold. `apps/web` is not the live site
+  (Caddy serves only its legacy `/assets/` etc. from the VPS clone's `apps/web/dist`); `packages/shared` is built into the API.
 - `resume/resume-datasheet-source.html` is the single résumé source; the PDF is printed at build time.
 - `PRODUCT.md` and `.impeccable/` hold the design context for the `impeccable` skill.
 
@@ -19,6 +22,7 @@ Verify behaviour in the source, not in this file or a README: status lines drift
   preview in `variants/redesign/dist/workshop/`, or `node variants/redesign/publish-test.cjs` for the production
   build and its checks (needs the résumé fonts; CI runs it).
 - Rebuild scaffold: `npm run typecheck`, `npm run build`, `npm run lint` from the root.
+- API release runs on the VPS too, and is a separate step: see "API release" in `resume/DEPLOYMENT.md`. Never release unless asked.
 - Release runs on the VPS (`ssh vps`): `variants/redesign/release.sh`. Never release unless asked.
   `node variants/redesign/verify-public.cjs` checks the live site.
 - Run the checks the change touches; leave the full `publish-test.cjs` to CI unless asked.

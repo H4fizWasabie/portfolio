@@ -61,6 +61,11 @@ let browser;
   if (movie) assert.equal((await fetch(base + '/' + movie, { method: 'HEAD' })).status, 200, movie);
   console.log(`PASS files: all ${manifest.length} served files match the manifest; résumé PDF and legacy video served`);
 
+  // Rejected before saving, counting or alerting, so this stays non-mutating. Needs the API released first (resume/DEPLOYMENT.md, "API release").
+  const overlong = await fetch(base + '/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'verify-public', email: 'verify@example.com', message: 'x'.repeat(5001) }) });
+  assert.equal(overlong.status, 400, 'over-long Enquiry is rejected');
+  console.log('PASS api: over-long Enquiry gets 400');
+
   browser = await chromium.launch({ executablePath: process.env.CHROME || '/home/theoses/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome', args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   for (const width of [1440, 390]) {
     const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
