@@ -1,8 +1,9 @@
 #!/bin/sh
 # Rebuild the House: model and bake in Blender (the sky is a CC0 Poly Haven HDRI, fetched once into a cache), render the backdrop
 # plate and the lake's ripple map, then quantize and compress with gltfpack and turn the textures into webp. Writes house.glb,
-# house-light.webp, house-wet.webp, backdrop.webp and water-normal.webp (together under 2.5 MB; publish-test checks), and for each
-# Room (room_<slug>.py, which build_house.py runs) room-<slug>.glb and room-<slug>-light.webp (under 2 MB each).
+# house-light.webp, house-wet.webp, backdrop.webp and water-normal.webp (together under 2.5 MB; publish-test checks), the night
+# lighting house-light-night.webp, and for each Room (room_<slug>.py, which build_house.py runs) room-<slug>.glb and
+# room-<slug>-light.webp (under 2 MB each) with room-<slug>-light-night.webp.
 # Usage: BLENDER=/path/to/blender ./build-house.sh        (HOUSE_DRAFT=1 for a quick, noisy bake while iterating)
 set -e
 cd "$(dirname "$0")"
@@ -21,12 +22,13 @@ npx --no-install gltfpack -i house-raw.glb -o house.glb -cc -kn -kv -vtf
 for raw in room-*-raw.glb; do npx --no-install gltfpack -i "$raw" -o "${raw%-raw.glb}.glb" -cc -kn -kv -vtf; done
 python3 -I -c '
 from PIL import Image, ImageFilter
-Image.open("house-light-raw.png").convert("RGB").filter(ImageFilter.GaussianBlur(0.5)).save("house-light.webp", "WEBP", quality=88, method=6)
+for raw in ["house-light-raw.png", "house-light-night-raw.png"]:
+    Image.open(raw).convert("RGB").filter(ImageFilter.GaussianBlur(0.5)).save(raw.replace("-raw.png", ".webp"), "WEBP", quality=88, method=6)
 Image.open("house-wet-raw.png").convert("L").resize((1024, 1024), Image.LANCZOS).save("house-wet.webp", "WEBP", quality=82, method=6)
 Image.open("backdrop-raw.png").convert("RGB").save("backdrop.webp", "WEBP", quality=90, method=6)
 Image.open("water-normal-raw.png").convert("RGB").save("water-normal.webp", "WEBP", quality=85, method=6)
 import glob
-for raw in glob.glob("room-*-light-raw.png"):
+for raw in glob.glob("room-*-light*-raw.png"):
     Image.open(raw).convert("RGB").filter(ImageFilter.GaussianBlur(0.5)).save(raw.replace("-raw.png", ".webp"), "WEBP", quality=88, method=6)'
-rm house-raw.glb house-light-raw.png house-wet-raw.png backdrop-raw.png water-normal-raw.png room-*-raw.glb room-*-light-raw.png
-ls -l house.glb house-light.webp house-wet.webp backdrop.webp water-normal.webp room-*.glb room-*-light.webp
+rm house-raw.glb house-light-raw.png house-light-night-raw.png house-wet-raw.png backdrop-raw.png water-normal-raw.png room-*-raw.glb room-*-light*-raw.png
+ls -l house.glb house-light*.webp house-wet.webp backdrop.webp water-normal.webp room-*.glb room-*-light*.webp

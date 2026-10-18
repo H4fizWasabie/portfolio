@@ -1,4 +1,4 @@
-/* Variant A, "The Workshop". Daylight clay: pale sage-grey surfaces matching the model,
+/* Variant A, "The Workshop". Pale sage-grey surfaces under the House's overcast,
    graphite type, cobalt only for what you are pointing at or about to press.
    Radius rule: one small radius (--r) for everything; only the phone screenshots keep a
    device corner. Surfaces are solid; nothing is frosted or translucent. */
@@ -111,45 +111,35 @@ input,select{accent-color:var(--cobalt)}
 
 section>h2,.about h2,.work-door h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 
-/* What I can do: one shelf per service, the projects that prove it beside it */
+/* What I can do: a stop per service (its Room's doorway), then each of its projects told in stops at its object */
 .work{padding:clamp(64px,9vw,120px) 0 0}
-.shelves{margin-top:28px}
-.shelf{position:relative;display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
-.shelf-panel{display:contents} /* the head and the cards (or note) are the grid's two columns; [data-room] makes the panel a box again */
-.shelf>*{min-width:0} /* a grid item's min-content would widen the column past a phone screen */
-.shelf-head h3{font-size:1.5rem;letter-spacing:-.02em}
-.shelf-head p{margin-top:8px;color:var(--muted);max-width:34ch}
-.shelf-items{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.shelf-note{align-self:center;max-width:58ch;font-size:1.125rem}
-.shelf-action{margin-top:20px}
-.shelf-note a{font-weight:700}
-.shelf-all{margin-top:8px}
+.stops{margin-top:28px}
+.stop{position:relative;display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2.6fr);gap:20px clamp(24px,4vw,56px);padding:clamp(24px,3vw,36px) 0;border-top:1px solid var(--line)}
+.stop-panel{display:contents} /* the head and the cards (or note) are the grid's two columns; [data-room] makes the panel a box again */
+.stop>*{min-width:0} /* a grid item's min-content would widen the column past a phone screen */
+.stop-head h3{font-size:1.5rem;letter-spacing:-.02em}
+.stop-head p{margin-top:8px;color:var(--muted);max-width:34ch}
+.stop-note{align-self:center;max-width:58ch;font-size:1.125rem}
+.stop-action{margin-top:20px}
+.stop-note a{font-weight:700}
+.stop-all{margin-top:8px}
 /* A Room's stops: a project told at its object (page.cjs projectStops). Without the House each is a plain section with its screenshots. */
-.shelf-head h4{margin:0;font-size:1.375rem;letter-spacing:-.02em}
-.shelf-stop .shelf-note{align-self:start;font-size:1.0625rem}
-.shelf-stop .shelf-note>*+*{margin-top:12px}
+.stop-head h4{margin:0;font-size:1.375rem;letter-spacing:-.02em}
+.stop-project .stop-note{align-self:start;font-size:1.0625rem}
+.stop-project .stop-note>*+*{margin-top:12px}
 .stop-kind{font-weight:600}
 .stop-list{margin:0;padding-left:1.25em;display:grid;gap:6px}
 .stop-small{font-size:.9375rem;color:var(--muted)}
 .stop-shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
 .stop-shots img{display:block;width:100%;height:auto;border-radius:var(--r);outline:1px solid var(--img-line);outline-offset:-1px}
 @media (max-width:640px){.stop-shots{grid-template-columns:1fr}}
-@media (max-width:900px){.shelf{grid-template-columns:1fr}.shelf-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* Phones: each shelf's cards are a swipeable row that snaps card by card, the next one peeking in.
-   (They once stacked like a deck; the next shelf slid over the text of the one before.) */
-@media (max-width:900px){
-  .shelf-items{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(78%,340px);overflow-x:auto;overscroll-behavior-x:contain;
-    scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--pad));padding-inline:var(--pad);scroll-padding-inline:var(--pad)}
-  .shelf-items:has(>li:only-child){grid-auto-columns:100%}
-  .shelf-items li{scroll-snap-align:start}
-}
+@media (max-width:900px){.stop{grid-template-columns:1fr}}
 
 /* /projects/: an uneven grid of every object render */
 .work-grid{list-style:none;margin:32px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
 .work-grid li{grid-column:span 2}
 .work-procura,.work-pims,.work-map,.work-yen{grid-column:span 3!important}
-.shelf-items li{grid-column:auto!important}
-.work-grid a,.shelf-items a{display:grid;align-content:start;gap:14px;height:100%;padding:0 0 18px;border-radius:var(--r);background:var(--surface);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.work-grid a{display:grid;align-content:start;gap:14px;height:100%;padding:0 0 18px;border-radius:var(--r);background:var(--surface);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .work-img{position:relative;display:block;overflow:hidden;border-radius:var(--r) var(--r) 0 0} /* the image runs to the card's top and side edges, so its corners share the card's radius */
 .work-img::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px var(--img-line);pointer-events:none} /* the hairline stays on the frame while the image zooms */
 .work-img img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
@@ -418,15 +408,14 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .site-nav nav a:not(.button):hover{color:var(--cobalt)}
   .theme-toggle:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
   .bench-index a:hover{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
-  :is(.work-grid,.shelf-items) a:hover{transform:translateY(-3px);box-shadow:var(--lift)}
-  [data-room] .shelf-items a:hover{box-shadow:none}
-  .site-footer a:hover,.hiring a:hover,.shelf-note a:hover,.text-link:hover,.case-head p>a:hover,.index-page>p>a:hover{color:var(--cobalt)}
+  .work-grid a:hover{transform:translateY(-3px);box-shadow:var(--lift)}
+  .site-footer a:hover,.hiring a:hover,.stop-note a:hover,.text-link:hover,.case-head p>a:hover,.index-page>p>a:hover{color:var(--cobalt)}
   .contact-block a:not(.button):hover{text-decoration-thickness:2px}
   .enquiry .field :is(input,textarea):hover,.enquiry-failed textarea:hover{border-color:var(--on-panel)}
-  :is(.work-grid,.shelf-items) a:hover strong{color:var(--cobalt)}
+  .work-grid a:hover strong{color:var(--cobalt)}
   @media (pointer:fine) and (prefers-reduced-motion:no-preference){
     .work-img img{transition:transform .55s var(--ease),opacity .5s var(--ease)}
-    :is(.work-grid,.shelf-items) a:hover .work-img img{transform:scale(1.03)}
+    .work-grid a:hover .work-img img{transform:scale(1.03)}
   }
   .next a:hover strong{color:var(--cobalt)}
   .stepper button:hover{color:var(--cobalt)}
@@ -438,17 +427,17 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 .w>span{display:inline-block}
 
 /* Below the room the page keeps moving with the scroll, the way the room does: section titles
-   sweep in large and settle while their words rise, the service shelves stack like a deck (wide
-   screens; phones swipe a row per shelf), cards fly in one after another, the portrait unrolls and
+   sweep in large and settle while their words rise, the stops stack like a deck (wide
+   screens), the portrait unrolls and
    drifts, the contact panel rises in and the name rises letter by letter at the foot. Every
    animation is tied to scroll position (no JavaScript), so it runs backwards on the way up and an
    anchor jump lands on the finished state. Reduced motion gets the page as it was; so do browsers
    without scroll timelines, apart from the deck, which is plain sticky positioning. */
 @media (prefers-reduced-motion:no-preference){
-  /* The deck: each shelf pins near the top and the next slides over it. Wide, tall screens only,
-     where a shelf fits on screen; every shelf is as tall as the tallest so each covers the last. */
+  /* The deck: each stop pins near the top and the next slides over it. Wide, tall screens only,
+     where a stop fits on screen; every stop is as tall as the tallest so each covers the last. */
   @media (min-width:901px) and (min-height:700px){
-    .shelf{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
+    .stop{position:sticky;top:clamp(16px,6vh,64px);min-height:min(480px,80vh);align-content:start;background:var(--day);
       box-shadow:0 -30px 44px -38px light-dark(rgba(40,52,44,.55),rgba(0,0,0,.85))}
   }
 }
@@ -463,17 +452,11 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .wordmark{view-timeline:--mark}
   .wordmark .w>span{animation:rise linear both;animation-timeline:--mark;animation-range:entry calc(var(--i) * 4%) entry calc(45% + var(--i) * 4%)}
 
-  .shelf{border-top-color:transparent}
-  .shelf::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 20%}
+  .stop{border-top-color:transparent}
+  .stop::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--line);transform-origin:left;animation:draw linear both;animation-timeline:view();animation-range:entry 0% cover 20%}
   @keyframes draw{from{transform:scaleX(0)}to{transform:none}}
-  .shelf-head,.shelf-note,.contact>p,.contact-lede>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
+  .stop-head,.stop-note,.contact>p,.contact-lede>p{animation:lift linear both;animation-timeline:view();animation-range:entry 0% cover 22%}
   @keyframes lift{from{opacity:0;transform:translateY(110px)}to{opacity:1;transform:none}}
-  .shelf-items li{animation:card linear both;animation-timeline:view();animation-range:entry calc(var(--n,0) * 10%) cover calc(20% + var(--n,0) * 4%)}
-  .shelf-items li:nth-child(2){--n:1}.shelf-items li:nth-child(3){--n:2}
-  @keyframes card{from{opacity:0;transform:translateY(200px) scale(.82) rotate(4deg)}to{opacity:1;transform:none}}
-
-  /* In a swipeable row the cards' nearest scroller is the row, so they follow their shelf. */
-  @media (max-width:900px){.shelf{view-timeline:--shelf}.shelf-items li{animation-timeline:--shelf}}
   .contact{animation:settle linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
   @keyframes settle{from{border-radius:48px;transform:translateY(80px)}to{border-radius:var(--r);transform:none}}
 }}
@@ -488,14 +471,14 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
    and the page keeps its static layout. */
 [data-room]{--nav-h:76px;--edge:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)));--scrim-a:94%;--scrim-hold:75%;--scrim-fade:24px;--scrim-c:color-mix(in srgb,var(--day) var(--scrim-a),transparent);--scrim:linear-gradient(to top,transparent,var(--scrim-c) var(--scrim-fade),var(--scrim-c) var(--scrim-hold),transparent);scroll-snap-type:y mandatory}
 /* Fades to nothing below the step's foot (the scrim runs --scrim-fade into the next step), so one step's meets the next with no hard edge. Phones show more room: lighter, and a project's scrim is solid for less of the screen;
-   a service shelf is taller than that and has small muted text, so its scrim is sized to its text and denser. */
+   a stop's caption is taller than that and has small muted text, so its scrim is sized to its text and denser. */
 @media (max-width:640px){[data-room]{--nav-h:100px}}
 [data-room=phone]{--scrim-a:86%;--scrim-hold:30%;--scrim-fade:64px}
 [data-room] :is(.bench-copy,[data-stop],.about,.contact){scroll-snap-align:start}
 [data-room] .site-footer{scroll-snap-align:end} /* mandatory snapping must still let the page reach its foot */
 /* Only the panels take pointer events, so a tap between them reaches the room. */
-[data-room] :is(.tour,.sky,.bench,.bench-copy,main,.work,.shelf){pointer-events:none}
-[data-room] :is(canvas,.bench-panel,.site-nav,.work-door h2,.shelf-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
+[data-room] :is(.tour,.sky,.bench,.bench-copy,main,.work,.stop){pointer-events:none}
+[data-room] :is(canvas,.bench-panel,.site-nav,.work-door h2,.stop-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
 /* The bar sits in the House, not over it: no ground of its own, only a mist that thins down from the screen's top edge,
    enough to read the links over the darkest of the room. */
 [data-room] .site-nav{position:fixed;inset:0 0 auto;z-index:7;max-width:none;margin:0;background:none;transition:transform .3s ease;
@@ -522,56 +505,48 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 [data-room=phone] .actions{margin-top:16px}
 [data-room=phone] .bench-index{display:none}
 
-/* Services: "What I can do for you" is a small label that stays under the bar while the shelves pass;
-   each shelf is a stop with its captions on the room, the camera turns to its objects. A caption is the
-   count, object, title, one line and an Open link, over a soft scrim (--scrim) that keeps the text readable. */
+/* Services: "What I can do for you" is a small label that stays under the bar while the stops pass;
+   each stop has its caption on the House while the camera shows what it names, over a soft scrim (--scrim) that keeps
+   the text readable. */
 [data-room] main{position:relative;z-index:1;max-width:none;padding:0}
 [data-room] .work{padding:0}
-/* The doorway: "What I can do for you" is the stop where the camera stands at the sliding glass, its heading a panel like a shelf's. */
+/* The doorway: "What I can do for you" is the stop where the camera stands at the sliding glass, its heading a panel like a stop's. */
 [data-room] .work-door{min-height:100svh;display:flex;align-items:flex-end;padding:0 var(--edge) 12px}
 [data-room] .work-door h2{width:100%;margin:0;padding:16px 18px;font-size:1.5rem;letter-spacing:-.02em;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
 [data-room=wide] .work-door{padding-bottom:clamp(24px,6svh,72px)}
 [data-room=wide] .work-door h2{width:min(30rem,42vw)}
-[data-room] .shelves{margin:0}
-[data-room] .shelf{position:relative;top:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--edge) 12px;
+[data-room] .stops{margin:0}
+[data-room] .stop{position:relative;top:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--edge) 12px;
   background:none;box-shadow:none;border:0;grid-template-columns:1fr}
-[data-room] .shelf::before{display:none}
-[data-room] .shelf-panel{display:grid;gap:12px;padding:0 18px}
-[data-room] .shelf .work-object,[data-room] .shelf .work-text>span:last-child{color:var(--ink)}
-[data-room] .shelf-head :is(h3,h4){font-size:1.375rem}
+[data-room] .stop::before{display:none}
+[data-room] .stop-panel{display:grid;gap:12px;padding:0 18px}
+[data-room] .stop-head :is(h3,h4){font-size:1.375rem}
 [data-room] .stop-shots{display:none} /* the House shows the screens on the project's own object */
-[data-room] .shelf-stop .shelf-note{font-size:1rem}
-[data-room] .shelf-head p{margin-top:6px;max-width:none}
-[data-room] .shelf-items{grid-template-columns:1fr;grid-auto-flow:row;grid-auto-columns:auto;overflow:visible;overscroll-behavior:auto;scroll-snap-type:none;margin:0;padding:0;gap:8px}
-[data-room] .shelf-items a{display:grid;gap:2px;height:auto;padding:0;background:none}
-[data-room] .shelf-items .work-img{display:none}
-[data-room] .shelf-items a::after{content:"Open \2192";justify-self:start;margin-top:8px;font-weight:700;color:var(--cobalt)}
-[data-room] .work-text{padding:0}
-[data-room] .shelf-items .work-text strong{font-size:1.25rem}
-:root[data-room] .shelf-items :is(.thumb-day,.thumb-night){display:none!important}
-[data-room] .shelf-note{font-size:1rem}
-[data-room] .shelf-action{margin-top:14px}
+[data-room] .stop-project .stop-note{font-size:1rem}
+[data-room] .stop-head p{margin-top:6px;max-width:none}
+[data-room] .stop-note{font-size:1rem}
+[data-room] .stop-action{margin-top:14px}
 
 /* The room is the animation now: the captions do not also fly in. */
-[data-room] :is(.rise,.rise .w>span,.shelf-items li,.shelf-head,.shelf-note,.contact>p,.contact){animation:none}
+[data-room] :is(.rise,.rise .w>span,.stop-head,.stop-note,.contact>p,.contact){animation:none}
 [data-room] :is(.wordmark,.site-footer){position:relative;z-index:1;max-width:none;margin:0;background:var(--surface);border:0;
   padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
 /* The goodbye: the name fills the screen's foot over the room, the camera pulls back here. */
 [data-room] .wordmark{padding-top:calc(100svh - 1em);padding-bottom:clamp(8px,1.5vw,20px);background:none}
 /* The scrim is a layer behind each caption (z -1 inside its own stacking context): a screen-high fade for
    the captions, a shorter one under the goodbye's name so the room still shows above it. */
-[data-room] :is(.shelf,.wordmark){isolation:isolate}
-[data-room] .shelf::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
-/* Wide: the shelf's captions sit at the foot of the left side and its objects on the right, so the scrim lies behind the
+[data-room] :is(.stop,.wordmark){isolation:isolate}
+[data-room] .stop::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
+/* Wide: the stop's captions sit at the foot of the left side and its objects on the right, so the scrim lies behind the
    caption only, feathered at its top and right, and the room shows everywhere else. */
-[data-room=wide] .shelf::after{display:none}
-[data-room=wide] .shelf-panel{position:relative}
-[data-room=wide] .shelf-panel::before{content:"";position:absolute;inset:-64px -72px calc(-1 * clamp(24px,6svh,72px)) -100vw;z-index:-1;background:color-mix(in srgb,var(--day) 85%,transparent);
+[data-room=wide] .stop::after{display:none}
+[data-room=wide] .stop-panel{position:relative}
+[data-room=wide] .stop-panel::before{content:"";position:absolute;inset:-64px -72px calc(-1 * clamp(24px,6svh,72px)) -100vw;z-index:-1;background:color-mix(in srgb,var(--day) 85%,transparent);
   mask:linear-gradient(to right,#000 calc(100% - 120px),transparent),linear-gradient(transparent,#000 64px);mask-composite:intersect}
-[data-room=wide] .shelf-head p{color:color-mix(in srgb,var(--muted) 70%,var(--ink))} /* the scrim lets the room through, so the muted line darkens a little to stay at 4.5:1 */
-[data-room=phone] .shelf::after{display:none}
-[data-room=phone] .shelf-panel{position:relative;--shelf-c:color-mix(in srgb,var(--day) 94%,transparent)}
-[data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-24px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 24px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
+[data-room=wide] .stop-head p{color:color-mix(in srgb,var(--muted) 70%,var(--ink))} /* the scrim lets the room through, so the muted line darkens a little to stay at 4.5:1 */
+[data-room=phone] .stop::after{display:none}
+[data-room=phone] .stop-panel{position:relative;--stop-c:color-mix(in srgb,var(--day) 94%,transparent)}
+[data-room=phone] .stop-panel::before{content:"";position:absolute;inset:-24px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--stop-c) 24px,var(--stop-c) calc(100% - var(--scrim-fade)),transparent)}
 [data-room] .wordmark::after{content:"";position:absolute;inset:auto 0 0;height:32%;z-index:-1;background:linear-gradient(to top,color-mix(in srgb,var(--day) 92%,transparent) 80%,transparent)}
 /* About and Contact are plain page below the goodbye, on a solid ground so the room does not show through. */
 /* Each starts its own stop: it is at least a screen tall, rests with its top at the screen's top (the bar covers its
@@ -581,9 +556,9 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 [data-room] .about{background:var(--day);padding:max(clamp(64px,9vw,120px),calc(var(--nav-h) + 16px)) var(--edge) clamp(48px,7vw,96px)}
 [data-room] .contact{margin:0;padding:calc(var(--nav-h) + clamp(28px,5vw,64px)) var(--edge) clamp(28px,5vw,64px);border-radius:0;box-shadow:none}
 
-/* Wide: captions sit at the foot of their shelf, the room fills the rest. */
-[data-room=wide] .shelf{justify-content:flex-end;padding:0 var(--edge) clamp(24px,6svh,72px)}
-[data-room=wide] .shelf-panel{width:min(30rem,42vw)}
+/* Wide: captions sit at the foot of their stop, the room fills the rest. */
+[data-room=wide] .stop{justify-content:flex-end;padding:0 var(--edge) clamp(24px,6svh,72px)}
+[data-room=wide] .stop-panel{width:min(30rem,42vw)}
 
 /* Polish: small details that make the page feel finished. Every transition names its properties and
    shares one ease (--ease); motion that plays by itself is behind no-preference. */

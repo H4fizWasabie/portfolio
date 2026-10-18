@@ -11,38 +11,12 @@ import { isNight } from './theme.js';
 // The House and the project-page object viewer, loaded by main.js once the page has painted (it is most of the bytes).
 
 const params = new URLSearchParams(location.search);
-const still = params.get('still'); // render-stills.cjs: "poster", "poster-phone"
+const still = params.get('still'); // render-stills.cjs: "poster", "poster-phone", "thumb-<slug>" (a project's object at its first stop)
+const thumb = still?.startsWith('thumb-') ? still.slice(6) : null;
 const reduced = !!still || matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Same query as the stacked hero in style.css: the room sits above the copy, not beside it.
 const stackedQuery = matchMedia('(max-width: 899px), (orientation: portrait)');
 const stacked = () => still === 'poster-phone' || (!still && stackedQuery.matches);
-
-// Lighting presets of the project-page viewer: every value fades between day (0) and night (1).
-const OBJECT = {
-  day: { exposure: 1.08, ground: 0xcfc6b8, hemi: 1.3, keyColor: 0xfff0d8, key: 2.4, fill: 0.6, shade: 0.16, screen: 1 },
-  night: { exposure: 1, ground: 0x2a3038, hemi: 0.95, keyColor: 0xdfe6ff, key: 2, fill: 0.45, shade: 0.35, screen: 0.85 }
-};
-const mix = (preset, t) => Object.fromEntries(Object.keys(preset.day).map(k => {
-  const a = preset.day[k], b = preset.night[k];
-  return [k, k.endsWith('olor') || k === 'sky' || k === 'ground' ? new THREE.Color(a).lerp(new THREE.Color(b), t) : a + (b - a) * t];
-}));
-
-// Fades a 0..1 day/night value towards the current theme; calls onChange while it moves.
-function nightFader(onChange) {
-  let t = isNight() ? 1 : 0, goal = t, last = 0;
-  addEventListener('themechange', () => { goal = isNight() ? 1 : 0; last = 0; onChange(t); });
-  return now => {
-    if (t === goal) return t;
-    const dt = last ? now - last : 16;
-    last = now;
-    t = reduced ? goal : goal > t ? Math.min(goal, t + dt / 700) : Math.max(goal, t - dt / 700);
-    onChange(t);
-    return t;
-  };
-}
-const SCREENS = { theoses: 'theoses-report.webp', map: 'map-home-demo.webp', procura: 'procura-inventory.webp' };
-// Parts of a project that sit apart from it and should not steer framing.
-const OFF_FRAME = new Set(['server']);
 
 if (still) document.documentElement.classList.add('still');
 
@@ -51,71 +25,84 @@ const tag = (o, prefix) => [o, o.parent].some(p => p && p.name.startsWith(prefix
 
 function renderer() {
   const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: !!still });
-  // The room is a full-screen background, so phones render it at a lighter pixel ratio.
+  // The House is a full-screen background, so phones render it at a lighter pixel ratio.
   r.setPixelRatio(Math.min(devicePixelRatio, matchMedia('(pointer: coarse)').matches ? 1.5 : 2));
-  r.shadowMap.enabled = true;
-  r.shadowMap.type = THREE.PCFShadowMap;
   r.outputColorSpace = THREE.SRGBColorSpace;
-  r.toneMapping = THREE.ACESFilmicToneMapping;
+  r.toneMapping = THREE.NeutralToneMapping; // the lighting is baked: no lights, no shadow maps
   r.domElement.setAttribute('aria-hidden', 'true');
   return r;
 }
 
-// Loads the room and prepares materials: shadows, glass, glowing parts, real screens.
-function loadRoom(root, onTexture) {
-  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  return loader.loadAsync(`${root}static/workshop.glb`).then(gltf => {
-    const room = gltf.scene;
-    const glows = [], screens = [];
-    room.traverse(o => {
-      if (!o.isMesh) return;
-      o.castShadow = o.receiveShadow = true;
-      if (tag(o, 'glass_')) {
-        o.material = o.material.clone();
-        Object.assign(o.material, { transparent: true, depthWrite: false });
-        o.castShadow = false;
-      }
-      if (tag(o, 'glow_')) {
-        o.userData.glow = true;
-        o.castShadow = false;
-        o.material = o.material.clone();
-        // The desk-lamp bulb is off by day; everything else that glows just brightens at night.
-        const base = o.material.emissiveIntensity;
-        // The ring light rests dim and switches on when 89lab is opened.
-        o.userData.glowRange = tag(o, 'glow_bulb') ? [0.05, base * 4] : tag(o, 'glow_ring') ? [0.15, 0.6] : [base, base * 3];
-        o.userData.boost = 0;
-        glows.push(o);
-      }
-      const screen = [o, o.parent].find(p => p && p.name.startsWith('screen_'));
-      if (screen && SCREENS[screen.name.slice(7)]) {
-        const t = new THREE.TextureLoader().load(`${root}static/${SCREENS[screen.name.slice(7)]}`, onTexture);
-        t.colorSpace = THREE.SRGBColorSpace;
-        t.flipY = false;
-        t.anisotropy = 8;
-        o.material = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
-        o.castShadow = false;
-        o.userData.bright = screen.name === 'screen_map' ? 0.3 : 1; // the phone sleeps until opened
-        screens.push(o);
-      }
-    });
-    const groups = {};
-    room.traverse(o => { if (o.name.startsWith('obj_')) groups[o.name.slice(4)] = o; });
-    for (const [slug, g] of Object.entries(groups)) {
-      g.traverse(o => {
-        if (!o.isMesh) return;
-        o.userData.slug = slug;
-        if (!o.userData.glow && o.material.emissive) o.material = o.material.clone();
-      });
+// build_house.py stores the baked irradiance as E / (pi * LIGHT_RANGE); three's lightMap wants E.
+const LIGHT_SCALE = Math.PI * 4.0;
+const lightTexture = t => Object.assign(t, { colorSpace: THREE.SRGBColorSpace, flipY: false, channel: 1 });
+// A material lit by a baked lighting texture by day (day) and another at night (night.value), mixed by nightMix.value.
+function bakedMaterial(m, day, night, nightMix) {
+  m.lightMap = day;
+  m.lightMapIntensity = LIGHT_SCALE;
+  if (m.userData.night) return;
+  m.userData.night = night;
+  m.onBeforeCompile = s => {
+    Object.assign(s.uniforms, { lightMapNight: night, nightMix });
+    s.fragmentShader = `uniform sampler2D lightMapNight;\nuniform float nightMix;\n${s.fragmentShader.replace('#include <lights_fragment_maps>', THREE.ShaderChunk.lights_fragment_maps.replace('texture2D( lightMap, vLightMapUv )', 'mix( texture2D( lightMap, vLightMapUv ), texture2D( lightMapNight, vLightMapUv ), nightMix )'))}`;
+  };
+}
+
+// The Rooms: each its own asset (room-<slug>.glb, lit by room-<slug>-light.webp and at night room-<slug>-light-night.webp,
+// model/room_<slug>.py) behind the House's doorway_<slug>. A Room's project objects are obj_<slug> (a click opens the case study)
+// and their screens screen_<slug> (or screen_<slug>_<which>), which show the project's screenshots.
+const ROOMS = { stock: ['procura', 'pims'], records: ['dd-drugs-register'], ai: ['theoses', '89lab', 'yen'], android: ['map'] };
+const screenOf = (o, room) => { const name = [o, o.parent].find(p => p?.name.startsWith('screen_'))?.name; return name && ROOMS[room].find(s => name.startsWith(`screen_${s}`)); };
+
+// A project without approved screenshots shows its workflow outline on its screen, labelled as one: its steps drawn to the
+// screen's own proportions (size: its width and height in the House). done() runs once it is drawn.
+function outline(title, steps, size, anisotropy, done) {
+  const aspect = Math.max(size.x, size.z) / size.y;
+  const c = document.createElement('canvas');
+  [c.width, c.height] = aspect >= 1 ? [1024, Math.round(1024 / aspect)] : [Math.round(1024 * aspect), 1024];
+  const t = new THREE.CanvasTexture(c);
+  Object.assign(t, { colorSpace: THREE.SRGBColorSpace, flipY: false, anisotropy });
+  document.fonts.load('700 40px Schibsted').catch(() => {}).then(() => {
+    const g = c.getContext('2d'), W = c.width, H = c.height, u = Math.min(W, H * 1.6) / 1024, pad = 56 * u;
+    const wrap = (text, width) => text.split(' ').reduce((lines, w) => {
+      const line = lines.length ? `${lines[lines.length - 1]} ${w}` : w;
+      if (lines.length && g.measureText(line).width <= width) lines[lines.length - 1] = line; else lines.push(w);
+      return lines;
+    }, []);
+    g.fillStyle = '#f3f4f1'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#1f252c'; g.fillRect(0, 0, W, 104 * u);
+    g.fillStyle = '#f3f4f1'; g.font = `700 ${44 * u}px Schibsted, sans-serif`; g.textBaseline = 'middle';
+    g.fillText(title, pad, 52 * u, W - 2 * pad);
+    g.fillStyle = '#5b646d'; g.font = `600 ${30 * u}px Schibsted, sans-serif`;
+    g.fillText('Workflow outline, not a screenshot', pad, 160 * u, W - 2 * pad);
+    // the steps, numbered, as large as fit in what is left of the screen
+    const top = 220 * u, x = pad + 76 * u, width = W - x - pad;
+    let size = 40 * u, laid;
+    for (;;) {
+      g.font = `500 ${size}px Schibsted, sans-serif`;
+      laid = steps.map(st => wrap(st, width));
+      if (top + laid.reduce((h, l) => h + l.length * size * 1.25 + size * 0.9, 0) <= H - pad || size < 14 * u) break;
+      size -= 2 * u;
     }
-    // Materials follow day/night (tint) plus per-part extras set by animations (refresh).
-    let night = 0, screenLevel = 1;
-    const refresh = () => {
-      for (const o of glows) o.material.emissiveIntensity = o.userData.glowRange[0] + (o.userData.glowRange[1] - o.userData.glowRange[0]) * night + o.userData.boost;
-      for (const o of screens) o.material.color.setScalar(screenLevel * o.userData.bright);
-    };
-    const tint = (t, screen) => { night = t; screenLevel = screen; refresh(); };
-    return { room, groups, tint, refresh };
+    let y = top;
+    laid.forEach((lines, i) => {
+      g.fillStyle = '#2f4fd0';
+      g.beginPath(); g.arc(pad + 26 * u, y + size * 0.6, 26 * u, 0, 7); g.fill();
+      g.fillStyle = '#ffffff'; g.font = `700 ${28 * u}px Schibsted, sans-serif`; g.textAlign = 'center';
+      g.fillText(String(i + 1), pad + 26 * u, y + size * 0.62);
+      g.textAlign = 'left'; g.fillStyle = '#1f252c'; g.font = `500 ${size}px Schibsted, sans-serif`;
+      for (const line of lines) { g.fillText(line, x, y + size * 0.6); y += size * 1.25; }
+      y += size * 0.9;
+    });
+    t.needsUpdate = true;
+    done();
   });
+  return t;
+}
+// A screen's pictures: the project's screenshots (imgs) in turn, or else its outline.
+function screenShots(imgs, loader, anisotropy, onLoad, outlineOf) {
+  const shots = imgs.map(img => Object.assign(loader.load(img.getAttribute('src'), onLoad), { colorSpace: THREE.SRGBColorSpace, flipY: false, anisotropy }));
+  return shots.length ? shots : [outlineOf()];
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -126,18 +113,19 @@ function loadRoom(root, onTexture) {
 // and the lake is a mirror of the scene (a Reflector) rippled by a small normal map, so the warm windows run down the
 // water. The scroll glides the camera along one path with a stop for every [data-stop] element of the page.
 
-// build_house.py stores the baked irradiance as E / (pi * LIGHT_RANGE); three's lightMap wants E.
-const LIGHT_SCALE = Math.PI * 4.0;
 // The plate (build_backdrop.py): its columns run from az0 to az1 degrees either side of straight ahead (towards -z), its
 // rows from el1 at the top down to el0. mist is the horizon's colour, which the fog fades the land and the lake into.
 const BACKDROP = { az0: -50, az1: 50, el0: -6, el1: 34 };
 const SKY = { mist: 0x667a82, zenith: 0x56646c };
+// At night (the desk-lamp switch) the sky, the mist and what is lit only by them fall to these.
+// sky: what the plate is multiplied by (linear), and the mist with it; foliage: the trees' share of their day colour; env: of the sky's reflections.
+const NIGHT = { sky: [0.08, 0.09, 0.12], land: 0x050607, foliage: 0.2, rocks: 0x101211, env: 0.08 };
 const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom of the screen
 
 // Where the camera rests, in glTF axes (x right, y up, z towards the lake; the House's depth runs along -z). A stop's
 // data-look names one (page.cjs). pos and at: the camera and what it looks at; hfov: horizontal field of view in
 // degrees; off: on wide screens how far the picture is pushed right of the panel, as a share of the screen's width; exp:
-// exposure. A stop with near names a node of the House (doorway_<slug>, balcony): the camera stands from that far away
+// exposure. A stop with near names a node of the House (doorway_<slug>, poster_<step>): the camera stands from that far away
 // and looks at it plus look. .phone overrides on phones, where the card sits at the bottom and up lifts the picture
 // clear of it (a share of the screen's height). via lists waypoints (pos, at: in the House's axes) the camera passes on its way
 // to that stop from the one before, to keep the path clear of walls and slabs.
@@ -147,20 +135,23 @@ const STAIRS = [{ pos: [4.6, 2.8, -3.4], at: [6.45, 3.6, -7] }, { pos: [6.45, 2.
 // from it, and looks at it across the treads; dy lowers it (the second keeps under the slab's edge, which it has just passed).
 const poster = (step, dy = 0.12) => ({ near: `poster_${step}`, from: [-1.42, dy, 1.15], look: [0, -0.02, 0], hfov: 58, off: 0.12, exp: 1.1, phone: { hfov: 50, up: 0.26, from: [-1.42, dy, 1.3] } });
 const doorway = (slug, from) => ({ near: `doorway_${slug}`, from, look: [0, 1.3, 0], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 44, up: 0.28, from: [from[0] * 0.5, from[1], from[2] - 3] } });
-// The Rooms: each its own asset (room-<slug>.glb, lit by room-<slug>-light.webp, model/room_<slug>.py) behind the House's
-// doorway_<slug>, fetched once the visitor is a Room away; then its door is taken away. A Room's project objects are obj_<slug>
-// (a click opens the case study) and their screens screen_<slug>, which show the project's screenshots from its stops in the page.
-const ROOMS = { stock: ['procura', 'pims'] };
-// Through the stock Room's doorway (x -3.8, 1.3 m wide, 2.55 m high): its middle, a step either side of the wall.
-const STOCK_DOOR = [{ pos: [-3.8, 2.6, -11.0], at: [-3.8, 2.4, -16] }, { pos: [-3.8, 2.65, -13.0], at: [-1.5, 2.2, -16] }];
-// A stop in a Room: where the camera stands and what it looks at (a project's object), in the House's axes.
-const roomStop = (pos, at, phone = {}) => ({ pos, at, hfov: 58, off: 0.12, exp: 1.15, phone: { hfov: 46, up: 0.26, ...phone } });
+// A Room (ROOMS) is fetched once the visitor is a Room away from its doorway; then its door is taken away.
+// Through a Room's doorway (1.3 m wide, 2.55 m high, in the back wall at z -12 to -12.4): its middle, a step either side of the wall,
+// on the floor at y (eye height 1.6 m above it). in: from the hall, looking on to at; out: back to the hall, looking on to at.
+const door = (x, y) => ({
+  in: at => [{ pos: [x, y + 1.55, -11.0], at: [x, y + 1.35, -16] }, { pos: [x, y + 1.6, -13.0], at }],
+  out: at => [{ pos: [x, y + 1.6, -13.0], at: [x, y + 1.35, -8] }, { pos: [x, y + 1.55, -11.0], at }]
+});
+const DOORS = { stock: door(-3.8, 1.05), records: door(1.0, 1.05), ai: door(-3.8, 4.67), android: door(1.0, 4.67) };
+// A stop in a Room: where the camera stands and what it looks at (a project's object), in the House's axes; more overrides the rest.
+const roomStop = (pos, at, more = {}) => ({ pos, at, hfov: 58, off: 0.12, exp: 1.15, ...more, phone: { hfov: 46, up: 0.26, ...more.phone } });
+const studioStop = (pos, at, more = {}) => roomStop(pos, at, { exp: 1.45, ...more }); // the AI Room is dark: the eye opens up
 const STOPS = {
   hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
-  door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], hfov: 42, up: 0.26 } },
+  door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], at: [0, 3.3, -8], hfov: 42, up: 0.26 } },
   stock: { ...doorway('stock', [3.4, 1.8, 10.5]), via: [{ pos: [0, 2.5, -1.4], at: [-2.4, 2.4, -12] }] }, // in through the middle of the open door
   // The stock Room: Procura's workstation against the partition, PIMS's tablet on the wall by the door.
-  'procura-1': { ...roomStop([-3.6, 2.75, -14.2], [-0.9, 2.0, -16.2]), via: STOCK_DOOR },
+  'procura-1': { ...roomStop([-3.6, 2.75, -14.2], [-0.9, 2.0, -16.2]), via: DOORS.stock.in([-1.5, 2.2, -16]) },
   'procura-2': roomStop([-2.4, 2.6, -17.9], [-0.9, 2.1, -15.8]),
   'procura-3': roomStop([-2.05, 2.3, -16.0], [-0.77, 2.26, -16.0]),
   'procura-4': roomStop([-4.8, 2.95, -13.4], [-2.0, 1.8, -17.0]),
@@ -168,14 +159,39 @@ const STOPS = {
   'pims-2': roomStop([-5.6, 2.6, -12.9], [-8.2, 2.2, -14.8]),
   'pims-3': roomStop([-7.0, 2.52, -13.9], [-8.17, 2.5, -13.9]),
   'pims-4': roomStop([-1.6, 2.9, -18.1], [-6.0, 1.9, -14.2]),
-  records: { ...doorway('records', [-2.6, 1.8, 10.5]), via: [{ pos: [-3.8, 2.65, -13.0], at: [-3.8, 2.4, -8] }, { pos: [-3.8, 2.6, -11.0], at: [-1.5, 2.4, -6] }] }, // back out of the stock Room's doorway
+  records: { ...doorway('records', [-2.6, 1.8, 10.5]), via: DOORS.stock.out([-1.5, 2.4, -6]) }, // back out of the stock Room's doorway
+  // The records Room: the controlled-drugs cabinet on the back wall over the counter, the register's terminal beside it.
+  'dd-drugs-register-1': { ...roomStop([0.7, 2.75, -13.9], [2.55, 2.55, -18.9]), via: DOORS.records.in([2.5, 2.3, -18]) },
+  'dd-drugs-register-2': roomStop([4.3, 2.7, -15.4], [2.3, 2.5, -18.9]),
+  'dd-drugs-register-3': roomStop([3.1, 2.42, -17.85], [3.1, 2.33, -18.9]),
+  'dd-drugs-register-4': roomStop([4.5, 3.0, -13.1], [1.8, 1.9, -18.0]),
   // Up the stairs one poster at a time (How I work, on the stair wall), then on up to the first floor.
-  requirements: poster('requirements'),
+  requirements: { ...poster('requirements'), via: DOORS.records.out([4, 2.8, -7]) },
   build: poster('build', -0.6),
   measure: poster('measure'),
   ai: { ...doorway('ai', [3.4, 1.7, 10.5]), via: STAIRS.slice(3) },
-  android: doorway('android', [-2.6, 1.7, 10.5]),
-  teach: { near: 'balcony', from: [0, 1.75, -4.6], look: [-1.8, 0.9, 6], hfov: 62, off: 0.12, exp: 1.1, phone: { hfov: 52, up: 0.2 } },
+  // The AI & automation Room: Theoses's desk and server on the back wall, 89lab's recording corner by the partition, Yen's console by the door.
+  'theoses-1': { ...studioStop([-3.4, 6.35, -14.2], [-6.0, 5.55, -18.6]), via: DOORS.ai.in([-5.6, 5.8, -18]) },
+  'theoses-2': studioStop([-7.6, 6.3, -15.2], [-5.4, 5.6, -18.8]),
+  'theoses-3': studioStop([-5.6, 5.95, -17.4], [-5.6, 5.83, -18.9], { hfov: 52 }),
+  'theoses-4': studioStop([-3.9, 6.7, -14.0], [-6.4, 5.3, -18.4]),
+  '89lab-1': studioStop([-4.0, 6.3, -13.6], [-2.3, 5.6, -17.0]),
+  '89lab-2': studioStop([-4.6, 6.2, -18.0], [-1.5, 5.5, -16.0]),
+  '89lab-3': studioStop([-1.75, 6.25, -17.9], [-1.75, 6.3, -19.2], { hfov: 76, off: 0.2, phone: { hfov: 64 } }),
+  '89lab-4': studioStop([-6.4, 6.5, -13.5], [-1.9, 5.3, -16.6]),
+  'yen-1': studioStop([-5.4, 6.2, -13.0], [-7.9, 5.45, -14.9]),
+  'yen-2': studioStop([-5.6, 6.1, -17.0], [-7.9, 5.45, -14.7]),
+  'yen-3': studioStop([-6.85, 5.72, -14.82], [-7.95, 5.52, -14.82], { hfov: 70 }),
+  'yen-4': studioStop([-4.2, 6.5, -17.6], [-7.6, 5.2, -14.6]),
+  android: { ...doorway('android', [-2.6, 1.7, 10.5]), via: DOORS.ai.out([-1.5, 6.2, -6]) },
+  // The Android Room: the armchair in the corner under its lamp, MAP on its stand on the side table beside it.
+  'map-1': { ...roomStop([1.1, 6.15, -14.3], [2.5, 5.2, -17.6]), via: DOORS.android.in([2.3, 5.4, -17.6]) },
+  'map-2': roomStop([0.6, 5.85, -16.4], [2.6, 5.25, -17.8]),
+  'map-3': roomStop([2.3, 5.42, -17.08], [2.3, 5.32, -17.6], { hfov: 40, phone: { hfov: 26 } }),
+  'map-4': roomStop([4.4, 6.4, -14.2], [2.4, 5.0, -17.6]),
+  // Out on the balcony, past the table, looking back in at the lit rooms through the glass.
+  teach: { pos: [-5.6, 6.15, 0.95], at: [-0.8, 5.5, -1.8], hfov: 62, off: 0.12, exp: 1.1, phone: { pos: [-5.2, 6.2, 1.0], hfov: 56, up: 0.2 },
+    via: [...DOORS.android.out([0, 6.0, -3]), { pos: [0, 6.2, -3.0], at: [0, 6.0, 2] }, { pos: [0, 6.2, 0.1], at: [-3, 5.8, 1] }] },
   end: { via: [{ pos: [0.3, 6.5, 2.8], at: [0, 6, 20] }], pos: [18, 17, 62], at: [0, 4, -8], hfov: 38, off: 0, up: 0.2, exp: 1.0, phone: { pos: [14, 13, 52], at: [0, 4, -8], hfov: 30 } }
 };
 
@@ -185,9 +201,9 @@ function skyDome(plate) {
   const rad = d => THREE.MathUtils.degToRad(d);
   const m = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { plate: { value: plate }, mist: { value: c(SKY.mist) }, zenith: { value: c(SKY.zenith) }, az: { value: new THREE.Vector2(rad(BACKDROP.az0), rad(BACKDROP.az1)) }, el: { value: new THREE.Vector2(rad(BACKDROP.el0), rad(BACKDROP.el1)) } },
+    uniforms: { night: { value: 0 }, dark: { value: new THREE.Vector3(...NIGHT.sky) }, plate: { value: plate }, mist: { value: c(SKY.mist) }, zenith: { value: c(SKY.zenith) }, az: { value: new THREE.Vector2(rad(BACKDROP.az0), rad(BACKDROP.az1)) }, el: { value: new THREE.Vector2(rad(BACKDROP.el0), rad(BACKDROP.el1)) } },
     vertexShader: 'varying vec3 d; void main(){ d = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: `uniform sampler2D plate; uniform vec3 mist, zenith; uniform vec2 az, el;
+    fragmentShader: `uniform sampler2D plate; uniform vec3 mist, zenith, dark; uniform vec2 az, el; uniform float night;
 varying vec3 d;
 void main(){
   float a = atan(d.x, -d.z), e = asin(clamp(d.y, -1.0, 1.0));
@@ -197,6 +213,7 @@ void main(){
   if (e > el.y) c = mix(c, zenith, smoothstep(0.0, 1.0, (e - el.y) / (1.57 - el.y)));
   if (e < el.x) c = mist;
   if (abs(a) > az.y) c = mix(c, mist, smoothstep(0.0, 0.35, abs(a) - az.y));
+  c = mix(c, c * dark, night);
   gl_FragColor = vec4(c, 1.0);
 #include <colorspace_fragment>
 }`
@@ -356,8 +373,6 @@ function startHouse(stage, { root }) {
   const noRoom = () => document.documentElement.removeAttribute('data-room'); // back to the static page
   let r;
   try { r = renderer(); } catch { noRoom(); return; } // No WebGL: poster image and index links remain.
-  r.shadowMap.enabled = false; // the lighting is baked
-  r.toneMapping = THREE.NeutralToneMapping;
   const canvas = r.domElement;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 900);
@@ -373,34 +388,59 @@ function startHouse(stage, { root }) {
   composer.addPass(grade);
 
   let house = null, dress = null, anisotropy = 1;
+  // Day and night. Each asset (the House, a Room) is lit by its day lighting texture and, once night has been switched on, by its night
+  // one (<file>-light-night.webp, fetched then and not before); every material it lights mixes the two by nightMix (bakedLight).
+  // What only the sky lights (the sky itself, the mist, the trees, the rocks, reflections of the sky) and a Room's ceiling panels
+  // fade with it (setNight).
+  const nightMix = { value: 0 }, lights = [], unlit = [], shiny = [], panels = [];
+  let nightT = isNight() ? 1 : 0, nightGoal = nightT;
+  const loadNight = a => (a.loading ||= textures.loadAsync(`${root}static/${a.file}-light-night.webp`).then(t => { a.night.value = lightTexture(t); dirty = true; }));
+  function bakedLight(file, day) {
+    const a = lights.find(l => l.file === file) || { file, night: { value: null } };
+    if (!lights.includes(a)) lights.push(a);
+    a.day = lightTexture(day);
+    a.night.value ||= a.day; // until the night texture is in
+    if (nightGoal) loadNight(a);
+    return a;
+  }
+  const nightMist = new THREE.Color(SKY.mist).multiply(new THREE.Color(...NIGHT.sky));
+  function setNight(t) {
+    nightMix.value = t;
+    dome.material.uniforms.night.value = t;
+    scene.fog.color.set(SKY.mist).lerp(nightMist, t);
+    lake.material.uniforms.fogColor.value.copy(scene.fog.color);
+    for (const [m, day, night] of unlit) m.color.copy(day).lerp(night, t);
+    for (const [m, day] of shiny) m.envMapIntensity = day * (1 + (NIGHT.env - 1) * t);
+    for (const [m, day] of panels) m.emissiveIntensity = day * (1 - t);
+    dirty = true;
+  }
+  addEventListener('themechange', () => {
+    if (!isNight()) { nightGoal = 0; return; }
+    Promise.all(lights.map(loadNight)).then(() => { if (isNight()) nightGoal = 1; }); // the fade starts once the night lighting is in
+  });
   const rooms = {}, roomScenes = [], screens = [];
   // A Room, once: its asset dressed like the House, its screens given their screenshots, its door taken away.
-  function fetchRoom(slug) {
-    return (rooms[slug] ||= Promise.all([loader.loadAsync(`${root}static/room-${slug}.glb`), textures.loadAsync(`${root}static/room-${slug}-light.webp`)]).then(([g, light]) => {
-      light.colorSpace = THREE.SRGBColorSpace;
-      light.flipY = false;
-      light.channel = 1;
-      dress(g.scene, light, 1);
+  function fetchRoom(room) {
+    return (rooms[room] ||= Promise.all([loader.loadAsync(`${root}static/room-${room}.glb`), textures.loadAsync(`${root}static/room-${room}-light.webp`)]).then(([g, light]) => {
+      dress(g.scene, bakedLight(`room-${room}`, light), 1);
+      g.scene.updateMatrixWorld(true);
       g.scene.traverse(o => {
-        const name = [o, o.parent].find(p => p?.name.startsWith('screen_'))?.name;
-        if (!o.isMesh || !name) return;
-        const slug = name.slice(7);
-        const shots = [...document.querySelectorAll(`[data-project="${slug}"] .stop-shots img`)].map(img => {
-          const t = textures.load(img.getAttribute('src'), () => { dirty = true; });
-          Object.assign(t, { colorSpace: THREE.SRGBColorSpace, flipY: false, anisotropy });
-          return t;
-        });
+        const slug = o.isMesh && screenOf(o, room);
+        if (!slug) return;
+        const shots = screenShots([...document.querySelectorAll(`[data-project="${slug}"] .stop-shots img`)], textures, anisotropy, () => { dirty = true; },
+          () => outline(document.getElementById(slug).querySelector('h4').textContent, [...document.querySelectorAll(`[data-look="@${slug}-3"] .stop-outline li`)].map(li => li.textContent),
+            new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()), anisotropy, () => { dirty = true; }));
         o.material = new THREE.MeshBasicMaterial({ map: shots[0], color: 0xe8e8e8 });
         Object.assign(o.userData, { slug, shots, shown: 0 });
         screens.push(o);
       });
       scene.add(g.scene);
-      g.scene.updateMatrixWorld(true);
-      house.getObjectByName(`door_${slug}`).visible = false;
+      setNight(nightT);
+      house.getObjectByName(`door_${room}`).visible = false;
       roomScenes.push(g.scene);
       dirty = true;
       return g.scene;
-    }).catch(err => console.warn(`The ${slug} Room failed to load.`, err)));
+    }).catch(err => console.warn(`The ${room} Room failed to load.`, err)));
   }
   // At a project's screens stop (<slug>-3) its screen shows each of its screenshots in turn; elsewhere the first.
   function turnScreens(now) {
@@ -423,6 +463,7 @@ function startHouse(stage, { root }) {
   canvas.addEventListener('click', e => { const slug = pick(e); if (slug) location.href = `${root}work/${slug}/`; });
   canvas.addEventListener('pointermove', e => { canvas.style.cursor = pick(e) ? 'pointer' : ''; }, { passive: true });
 
+  let waiting = !!thumb; // a thumbnail waits for its Room
   let nodes = {}, loaded = false, dirty = true, size = [1, 1], tour = null, lastNow = 0, lake = null, dome = null;
   const shift = { x: 0, y: 0 }, shiftGoal = { x: 0, y: 0 };
   const aim = new THREE.Vector3(); // what the camera looks at
@@ -430,9 +471,12 @@ function startHouse(stage, { root }) {
 
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const textures = new THREE.TextureLoader();
-  Promise.all([loader.loadAsync(`${root}static/house.glb`), ...['house-light', 'backdrop', 'house-wet', 'water-normal'].map(f => textures.loadAsync(`${root}static/${f}.webp`))]).then(([gltf, light, plate, wet, ripple]) => {
-    for (const t of [light, plate]) { t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; }
-    light.channel = wet.channel = 1; // both follow the second UV set (the baked lighting's layout)
+  const houseLight = { file: 'house', night: { value: null } };
+  lights.push(houseLight);
+  Promise.all([loader.loadAsync(`${root}static/house.glb`), ...['house-light', 'backdrop', 'house-wet', 'water-normal'].map(f => textures.loadAsync(`${root}static/${f}.webp`)), nightGoal && loadNight(houseLight)]).then(([gltf, light, plate, wet, ripple]) => {
+    plate.colorSpace = THREE.SRGBColorSpace;
+    plate.flipY = false;
+    wet.channel = 1; // follows the second UV set (the baked lighting's layout)
     wet.flipY = false;
     ripple.wrapS = ripple.wrapT = THREE.RepeatWrapping;
     ripple.anisotropy = 4;
@@ -441,26 +485,35 @@ function startHouse(stage, { root }) {
     const env = skyEnvironment(r, plate), glass = glassMaterial(env), aniso = Math.min(8, r.capabilities.getMaxAnisotropy());
     dome = skyDome(plate);
     scene.add(dome);
-    // Materials for the House or a Room (its own lighting texture): baked light, glass, foliage, glows, the wet concrete.
+    // Materials for the House or a Room (its baked light, a bakedLight): baked light, glass, foliage, glows, the wet concrete.
+    const reflects = (m, k) => { if (!m.envMap) shiny.push([m, k]); m.envMap = env; m.envMapIntensity = k; };
+    const foliage = map => { const m = foliageMaterial(map); unlit.push([m, m.color.clone(), m.color.clone().multiplyScalar(NIGHT.foliage)]); return m; };
+    const leaves = foliage(null);
     dress = (root, light, glow = 2) => root.traverse(o => {
       if (!o.isMesh) return;
       if (tag(o, 'glass_')) { o.material = glass; o.renderOrder = 2; return; }
       const m = o.material;
-      if (tag(o, 'trees')) { o.material = foliageMaterial(m.map); if (m.map) m.map.anisotropy = aniso; return; }
-      if (tag(o, 'rocks')) { o.material = new THREE.MeshBasicMaterial({ map: m.map, color: 0x6a746c, vertexColors: true }); return; } // unlit; the vertex colours carry the moss and the wet waterline
+      if (tag(o, 'trees')) { o.material = m.map ? foliage(m.map) : leaves; if (m.map) m.map.anisotropy = aniso; return; }
+      if (tag(o, 'rocks')) { o.material = new THREE.MeshBasicMaterial({ map: m.map, color: 0x6a746c, vertexColors: true }); unlit.push([o.material, o.material.color.clone(), new THREE.Color(NIGHT.rocks)]); return; } // unlit; the vertex colours carry the moss and the wet waterline
       if (tag(o, 'sheer')) { Object.assign(m, { transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide }); o.renderOrder = 1; } // sheer curtains: the light comes through
-      if (tag(o, 'glow_')) { o.material = m.clone(); o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : glow; return; }
+      if (tag(o, 'glow_')) {
+        o.material = m.clone();
+        o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : glow;
+        if (/_panels$/.test(o.name) || /_panels$/.test(o.parent?.name)) panels.push([o.material, o.material.emissiveIntensity]); // a Room's ceiling panels are off at night
+        return;
+      }
       if (m.map) m.map.anisotropy = aniso;
-      if (m.name === 'concrete' || m.name === 'roof') { m.roughnessMap = wet; m.roughness = 1; m.envMap = env; m.envMapIntensity = 1.5; } // house-wet.webp is its roughness: damp where it rained and at the waterline, so it shines there
-      if (o.geometry.attributes.uv1) { m.lightMap = light; m.lightMapIntensity = LIGHT_SCALE; }
-      if (m.metalness > 0.5) { m.envMap = env; m.envMapIntensity = 0.5; }
-      if (m.name === 'floor' || m.name === 'terrace' || m.name === 'vinyl') { m.envMap = env; m.envMapIntensity = 0.3; }
+      if (m.name === 'concrete' || m.name === 'roof') { m.roughnessMap = wet; m.roughness = 1; reflects(m, 1.5); } // house-wet.webp is its roughness: damp where it rained and at the waterline, so it shines there
+      if (o.geometry.attributes.uv1) bakedMaterial(m, light.day, light.night, nightMix);
+      if (m.metalness > 0.5) reflects(m, 0.5);
+      if (m.name === 'floor' || m.name === 'terrace' || m.name === 'vinyl') reflects(m, 0.3);
     });
-    dress(gltf.scene, light);
+    shiny.push([glass, glass.envMapIntensity]);
+    dress(gltf.scene, bakedLight('house', light));
     house = gltf.scene;
     anisotropy = aniso;
     scene.add(gltf.scene);
-    for (const name of ['doorway_stock', 'doorway_records', 'doorway_ai', 'doorway_android', 'balcony']) nodes[name] = gltf.scene.getObjectByName(name);
+    for (const name of Object.keys(ROOMS).map(room => `doorway_${room}`)) nodes[name] = gltf.scene.getObjectByName(name);
     for (const step of Object.keys(POSTERS)) {
       const o = gltf.scene.getObjectByName(`poster_${step}`);
       nodes[`poster_${step}`] = { getWorldPosition: v => new THREE.Box3().setFromObject(o).getCenter(v) };
@@ -468,6 +521,7 @@ function startHouse(stage, { root }) {
     }
     // Beyond the land that was modelled the ground carries on, dark, into the mist.
     const far = new THREE.Mesh(new THREE.PlaneGeometry(1800, 700), new THREE.MeshBasicMaterial({ color: 0x1d2420 }));
+    unlit.push([far.material, far.material.color.clone(), new THREE.Color(NIGHT.land)]);
     far.rotation.x = -Math.PI / 2;
     far.position.set(0, 0.85, -490);
     scene.add(far);
@@ -477,8 +531,10 @@ function startHouse(stage, { root }) {
     lake.rotation.x = -Math.PI / 2;
     scene.add(lake);
     gltf.scene.updateMatrixWorld(true);
+    setNight(nightT);
     if (params.has('probe')) window.houseProbe = () => Promise.all(Object.keys(ROOMS).map(fetchRoom)).then(() => probePath([gltf.scene, ...roomScenes])); // publish-test: is the tour's path clear?
     loaded = true;
+    if (thumb) fetchRoom(Object.keys(ROOMS).find(k => ROOMS[k].includes(thumb))).then(() => nightGoal && Promise.all(lights.map(loadNight))).then(() => { waiting = false; dirty = true; });
     stage.classList.add('is-live');
     stage.prepend(canvas);
     resize();
@@ -569,7 +625,7 @@ function startHouse(stage, { root }) {
     size = [width, height];
     camera.aspect = width / height;
     setTour();
-    if (!tour) place(viewOf('hero'));
+    if (!tour) place({ ...viewOf(thumb ? `${thumb}-1` : 'hero'), ...(thumb && { ox: 0, oy: 0 }) });
     frame();
   }
   new ResizeObserver(resize).observe(stage);
@@ -689,70 +745,73 @@ function startHouse(stage, { root }) {
       else { shift.x += (shiftGoal.x - shift.x) * k; shift.y += (shiftGoal.y - shift.y) * k; }
       frame();
     }
+    if (nightT !== nightGoal) { // the lamp switch: a crossfade, or at once with reduced motion
+      nightT = reduced ? nightGoal : nightGoal > nightT ? Math.min(nightGoal, nightT + dt / 700) : Math.max(nightGoal, nightT - dt / 700);
+      setNight(nightT);
+    }
     if (tour && stepTour(dt)) dirty = true;
     turnScreens(now);
     if (!dirty) return;
     composer.render();
     dirty = false;
-    if (still) html.dataset.ready = '1';
+    if (still && !waiting) html.dataset.ready = '1';
   };
   requestAnimationFrame(loop);
 }
 
-// Case pages: the project's object on its own, turned by dragging sideways.
+// Case pages: the project's object on its own, from its Room's asset in the Room's baked light (night too, with the lamp switch),
+// standing on a soft shadow, turned by dragging sideways.
 function startObject(box) {
-  const slug = box.dataset.object;
-  const root = box.dataset.root;
+  const { object: slug, root, asset: room } = box.dataset;
   let r;
   try { r = renderer(); } catch { return; }
+  r.toneMappingExposure = 1.15;
   const canvas = r.domElement;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(28, 1, 0.05, 50);
-  const hemi = new THREE.HemisphereLight(0xffffff);
-  const key = new THREE.DirectionalLight();
-  key.position.set(-3, 6, 4);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.bias = -0.0004;
-  Object.assign(key.shadow.camera, { left: -2, right: 2, top: 2, bottom: -2 });
-  const fill = new THREE.DirectionalLight(0xe6eeff);
-  fill.position.set(4, 3, 2);
-  scene.add(hemi, key, fill);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.ShadowMaterial());
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
   const turntable = new THREE.Group();
   scene.add(turntable);
-  let dirty = true, spin = reduced ? 0 : -0.7, aim = 0, tint = () => {};
-  const light = t => {
-    const m = mix(OBJECT, t);
-    r.toneMappingExposure = m.exposure;
-    hemi.groundColor.copy(m.ground); hemi.intensity = m.hemi;
-    key.color.copy(m.keyColor); key.intensity = m.key;
-    fill.intensity = m.fill;
-    floor.material.opacity = m.shade;
-    tint(t, m.screen);
-    dirty = true;
-  };
-  const fade = nightFader(light);
-  light(isNight() ? 1 : 0);
-  loadRoom(root, () => { dirty = true; }).then(({ groups, tint: t }) => {
-    tint = t;
-    light(isNight() ? 1 : 0);
-    const g = groups[slug];
-    if (!g) return;
-    const obj = g.clone(true);
-    obj.children.filter(c => OFF_FRAME.has(c.name)).forEach(c => obj.remove(c));
-    obj.position.set(0, 0, 0);
-    obj.rotation.set(0, 0, 0);
-    obj.updateMatrixWorld(true);
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder), textures = new THREE.TextureLoader();
+  const nightMix = { value: isNight() ? 1 : 0 }, night = { value: null };
+  let dirty = true, spin = reduced ? 0 : -0.7, aim = 0, goal = nightMix.value, nightLoad = null, last = 0;
+  const loadNight = () => (nightLoad ||= textures.loadAsync(`${root}static/room-${room}-light-night.webp`).then(t => { night.value = lightTexture(t); dirty = true; }));
+  addEventListener('themechange', () => { if (isNight()) loadNight().then(() => { if (isNight()) goal = 1; }); else goal = 0; });
+  Promise.all([loader.loadAsync(`${root}static/room-${room}.glb`), textures.loadAsync(`${root}static/room-${room}-light.webp`), goal && loadNight()]).then(([g, day]) => {
+    lightTexture(day);
+    night.value ||= day;
+    g.scene.updateMatrixWorld(true);
+    const obj = g.scene.getObjectByName(`obj_${slug}`);
+    const aniso = Math.min(8, r.capabilities.getMaxAnisotropy());
+    obj.traverse(o => {
+      if (!o.isMesh) return;
+      if (screenOf(o, room)) {
+        o.material = new THREE.MeshBasicMaterial({ color: 0xe8e8e8, map: screenShots([...document.querySelectorAll('.gallery-panel img')].slice(0, 1), textures, aniso, () => { dirty = true; },
+          () => outline(document.querySelector('h1').textContent, [...document.querySelectorAll('.outline li')].map(li => li.textContent), new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()), aniso, () => { dirty = true; }))[0] });
+      } else if (tag(o, 'glow_')) o.material.emissiveIntensity = 1;
+      else if (o.geometry.attributes.uv1) bakedMaterial(o.material, day, night, nightMix);
+    });
+    // turned so that its (first) screen faces the camera, which looks along -z
+    let screen = null;
+    obj.traverse(o => { if (!screen && o.isMesh && screenOf(o, room)) screen = o; });
+    if (screen) {
+      const n = new THREE.Vector3().fromBufferAttribute(screen.geometry.attributes.normal, 0).transformDirection(screen.matrixWorld);
+      aim = -Math.atan2(n.x, n.z);
+      spin = aim - (reduced ? 0 : 0.7);
+    }
     const b = new THREE.Box3().setFromObject(obj);
-    const c = b.getCenter(new THREE.Vector3());
-    obj.position.set(-c.x, -b.min.y, -c.z);
+    const c = b.getCenter(new THREE.Vector3()), size = b.getSize(new THREE.Vector3());
+    obj.position.sub(new THREE.Vector3(c.x, b.min.y, c.z)); // its parts keep their places in the Room; the turntable turns about its middle
     turntable.add(obj);
-    const size = b.getSize(new THREE.Vector3());
+    // a soft shadow under it
+    const sc = document.createElement('canvas');
+    sc.width = sc.height = 64;
+    const sg = sc.getContext('2d'), grad = sg.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(0,0,0,0.35)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
+    sg.fillStyle = grad; sg.fillRect(0, 0, 64, 64);
+    const shade = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
+    shade.rotation.x = -Math.PI / 2;
+    shade.scale.setScalar(Math.max(size.x, size.z) * 1.5);
+    turntable.add(shade);
     const fit = size.length() / 2 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
     // Tall objects (the phone on its stand) need more room above them at this camera tilt.
     camera.position.set(0, size.y / 2, 0).add(new THREE.Vector3(0, 0.45, 1).normalize().multiplyScalar(fit * (size.y > size.x ? 1.05 : 0.85)));
@@ -780,7 +839,12 @@ function startObject(box) {
 
   const loop = now => {
     requestAnimationFrame(loop);
-    fade(now);
+    const dt = Math.min(250, last ? now - last : 16);
+    last = now;
+    if (nightMix.value !== goal) { // the lamp switch: a crossfade, or at once with reduced motion
+      nightMix.value = reduced ? goal : goal > nightMix.value ? Math.min(goal, nightMix.value + dt / 700) : Math.max(goal, nightMix.value - dt / 700);
+      dirty = true;
+    }
     const step = reduced ? aim - spin : (aim - spin) * 0.08;
     if (Math.abs(step) > 1e-4) { spin += step; dirty = true; }
     if (!dirty) return;

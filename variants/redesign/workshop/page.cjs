@@ -1,6 +1,6 @@
 // Variant A, "The Workshop": the homepage tours a House (model/build_house.py). The hero sees it from across the lake;
-// scrolling glides the camera over the water, in through the sliding glass and up the stairs, a stop per [data-stop] below.
-// The project pages still show their object from the old room model (workshop.glb) until each Room exists.
+// scrolling glides the camera over the water, in through the sliding glass, through a Room per service and up the stairs,
+// a stop per [data-stop] below. Each project page shows its object from its Room's asset.
 const B = require('../blocks.cjs');
 const { demos } = require('../demos.cjs');
 const { site } = require('../content.cjs');
@@ -8,14 +8,16 @@ const { site } = require('../content.cjs');
 const fonts = ['schibsted-grotesk-latin-wght-normal.woff2'];
 const licenses = ['OFL-schibsted-grotesk.txt'];
 const thumbs = ['procura', 'pims', 'dd-drugs-register', 'theoses', '89lab', 'map', 'yen'].flatMap(s => [`model/thumb-${s}.webp`, `model/thumb-${s}-night.webp`]);
-const statics = ['model/room-stock.glb', 'model/room-stock-light.webp', 'model/house.glb', 'model/house-light.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', 'model/workshop.glb', 'photo/hafiz-portrait.webp', ...thumbs];
+// The Rooms (room.js ROOMS), each its own asset with its day and night lighting.
+const roomFiles = ['stock', 'records', 'ai', 'android'].flatMap(s => [`model/room-${s}.glb`, `model/room-${s}-light.webp`, `model/room-${s}-light-night.webp`]);
+const statics = [...roomFiles, 'model/house.glb', 'model/house-light.webp', 'model/house-light-night.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', 'photo/hafiz-portrait.webp', ...thumbs];
 
-// What each project is on the bench, so the index can name the object.
-const objectName = { procura: 'Trolley of deliveries', pims: 'Supply cabinet', 'dd-drugs-register': 'Drug safe', theoses: 'Monitor and home server', '89lab': 'Camera, light and microphone', map: 'Phone on its charger', yen: 'Little robot' };
+// What each project is in its Room, so /projects/ can name the object.
+const objectName = { procura: 'Workstation', pims: 'Wall tablet', 'dd-drugs-register': 'Drugs cabinet and terminal', theoses: 'Monitors and home server', '89lab': 'Camera, ring light and microphone', map: 'Phone on its stand', yen: 'Puck, laptop and phone' };
 
-// What a client can ask for. The homepage shelves each project under the service it proves; teaching has no
-// object of its own, so its row is a short note instead of cards. The last field is where the House shows
-// the service (a [data-look] of the tour in room.js): a doorway on the ground floor or upstairs, the balcony for teaching.
+// What a client can ask for. The homepage tells each project in the Room of the service it proves; teaching has no
+// object of its own, so its stop is a short note. The last field is where the House shows the service (a [data-look]
+// of the tour in room.js): a Room's doorway on the ground floor or upstairs, the balcony for teaching.
 const services = [
   ['Stock and purchasing apps', 'Know what to buy, raise requests and track every order from request to receipt.', ['procura', 'pims'], 'stock'],
   ['Records with an audit trail', 'Daily counts and corrections that keep the original entry, with a name on every change.', ['dd-drugs-register'], 'records'],
@@ -24,9 +26,9 @@ const services = [
   ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', [], 'teach']
 ];
 const coaching = `mailto:${site.email}?subject=${encodeURIComponent('Coaching session')}&body=${encodeURIComponent('What I want to build or learn:\n\nJust me, or a team (how many people)?\n\nWhen suits me:\n')}`;
-const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
-<p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p>
-<p class="shelf-all"><a class="text-link" href="${root}projects/">All projects →</a></p></div>`;
+const teaching = root => `<div class="stop-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
+<p class="stop-action"><a class="button" href="${coaching}">Book a coaching session</a></p>
+<p class="stop-all"><a class="text-link" href="${root}projects/">All projects →</a></p></div>`;
 
 // How I work, on the stair wall between the floors: a poster per step, each a stop (data-look="@<step>", room.js draws the posters).
 // The owner's About copy, a sentence to a step.
@@ -72,37 +74,35 @@ const words = (text, esc) => rise(text.split(/( )/), esc);
 const wordmark = `<p class="wordmark" aria-hidden="true" data-stop data-look="@end">${rise([...site.name], s => s)}</p>`;
 const footer = root => `${wordmark}${B.footer(root, `${root}resume/`)}`;
 
-const card = (p, root, esc, num) => `<li class="work-${p.slug}" data-project="${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
-<span class="work-text">${num ? `<span class="tour-count">${num}</span>` : ''}<span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
+const card = (p, root, esc) => `<li class="work-${p.slug}" data-project="${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
+<span class="work-text"><span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
 
 // /projects/: every object render in one uneven grid.
 const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => card(p, root, esc)).join('')}</ul>`;
 
-// Homepage: one shelf per service, the projects that prove it beside it. Each is a stop, and data-look names
-// what the House shows while it is on screen (room.js): the service's doorway, or the balcony for teaching.
-// Between the ground floor's services and the upstairs ones the tour climbs the stairs, a poster of How I work at a time.
-const stairs = esc => howIWork.map(([h, look, text], i) => `<section class="shelf shelf-stairs" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${esc(h)}</h3><p>How I work, ${i + 1} of ${howIWork.length}</p></div>
-<div class="shelf-note"><p>${esc(text)}</p></div></div></section>`).join('');
-// A service whose Room is built (room.js ROOMS) opens on its doorway, and then each of its projects is told in four
-// stops at its object, from the project's own data: what it is, what it solves, its screens, and in use. The index
-// sends a visitor to the first of them (id = the project's slug). Without the House they read as plain sections.
-const rooms = new Set(['stock']);
-const stop = (p, i, look, title, body) => `<section class="shelf shelf-stop" data-stop data-look="@${look}" data-project="${p.slug}"${i === 1 ? ` id="${p.slug}"` : ''}><div class="shelf-panel"><div class="shelf-head"><h4>${title}</h4><p>${i === 1 ? '' : `${p.title}, `}${i} of 4</p></div>
-<div class="shelf-note">${body}</div></div></section>`;
+// Homepage: a stop per service, and data-look names what the House shows while it is on screen (room.js): the service's
+// Room's doorway, or the balcony for teaching. Between the ground floor's Rooms and the upstairs ones the tour climbs the
+// stairs, a poster of How I work at a time.
+const stairs = esc => howIWork.map(([h, look, text], i) => `<section class="stop stop-stairs" data-stop data-look="@${look}"><div class="stop-panel"><div class="stop-head"><h3>${esc(h)}</h3><p>How I work, ${i + 1} of ${howIWork.length}</p></div>
+<div class="stop-note"><p>${esc(text)}</p></div></div></section>`).join('');
+// After its doorway each project is told in four stops at its object in the Room, from the project's own data: what it is,
+// what it solves, its screens (or, without approved screenshots, its workflow outline, which its object's screen shows too),
+// and in use (or, for a project not in use yet, where it stands). The index sends a visitor to the first of them (id = the project's slug). Without the House they read as plain sections.
+const stop = (p, i, look, title, body) => `<section class="stop stop-project" data-stop data-look="@${look}" data-project="${p.slug}"${i === 1 ? ` id="${p.slug}"` : ''}><div class="stop-panel"><div class="stop-head"><h4>${title}</h4><p>${i === 1 ? '' : `${p.title}, `}${i} of 4</p></div>
+<div class="stop-note">${body}</div></div></section>`;
+const steps = (p, esc) => `<ol class="stop-list">${p.workflow.map(w => `<li>${esc(w)}</li>`).join('')}</ol>`;
 const projectStops = (p, root, esc) => [
-  stop(p, 1, `${p.slug}-1`, esc(p.title), `<p class="stop-kind">${esc(p.category)}</p><p>${esc(p.description)}</p><p>${esc(p.proof)}</p>`),
-  stop(p, 2, `${p.slug}-2`, 'What it solves', `<p>${esc(p.problem)}</p><ol class="stop-list">${p.workflow.map(w => `<li>${esc(w)}</li>`).join('')}</ol>`),
-  stop(p, 3, `${p.slug}-3`, 'Its screens', `<ul class="stop-list">${p.scenes.map(([name, , caption]) => `<li><strong>${esc(name)}.</strong> ${esc(caption)}</li>`).join('')}</ul><p class="stop-small">${esc(p.disclosure)}</p>
-<div class="stop-shots">${p.scenes.map(([name, img]) => `<img src="${root}static/${img}" alt="${esc(`${p.title}: ${name}`)}" width="1360" height="860" loading="lazy">`).join('')}</div>`),
-  stop(p, 4, `${p.slug}-4`, 'In use', `<ul class="stop-list">${p.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
-<p class="shelf-action"><a class="button" href="${root}work/${p.slug}/">Read the case study</a> <a class="text-link" href="${root}work/${p.slug}/#try-title">Try the demo</a></p>`)
+  stop(p, 1, `${p.slug}-1`, esc(p.title), `<p class="stop-kind">${esc(p.category)}</p><p>${esc(p.description)}</p><p>${esc(p.proof || p.summary)}</p>`),
+  stop(p, 2, `${p.slug}-2`, 'What it solves', `<p>${esc(p.problem)}</p>${p.scenes.length ? steps(p, esc) : ''}`),
+  p.scenes.length
+    ? stop(p, 3, `${p.slug}-3`, 'Its screens', `<ul class="stop-list">${p.scenes.map(([name, , caption]) => `<li><strong>${esc(name)}.</strong> ${esc(caption)}</li>`).join('')}</ul><p class="stop-small">${esc(p.disclosure)}</p>
+<div class="stop-shots">${p.scenes.map(([name, img]) => B.img(root, img, `${p.title}: ${name}`, 'loading="lazy"')).join('')}</div>`)
+    : stop(p, 3, `${p.slug}-3`, 'Workflow outline', `<p class="stop-kind">Workflow outline, not a screenshot</p><div class="stop-outline">${steps(p, esc)}</div><p class="stop-small">${esc(p.disclosure)}</p>`),
+  stop(p, 4, `${p.slug}-4`, p.facts ? 'In use' : 'Where it stands', `${p.facts ? `<ul class="stop-list">${p.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : `<p>${esc(p.limits)}</p>`}
+<p class="stop-action"><a class="button" href="${root}work/${p.slug}/">Read the case study</a> <a class="text-link" href="${root}work/${p.slug}/#try-title">Try the demo</a></p>`)
 ].join('');
-const shelves = (by, root, esc) => {
-  const all = Object.keys(by), num = s => `${two(all.indexOf(s) + 1)} / ${two(all.length)}`;
-  return `<div class="shelves">${services.map(([h, d, slugs, look]) => `${look === 'ai' ? stairs(esc) : ''}<section class="shelf${rooms.has(look) ? ' shelf-door' : ''}" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
-${rooms.has(look) ? '' : slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>${rooms.has(look) ? slugs.map(s => projectStops(by[s], root, esc)).join('') : ''}`).join('')}</div>`;
-};
-const inRoom = slug => services.some(([, , slugs, look]) => rooms.has(look) && slugs.includes(slug));
+const rooms = (by, root, esc) => `<div class="stops">${services.map(([h, d, slugs, look]) => `${look === 'ai' ? stairs(esc) : ''}<section class="stop${slugs.length ? ' stop-door' : ''}" data-stop data-look="@${look}"><div class="stop-panel"><div class="stop-head"><h3>${h}</h3><p>${d}</p></div>
+${slugs.length ? '' : teaching(root)}</div></section>${slugs.map(s => projectStops(by[s], root, esc)).join('')}`).join('')}</div>`;
 
 const two = n => String(n).padStart(2, '0');
 
@@ -123,11 +123,11 @@ function home({ projects, site, esc, root }) {
 <div class="bench-copy"><div class="bench-panel"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="#contact">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
 <div class="bench-index"><p id="index-label">Pick a project to read its case study:</p>
-<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${inRoom(p.slug) ? `#${p.slug}` : `${root}work/${p.slug}/`}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
+<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="#${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
 </section></div></div>
 <main id="main">
 <section class="work" id="work" aria-labelledby="work-title"><div class="work-door" data-stop data-look="@door"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2></div>
-${shelves(by, root, esc)}</section>
+${rooms(by, root, esc)}</section>
 ${wordmark}
 
 <section class="about" id="about" aria-labelledby="about-title"><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
@@ -172,7 +172,7 @@ function project({ p, next, site, esc, root }) {
 <main id="main" class="case">
 <header class="case-head"><div><p><a href="${root}projects/">All projects</a></p><h1>${esc(p.title)}</h1>
 <p class="kind">${esc(p.category)}</p><p class="case-lede">${esc(p.description)}</p>${p.proof ? `<p class="case-proof">${esc(p.proof)}</p>` : ''}</div>
-<div><div class="object-view" data-object="${p.slug}" data-root="${root}">${thumb(root, p, 'loading="lazy"')}</div><p class="object-hint">Drag sideways to turn it.</p></div></header>
+<div><div class="object-view" data-object="${p.slug}" data-asset="${services.find(sv => sv[2].includes(p.slug))[3]}" data-root="${root}">${thumb(root, p, 'loading="lazy"')}</div><p class="object-hint">Drag sideways to turn it.</p></div></header>
 ${p.slug === 'map' ? '' : `<section class="try" aria-labelledby="try-title"><h2 id="try-title">Try it</h2><p>A small working version of the workflow, running in your browser with fictional data.</p>${demos[p.slug](root, p)}</section>`}
 ${p.scenes.length ? B.gallery(p, root) : ''}
 <div class="case-grid"><div class="case-body">${B.caseBody(p)}</div><aside class="case-facts">${B.facts(p)}</aside></div>

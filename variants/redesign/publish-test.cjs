@@ -66,7 +66,7 @@ const listed = new Set(manifest.map(e => e.file));
 for (const route of routes) assert.ok(listed.has(rel(route)), `manifest lists ${rel(route)}`);
 // The House's outside: everything it needs before it shows (page.cjs lists them as statics, main.js preloads them).
 const outside = ['house.glb', 'house-light.webp', 'house-wet.webp', 'backdrop.webp', 'water-normal.webp'];
-for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', 'static/workshop.glb', ...outside.map(f => `static/${f}`), 'static/poster.webp', 'static/poster-phone.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
+for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', ...outside.map(f => `static/${f}`), 'static/house-light-night.webp', 'static/poster.webp', 'static/poster-phone.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
 for (const e of manifest) {
   assert.equal(hash(fs.readFileSync(path.join(site, e.file))), e.sha256, e.file);
   assert.doesNotMatch(e.file, /^(assets\/|\.impeccable|evidence|FICTIONAL|.*\.cjs$)/, `${e.file}: no source or reserved paths`);
@@ -84,21 +84,29 @@ function webpSize(file) {
 }
 for (const f of outside.filter(f => f.endsWith('.webp'))) assert.ok(webpSize(path.join(site, 'static', f)).every(n => n <= 2048), `${f} is ${webpSize(path.join(site, 'static', f))} px; textures stay within 2048`);
 // Each Room is its own download, under 2 MB with its lighting texture, which stays within 2048 px too.
-const rooms = { stock: ['procura', 'pims'] };
+const rooms = { stock: ['procura', 'pims'], records: ['dd-drugs-register'], ai: ['theoses', '89lab', 'yen'], android: ['map'] };
 for (const slug of Object.keys(rooms)) {
   const files = [`room-${slug}.glb`, `room-${slug}-light.webp`];
-  for (const f of files) assert.ok(listed.has(`static/${f}`), `manifest lists static/${f}`);
+  for (const f of [...files, `room-${slug}-light-night.webp`]) assert.ok(listed.has(`static/${f}`), `manifest lists static/${f}`);
   const bytes = files.reduce((total, f) => total + fs.statSync(path.join(site, 'static', f)).size, 0);
   assert.ok(bytes < 2000 * 1000, `the ${slug} Room is ${bytes} bytes; the ceiling is 2 MB`);
   assert.ok(webpSize(path.join(site, 'static', files[1])).every(n => n <= 2048), `${files[1]} stays within 2048 px`);
 }
 // The homepage HTML holds every Room's heading and all of its stops' words, so search engines and visitors without the House read them.
 const homeHtml = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
-assert.ok(homeHtml.includes('<h3>Stock and purchasing apps</h3>'), 'the stock Room has its heading');
+for (const h of ['Stock and purchasing apps', 'Records with an audit trail', 'AI assistants and automation', 'Android apps']) assert.ok(homeHtml.includes(`<h3>${h}</h3>`), `/: the ${h} Room has its heading`);
+assert.deepEqual(Object.values(rooms).flat().sort(), projects.map(p => p.slug).sort(), 'every project is in a Room');
 for (const p of Object.values(rooms).flat().map(slug => projects.find(x => x.slug === slug))) {
-  for (const text of [p.title, p.category, p.description, p.proof, p.problem, ...p.workflow, ...p.scenes.map(s => s[2]), p.disclosure, ...p.facts]) assert.ok(homeHtml.includes(esc(text)), `/: ${p.slug}'s stops include "${text}"`);
+  for (const text of [p.title, p.category, p.description, p.proof || p.summary, p.problem, ...p.workflow, ...p.scenes.map(s => s[2]), p.disclosure, ...(p.facts || [p.limits])]) assert.ok(homeHtml.includes(esc(text)), `/: ${p.slug}'s stops include "${text}"`);
   assert.ok(homeHtml.includes(`href="#${p.slug}"`) && homeHtml.includes(`id="${p.slug}"`), `/: the index sends ${p.slug} to its first stop`);
+  // Honesty: a project without approved screenshots has its screens stop labelled as a workflow outline (its screen in the House draws the same).
+  const screens = homeHtml.match(new RegExp(`<section[^>]*data-look="@${p.slug}-3"[^>]*>.*?</section>`, 's'))[0];
+  if (!p.scenes.length) assert.ok(screens.includes('<h4>Workflow outline</h4>') && screens.includes('Workflow outline, not a screenshot'), `/: ${p.slug}'s screen is labelled "Workflow outline"`);
 }
+assert.match(homeHtml, /built on the pi coding agent/, '/: Theoses is described as built on the pi coding agent');
+assert.doesNotMatch(homeHtml, /shelf/i, '/: no Shelf markup remains (the Rooms replace it)');
+const teach = homeHtml.match(/<section[^>]*data-look="@teach"[^>]*>.*?<\/section>/s)[0];
+assert.ok(teach.includes('Book a coaching session'), '/: the teaching stop (the balcony) has the coaching action');
 
 assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf')), fs.readFileSync(path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf')));
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
@@ -162,7 +170,7 @@ async function homeChecks(browser, url) {
   const content = () => ({
     headline: document.querySelector('h1').textContent.length > 10,
     door: !!document.querySelector('.work-door h2'),
-    services: document.querySelectorAll('.shelf:not(.shelf-stairs) h3').length,
+    services: document.querySelectorAll('.stop:not(.stop-stairs) h3').length,
     projects: new Set([...document.querySelectorAll('[data-project]')].map(e => e.dataset.project)).size,
     hero: [...document.querySelectorAll('.bench-poster, .bench-stage canvas')].some(e => e.getBoundingClientRect().height > 100),
     room: document.documentElement.dataset.room || ''
@@ -198,6 +206,12 @@ async function homeChecks(browser, url) {
       await page.click('.bench-index a[href="#procura"]');
       await page.waitForTimeout(1500);
       assert.ok(await page.evaluate(() => { const el = document.getElementById('procura'); return Math.abs(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop)) < 2; }), '/: choosing Procura in the index rests the tour on its first stop');
+      // Night lighting is fetched on the first switch to night, for the House and every Room it has, and not before.
+      const night = () => page.evaluate(() => performance.getEntriesByType('resource').filter(e => e.name.includes('-light-night')).map(e => e.name.split('/').pop()).sort());
+      assert.deepEqual(await night(), [], '/: no night lighting is fetched by day');
+      await page.evaluate(() => document.querySelector('[data-theme-toggle]').click()); // the bar may have slid away while touring
+      await page.waitForFunction(() => performance.getEntriesByType('resource').filter(e => e.name.includes('-light-night')).length >= 2, null, { timeout: 30000 });
+      assert.deepEqual(await night(), ['house-light-night.webp', 'room-stock-light-night.webp'], '/: the lamp switch fetches the night lighting of the House and the Room it has, and no other');
     }
     if (live) assert.deepEqual(await page.evaluate(() => window.houseProbe()), [], `/: the tour's camera path (${layout}) keeps clear of every wall, floor, ceiling and pane of glass`);
     await page.close();
@@ -231,7 +245,6 @@ async function browserChecks() {
       const open = document.querySelector('.chapter.is-open');
       return open.querySelector('.chapter-panel').getBoundingClientRect().left >= open.querySelector('.portrait').getBoundingClientRect().right - 0.5;
     }), '/: About caption sits beside the portrait at 1440px');
-    assert.ok(await desktop.evaluate(() => [...document.querySelector('.shelf-items').children].every(li => li.getBoundingClientRect().width >= 200)), '/: Shelf cards stay at least 200px wide without the House (1440px)');
     await desktop.close();
     await homeChecks(browser, `http://127.0.0.1:${server.address().port}/`);
     await enquiryChecks(browser, `http://127.0.0.1:${server.address().port}/`);
@@ -242,4 +255,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, Enquiry form and résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px, the Shelf cards stay 200px or wider without the House; the homepage keeps every service and project without JavaScript or with reduced motion and starts the House or falls back to that layout; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
+browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px; the homepage keeps every service and project without JavaScript or with reduced motion and starts the House or falls back to that layout; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
