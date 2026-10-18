@@ -19,18 +19,20 @@ The portfolio API (`apps/api`, `POST /api/contact` and friends) is released sepa
 On the VPS, as root, after the change is merged to `main`:
 
 ```sh
-cd /var/www/portfolio-app
-sudo -u theoses git status --short           # must be clean (or understood) first
-sudo -u theoses git pull --ff-only origin main
-sudo -u theoses npm ci
-sudo -u theoses npm run build --workspace=packages/shared
-sudo -u theoses npm run build --workspace=apps/api
-systemctl restart portfolio-api
-curl -s http://127.0.0.1:8085/api/health      # {"ok":true}
-curl -s -o /dev/null -w '%{http_code}\n' -H 'content-type: application/json' \
-  --data "{\"name\":\"release-check\",\"email\":\"check@example.com\",\"message\":\"$(printf 'x%.0s' $(seq 5001))\"}" \
-  https://portfolio.wasabietech.com/api/contact   # 400: an over-long Enquiry is rejected, nothing saved
+cd /var/www/portfolio-app \
+  && test -z "$(sudo -u theoses git status --short)" \
+  && sudo -u theoses git pull --ff-only origin main \
+  && sudo -u theoses npm ci \
+  && sudo -u theoses npm run build --workspace=packages/shared \
+  && sudo -u theoses npm run build --workspace=apps/api \
+  && systemctl restart portfolio-api \
+  && sleep 3 && curl -sf http://127.0.0.1:8085/api/health \
+  && curl -s -o /dev/null -w '%{http_code}\n' -H 'content-type: application/json' \
+       --data "{\"name\":\"release-check\",\"email\":\"check@example.com\",\"message\":\"$(printf 'x%.0s' $(seq 5001))\"}" \
+       https://portfolio.wasabietech.com/api/contact   # 400: an over-long Enquiry is rejected, nothing saved
 ```
+
+If any step fails, the chain stops before the restart and the running API is untouched: fix the cause and run it again. Never restart `portfolio-api` after a failed `npm ci` or build; the service would start without its dependencies. Don't pipe these steps through `tail` or `head`, which hides their exit codes. `npm ci` needs `/home/theoses/.npm` to belong to `theoses`; root-owned files there make it fail with EACCES (`chown -R theoses:theoses /home/theoses/.npm` fixes it).
 
 Build only `packages/shared` and `apps/api`. Do not run the root `npm run build`: it also rebuilds `apps/web/dist`, which Caddy still serves for the legacy `/assets/`, `/fonts/`, `/img/` and dated `.mp4` paths.
 
