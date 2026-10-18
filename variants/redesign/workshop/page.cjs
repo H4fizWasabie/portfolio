@@ -23,7 +23,8 @@ const services = [
 ];
 const coaching = `mailto:${site.email}?subject=${encodeURIComponent('Coaching session')}&body=${encodeURIComponent('What I want to build or learn:\n\nJust me, or a team (how many people)?\n\nWhen suits me:\n')}`;
 const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
-<p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p></div>`;
+<p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p>
+<p class="shelf-all"><a class="text-link" href="${root}projects/">All projects →</a></p></div>`;
 
 // About: three chapters, each shown by one of the room's objects (or the portrait). The words are the
 // owner's About copy, kept exactly as written.
