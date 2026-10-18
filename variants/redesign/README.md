@@ -5,7 +5,7 @@ project. The room is also the background of the whole homepage: the canvas is fi
 the scroll flies the camera through it. The page is a run of steps about a screen tall (the hero, one per
 project, one per service, then the goodbye where the room ends; About and Contact are plain page below it), each a `[data-stop]` in `page.cjs` whose `data-look`
 names what the room shows; its panel sits at the bottom on phones and to one side on wide screens, and
-native scroll snapping (`y proximity`) rests each step in place. `room.js` (`VIEW`, `STOPS`, `measure`,
+native scroll snapping (`y mandatory`) rests each step in place. `room.js` (`VIEW`, `STOPS`, `measure`,
 `stepTour`) keys the camera to that same scroll position, so the object on a panel is the one in frame;
 the `[data-room]` block at the end of `workshop/style.css` lays it out. Without JavaScript, with reduced
 motion, without WebGL or in `?still=` renders the page keeps its static layout.
