@@ -486,8 +486,12 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
 /* Only the panels take pointer events, so a tap between them reaches the room. */
 [data-room] :is(.tour,.sky,.bench,.bench-copy,main,.work,.shelf){pointer-events:none}
 [data-room] :is(canvas,.bench-panel,.site-nav,.work-door h2,.shelf-panel,.about,.contact,.wordmark,.site-footer){pointer-events:auto}
-[data-room] .site-nav{position:fixed;inset:0 0 auto;z-index:7;max-width:none;margin:0;background:var(--day);transition:transform .3s ease;
+/* The bar sits in the House, not over it: no ground of its own, only a mist that thins down from the screen's top edge,
+   enough to read the links over the darkest of the room. */
+[data-room] .site-nav{position:fixed;inset:0 0 auto;z-index:7;max-width:none;margin:0;background:none;transition:transform .3s ease;
   padding-inline:max(var(--pad),calc((100% - var(--max)) / 2 + var(--pad)))}
+[data-room] .site-nav::before{content:"";position:absolute;inset:0 0 -40px;z-index:-1;pointer-events:none;
+  background:linear-gradient(color-mix(in srgb,var(--day) 84%,transparent),color-mix(in srgb,var(--day) 66%,transparent) 55%,transparent)}
 /* Scrolling down tucks the bar away so it does not eat the room; scrolling up brings it back. */
 [data-room].nav-away .site-nav:not(:focus-within){transform:translateY(-100%)}
 [data-room] .sky{position:static;isolation:auto;overflow:visible;background:none}
@@ -546,8 +550,13 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
    the captions, a shorter one under the goodbye's name so the room still shows above it. */
 [data-room] :is(.shelf,.wordmark){isolation:isolate}
 [data-room] .shelf::after{content:"";position:absolute;inset:0 0 calc(var(--scrim-fade) * -1);z-index:-1;background:var(--scrim)}
-/* Wide: the shelf's captions sit on the left and its objects on the right, so the scrim covers the caption column only. */
-[data-room=wide] .shelf::after{background:linear-gradient(to right,var(--scrim-c) calc(var(--edge) + 500px),transparent calc(var(--edge) + 720px))}
+/* Wide: the shelf's captions sit at the foot of the left side and its objects on the right, so the scrim lies behind the
+   caption only, feathered at its top and right, and the room shows everywhere else. */
+[data-room=wide] .shelf::after{display:none}
+[data-room=wide] .shelf-panel{position:relative}
+[data-room=wide] .shelf-panel::before{content:"";position:absolute;inset:-112px -120px calc(-1 * clamp(24px,6svh,72px)) -100vw;z-index:-1;background:color-mix(in srgb,var(--day) 85%,transparent);backdrop-filter:blur(8px);
+  mask:linear-gradient(to right,#000 calc(100% - 180px),transparent),linear-gradient(transparent,#000 112px);mask-composite:intersect}
+[data-room=wide] .shelf-head p{color:color-mix(in srgb,var(--muted) 70%,var(--ink))} /* the scrim lets the room through, so the muted line darkens a little to stay at 4.5:1 */
 [data-room=phone] .shelf::after{display:none}
 [data-room=phone] .shelf-panel{position:relative;--shelf-c:color-mix(in srgb,var(--day) 94%,transparent)}
 [data-room=phone] .shelf-panel::before{content:"";position:absolute;inset:-24px calc(-18px - var(--edge)) calc(-12px - var(--scrim-fade));z-index:-1;background:linear-gradient(transparent,var(--shelf-c) 24px,var(--shelf-c) calc(100% - var(--scrim-fade)),transparent)}
