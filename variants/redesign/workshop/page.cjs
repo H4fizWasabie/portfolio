@@ -119,11 +119,12 @@ ${shelves(by, root, esc)}</section>
 ${wordmark}
 
 <section class="about" id="about" aria-labelledby="about-title"><h2 id="about-title" class="rise">${words('About me', esc)}</h2>
-${colonnade(root, esc)}
-<p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p></section>
+${colonnade(root, esc)}</section>
 <section class="contact contact-block" id="contact" aria-labelledby="contact-title"><h2 id="contact-title" class="rise">${words(site.contactTitle, esc)}</h2>
-<p>${esc(site.contactBody)} ${esc(site.based)}</p>
-<div class="contact-reach"><a class="contact-mail" href="${site.mailto}">${site.email}</a>
+<div class="contact-lede"><p>${esc(site.contactBody)} ${esc(site.based)}</p>
+<p class="hiring">${esc(site.hiring)} <a href="${root}resume/">Read my résumé</a></p>
+<a class="contact-mail" href="${site.mailto}">${site.email}</a></div>
+<div class="contact-reach">
 <form class="enquiry" data-enquiry data-email="${site.email}" action="mailto:${site.email}?subject=Project%20enquiry" method="post" enctype="text/plain" novalidate>
 <fieldset><legend>What do you need?</legend><div class="chips">${services.map(sv => sv[0]).map((n, i) => `<label class="chip"><input type="checkbox" name="need" value="${n}" id="need-${i}">${n}</label>`).join('')}</div></fieldset>
 <fieldset><legend>How many people would use it?</legend><div class="chips">${['Just me', '2 to 10', '11 to 50', 'More than 50'].map((n, i) => `<label class="chip"><input type="radio" name="people" value="${n}" id="people-${i}">${n}</label>`).join('')}</div></fieldset>
@@ -138,7 +139,7 @@ ${colonnade(root, esc)}
 <p class="field-error" id="enquiry-email-error" data-error="email" role="alert" hidden></p></div></div></fieldset>
 <div class="enquiry-trap" aria-hidden="true"><label>Leave this empty<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
 <p class="field-help">I only use your name and email to reply to you.</p>
-<div class="enquiry-actions"><button class="button" data-enquiry-send>Send enquiry</button><a href="mailto:${site.email}">${site.email}</a></div>
+<div class="enquiry-actions"><button class="button" data-enquiry-send>Send enquiry</button></div>
 <div class="enquiry-failed" data-enquiry-failed hidden><p class="field-error" data-enquiry-failure role="alert"></p>
 <p>You can write to <a href="mailto:${site.email}">${site.email}</a> instead. This message is ready to send from your mail app, or copy it.</p>
 <p><a class="button" data-enquiry-mail href="mailto:${site.email}">Open in your mail app</a></p>
@@ -146,8 +147,7 @@ ${colonnade(root, esc)}
 <p class="enquiry-copy"><button type="button" class="button" data-enquiry-copy>Copy message</button><span role="status" data-enquiry-copied></span></p></div>
 </form>
 <div class="enquiry-sent" data-enquiry-sent role="status" tabindex="-1" hidden></div>
-<p class="contact-links"><a href="${site.github}">GitHub</a><a href="${root}resume/">Résumé</a></p>
-<p class="contact-actions enquiry-fallback"><a class="button" href="${site.mailto}">${esc(site.cta)}</a><a href="mailto:${site.email}">${site.email}</a></p></div>
+</div>
 </section>
 </main>${B.footer(root, `${root}resume/`)}
 <script type="application/json" id="bench-data">${JSON.stringify({ root, projects: data })}</script>
