@@ -13,25 +13,27 @@
   --cobalt:light-dark(#2f4fd0,#8ea2ff);--on-cobalt:light-dark(#f4f6f3,#171b20);
   --panel:light-dark(#D9C4A6,#4A3828);--on-panel:light-dark(#2B2118,#F2E8DA); /* About panels and the Contact block: light latte by day, walnut at night */
   --shadow:0 24px 60px -32px light-dark(rgba(40,52,44,.45),rgba(0,0,0,.7));
-  --r:8px;--max:1360px;--pad:clamp(20px,4vw,56px);
+  --r:8px;--lift:0 18px 34px -22px light-dark(rgba(40,52,44,.5),rgba(0,0,0,.75));--max:1360px;--pad:clamp(20px,4vw,56px);
+  --ease:cubic-bezier(.22,1,.36,1); /* one ease-out for every interaction: quick start, soft landing */
+  --img-line:light-dark(oklch(0 0 0/.1),oklch(1 0 0/.1)); /* image edge: pure black or white, never a tint */
 }
 :root[data-theme=light]{color-scheme:light}
 :root[data-theme=dark]{color-scheme:dark}
 
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--day);color:var(--ink);font:400 1.0625rem/1.6 Schibsted,system-ui,sans-serif}
 @media (prefers-reduced-motion:no-preference){body,.contact,.drawer,.case-facts dl,.object-view{transition:background-color .6s ease,color .6s ease}}
 img{max-width:100%;height:auto;display:block}
-a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
+a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px;transition:color .2s var(--ease),text-decoration-color .2s var(--ease),text-decoration-thickness .2s var(--ease)}
 :focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
 h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.05;text-wrap:balance}
 p{margin:0;text-wrap:pretty}
 [hidden]{display:none!important}
 
 .button{display:inline-flex;align-items:center;min-height:48px;padding:12px 22px;border-radius:var(--r);border:0;background:var(--ink);color:var(--day);
-  font:700 1rem/1 Schibsted,sans-serif;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background-color .2s,transform .15s}
-.button:active{transform:scale(.98)}
+  font:700 1rem/1 Schibsted,sans-serif;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background-color .2s var(--ease),color .2s var(--ease),transform .15s var(--ease)}
+.button:active:not(:disabled){transform:scale(.96)}
 .button-small{min-height:44px;padding:8px 16px;font-size:.9375rem}
 /* Plain links keep their look; padding and min-height give them a thumb-sized hit area. */
 .text-link,.site-footer a,:is(.contact-actions,.enquiry-actions,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
@@ -41,7 +43,7 @@ p{margin:0;text-wrap:pretty}
 .brand{font-weight:800;font-size:1.125rem;text-decoration:none;letter-spacing:-.02em;white-space:nowrap}
 .site-nav nav,.nav-actions{display:flex;align-items:center;gap:clamp(12px,2.4vw,28px)}
 .site-nav nav{margin-left:auto}
-.site-nav nav a:not(.button){text-decoration:none;font-weight:600}
+.site-nav nav a:not(.button){text-decoration:none;font-weight:600;transition:color .2s var(--ease)}
 /* Night is a switch: pressed means the lights are off. */
 .theme-toggle{min-height:44px;padding:6px 14px;border:0;border-radius:var(--r);background:none;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);font:600 .9375rem Schibsted,sans-serif;cursor:pointer;white-space:nowrap}
 .theme-toggle{display:inline-flex;align-items:center;gap:8px}
@@ -93,7 +95,7 @@ input,select{accent-color:var(--cobalt)}
 .bench-index{margin-top:clamp(28px,5vh,48px)}
 .bench-index p{font-size:.9375rem;color:var(--muted)}
 .bench-index ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-.bench-index a{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);text-decoration:none;font-weight:600;font-size:.9375rem;transition:box-shadow .2s,color .2s}
+.bench-index a{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px;border-radius:var(--r);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);text-decoration:none;font-weight:600;font-size:.9375rem;transition:box-shadow .2s var(--ease),color .2s var(--ease),transform .15s var(--ease)}
 .bench-index a[aria-current]{box-shadow:inset 0 0 0 2px var(--cobalt);color:var(--cobalt)}
 
 /* Drawer: slides over the right side of the room when an object is picked (below it when stacked) */
@@ -187,12 +189,12 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .work-grid li{grid-column:span 2}
 .work-procura,.work-pims,.work-map,.work-yen{grid-column:span 3!important}
 .shelf-items li{grid-column:auto!important}
-.work-grid a,.shelf-items a{display:grid;align-content:start;gap:14px;height:100%;padding:12px 12px 18px;border-radius:var(--r);background:var(--surface);text-decoration:none;transition:transform .25s cubic-bezier(.2,.9,.3,1)}
+.work-grid a,.shelf-items a{display:grid;align-content:start;gap:14px;height:100%;padding:12px 12px 18px;border-radius:var(--r);background:var(--surface);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .work-grid img,.shelf-items img{width:100%;border-radius:var(--r);aspect-ratio:4/3;object-fit:cover}
 .work-grid :is(.work-procura,.work-pims,.work-map,.work-yen) img{aspect-ratio:16/10}
 .work-text{display:grid;gap:2px;padding:0 6px}
 .work-object{font-size:.875rem;color:var(--muted);font-weight:600}
-.work-text strong{font-size:1.375rem;letter-spacing:-.02em}
+.work-text strong{font-size:1.375rem;letter-spacing:-.02em;transition:color .2s var(--ease)}
 .work-text span:last-child{color:var(--muted)}
 @media (max-width:1000px){.work-grid li{grid-column:span 3}.work-yen{grid-column:1/-1!important}}
 @media (max-width:620px){.work-grid{grid-template-columns:1fr}.work-grid li,.work-yen{grid-column:auto!important}}
@@ -210,7 +212,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .colonnade{list-style:none;margin:32px 0 0;padding:0;display:flex;border-block:1px solid var(--line)}
 .chapter{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
 .chapter+.chapter{border-left:1px solid var(--line)}
-.chapter-tab{display:flex;gap:10px;align-items:center;width:100%;min-height:52px;padding:0 16px;border:0;background:var(--surface);color:var(--ink);font:700 .8125rem/1.2 Schibsted,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:left;cursor:pointer;box-shadow:inset 0 -3px 0 transparent}
+.chapter-tab{display:flex;gap:10px;align-items:center;width:100%;min-height:52px;padding:0 16px;border:0;background:var(--surface);color:var(--ink);font:700 .8125rem/1.2 Schibsted,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:left;cursor:pointer;box-shadow:inset 0 -3px 0 transparent;transition:box-shadow .3s var(--ease)}
 .chapter-tab span{color:var(--muted);font-variant-numeric:tabular-nums}
 .chapter-view{position:relative;overflow:hidden;height:clamp(380px,56svh,520px);background:var(--surface)}
 .chapter-view img{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;border-radius:0}
@@ -277,7 +279,7 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .enquiry fieldset{border:0;margin:0;padding:0;min-width:0}
 .enquiry legend,.enquiry .field label{font-weight:700;margin-bottom:10px;padding:0}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:var(--r);box-shadow:inset 0 0 0 1.5px var(--on-panel);font-weight:600;font-size:.9375rem;cursor:pointer;transition:box-shadow .2s,color .2s,background-color .2s}
+.chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:var(--r);box-shadow:inset 0 0 0 1.5px var(--on-panel);font-weight:600;font-size:.9375rem;cursor:pointer;transition:box-shadow .2s var(--ease),color .2s var(--ease),background-color .2s var(--ease),transform .15s var(--ease)}
 .chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
 .chip:has(input:checked){background:var(--cobalt);color:var(--on-cobalt);box-shadow:none}
 .chip:has(input:focus-visible){outline:3px solid var(--on-panel);outline-offset:3px}
@@ -457,7 +459,11 @@ tr.is-low .stepper{box-shadow:inset 0 0 0 2px var(--flag)}
   .drawer-close:hover{color:var(--cobalt)}
   .drawer-nav button:hover{background:var(--day)}
   .drawer-nav button:hover span{color:var(--cobalt)}
-  :is(.work-grid,.shelf-items) a:hover{transform:translateY(-3px)}
+  :is(.work-grid,.shelf-items) a:hover{transform:translateY(-3px);box-shadow:var(--lift)}
+  [data-room] .shelf-items a:hover{box-shadow:none}
+  .site-footer a:hover,.hiring a:hover,.shelf-note a:hover,.text-link:hover,.case-head p>a:hover,.index-page>p>a:hover{color:var(--cobalt)}
+  .contact-block a:not(.button):hover{text-decoration-thickness:2px}
+  .enquiry .field :is(input,textarea):hover,.enquiry-failed textarea:hover{border-color:var(--on-panel)}
   :is(.work-grid,.shelf-items) a:hover strong{color:var(--cobalt)}
   .next a:hover strong{color:var(--cobalt)}
   .stepper button:hover{color:var(--cobalt)}
@@ -623,3 +629,36 @@ html.is-inside[data-room] :is(main,.wordmark,.site-footer,.tour-steps){visibilit
 /* Wide: captions sit at the foot of their shelf, the room fills the rest. */
 [data-room=wide] .shelf{justify-content:flex-end;padding:0 var(--edge) clamp(24px,6svh,72px)}
 [data-room=wide] .shelf-panel{width:min(30rem,42vw)}
+
+/* Polish: small details that make the page feel finished. Every transition names its properties and
+   shares one ease (--ease); motion that plays by itself is behind no-preference. */
+.tour-title,.contact-mail{text-wrap:balance}
+:is(li,dd,figcaption,.hint,.field-help){text-wrap:pretty}
+/* Image edges and the gallery, the thumbnails and the next-project card: a hairline keeps pale renders from melting into pale cards. */
+:is(.work-grid,.shelf-items) img,.next img,.gallery-panel img,.object-view img{outline:1px solid var(--img-line);outline-offset:-1px}
+.enquiry .field :is(input,textarea),.enquiry-failed textarea{transition:border-color .2s var(--ease)}
+.enquiry .field :is(input,textarea):focus,.enquiry-failed textarea:focus{border-color:var(--on-panel)}
+.theme-toggle,.drawer-close,.drawer-nav button,.drawer-nav span,.gallery-tabs button,.stepper button,.channels button,.link-button{transition:color .2s var(--ease),background-color .2s var(--ease),box-shadow .2s var(--ease),transform .15s var(--ease)}
+.theme-toggle::before{transition:background-color .3s var(--ease),box-shadow .3s var(--ease)}
+:is(.theme-toggle,.bench-index a,.chip,.gallery-tabs button,.stepper button,.channels button,.drawer-close):active{transform:scale(.96)}
+@media (prefers-reduced-motion:no-preference){
+  /* The first screen of every page arrives in order, a beat apart, instead of all at once. */
+  @keyframes enter{from{opacity:0;transform:translateY(14px);filter:blur(4px)}}
+  :is(.bench-panel,.case-head>div:first-child)>*,.index-page>:is(p,h1,.index-intro){animation:enter .7s var(--ease) both;animation-delay:calc(var(--k,0) * 90ms)}
+  :is(.bench-panel,.case-head>div:first-child,.index-page)>:nth-child(2){--k:1}
+  :is(.bench-panel,.case-head>div:first-child,.index-page)>:nth-child(3){--k:2}
+  :is(.bench-panel,.case-head>div:first-child,.index-page)>:nth-child(4){--k:3}
+  :is(.case-head>div:first-child,.index-page)>:nth-child(5){--k:4}
+  .case-head>div:last-child{animation:enter .8s var(--ease) .25s both}
+  .bench-hint{animation:fade-in .6s ease .8s both}
+  @keyframes fade-in{from{opacity:0}}
+  /* Screenshot tabs: the new panel settles in rather than swapping. */
+  .gallery-panel{animation:enter .35s var(--ease) both}
+  /* Pictures arrive softly (main.js marks the ones still loading). */
+  img{transition:opacity .5s var(--ease)}
+  img.is-arriving{opacity:0}
+  /* Moving between pages cross-fades; the bar stays put. */
+  @view-transition{navigation:auto}
+  .site-nav{view-transition-name:site-nav}
+  ::view-transition-old(root),::view-transition-new(root){animation-duration:.25s}
+}

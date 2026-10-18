@@ -11,6 +11,7 @@ export function initEnquiry() {
   if (!form) return;
   const $ = s => form.querySelector(s);
   const send = $('[data-enquiry-send]');
+  const sendLabel = send.textContent;
   const failed = $('[data-enquiry-failed]');
   const sent = document.querySelector('[data-enquiry-sent]');
   const copied = $('[data-enquiry-copied]');
@@ -50,6 +51,7 @@ export function initEnquiry() {
 
     failed.hidden = true;
     send.disabled = true;
+    send.textContent = 'Sending…';
     let failure;
     try {
       const res = await fetch('/api/contact', {
@@ -62,6 +64,7 @@ export function initEnquiry() {
       failure = 'Your Enquiry could not be sent. Check your connection.';
     }
     send.disabled = false;
+    send.textContent = sendLabel;
 
     if (!failure) {
       form.hidden = true;

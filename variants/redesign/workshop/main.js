@@ -12,6 +12,14 @@ initDemos();
 initColonnade();
 initEnquiry();
 
+// Lazy pictures fade in as they arrive (style.css); the ones already loaded are left alone.
+for (const img of document.querySelectorAll('img[loading=lazy]')) {
+  if (img.complete) continue;
+  img.classList.add('is-arriving');
+  img.addEventListener('load', () => img.classList.remove('is-arriving'), { once: true });
+  img.addEventListener('error', () => img.classList.remove('is-arriving'), { once: true });
+}
+
 if (document.querySelector('[data-stage], [data-object]')) {
   const room = () => {
     // Fetch the model alongside the script instead of after it; room.js's loader picks the preload up.
