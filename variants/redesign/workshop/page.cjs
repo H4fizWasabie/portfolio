@@ -1,5 +1,6 @@
-// Variant A, "The Workshop": a small clay room modelled in Blender (model/build_workshop.py).
-// Every object on the bench is a project; selecting one flies the camera to it.
+// Variant A, "The Workshop": the homepage tours a House (model/build_house.py). The hero sees it from across the lake;
+// scrolling glides the camera over the water, in through the sliding glass and up the stairs, a stop per [data-stop] below.
+// The project pages still show their object from the old room model (workshop.glb) until each Room exists.
 const B = require('../blocks.cjs');
 const { demos } = require('../demos.cjs');
 const { site } = require('../content.cjs');
@@ -7,30 +8,38 @@ const { site } = require('../content.cjs');
 const fonts = ['schibsted-grotesk-latin-wght-normal.woff2'];
 const licenses = ['OFL-schibsted-grotesk.txt'];
 const thumbs = ['procura', 'pims', 'dd-drugs-register', 'theoses', '89lab', 'map', 'yen'].flatMap(s => [`model/thumb-${s}.webp`, `model/thumb-${s}-night.webp`]);
-const statics = ['model/workshop.glb', 'model/poster.webp', 'photo/hafiz-portrait.webp', ...thumbs];
+const statics = ['model/room-stock.glb', 'model/room-stock-light.webp', 'model/house.glb', 'model/house-light.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', 'model/workshop.glb', 'photo/hafiz-portrait.webp', ...thumbs];
 
 // What each project is on the bench, so the index can name the object.
 const objectName = { procura: 'Trolley of deliveries', pims: 'Supply cabinet', 'dd-drugs-register': 'Drug safe', theoses: 'Monitor and home server', '89lab': 'Camera, light and microphone', map: 'Phone on its charger', yen: 'Little robot' };
 
-// What a client can ask for. The homepage shelves each project under the service it proves;
-// teaching has no object of its own, so its row is a short note instead of cards.
+// What a client can ask for. The homepage shelves each project under the service it proves; teaching has no
+// object of its own, so its row is a short note instead of cards. The last field is where the House shows
+// the service (a [data-look] of the tour in room.js): a doorway on the ground floor or upstairs, the balcony for teaching.
 const services = [
-  ['Stock and purchasing apps', 'Know what to buy, raise requests and track every order from request to receipt.', ['procura', 'pims']],
-  ['Records with an audit trail', 'Daily counts and corrections that keep the original entry, with a name on every change.', ['dd-drugs-register']],
-  ['AI assistants and automation', 'Repeated work done by an agent or a pipeline, with your review before anything goes out.', ['theoses', '89lab', 'yen']],
-  ['Android apps', 'Local-first phone apps that work without accounts or tracking.', ['map']],
-  ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', []]
+  ['Stock and purchasing apps', 'Know what to buy, raise requests and track every order from request to receipt.', ['procura', 'pims'], 'stock'],
+  ['Records with an audit trail', 'Daily counts and corrections that keep the original entry, with a name on every change.', ['dd-drugs-register'], 'records'],
+  ['AI assistants and automation', 'Repeated work done by an agent or a pipeline, with your review before anything goes out.', ['theoses', '89lab', 'yen'], 'ai'],
+  ['Android apps', 'Local-first phone apps that work without accounts or tracking.', ['map'], 'android'],
+  ['AI teaching and coaching', 'Learn how to design an AI agent, which tools to use and how to build the system yourself, with me alongside.', [], 'teach']
 ];
 const coaching = `mailto:${site.email}?subject=${encodeURIComponent('Coaching session')}&body=${encodeURIComponent('What I want to build or learn:\n\nJust me, or a team (how many people)?\n\nWhen suits me:\n')}`;
 const teaching = root => `<div class="shelf-note"><p>My <a href="${root}work/89lab/">content pipelines</a> publish AI news, a GitHub project to learn from and an AI concept explained every day. I coach people and teams who want to design and build their own agents and automation.</p>
 <p class="shelf-action"><a class="button" href="${coaching}">Book a coaching session</a></p>
 <p class="shelf-all"><a class="text-link" href="${root}projects/">All projects →</a></p></div>`;
 
-// About: three chapters, each shown by one of the room's objects (or the portrait). The words are the
+// How I work, on the stair wall between the floors: a poster per step, each a stop (data-look="@<step>", room.js draws the posters).
+// The owner's About copy, a sentence to a step.
+const howIWork = [
+  ['Requirements', 'requirements', 'I model the data around the real workflow.'],
+  ['Build', 'build', 'I put it in front of the people who use it. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
+  ['Measure', 'measure', 'I let the numbers decide what\'s next.']
+];
+
+// About: two chapters, each shown by one of the room's objects (or the portrait). The words are the
 // owner's About copy, kept exactly as written.
 const chapters = [
   ['Background', 'portrait', 'Operations first, then software', 'Four years building systems, with AI automation at the core, coming from hands-on procurement, pharmacy and emergency care. PIMS, Procura and the DD Drugs Register run daily at the veterinary hospital where I work.'],
-  ['How I work', 'pims', 'Requirements → build → measure', 'I model the data around the real workflow, put it in front of the people who use it, and let the numbers decide what\'s next. My own AI agent tests, reviews and ships changes through pull requests, including to this site.'],
   ['Now', 'theoses', 'Agents that run on their own', 'Running Theoses, my self-hosted AI agent: about 30 scheduled jobs and 730+ commits in six weeks. Also building agent harnesses from scratch in Go (Neo, Fender, Mino), with more than a dozen public repositories on AI automation and agent design.']
 ];
 // One column per chapter. Without JavaScript every chapter shows; about.js opens one at a time (style.css).
@@ -42,10 +51,14 @@ const colonnade = (root, esc) => `<ul class="colonnade" data-colonnade>${chapter
 // Sets day or night before first paint: stored choice, else the device setting.
 // Stills are day unless render-stills.cjs asks for night.
 const themeScript = `<script>try{var t=localStorage.getItem('workshop-theme')}catch(e){}if(/[?&]still=/.test(location.search))t=/[?&]night=1/.test(location.search)?'dark':'light';document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')</script>`;
-// The whole homepage sits in the room: wide or phone layout, chosen before first paint so nothing
+// The whole homepage sits in the House: wide or phone layout, chosen before first paint so nothing
 // jumps when the room loads. room.js keeps it current and removes it if the room cannot start;
 // without JavaScript, with reduced motion or in ?still= renders the page keeps its static layout.
 const roomScript = `<script>(function(){if(/[?&]still=/.test(location.search)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.dataset.room=matchMedia('(max-width: 899px), (orientation: portrait)').matches?'phone':'wide'})()</script>`;
+// Which poster fits the House's hero: the phone's when the page will run the tour on a stacked hero (style.css shows
+// it for html[data-room=phone]; both are lazy, so the one that is hidden is never fetched). The preloads say the same in media queries.
+const phoneMedia = '(max-width: 899px) and (prefers-reduced-motion: no-preference), (orientation: portrait) and (prefers-reduced-motion: no-preference)';
+const wideMedia = '(min-width: 900px) and (orientation: landscape), (prefers-reduced-motion: reduce)';
 const toggle = '<button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>Night</button>';
 // Phones keep a short contact button in the bar, since the hero's button sits below the room;
 // the links drop to a second row there (style.css), so nothing has to be hidden.
@@ -59,63 +72,61 @@ const words = (text, esc) => rise(text.split(/( )/), esc);
 const wordmark = `<p class="wordmark" aria-hidden="true" data-stop data-look="@end">${rise([...site.name], s => s)}</p>`;
 const footer = root => `${wordmark}${B.footer(root, `${root}resume/`)}`;
 
-const card = (p, root, esc, num) => `<li class="work-${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
+const card = (p, root, esc, num) => `<li class="work-${p.slug}" data-project="${p.slug}"><a href="${root}work/${p.slug}/"><span class="work-img">${thumb(root, p, 'loading="lazy"')}</span>
 <span class="work-text">${num ? `<span class="tour-count">${num}</span>` : ''}<span class="work-object">${esc(objectName[p.slug])}</span><strong>${esc(p.title)}</strong><span>${esc(p.proof || p.summary)}</span></span></a></li>`;
 
 // /projects/: every object render in one uneven grid.
 const workGrid = (projects, root, esc) => `<ul class="work-grid">${projects.map(p => card(p, root, esc)).join('')}</ul>`;
 
-// Homepage: one shelf per service, the projects that prove it beside it. data-look names what the
-// room shows while the shelf is on screen (room.js); teaching has no object, so it shows the desk.
+// Homepage: one shelf per service, the projects that prove it beside it. Each is a stop, and data-look names
+// what the House shows while it is on screen (room.js): the service's doorway, or the balcony for teaching.
+// Between the ground floor's services and the upstairs ones the tour climbs the stairs, a poster of How I work at a time.
+const stairs = esc => howIWork.map(([h, look, text], i) => `<section class="shelf shelf-stairs" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${esc(h)}</h3><p>How I work, ${i + 1} of ${howIWork.length}</p></div>
+<div class="shelf-note"><p>${esc(text)}</p></div></div></section>`).join('');
+// A service whose Room is built (room.js ROOMS) opens on its doorway, and then each of its projects is told in four
+// stops at its object, from the project's own data: what it is, what it solves, its screens, and in use. The index
+// sends a visitor to the first of them (id = the project's slug). Without the House they read as plain sections.
+const rooms = new Set(['stock']);
+const stop = (p, i, look, title, body) => `<section class="shelf shelf-stop" data-stop data-look="@${look}" data-project="${p.slug}"${i === 1 ? ` id="${p.slug}"` : ''}><div class="shelf-panel"><div class="shelf-head"><h4>${title}</h4><p>${i === 1 ? '' : `${p.title}, `}${i} of 4</p></div>
+<div class="shelf-note">${body}</div></div></section>`;
+const projectStops = (p, root, esc) => [
+  stop(p, 1, `${p.slug}-1`, esc(p.title), `<p class="stop-kind">${esc(p.category)}</p><p>${esc(p.description)}</p><p>${esc(p.proof)}</p>`),
+  stop(p, 2, `${p.slug}-2`, 'What it solves', `<p>${esc(p.problem)}</p><ol class="stop-list">${p.workflow.map(w => `<li>${esc(w)}</li>`).join('')}</ol>`),
+  stop(p, 3, `${p.slug}-3`, 'Its screens', `<ul class="stop-list">${p.scenes.map(([name, , caption]) => `<li><strong>${esc(name)}.</strong> ${esc(caption)}</li>`).join('')}</ul><p class="stop-small">${esc(p.disclosure)}</p>
+<div class="stop-shots">${p.scenes.map(([name, img]) => `<img src="${root}static/${img}" alt="${esc(`${p.title}: ${name}`)}" width="1360" height="860" loading="lazy">`).join('')}</div>`),
+  stop(p, 4, `${p.slug}-4`, 'In use', `<ul class="stop-list">${p.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
+<p class="shelf-action"><a class="button" href="${root}work/${p.slug}/">Read the case study</a> <a class="text-link" href="${root}work/${p.slug}/#try-title">Try the demo</a></p>`)
+].join('');
 const shelves = (by, root, esc) => {
   const all = Object.keys(by), num = s => `${two(all.indexOf(s) + 1)} / ${two(all.length)}`;
-  return `<div class="shelves">${services.map(([h, d, slugs]) => `<section class="shelf" data-stop data-look="${slugs.join(' ') || '@teach'}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
-${slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>`).join('')}</div>`;
+  return `<div class="shelves">${services.map(([h, d, slugs, look]) => `${look === 'ai' ? stairs(esc) : ''}<section class="shelf${rooms.has(look) ? ' shelf-door' : ''}" data-stop data-look="@${look}"><div class="shelf-panel"><div class="shelf-head"><h3>${h}</h3><p>${d}</p></div>
+${rooms.has(look) ? '' : slugs.length ? `<ul class="shelf-items">${slugs.map(s => card(by[s], root, esc, num(s))).join('')}</ul>` : teaching(root)}</div></section>${rooms.has(look) ? slugs.map(s => projectStops(by[s], root, esc)).join('') : ''}`).join('')}</div>`;
 };
+const inRoom = slug => services.some(([, , slugs, look]) => rooms.has(look) && slugs.includes(slug));
 
-// One stop per project. Phones: each card rides the bottom of the screen over the room while the
-// camera rests on its object (room.js). Wide screens: these are only the scroll distance, and the
-// large caption (tour-card) shows the name instead. Shown only while the room is the background.
 const two = n => String(n).padStart(2, '0');
-const steps = (projects, esc) => `<ol class="tour-steps" data-steps>${projects.map((p, i) => `<li data-stop data-look="${p.slug}"><div class="step-card"><p class="tour-count">${two(i + 1)} / ${two(projects.length)}</p>
-<p class="tour-object">${esc(objectName[p.slug])}</p><p class="tour-title">${esc(p.title)}</p><p class="tour-summary">${esc(p.proof || p.summary)}</p>
-<button class="button" type="button" data-open="${p.slug}">Open the project</button></div></li>`).join('')}</ol>`;
 
 // Day and night renders of the same object; the theme shows one (the hidden one is never fetched).
 const thumb = (root, p, attrs = '') => ['', '-night'].map(v => `<img class="thumb${v || '-day'}" src="${root}static/thumb-${p.slug}${v}.webp" alt="" width="640" height="480" ${attrs}>`).join('');
 
 function home({ projects, site, esc, root }) {
   const by = Object.fromEntries(projects.map(p => [p.slug, p]));
-  const data = projects.map(p => ({
-    slug: p.slug, title: p.title, object: objectName[p.slug], category: p.category, summary: p.proof || p.summary, description: p.description,
-    image: p.slug === 'map' ? 'map-home-demo.webp' : p.preview || (p.scenes[0] && p.scenes[0][1]) || null,
-    disclosure: p.disclosure, steps: p.workflow
-  }));
   return `${B.head({ title: site.title, description: site.description, root, fonts,
-    route: '/', extra: `${themeScript}${roomScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image">` })}
+    route: '/', extra: `${themeScript}${roomScript}<meta name="portfolio-surface" content="workshop"><link rel="preload" href="${root}static/poster.webp" as="image" media="${wideMedia}"><link rel="preload" href="${root}static/poster-phone.webp" as="image" media="${phoneMedia}">` })}
 <body>
 <div class="tour" data-tour><div class="sky">${nav(root, site, esc)}
 <section class="bench">
 <div class="bench-stage" data-stage>
-<img class="bench-poster" src="${root}static/poster.webp" alt="A small clay workshop: a desk with a monitor, phone, lamp and robot, a supply cabinet, a drug safe, a trolley of deliveries, and a camera with a ring light." width="1600" height="1200">
-<p class="bench-tip" data-tip hidden></p>
-<p class="bench-hint" data-hint hidden>Tap anything in the room to open it</p>
+<img class="bench-poster bench-poster-wide" src="${root}static/poster.webp" alt="A two-storey concrete house with warmly lit glass walls on the edge of a still lake at dusk, spruces either side and a misty mountain behind." width="1600" height="1000" loading="lazy">
+<img class="bench-poster bench-poster-phone" src="${root}static/poster-phone.webp" alt="" width="780" height="1688" loading="lazy">
 </div>
-<aside class="drawer" data-drawer aria-labelledby="drawer-title" hidden>
-<button class="drawer-close" type="button" data-close>Back to the bench</button>
-<h2 id="drawer-title" data-f="title"></h2><p class="drawer-kind" data-f="category"></p><p class="drawer-summary" data-f="summary"></p>
-<figure data-f="figure"></figure><p data-f="description"></p>
-<a class="button" data-f="link" href="#">Read the case study</a>
-<div class="drawer-nav"><button type="button" data-step="-1">Previous<span></span></button><button type="button" data-step="1">Next<span></span></button></div></aside>
-<div class="tour-card is-away" data-tour-card><p class="tour-count" data-t="count"></p><p class="tour-object" data-t="object"></p>
-<p class="tour-title" data-t="title"></p><p class="tour-summary" data-t="summary"></p><button class="button" type="button" data-t="open">Open the project</button></div>
 <div class="bench-copy"><div class="bench-panel"><h1>${esc(site.headline)}</h1><p>${esc(site.sub)}</p>
 <p class="actions"><a class="button" href="#contact">${esc(site.cta)}</a><a class="text-link" href="#work">See the work</a></p>
-<div class="bench-index"><p id="index-label">Everything in this room is a project I built. Pick one:</p>
-<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${root}work/${p.slug}/" data-pick="${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
-${steps(projects, esc)}</section></div></div>
+<div class="bench-index"><p id="index-label">Pick a project to read its case study:</p>
+<ul aria-labelledby="index-label">${projects.map(p => `<li><a href="${inRoom(p.slug) ? `#${p.slug}` : `${root}work/${p.slug}/`}">${esc(p.title)}</a></li>`).join('')}</ul></div></div></div>
+</section></div></div>
 <main id="main">
-<section class="work" id="work" aria-labelledby="work-title"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2>
+<section class="work" id="work" aria-labelledby="work-title"><div class="work-door" data-stop data-look="@door"><h2 id="work-title" class="rise">${words('What I can do for you', esc)}</h2></div>
 ${shelves(by, root, esc)}</section>
 ${wordmark}
 
@@ -151,7 +162,7 @@ ${colonnade(root, esc)}</section>
 </div>
 </section>
 </main>${B.footer(root, `${root}resume/`)}
-<script type="application/json" id="bench-data">${JSON.stringify({ root, projects: data })}</script>
+<script type="application/json" id="bench-data">${JSON.stringify({ root })}</script>
 <script type="module" src="${root}static/main.js"></script></body></html>`;
 }
 

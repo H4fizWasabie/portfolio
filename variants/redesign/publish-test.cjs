@@ -12,7 +12,7 @@ const { chromium } = require('playwright-core');
 
 const here = __dirname;
 const origin = 'https://portfolio.wasabietech.com';
-const { projects } = require('./content.cjs');
+const { projects, esc } = require('./content.cjs');
 const routes = ['/', '/projects/', '/resume/', ...projects.map(p => `/work/${p.slug}/`)];
 const rel = route => (route === '/' ? 'index.html' : route.slice(1) + 'index.html');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -42,8 +42,8 @@ for (const route of routes) {
 const verification = fs.readFileSync(path.join(here, '../../apps/web/index.html'), 'utf8').match(/<meta\b[^>]*name="google-site-verification"[^>]*>/)[0];
 const home = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
 assert.ok(home.includes(verification), 'Google Search Console verification lost');
-assert.equal((home.match(/data-pick="/g) || []).length, projects.length, 'every project is on the bench');
-assert.equal((home.match(/<li class="work-/g) || []).length, projects.length, 'every project is in the work grid');
+assert.equal((home.match(/<ul aria-labelledby="index-label">.*?<\/ul>/s)[0].match(/<li>/g) || []).length, projects.length, 'every project is in the hero index');
+assert.equal(new Set([...home.matchAll(/data-project="([^"]+)"/g)].map(m => m[1])).size, projects.length, 'every project is on the homepage, as a card or as its stops in a Room');
 assert.match(home, /href="resume\/"/, 'homepage links the résumé on this site');
 assert.match(home, /href="projects\/"/, 'homepage links all projects');
 assert.match(home, /data-enquiry/, 'Enquiry form present');
@@ -64,10 +64,40 @@ assert.ok(robots.includes(`Sitemap: ${origin}/sitemap.xml`));
 const manifest = JSON.parse(fs.readFileSync(path.join(site, 'runtime-manifest.json'), 'utf8'));
 const listed = new Set(manifest.map(e => e.file));
 for (const route of routes) assert.ok(listed.has(rel(route)), `manifest lists ${rel(route)}`);
-for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', 'static/workshop.glb', 'static/poster.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
+// The House's outside: everything it needs before it shows (page.cjs lists them as statics, main.js preloads them).
+const outside = ['house.glb', 'house-light.webp', 'house-wet.webp', 'backdrop.webp', 'water-normal.webp'];
+for (const f of ['favicon.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'static/main.js', 'static/style.css', 'static/workshop.glb', ...outside.map(f => `static/${f}`), 'static/poster.webp', 'static/poster-phone.webp', 'resume/Resume-Hafiz-Jamali.pdf']) assert.ok(listed.has(f), `manifest lists ${f}`);
 for (const e of manifest) {
   assert.equal(hash(fs.readFileSync(path.join(site, e.file))), e.sha256, e.file);
   assert.doesNotMatch(e.file, /^(assets\/|\.impeccable|evidence|FICTIONAL|.*\.cjs$)/, `${e.file}: no source or reserved paths`);
+}
+
+// The House's outside loads first, so it stays small: the model, its lighting and wet textures, the backdrop plate and the lake's ripples together.
+const houseBytes = outside.reduce((total, f) => total + fs.statSync(path.join(site, 'static', f)).size, 0);
+assert.ok(houseBytes < 2500 * 1000, `the House (${outside.join(', ')}) is ${houseBytes} bytes; the ceiling is 2.5 MB`);
+// No texture of the House is larger than 2048 px on a side (the GPU memory of phones).
+function webpSize(file) {
+  const b = fs.readFileSync(file), kind = b.toString('latin1', 12, 16);
+  if (kind === 'VP8X') return [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)];
+  if (kind === 'VP8L') return [1 + (b.readUInt16LE(21) & 0x3fff), 1 + ((b.readUInt32LE(21) >> 14) & 0x3fff)];
+  return [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff]; // 'VP8 '
+}
+for (const f of outside.filter(f => f.endsWith('.webp'))) assert.ok(webpSize(path.join(site, 'static', f)).every(n => n <= 2048), `${f} is ${webpSize(path.join(site, 'static', f))} px; textures stay within 2048`);
+// Each Room is its own download, under 2 MB with its lighting texture, which stays within 2048 px too.
+const rooms = { stock: ['procura', 'pims'] };
+for (const slug of Object.keys(rooms)) {
+  const files = [`room-${slug}.glb`, `room-${slug}-light.webp`];
+  for (const f of files) assert.ok(listed.has(`static/${f}`), `manifest lists static/${f}`);
+  const bytes = files.reduce((total, f) => total + fs.statSync(path.join(site, 'static', f)).size, 0);
+  assert.ok(bytes < 2000 * 1000, `the ${slug} Room is ${bytes} bytes; the ceiling is 2 MB`);
+  assert.ok(webpSize(path.join(site, 'static', files[1])).every(n => n <= 2048), `${files[1]} stays within 2048 px`);
+}
+// The homepage HTML holds every Room's heading and all of its stops' words, so search engines and visitors without the House read them.
+const homeHtml = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
+assert.ok(homeHtml.includes('<h3>Stock and purchasing apps</h3>'), 'the stock Room has its heading');
+for (const p of Object.values(rooms).flat().map(slug => projects.find(x => x.slug === slug))) {
+  for (const text of [p.title, p.category, p.description, p.proof, p.problem, ...p.workflow, ...p.scenes.map(s => s[2]), p.disclosure, ...p.facts]) assert.ok(homeHtml.includes(esc(text)), `/: ${p.slug}'s stops include "${text}"`);
+  assert.ok(homeHtml.includes(`href="#${p.slug}"`) && homeHtml.includes(`id="${p.slug}"`), `/: the index sends ${p.slug} to its first stop`);
 }
 
 assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf')), fs.readFileSync(path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf')));
@@ -126,6 +156,54 @@ async function enquiryChecks(browser, url) {
   }
   await page.close();
 }
+// The homepage keeps all its content as a static page (no JavaScript, reduced motion), and when the House runs it
+// takes over the page; where the browser has no WebGL the page falls back to the static layout with the poster.
+async function homeChecks(browser, url) {
+  const content = () => ({
+    headline: document.querySelector('h1').textContent.length > 10,
+    door: !!document.querySelector('.work-door h2'),
+    services: document.querySelectorAll('.shelf:not(.shelf-stairs) h3').length,
+    projects: new Set([...document.querySelectorAll('[data-project]')].map(e => e.dataset.project)).size,
+    hero: [...document.querySelectorAll('.bench-poster, .bench-stage canvas')].some(e => e.getBoundingClientRect().height > 100),
+    room: document.documentElement.dataset.room || ''
+  });
+  for (const [what, options] of [['no JavaScript', { javaScriptEnabled: false }], ['reduced motion', { reducedMotion: 'reduce' }]]) {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, ...options });
+    await page.goto(url, { waitUntil: 'networkidle' });
+    const c = await page.evaluate(content);
+    assert.deepEqual(c, { headline: true, door: true, services: 5, projects: projects.length, hero: true, room: '' }, `/: ${what} keeps the static layout with every service and project`);
+    await page.close();
+  }
+  // ?probe has the House report where its tour's path is not clear of walls, floors, ceilings and glass (room.js probePath).
+  let live;
+  for (const [layout, viewport] of [['phone', { width: 390, height: 844 }], ['wide', { width: 1440, height: 900 }]]) {
+    const page = await browser.newPage({ viewport });
+    await page.goto(`${url}?probe`, { waitUntil: 'networkidle' });
+    await page.waitForFunction(() => document.querySelector('.bench-stage.is-live') || !document.documentElement.dataset.room, null, { timeout: 60000 });
+    live = await page.evaluate(() => !!document.querySelector('.bench-stage.is-live canvas'));
+    const c = await page.evaluate(content);
+    assert.ok(live ? c.room === layout : c.room === '', `/: the House runs with its tour layout, or without WebGL the page keeps the static layout (live: ${live}, room: "${c.room}")`);
+    assert.equal(c.services, 5);
+    assert.equal(c.projects, projects.length);
+    if (live && layout === 'wide') {
+      // A Room is fetched only once the visitor is a Room away: not at the hero, by the sliding glass.
+      const fetched = () => page.evaluate(() => performance.getEntriesByType('resource').some(e => e.name.includes('room-stock')));
+      await page.waitForTimeout(1500);
+      assert.ok(!(await fetched()), '/: the stock Room is not fetched at the hero');
+      await page.evaluate(() => document.querySelector('[data-look="@door"]').scrollIntoView());
+      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => e.name.includes('room-stock')), null, { timeout: 30000 });
+      // Choosing a project with a Room in the index takes the tour to its first stop.
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.waitForTimeout(500);
+      await page.click('.bench-index a[href="#procura"]');
+      await page.waitForTimeout(1500);
+      assert.ok(await page.evaluate(() => { const el = document.getElementById('procura'); return Math.abs(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop)) < 2; }), '/: choosing Procura in the index rests the tour on its first stop');
+    }
+    if (live) assert.deepEqual(await page.evaluate(() => window.houseProbe()), [], `/: the tour's camera path (${layout}) keeps clear of every wall, floor, ceiling and pane of glass`);
+    await page.close();
+  }
+  console.log(live ? 'note: the House started (WebGL available) and its tour path is clear at both layouts' : 'note: no WebGL here, so the House was not started; the static fallback was checked');
+}
 // Browser step: serve the production build locally and check the layout where a phone would see it.
 async function browserChecks() {
   const server = http.createServer((req, res) => {
@@ -134,7 +212,7 @@ async function browserChecks() {
     res.writeHead(200, { 'content-type': { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' }[path.extname(file)] || 'application/octet-stream' }).end(fs.readFileSync(file)); // module scripts need a JavaScript type
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--disable-dev-shm-usage', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   try {
     for (const width of [360, 390, 430]) {
       const page = await browser.newPage({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
@@ -153,8 +231,9 @@ async function browserChecks() {
       const open = document.querySelector('.chapter.is-open');
       return open.querySelector('.chapter-panel').getBoundingClientRect().left >= open.querySelector('.portrait').getBoundingClientRect().right - 0.5;
     }), '/: About caption sits beside the portrait at 1440px');
-    assert.ok(await desktop.evaluate(() => [...document.querySelector('.shelf-items').children].every(li => li.getBoundingClientRect().width >= 200)), '/: Shelf cards stay at least 200px wide without the Room (1440px)');
+    assert.ok(await desktop.evaluate(() => [...document.querySelector('.shelf-items').children].every(li => li.getBoundingClientRect().width >= 200)), '/: Shelf cards stay at least 200px wide without the House (1440px)');
     await desktop.close();
+    await homeChecks(browser, `http://127.0.0.1:${server.address().port}/`);
     await enquiryChecks(browser, `http://127.0.0.1:${server.address().port}/`);
   } finally {
     await browser.close();
@@ -163,4 +242,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots; ${manifest.length} manifest hashes; demos, Enquiry form and résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px, the Shelf cards stay 200px or wider without the Room; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
+browserChecks().then(() => console.log('PASS browser step: on the production build the About caption sits below its image (beside the portrait on desktop), Contact has the Hiring line and one email, and nothing scrolls sideways at 360, 390 and 430px, the Shelf cards stay 200px or wider without the House; the homepage keeps every service and project without JavaScript or with reduced motion and starts the House or falls back to that layout; the Enquiry form sends, validates and falls back to the mail app when sending fails'));
