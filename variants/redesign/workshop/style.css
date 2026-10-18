@@ -34,7 +34,7 @@ p{margin:0;text-wrap:pretty}
 .button:active{transform:scale(.98)}
 .button-small{min-height:44px;padding:8px 16px;font-size:.9375rem}
 /* Plain links keep their look; padding and min-height give them a thumb-sized hit area. */
-.text-link,.site-footer a,:is(.contact-actions,.brief-actions,.contact-links,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
+.text-link,.site-footer a,:is(.contact-actions,.enquiry-actions,.contact-links,.resume-actions) a:not(.button),.index-page>p>a,.case-head p>a{display:inline-flex;align-items:center;min-height:44px}
 .text-link{font-weight:700}
 
 .site-nav{max-width:var(--max);margin:0 auto;padding:18px var(--pad);display:flex;align-items:center;gap:clamp(12px,2.4vw,28px);position:relative;z-index:3}
@@ -258,28 +258,35 @@ section>h2,.about h2{font-size:clamp(1.9rem,3.4vw,2.75rem)}
 .contact-mail{display:inline-block;font-size:clamp(1.5rem,4.2vw,2.5rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;overflow-wrap:anywhere}
 .contact-links{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:12px;font-weight:700}
 @media (min-width:900px) and (orientation:landscape){.contact-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:0 clamp(32px,6vw,96px)}.contact-block>h2{grid-column:1}.contact-block>p{grid-column:1;align-self:start}.contact-reach{grid-column:2;grid-row:1/span 2;align-self:end}}
-/* Contact brief: a few choices and one line, turned into an email the visitor sends from their own app. */
+/* Enquiry form: a few choices and one line, plus a name and email, sent to the portfolio API. */
 .contact-block{--muted:light-dark(#4a3c2e,#d6c8b4);--flag:light-dark(#8a1f18,#ff8a7e)}
-.brief{display:grid;gap:22px;margin-top:28px;max-width:760px}
-.brief fieldset{border:0;margin:0;padding:0}
-.brief legend,.brief .field label{font-weight:700;margin-bottom:10px;padding:0}
+.enquiry{display:grid;gap:22px;margin-top:28px;max-width:760px}
+.enquiry fieldset{border:0;margin:0;padding:0;min-width:0}
+.enquiry legend,.enquiry .field label{font-weight:700;margin-bottom:10px;padding:0}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:var(--r);box-shadow:inset 0 0 0 1.5px var(--on-panel);font-weight:600;font-size:.9375rem;cursor:pointer;transition:box-shadow .2s,color .2s,background-color .2s}
 .chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
 .chip:has(input:checked){background:var(--cobalt);color:var(--on-cobalt);box-shadow:none}
 .chip:has(input:focus-visible){outline:3px solid var(--on-panel);outline-offset:3px}
-.brief .field{display:grid;gap:6px}
-.brief .field label{margin:0}
-.brief textarea{font:inherit;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical;min-height:96px}
+.enquiry .field{display:grid;gap:6px;align-content:start}
+.enquiry .field label{margin:0}
+.enquiry .field :is(input,textarea){font:inherit;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;min-height:48px;width:100%;box-sizing:border-box}
+.enquiry textarea{resize:vertical;min-height:96px}
+.enquiry .field [aria-invalid]{border-color:var(--flag)}
+.enquiry-who{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:16px}
+.enquiry-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .field-help{font-size:.875rem;color:var(--muted)}
 .field-error{color:var(--flag);font-size:.9375rem;font-weight:700}
-.brief-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;font-weight:700}
-.brief-done{display:grid;gap:12px;color:var(--muted)}
-.brief-done a{color:var(--ink);font-weight:700}
-.brief-done textarea{font:inherit;font-size:.9375rem;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical}
-.brief-copy{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-weight:700;color:var(--ink)}
-.js .brief-fallback{display:none}
-.no-js .brief{display:none}
+.enquiry-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;font-weight:700}
+.enquiry-actions .button:disabled{opacity:.6;cursor:progress}
+.enquiry-failed{display:grid;gap:12px}
+.enquiry-failed>p:not(.field-error):not(.enquiry-copy){color:var(--muted)}
+.enquiry-failed a:not(.button){color:var(--ink);font-weight:700}
+.enquiry-failed textarea{font:inherit;font-size:.9375rem;color:var(--ink);background:var(--day);border:1.5px solid var(--muted);border-radius:var(--r);padding:12px 14px;resize:vertical}
+.enquiry-copy{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-weight:700;color:var(--ink)}
+.enquiry-sent{margin-top:28px;max-width:760px;font-size:clamp(1.25rem,2.6vw,1.75rem);font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.enquiry-sent:focus{outline:0}
+.js .enquiry-fallback{display:none}
 .site-footer{max-width:var(--max);margin:0 auto;padding:24px var(--pad) 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9375rem;border-top:1px solid var(--line)}
 .site-footer p:last-child{display:flex;flex-wrap:wrap;gap:0 20px}
 
