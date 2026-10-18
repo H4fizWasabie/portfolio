@@ -1,16 +1,16 @@
 // Everything the page needs before the room exists: day and night, the About columns, the
-// contact brief, the screenshot tabs and the demos. This file is small on purpose, so those work
+// Enquiry form, the screenshot tabs and the demos. This file is small on purpose, so those work
 // at once on a slow phone; room.js (three.js, about 680KB) loads afterwards and takes over the hero.
 import { initGalleries } from '../gallery.js';
 import { initDemos } from '../demos.js';
 import { initColonnade } from './about.js';
-import { initBrief } from './brief.js';
+import { initEnquiry } from './enquiry.js';
 import './theme.js';
 
 initGalleries();
 initDemos();
 initColonnade();
-initBrief();
+initEnquiry();
 
 if (document.querySelector('[data-stage], [data-object]')) {
   const room = () => {
