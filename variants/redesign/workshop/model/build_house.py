@@ -28,7 +28,7 @@
 #   land, plinth, house, ...    the lit, baked structure (the lighting texture is applied to every mesh that has TEXCOORD_1)
 #   glass_*                     transparent, never casts shadows; no lighting texture
 #   glow_*                      emissive parts (lamps, downlights, candle flames, LEDs); glow_<room>_panels, a
-#                               Room's ceiling lights, are off at night
+#                               Room's ceiling lights, are dimmed at night (NIGHT_PANELS)
 #   trees, rocks                dark, unlit (vertex colours carry their shading); the page shows them with basic materials
 #   trees_cards                 the near trees' branch cards: the same, with the branch texture cut out by its alpha
 #   sheer                       the sheer curtains, baked like the rest; the page makes them see-through
@@ -57,6 +57,7 @@ out_light = sys.argv[sys.argv.index('--') + 2]
 out_wet = sys.argv[sys.argv.index('--') + 3]
 hdri = os.environ['HOUSE_HDRI']
 draft = bool(os.environ.get('HOUSE_DRAFT'))  # quick bake for iterating on the shape
+ONLY = os.environ.get('HOUSE_ROOMS', '').split(',') if os.environ.get('HOUSE_ROOMS') else None  # bake and export only these Rooms (e.g. ai), not the House
 LIGHT_RES = int(os.environ.get('HOUSE_RES', 512 if draft else 2048))  # the texture is shipped at this size (build-house.sh only softens the bake noise a little)
 SAMPLES = int(os.environ.get('HOUSE_SAMPLES', 24 if draft else 512))
 LIGHT_RANGE = 4.0  # the texture holds white-surface radiance divided by this; room.js multiplies by pi * LIGHT_RANGE
@@ -1287,18 +1288,22 @@ def bake_into(objs, image):
         baked.add(m)
     select(objs)
     bpy.ops.object.bake(type='DIFFUSE', pass_filter={'DIRECT', 'INDIRECT'}, margin=12, margin_type='EXTEND', use_clear=True)
+    px = np.empty(len(image.pixels), np.float32)
+    image.pixels.foreach_get(px)
+    assert px.reshape(-1, 4)[:, :3].max() > 0, f'{image.name} baked black: Cycles failed (out of GPU memory?)'  # Cycles only logs it
 
 
 # Each Room bakes into its own lighting texture, in the same light, with its door open (the page takes the door away once the
-# Room is in). Its ceiling panels (glow_<slug>_panels) light it by day; at night they are off and its lamps and screens light it.
-room_targets = {slug: [o for o in objs if o.type == 'MESH' and not o.name.startswith(('glow_', 'screen_', 'glass_'))] for slug, objs in ROOMS.items()}
+# Room is in). Its ceiling panels (glow_<slug>_panels) light it by day; at night they are dimmed and its lamps and screens lead.
+room_targets = {slug: [o for o in objs if o.type == 'MESH' and not o.name.startswith(('glow_', 'screen_', 'glass_'))] for slug, objs in ROOMS.items() if not ONLY or slug in ONLY}
 for targets in room_targets.values():
     lightmap_uvs(targets)
 
 
 def bake_all(suffix):
-    house_img = lightmap_image('lightmap' + suffix)
-    bake_into(bake_objs, house_img)
+    house_img = None if ONLY else lightmap_image('lightmap' + suffix)
+    if house_img:
+        bake_into(bake_objs, house_img)
     imgs = {}
     for slug, targets in room_targets.items():
         door = bpy.data.objects[f'door_{slug}']
@@ -1310,12 +1315,14 @@ def bake_all(suffix):
 
 
 img, room_imgs = bake_all('')
-# Night: no bright sky, only a faint cool glow in the overcast; the House's lamps stay on and the Rooms' panels go off.
+# Night: no bright sky, only a faint cool glow in the overcast; the House's lamps stay on and the Rooms' panels are dimmed
+# (room.js NIGHT.panels must match).
 NIGHT_SKY = float(os.environ.get('NIGHT_SKY', 0.04))  # of the day sky's radiance
 gain.inputs[7].default_value = (*(SKY_LEVEL * NIGHT_SKY * np.array((0.7, 0.85, 1.25)) / sky_mean), 1)
 panels = [(m.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'], m.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value) for m in materials.values() if m.get('panel')]
-for strength, _ in panels:
-    strength.default_value = 0.0
+NIGHT_PANELS = 0.3  # of their day strength
+for strength, day in panels:
+    strength.default_value = day * NIGHT_PANELS
 img_night, room_imgs_night = bake_all('_night')
 for strength, day in panels:  # the glb carries the day's
     strength.default_value = day
@@ -1424,7 +1431,8 @@ for o, ms in originals.items():
     for i, m in enumerate(ms):
         o.data.materials[i] = MASK if m in (CONCRETE, ROOF_CONCRETE) else BLACK
 scene.cycles.samples = min(SAMPLES, 96)
-bpy.ops.object.bake(type='EMIT', margin=12, margin_type='EXTEND', use_clear=True)
+if not ONLY:
+    bpy.ops.object.bake(type='EMIT', margin=12, margin_type='EXTEND', use_clear=True)
 for o, ms in originals.items():
     for i, m in enumerate(ms):
         o.data.materials[i] = m
@@ -1450,17 +1458,18 @@ def png(path, a):
     open(path, 'wb').write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw, 9)) + chunk(b'IEND', b''))
 
 
-damp, wear, algae = (pixels(mimg)[:, :, i] for i in (0, 1, 2))
-print('damp: mean %.3f on concrete %.3f; wear mean %.4f' % (damp.mean(), damp[damp > 0.01].mean() if (damp > 0.01).any() else 0, wear.mean()))
 out_dir = os.path.dirname(out_glb)
-for image, path in ((img, out_light), (img_night, os.path.join(out_dir, 'house-light-night-raw.png'))):
-    rgb = pixels(image)[:, :, :3]
-    print('%s: mean %.3f p99 %.3f max %.3f' % (image.name, rgb.mean(), np.percentile(rgb, 99), rgb.max()))
-    rgb = rgb * (1 - np.array((0.56, 0.53, 0.56)) * damp[:, :, None]) * (1 + 0.22 * wear[:, :, None])
-    rgb = rgb * (1 - np.array((0.55, 0.3, 0.62)) * algae[:, :, None])  # the waterline's algae: darker, and green
-    png(path, encode(rgb))
-wet = np.clip(0.9 - 0.52 * damp, 0, 1)  # roughness: 0.9 dry, 0.38 where it is damp
-png(out_wet, np.repeat(np.round(wet * 255).astype(np.uint8)[:, :, None], 3, 2)[::-1])
+if not ONLY:  # the House
+    damp, wear, algae = (pixels(mimg)[:, :, i] for i in (0, 1, 2))
+    print('damp: mean %.3f on concrete %.3f; wear mean %.4f' % (damp.mean(), damp[damp > 0.01].mean() if (damp > 0.01).any() else 0, wear.mean()))
+    for image, path in ((img, out_light), (img_night, os.path.join(out_dir, 'house-light-night-raw.png'))):
+        rgb = pixels(image)[:, :, :3]
+        print('%s: mean %.3f p99 %.3f max %.3f' % (image.name, rgb.mean(), np.percentile(rgb, 99), rgb.max()))
+        rgb = rgb * (1 - np.array((0.56, 0.53, 0.56)) * damp[:, :, None]) * (1 + 0.22 * wear[:, :, None])
+        rgb = rgb * (1 - np.array((0.55, 0.3, 0.62)) * algae[:, :, None])  # the waterline's algae: darker, and green
+        png(path, encode(rgb))
+    wet = np.clip(0.9 - 0.52 * damp, 0, 1)  # roughness: 0.9 dry, 0.38 where it is damp
+    png(out_wet, np.repeat(np.round(wet * 255).astype(np.uint8)[:, :, None], 3, 2)[::-1])
 for suffix, imgs in (('', room_imgs), ('-night', room_imgs_night)):  # a Room's lighting textures: irradiance as for the House, without the weather
     for slug, rimg in imgs.items():
         rgb = pixels(rimg)[:, :, :3]
@@ -1486,6 +1495,7 @@ def export(path, objs):
                               export_lights=False)
 
 
-export(out_glb, [o for o in scene.objects if o not in ROOM_OBJS])
-for slug, objs in ROOMS.items():  # beside house.glb: room-<slug>-raw.glb
+if not ONLY:
+    export(out_glb, [o for o in scene.objects if o not in ROOM_OBJS])
+for slug, objs in ((k, v) for k, v in ROOMS.items() if k in room_targets):  # beside house.glb: room-<slug>-raw.glb
     export(os.path.join(os.path.dirname(out_glb), f'room-{slug}-raw.glb'), objs)

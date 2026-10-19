@@ -119,7 +119,7 @@ const BACKDROP = { az0: -50, az1: 50, el0: -6, el1: 34 };
 const SKY = { mist: 0x667a82, zenith: 0x56646c };
 // At night (the desk-lamp switch) the sky, the mist and what is lit only by them fall to these.
 // sky: what the plate is multiplied by (linear), and the mist with it; foliage: the trees' share of their day colour; env: of the sky's reflections.
-const NIGHT = { sky: [0.08, 0.09, 0.12], land: 0x050607, foliage: 0.2, rocks: 0x101211, env: 0.08 };
+const NIGHT = { sky: [0.08, 0.09, 0.12], land: 0x050607, foliage: 0.2, rocks: 0x101211, env: 0.08, panels: 0.3 }; // panels: a Room's ceiling lights, dimmed (build_house.py NIGHT_PANELS)
 const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom of the screen
 
 // Where the camera rests, in glTF axes (x right, y up, z towards the lake; the House's depth runs along -z). A stop's
@@ -411,7 +411,7 @@ function startHouse(stage, { root }) {
     lake.material.uniforms.fogColor.value.copy(scene.fog.color);
     for (const [m, day, night] of unlit) m.color.copy(day).lerp(night, t);
     for (const [m, day] of shiny) m.envMapIntensity = day * (1 + (NIGHT.env - 1) * t);
-    for (const [m, day] of panels) m.emissiveIntensity = day * (1 - t);
+    for (const [m, day] of panels) m.emissiveIntensity = day * (1 + (NIGHT.panels - 1) * t);
     dirty = true;
   }
   addEventListener('themechange', () => {
@@ -499,7 +499,7 @@ function startHouse(stage, { root }) {
       if (tag(o, 'glow_')) {
         o.material = m.clone();
         o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : glow;
-        if (/_panels$/.test(o.name) || /_panels$/.test(o.parent?.name)) panels.push([o.material, o.material.emissiveIntensity]); // a Room's ceiling panels are off at night
+        if (/_panels$/.test(o.name) || /_panels$/.test(o.parent?.name)) panels.push([o.material, o.material.emissiveIntensity]); // a Room's ceiling panels are dimmed at night
         return;
       }
       if (m.map) m.map.anisotropy = aniso;

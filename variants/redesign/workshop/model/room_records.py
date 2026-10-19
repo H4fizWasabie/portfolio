@@ -4,7 +4,7 @@
 # register's terminal on the counter, dispensary shelving, a medicines fridge and a wall clock. Its objects:
 #   obj_dd-drugs-register         the cabinet and the terminal beneath it; the terminal's screen_dd-drugs-register shows the
 #                                 register's workflow outline (the page draws it: no interface or record is shown)
-#   glow_records_panels           the ceiling panels (off at night)
+#   glow_records_panels           the ceiling panels (dimmed at night)
 #   glow_records_strip, _fridge   the light under the cabinet and inside the fridge (on day and night)
 # Coordinates as in build_house.py: from the stock Room's partition to x = X1, the House's back wall to the wing's.
 

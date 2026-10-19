@@ -4,7 +4,7 @@
 # accent: the kraft cartons of a delivery. Its objects, by the page's conventions:
 #   obj_procura   the workstation against the partition, its monitor screen_procura (Procura's screenshots)
 #   obj_pims      the wall tablet where stock requests arrive, its screen screen_pims (PIMS's screenshots)
-#   glow_stock_panels  the ceiling panels (off at night)
+#   glow_stock_panels  the ceiling panels (dimmed at night)
 #   glow_stock_lamp    the task lamp on the workstation (on day and night)
 # Coordinates as in build_house.py: the Room runs from the back wall (y = YB + 0.4) to the wing's back wall, on the ground floor.
 
@@ -23,7 +23,7 @@ LAMINATE = mat('laminate', None, color=(0.9, 0.9, 0.89), rough=0.5)
 SCREEN = mat('screen', None, color=(0.02, 0.02, 0.025), rough=0.2, emit=float(os.environ.get('SCREEN', 3.0)), emit_color=(0.85, 0.9, 1.0))  # lit, so it lights the desk in the bake; the page puts the screenshot on it
 RUBBER = mat('rubber', None, color=(0.04, 0.04, 0.045), rough=0.9)
 PANEL = mat('panel_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('PANEL', 24.0)), emit_color=(0.97, 0.98, 1.0))  # LED panels, cool white
-PANEL['panel'] = True  # off in the night bake (build_house.py)
+PANEL['panel'] = True  # dimmed in the night bake (build_house.py)
 
 room_parts = []
 

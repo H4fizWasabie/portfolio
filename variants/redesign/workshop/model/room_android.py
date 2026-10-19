@@ -3,7 +3,7 @@
 # room-android.glb. Warm and everyday: plaster walls, oak boards, a rug, an armchair under a floor lamp, a bookcase, a print.
 # Its objects:
 #   obj_map             the side table by the armchair with MAP on its phone stand (screen_map: MAP's screenshots)
-#   glow_android_panels the two ceiling lights (off at night)
+#   glow_android_panels the two ceiling lights (dimmed at night)
 #   glow_android_lamp   the floor lamp's shade (on day and night)
 # Coordinates as in build_house.py: upstairs, from the partition with the AI Room to x = X1, the House's back wall to the wing's.
 
@@ -36,8 +36,8 @@ walls_with_openings(shell, X0, X1, Y0 - 0.02, Y0, F, CE1, [(DOOR_X, OPEN_W, OPEN
 for a, b, c, d, k in ((X0, X1, Y0, Y0 + 0.015, NORTH), (X0, X0 + 0.015, Y0, Y1, EAST), (X1 - 0.015, X1, Y0, Y1, WEST), (X0, X1, Y1 - 0.015, Y1, SOUTH)):
     shell.box(a, b, c, d, F, F + 0.08, OAK_DARK, keep=k)  # skirting
 
-FLUSH = mat('glow_flush', None, color=WARM, rough=0.5, emit=float(os.environ.get('FLUSH', 40.0)), emit_color=LAMP)  # round opal ceiling lights
-FLUSH['panel'] = True  # off in the night bake
+FLUSH = mat('flush_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('FLUSH', 30.0)), emit_color=(1.0, 0.78, 0.56))  # round opal ceiling lights, 3500 K (not glow_: no 2000 K Blackbody)
+FLUSH['panel'] = True  # dimmed in the night bake
 lights = part('glow_android_panels', weight=1.0)
 for x, y in ((1.6, 14.6), (3.0, 17.0)):
     lights.cyl(x, y, CE1 - 0.06, CE1, 0.32, FLUSH, seg=28, caps=(True, False))
