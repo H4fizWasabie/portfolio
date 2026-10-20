@@ -1,6 +1,6 @@
 # Résumé
 
-One-page Internal Tools Developer / AI Automation résumé, approved by the owner 2026-10-14. Projects: PIMS, Procura, DD Drugs Register, Theoses, MAP.
+One-page Internal Tools Developer résumé, approved by the owner 2026-10-20. Projects: CAVELMS, PIMS, Procura, DD Drugs Register, Theoses, MAP.
 
 ## Single source
 
