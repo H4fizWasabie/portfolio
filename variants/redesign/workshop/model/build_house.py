@@ -120,7 +120,7 @@ def board_formed(size=1536, tile=TILE, board=0.15, tie=(1.2, 0.6)):
         butt[k] = np.exp(-(np.abs((ax[None, :] - cuts[:, None] + tile / 2) % tile - tile / 2).min(0) / 0.0018) ** 2)
     d = y % board
     t = 1 + seg_tone[row] + 0.03 * (0.5 - d / board) * r.uniform(0.4, 1.6, nb)[row][:, None]  # each board a touch lighter at its top (the form's lower board bleeds)
-    t = t + 0.07 * field(60) + 0.08 * field(220) + 0.015 * field(1.0)
+    t = t + 0.05 * field(60) + 0.05 * field(220) + 0.015 * field(1.0)
     # the grain the planks leave: wavy lines along each board, a little different on every one
     grain = np.sin(2 * np.pi * (d / board * r.uniform(3, 6, nb)[row][:, None] + r.uniform(0, 1, nb)[row][:, None]) + 2.4 * field(260, 3))
     t = t * (1 + 0.008 * grain + 0.01 * field(40, 0.9))
@@ -144,10 +144,10 @@ def board_formed(size=1536, tile=TILE, board=0.15, tie=(1.2, 0.6)):
             dx = (x - cx + tile / 2) % tile - tile / 2
             dy = (y - cy + tile / 2) % tile - tile / 2
             q = np.sqrt(dx ** 2 + dy ** 2)
-            hole += (1 / (1 + np.exp((q - 0.031) / 0.0035))) * (0.66 - 0.1 * np.clip(dy / 0.031, -1, 1))  # the recess: darkest at the top, a lit lip below
+            hole += (1 / (1 + np.exp((q - 0.031) / 0.0035))) * (0.55 - 0.09 * np.clip(dy / 0.031, -1, 1))  # the recess: darkest at the top, a lit lip below
             ring += np.exp(-((q - 0.047) / 0.011) ** 2)
             run += np.exp(-(dx / (0.02 + 0.006 * np.sin(dy * 40))) ** 2) * (dy > 0) * np.exp(-np.clip(dy, 0, None) / 0.32) * (dy < 0.7)
-    t = t * (1 - np.clip(hole, 0, 1)) * (1 + 0.1 * ring) * (1 - 0.17 * np.clip(run, 0, 1) * (1 + 0.3 * field(2, 12)))
+    t = t * (1 - np.clip(hole, 0, 1)) * (1 + 0.1 * ring) * (1 - 0.09 * np.clip(run, 0, 1) * (1 + 0.3 * field(2, 12)))
     t = t / t.mean() * 0.34  # dark, weathered concrete; the rain streaks are the wet bake's (they follow gravity, the tile does not)
     rgb = np.clip(np.stack([t * 0.985, t, t * 1.0], 2), 0, 1)
     out = np.ones((size, size, 4), np.float32)
@@ -304,6 +304,7 @@ ROOF_CONCRETE = mat('roof', BOARD_IMG, TILE, (0.8, 0.8, 0.8), 0.95, world=True)
 OAK = mat('oak', 'oak', 1.83, (0.78, 0.7, 0.62), 0.5)
 OAK_DARK = mat('oak_dark', 'oak', 1.83, (0.42, 0.34, 0.28), 0.5)
 OAK_MID = mat('oak_mid', 'oak', 1.83, (0.62, 0.54, 0.46), 0.5)
+OAK_CLAD = mat('oak_clad', 'oak', 1.83, (0.62, 0.5, 0.4), 0.6)  # the battens outside, weathered lighter than the doors
 OAK_FLOOR = mat('oak_floor', 'oak', 1.83, (0.5, 0.45, 0.4), 0.45)
 PLASTER = mat('plaster', 'plaster', 2.0, (0.96, 0.94, 0.9), 0.95, size=256)
 FLOOR = mat('floor', 'floor', 2.0, (0.5, 0.5, 0.5), 0.35, size=384)
@@ -337,6 +338,7 @@ GLOW_WASH = mat('glow_wash', None, color=WARM, rough=0.5, emit=8.0, emit_color=L
 GLOW_COVE = mat('glow_cove', None, color=WARM, rough=0.5, emit=float(os.environ.get('COVE', 10.0)), emit_color=LAMP)  # the strip behind the glass head of each floor: it washes the floor and spills out onto the terrace and the balcony
 GLOW_SHADE = mat('glow_shade', None, color=WARM, rough=0.5, emit=9.0, emit_color=LAMP)  # a linen lampshade lit from inside
 GLOW_SOFFIT = mat('glow_soffit', None, color=WARM, rough=0.5, emit=45.0, emit_color=LAMP)  # downlights under the cantilever
+GLOW_SIDE = mat('glow_side', None, color=WARM, rough=0.5, emit=1.5, emit_color=LAMP)  # the side windows upstairs: a room lit behind a sheer
 GLASS = bpy.data.materials.new('glass')
 GLASS.use_nodes = True
 g = GLASS.node_tree.nodes['Principled BSDF']
@@ -569,9 +571,15 @@ house.box(-FX, 5.5, 7.4, YB + 0.4, CE0, FL1, CONCRETE, drop=[UP], top=ROOF)
 house.box(7.2, FX, 7.4, YB + 0.4, CE0, FL1, CONCRETE, drop=[UP], top=ROOF)
 house.box(5.5, 7.2, STAIR_TOP_Y, YB + 0.4, CE0, FL1, CONCRETE, drop=[UP])
 house.box(-FX, FX, BAL, YB + 0.4, CE1, ROOF, CONCRETE)
+SIDE_WIN = (2.4, 10.2, FL1 + 0.55, CE1 - 0.3)  # the side window upstairs (y0, y1, z0, z1), set 0.2 m into the wall
 for sx in (-1, 1):
     a, b = sorted((sx * HX1, sx * FX))
-    house.box(a, b, BAL, YB + 0.4, FL1, CE1, CONCRETE, drop=[UP, DOWN, NORTH], top=ROOF)
+    y0, y1, z0, z1 = SIDE_WIN
+    house.box(a, b, BAL, y0, FL1, CE1, CONCRETE, drop=[UP, DOWN], top=ROOF)
+    house.box(a, b, y1, YB + 0.4, FL1, CE1, CONCRETE, drop=[UP, DOWN, NORTH], top=ROOF)
+    house.box(a, b, y0, y1, FL1, z0, CONCRETE, drop=[DOWN, NORTH, SOUTH], top=ROOF)  # under the sill: its top is the sill
+    house.box(a, b, y0, y1, z1, CE1, CONCRETE, drop=[UP, NORTH, SOUTH], top=ROOF)    # over the head: its underside is the head
+    house.box(*sorted((sx * HX1, sx * (FX - 0.2))), y0, y1, z0, z1, CONCRETE, keep=(sx, 0, 0), wet=0.2)  # the back of the recess
 upper_doors = [(x, OPEN_W, OPEN_H) for slug, x, st in DOORS if st == 1]
 walls_with_openings(house, -HX1, HX1, YB, YB + 0.4, FL1, CE1, upper_doors, CONCRETE, drop=[DOWN, UP, NORTH, SOUTH])
 # The rear wing behind the back wall, two storeys, where the four Rooms are (each Room's asset holds its inside): its outside only
@@ -582,10 +590,32 @@ for a, b, c, d in ((-FX, FX, BAL, BAL + 0.25), (-FX, FX, YW - 0.25, YW), (-FX, -
 house.box(-FX + 0.25, FX - 0.25, BAL + 0.25, YW - 0.25, ROOF, ROOF + 0.04, GRAVEL, keep=UP)
 for x0, x1 in ((-5.6, -2.6), (-1.4, 1.6)):
     house.box(x0, x1, 6.2, 8.8, ROOF + 0.04, ROOF + 0.32, FRAME, drop=[DOWN])
-# The chimney tower, with a cap
-house.box(6.0, 8.2, 3.0, 5.4, ROOF, 11.2, CONCRETE, drop=[DOWN])
-house.box(5.9, 8.3, 2.9, 5.5, 11.2, 11.4, ROOF_CONCRETE, drop=[DOWN])
-house.box(6.5, 7.7, 3.5, 4.9, 11.4, 11.41, CHARCOAL, keep=UP)
+# The stove's flue: a slim black steel pipe through the roof, with a cap
+house.cyl(6.8, 4.2, ROOF + 0.3, ROOF + 2.0, 0.16, FRAME, seg=16, caps=(False, False))
+house.cyl(6.8, 4.2, ROOF + 2.0, ROOF + 2.12, 0.24, FRAME, seg=16, r_top=0.2)
+# The ground storey is clad in oak battens all round its sides (the wing's too), so the concrete upper floor sits on a
+# timber base, with a dark shadow gap where the concrete starts
+for sx in (-1, 1):
+    for x, ya, yb, wet in ((7.6, YF, YB + 0.4, 0.3), (FX, YB + 0.4, YW, 1.0)):
+        house.box(*sorted((sx * x, sx * (x + 0.02))), ya, yb, TERR, CE0 - 0.06, OAK_CLAD, keep=(sx, 0, 0), wet=wet)
+        house.box(*sorted((sx * x, sx * (x + 0.01))), ya, yb, CE0 - 0.06, CE0, CHARCOAL, keep=(sx, 0, 0))
+        for y in np.arange(ya + 0.1, yb - 0.05, 0.3):
+            house.box(*sorted((sx * (x + 0.02), sx * (x + 0.06))), y - 0.022, y + 0.022, TERR, CE0 - 0.06, OAK_CLAD, drop=[UP, DOWN, (-sx, 0, 0)], wet=wet)
+# A steel coping on the parapet, and two plant boxes on the roof towards the back
+for a, b, c, d in ((-FX - 0.02, FX + 0.02, BAL - 0.02, BAL + 0.27), (-FX - 0.02, FX + 0.02, YW - 0.27, YW + 0.02), (-FX - 0.02, -FX + 0.27, BAL, YW), (FX - 0.27, FX + 0.02, BAL, YW)):
+    house.box(a, b, c, d, ROOF + 0.3, ROOF + 0.34, FRAME, drop=[DOWN])
+for x0, y0 in ((-4.5, 14.5), (2.0, 15.6)):
+    house.box(x0, x0 + 1.4, y0, y0 + 0.9, ROOF + 0.04, ROOF + 0.85, FRAME, drop=[DOWN])
+# A long window on each side upstairs, warm behind a sheer: a steel frame, the glass and a lit panel behind it
+side_glow, side_glass = Part('glow_side', 1.0), Part('glass_side', 0)
+for sx in (-1, 1):
+    y0, y1, z0, z1 = SIDE_WIN
+    xr = FX - 0.2  # the back of the recess
+    side_glow.box(*sorted((sx * xr, sx * (xr + 0.01))), y0, y1, z0, z1, GLOW_SIDE, keep=(sx, 0, 0))
+    side_glass.box(*sorted((sx * (xr + 0.05), sx * (xr + 0.06))), y0, y1, z0, z1, GLASS, keep=(sx, 0, 0))
+    third = (y1 - y0) / 3
+    for a, b, c, d in ((y0, y1, z0, z0 + 0.05), (y0, y1, z1 - 0.05, z1), (y0, y0 + 0.05, z0, z1), (y1 - 0.05, y1, z0, z1), (y0 + third - 0.03, y0 + third + 0.03, z0, z1), (y1 - third - 0.03, y1 - third + 0.03, z0, z1)):
+        house.box(*sorted((sx * xr, sx * (xr + 0.08))), a, b, c, d, FRAME, drop=[(-sx, 0, 0)])
 
 # --- interior: floors, plaster, ceilings
 inside = Part('house_interior', 1.1)
@@ -861,7 +891,7 @@ for x in np.arange(-6.3, 6.4, 1.8):
 for x in (-5.4, -1.8, 1.8, 5.4):
     terrace_lights.cyl(x, -0.2, CE1 - 0.03, CE1, 0.06, GLOW_SOFFIT, seg=10, caps=(True, False))
 
-parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r]
+parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r, side_glow, side_glass]
 objects = [p.build() for p in parts] + [d.build() for d in doors]
 
 for slug, x, st in DOORS:
