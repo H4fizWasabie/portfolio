@@ -76,7 +76,7 @@
     <table class="idrow"><tr>
       <td>
         <h1 class="mono">MOHAMMAD HAFIZ JAMALI</h1>
-        <div class="role mono">INTERNAL TOOLS DEVELOPER · AI AUTOMATION</div>
+        <div class="role mono">INTERNAL TOOLS DEVELOPER · GO · POSTGRESQL · AI AUTOMATION</div>
       </td>
       <td class="meta mono">
         <span>Selayang 68100, Malaysia</span>
@@ -87,19 +87,31 @@
       </td>
     </tr></table>
     <div class="certline mono">
-      <b>CIPS CERTIFIED</b> — HUMANITARIAN PROCUREMENT PROFESSIONAL (LEVEL 3, 2025) &nbsp;·&nbsp; LANGUAGES: ENGLISH / BAHASA MALAYSIA / IBAN
+      <b>4 SYSTEMS IN PRODUCTION</b> — BUILT, DEPLOYED AND MAINTAINED SOLO &nbsp;·&nbsp; LANGUAGES: ENGLISH / BAHASA MALAYSIA / IBAN
     </div>
   </div>
 
   <!-- ================= PROFILE ================= -->
   <div class="sec">
     <div class="sechead"><span class="sectitle mono">PROFILE</span></div>
-    <p class="profile">Internal tools developer from an operations background. I build the systems my own workplace runs on — procurement, inventory and dangerous-drugs software in daily use at a veterinary hospital — and the AI automation around them.</p>
+    <p class="profile">Internal tools developer who learned the business first: years in procurement and inventory showed me where paper and spreadsheets break, and I now replace them with software people use daily. I take systems from requirements to production alone (data model, Go backend, deployment, backups, AI automation) for a veterinary hospital and a freelance client.</p>
   </div>
 
   <!-- ================= PROJECTS ================= -->
   <div class="sec">
     <div class="sechead"><span class="sectitle mono">PROJECTS</span></div>
+
+    <table class="sys"><tr>
+      <td class="sysname">CAVELMS — Learning Platform <span class="kind mono">· FREELANCE CLIENT · LIVE</span></td>
+      <td class="sysurl mono">lms.wasabietech.com</td>
+    </tr></table>
+    <div class="tags mono">GO · POSTGRESQL · AUTH · FILE STORAGE · CADDY · SYSTEMD</div>
+    <p class="sysdesc">Online courses, exams and certificates for The Cave Consult, a training company; built to spec with the client from requirements to deployment.</p>
+    <ul class="sysul">
+      <li>Learner registration with email verification and password reset; Admin role created only from the CLI, never through sign-up.</li>
+      <li>Course builder from ordered lessons, exams with PDF certificates, and a media gallery (uploads up to 2 GB) with per-course visibility rules.</li>
+      <li>Embedded database migrations, integration tests against a throwaway Postgres, nightly encrypted backups to off-site storage.</li>
+    </ul>
 
     <table class="sys"><tr>
       <td class="sysname">PIMS — Hospital Stock &amp; Inventory <span class="kind mono">· PRODUCTION · LIVE</span></td>
@@ -120,9 +132,7 @@
     <p class="sysdesc">Inventory, suppliers, reorder planning and purchase orders in one Go binary, replacing a Google Apps Script + Python setup.</p>
     <ul class="sysul">
       <li>Handles <b>619 purchase orders and 1,144 stock items</b> (January to mid-October 2026).</li>
-      <li>Spend analysis shows <b>10 to 15 core suppliers carry 80% of monthly spend</b>, out of 70 to 90 on file.</li>
-      <li>Converted key suppliers from pay-in-advance to credit terms — negotiated from data the system surfaced.</li>
-      <li>Standardized SRM protocols and supplier KPI tracking for reliable delivery on critical medical supplies.</li>
+      <li>Spend reporting that showed 10 to 15 suppliers carry 80% of spend; management used it to win credit terms from key suppliers.</li>
     </ul>
 
     <table class="sys"><tr>
@@ -143,11 +153,8 @@
     <div class="tags mono">TYPESCRIPT · AI AGENTS · AUTOMATION · LINUX VPS</div>
     <p class="sysdesc">Built on the open-source pi coding agent, forked to suit my workflow and use cases. Terminal, Telegram and web.</p>
     <ul class="sysul">
-      <li>Procura orchestrator: stock alerts every 30 min on workdays, RFQ/PO follow-ups, data questions, weekly work report.</li>
-      <li>Social media content pipeline: daily research → scripts → narrated videos → Facebook and Instagram posts.</li>
-      <li>Daily research and coding assistant; ships changes to my systems, including this portfolio, through reviewed pull requests.</li>
-      <li>Added shared long-term memory, a bounded context window and self-verification (plans, cross-model review, claim checks).</li>
-      <li><b>730+ commits and 360+ merged PRs in six weeks</b>; runs about 30 scheduled jobs. Successor to Mino, a Go agent runtime I built from scratch (graph memory, MCP, playbooks, evals).</li>
+      <li>Runs about 30 scheduled jobs: stock alerts every 30 min on workdays, RFQ/PO follow-ups, plain-language data questions, weekly reports.</li>
+      <li>Added long-term memory and self-checks (plans, cross-model review). Successor to Mino, an agent runtime I wrote from scratch in Go.</li>
     </ul>
 
     <table class="sys"><tr>
@@ -164,10 +171,18 @@
 
     <div class="job">
       <table class="jobrow"><tr>
+        <td class="jt">Freelance Developer <span class="jloc">— The Cave Consult (CAVELMS)</span></td>
+        <td class="jd mono">OCT 2026 – PRESENT</td>
+      </tr></table>
+      <p class="jdesc">Sole developer of the client's learning platform: gather requirements, propose mockups for approval, build, deploy and run it.</p>
+    </div>
+
+    <div class="job">
+      <table class="jobrow"><tr>
         <td class="jt">Procurement Officer / Internal Tools Developer <span class="jloc">— Starlight Veterinary Medical Centre, Ampang</span></td>
         <td class="jd mono">DEC 2025 – PRESENT</td>
       </tr></table>
-      <p class="jdesc">Owner of the full procurement-to-inventory operation; designed and shipped PIMS, Procura and the DD Drugs Register above. Digitized the entire procurement lifecycle; negotiated payment terms; run supplier consolidation and KPI programs.</p>
+      <p class="jdesc">Designed, built and run PIMS, Procura and the DD Drugs Register above, replacing paper and spreadsheet workflows across procurement, pharmacy stock and controlled drugs. Also own the procurement operation they serve.</p>
     </div>
 
     <div class="job">
@@ -175,7 +190,7 @@
         <td class="jt">Procurement / Operations Officer <span class="jloc">— IMARET (IMAM Response &amp; Relief Team), Selayang</span></td>
         <td class="jd mono">DEC 2022 – DEC 2025</td>
       </tr></table>
-      <p class="jdesc">Humanitarian procurement for clinics and field projects. Designed a Procurement Cycle System adopted as the organization's SOP. Built periodic reporting on inventory usage, assets, and projections for management decisions. Maintained 100% PRF/PO compliance across medicine stock and asset management for 2 static clinics + field missions.</p>
+      <p class="jdesc">Procurement for 2 clinics and field missions. Designed the procurement cycle adopted as the organization's SOP and built the inventory and asset reporting management decided from. CIPS Level 3 certified (2025).</p>
     </div>
 
     <div class="job">
@@ -199,11 +214,11 @@
   <div class="sec">
     <div class="sechead"><span class="sectitle mono">SKILLS</span></div>
     <table class="skills">
-      <tr><td class="sklabel mono">AI AGENTS</td><td class="sk">Agent runtimes &amp; harnesses (built from scratch in Go) · Agent loop design (ReAct, OODA-style poll/act/verify) &amp; tool calling · Context engineering (compaction, bounded context windows, prompt caching) · Memory &amp; retrieval (RAG, embeddings, graph memory, consolidation, dedup) · Tool management &amp; MCP · Subagent orchestration · Agent evals · Agent verification · Multi-provider LLMs</td></tr>
-      <tr><td class="sklabel mono">ARCHITECTURE</td><td class="sk">System design from scratch · Zero-trust design (least privilege, approval gates, fail-closed auth) · GraphRAG / knowledge graphs · ICM stage-based workflows · Client/server protocol design · Domain &amp; data modeling</td></tr>
-      <tr><td class="sklabel mono">AUTOMATION</td><td class="sk">Business process automation (procurement → inventory) · Scheduled AI workflows · Telegram AI bots · AI stock-take vision · Approval workflows &amp; RBAC</td></tr>
-      <tr><td class="sklabel mono">TECHNICAL</td><td class="sk">Go · TypeScript · Python · Kotlin · PostgreSQL/SQLite · JavaScript · Linux VPS deployment (Caddy, systemd) · GitHub Actions CI</td></tr>
-      <tr><td class="sklabel mono">DOMAIN</td><td class="sk">Procurement &amp; sourcing · Inventory management · SRM &amp; supplier negotiation · Healthcare ops · AutoCount (e-invoicing) · Excel</td></tr>
+      <tr><td class="sklabel mono">LANGUAGES</td><td class="sk">Go · TypeScript · JavaScript · Python · Kotlin · SQL</td></tr>
+      <tr><td class="sklabel mono">BACKEND &amp; DATA</td><td class="sk">PostgreSQL · SQLite · Data modeling · Migrations · REST APIs · Auth, sessions &amp; role-based access · Audit trails · Reporting &amp; CSV/PDF export</td></tr>
+      <tr><td class="sklabel mono">OPS</td><td class="sk">Linux VPS · Caddy · systemd · Backups &amp; restore · GitHub Actions CI · Git &amp; pull-request workflow · Integration testing</td></tr>
+      <tr><td class="sklabel mono">AI AUTOMATION</td><td class="sk">LLM agents &amp; tool calling · MCP · RAG &amp; embeddings · Scheduled AI workflows · Telegram bots · Evals</td></tr>
+      <tr><td class="sklabel mono">DOMAIN</td><td class="sk">Procurement · Inventory &amp; stock control · Healthcare / pharmacy operations · Requirements gathering with non-technical users</td></tr>
     </table>
   </div>
 
