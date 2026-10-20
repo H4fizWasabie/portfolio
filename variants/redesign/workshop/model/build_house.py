@@ -338,7 +338,7 @@ GLOW_WASH = mat('glow_wash', None, color=WARM, rough=0.5, emit=8.0, emit_color=L
 GLOW_COVE = mat('glow_cove', None, color=WARM, rough=0.5, emit=float(os.environ.get('COVE', 10.0)), emit_color=LAMP)  # the strip behind the glass head of each floor: it washes the floor and spills out onto the terrace and the balcony
 GLOW_SHADE = mat('glow_shade', None, color=WARM, rough=0.5, emit=9.0, emit_color=LAMP)  # a linen lampshade lit from inside
 GLOW_SOFFIT = mat('glow_soffit', None, color=WARM, rough=0.5, emit=45.0, emit_color=LAMP)  # downlights under the cantilever
-GLOW_SIDE = mat('glow_side', None, color=WARM, rough=0.5, emit=1.5, emit_color=LAMP)  # the side windows upstairs: a room lit behind a sheer
+GLOW_SIDE = mat('glow_side', None, color=WARM, rough=0.5, emit=14.0, emit_color=LAMP)  # the strip at the head of each side window upstairs: it washes the curtain behind the glass
 GLASS = bpy.data.materials.new('glass')
 GLASS.use_nodes = True
 g = GLASS.node_tree.nodes['Principled BSDF']
@@ -571,7 +571,7 @@ house.box(-FX, 5.5, 7.4, YB + 0.4, CE0, FL1, CONCRETE, drop=[UP], top=ROOF)
 house.box(7.2, FX, 7.4, YB + 0.4, CE0, FL1, CONCRETE, drop=[UP], top=ROOF)
 house.box(5.5, 7.2, STAIR_TOP_Y, YB + 0.4, CE0, FL1, CONCRETE, drop=[UP])
 house.box(-FX, FX, BAL, YB + 0.4, CE1, ROOF, CONCRETE)
-SIDE_WIN = (2.4, 10.2, FL1 + 0.55, CE1 - 0.3)  # the side window upstairs (y0, y1, z0, z1), set 0.2 m into the wall
+SIDE_WIN = (2.4, 10.2, FL1 + 0.55, CE1 - 0.3)  # the side window upstairs (y0, y1, z0, z1): glass 0.15 m into the wall, a curtain behind it
 for sx in (-1, 1):
     a, b = sorted((sx * HX1, sx * FX))
     y0, y1, z0, z1 = SIDE_WIN
@@ -579,7 +579,14 @@ for sx in (-1, 1):
     house.box(a, b, y1, YB + 0.4, FL1, CE1, CONCRETE, drop=[UP, DOWN, NORTH], top=ROOF)
     house.box(a, b, y0, y1, FL1, z0, CONCRETE, drop=[DOWN, NORTH, SOUTH], top=ROOF)  # under the sill: its top is the sill
     house.box(a, b, y0, y1, z1, CE1, CONCRETE, drop=[UP, NORTH, SOUTH], top=ROOF)    # over the head: its underside is the head
-    house.box(*sorted((sx * HX1, sx * (FX - 0.2))), y0, y1, z0, z1, CONCRETE, keep=(sx, 0, 0), wet=0.2)  # the back of the recess
+    house.box(*sorted((sx * HX1, sx * (FX - 0.6))), y0, y1, z0, z1, CONCRETE, keep=(sx, 0, 0), wet=0.2)  # the back of the recess
+    # a pleated linen curtain drawn across it, lit from the strip above (side_glow), so the bake gives it a falloff
+    for i, y in enumerate(np.arange(y0, y1 - 0.01, 0.13)):
+        xc = FX - 0.55 + 0.035 * (i % 2)
+        house.box(*sorted((sx * xc, sx * (xc + 0.01))), y, min(y + 0.13, y1), z0, z1 - 0.06, FABRIC_PALE, keep=(sx, 0, 0), wet=0)
+# The step where the wing stands out past the ground storey: its face, clad like the rest (it was open into the Rooms)
+for sx in (-1, 1):
+    house.box(*sorted((sx * 7.6, sx * FX)), YB + 0.38, YB + 0.4, TERR, CE0, OAK_CLAD, keep=SOUTH, wet=0.3)
 upper_doors = [(x, OPEN_W, OPEN_H) for slug, x, st in DOORS if st == 1]
 walls_with_openings(house, -HX1, HX1, YB, YB + 0.4, FL1, CE1, upper_doors, CONCRETE, drop=[DOWN, UP, NORTH, SOUTH])
 # The rear wing behind the back wall, two storeys, where the four Rooms are (each Room's asset holds its inside): its outside only
@@ -610,8 +617,8 @@ for x0, y0 in ((-4.5, 14.5), (2.0, 15.6)):
 side_glow, side_glass = Part('glow_side', 1.0), Part('glass_side', 0)
 for sx in (-1, 1):
     y0, y1, z0, z1 = SIDE_WIN
-    xr = FX - 0.2  # the back of the recess
-    side_glow.box(*sorted((sx * xr, sx * (xr + 0.01))), y0, y1, z0, z1, GLOW_SIDE, keep=(sx, 0, 0))
+    xr = FX - 0.2  # the window's frame
+    side_glow.box(*sorted((sx * (FX - 0.5), sx * (FX - 0.4))), y0, y1, z1 - 0.02, z1, GLOW_SIDE, keep=DOWN)  # hidden behind the head
     side_glass.box(*sorted((sx * (xr + 0.05), sx * (xr + 0.06))), y0, y1, z0, z1, GLASS, keep=(sx, 0, 0))
     third = (y1 - y0) / 3
     for a, b, c, d in ((y0, y1, z0, z0 + 0.05), (y0, y1, z1 - 0.05, z1), (y0, y0 + 0.05, z0, z1), (y1 - 0.05, y1, z0, z1), (y0 + third - 0.03, y0 + third + 0.03, z0, z1), (y1 - third - 0.03, y1 - third + 0.03, z0, z1)):

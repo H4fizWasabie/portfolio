@@ -498,7 +498,7 @@ function startHouse(stage, { root }) {
       if (tag(o, 'sheer')) { Object.assign(m, { transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide }); o.renderOrder = 1; } // sheer curtains: the light comes through
       if (tag(o, 'glow_')) {
         o.material = m.clone();
-        o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : tag(o, 'glow_side') ? 0.35 : glow; // the side windows: a room behind a sheer, not a lamp
+        o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : glow;
         if (/_panels$/.test(o.name) || /_panels$/.test(o.parent?.name)) panels.push([o.material, o.material.emissiveIntensity]); // a Room's ceiling panels are dimmed at night
         return;
       }
