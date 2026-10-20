@@ -147,7 +147,7 @@ const DOORS = { stock: door(-3.8, 1.05), records: door(1.0, 1.05), ai: door(-3.8
 const roomStop = (pos, at, more = {}) => ({ pos, at, hfov: 58, off: 0.12, exp: 1.15, ...more, phone: { hfov: 46, up: 0.26, ...more.phone } });
 const studioStop = (pos, at, more = {}) => roomStop(pos, at, { exp: 1.45, ...more }); // the AI Room is dark: the eye opens up
 const STOPS = {
-  hero: { pos: [4, 2.0, 41], at: [-1, 7.5, -4], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [2.5, 2.2, 38], at: [0, 8, -4], hfov: 33, up: 0.22 } },
+  hero: { pos: [-27, 2.6, 29], at: [2, 6.4, -7], hfov: 52, off: 0.22, exp: 1.0, phone: { pos: [-17, 2.4, 33], at: [0.5, 7.4, -6], hfov: 36, up: 0.22 } },
   door: { pos: [0, 2.2, 4.2], at: [0, 2.6, -8], hfov: 66, off: 0.12, exp: 1.2, phone: { pos: [0, 2.2, 5.5], at: [0, 3.3, -8], hfov: 42, up: 0.26 } },
   stock: { ...doorway('stock', [3.4, 1.8, 10.5]), via: [{ pos: [0, 2.5, -1.4], at: [-2.4, 2.4, -12] }] }, // in through the middle of the open door
   // The stock Room: Procura's workstation against the partition, PIMS's tablet on the wall by the door.
@@ -498,7 +498,7 @@ function startHouse(stage, { root }) {
       if (tag(o, 'sheer')) { Object.assign(m, { transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide }); o.renderOrder = 1; } // sheer curtains: the light comes through
       if (tag(o, 'glow_')) {
         o.material = m.clone();
-        o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : glow;
+        o.material.emissiveIntensity = tag(o, 'glow_lamps') ? 0.9 : tag(o, 'glow_side') ? 0.35 : glow; // the side windows: a room behind a sheer, not a lamp
         if (/_panels$/.test(o.name) || /_panels$/.test(o.parent?.name)) panels.push([o.material, o.material.emissiveIntensity]); // a Room's ceiling panels are dimmed at night
         return;
       }
