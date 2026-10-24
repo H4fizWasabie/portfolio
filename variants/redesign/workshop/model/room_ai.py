@@ -40,7 +40,7 @@ shell.box(X0, X1, Y0, Y1, F - 0.02, F, STUDIO_FLOOR, keep=UP)
 shell.box(X0, X1, Y0, Y1, CE1, CE1 + 0.02, STUDIO_CEIL, keep=DOWN)
 shell.box(X0 - 0.02, X0, Y0, Y1, F, CE1, ACOUSTIC, keep=EAST)
 shell.box(X1, X1 + 0.02, Y0, Y1, F, CE1, ACOUSTIC, keep=WEST)
-shell.box(X0, X1, Y1, Y1 + 0.02, F, CE1, ACOUSTIC, keep=SOUTH)
+wall_with_windows(shell, X0, X1, Y1, Y1 + 0.02, F, CE1, *WING_WIN[1], [ribbon(X0, X1)], ACOUSTIC, keep=SOUTH)  # the ribbon window to the dusk
 walls_with_openings(shell, X0, X1, Y0 - 0.02, Y0, F, CE1, [(DOOR_X, OPEN_W, OPEN_H)], ACOUSTIC, keep=NORTH)
 
 spots = part('glow_ai_panels', weight=1.0)

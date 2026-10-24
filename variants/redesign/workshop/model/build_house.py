@@ -499,6 +499,15 @@ HX0, HX1, FX = 7.2, 7.4, 8.6   # inner half widths (ground, upstairs) and the co
 BAL = -1.4                  # the balcony's front edge
 DOORS = [('stock', -3.8, 0), ('records', 1.0, 0), ('ai', -3.8, 1), ('android', 1.0, 1)]  # slug, x, storey
 OPEN_W, OPEN_H = 0.65, 2.55  # half width and height of a doorway
+WING_WIN = {0: (FL0 + 2.45, CE0 - 0.1), 1: (FL1 + 2.45, CE1 - 0.08)}  # sill and head of the Rooms' ribbon windows, per storey: over their furniture
+
+
+def ribbon(x0, x1):
+    """The ribbon window (centre, half width) in the back wall of a Room that runs from x0 to x1."""
+    return (x0 + x1) / 2, (x1 - x0) / 2 - 0.3
+
+
+WING_RIBBONS = [ribbon(-FX + 0.4, -0.5), ribbon(-0.3, 5.0)]  # the Rooms' spans: stock and ai on the left, records and android on the right
 STAIR_X0, STAIR_X1, STAIR_Y0, RISE, GOING = 5.7, 7.2, 6.0, 0.18, 0.27
 NORTH, SOUTH, EAST, WEST, UP, DOWN = (0, 1, 0), (0, -1, 0), (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)
 STAIR_TOP_Y = STAIR_Y0 + 19 * GOING  # the 20th riser lands on the upstairs floor here
@@ -515,6 +524,12 @@ def walls_with_openings(part, x0, x1, y0, y1, z0, z1, openings, material, **kw):
         part.box(a, b, y0, y1, z0, z1, material, **kw)
     for xc, hw, h in openings:  # the lintel keeps its underside: the tour walks under it
         part.box(xc - hw, xc + hw, y0, y1, z0 + h, z1, material, **{**kw, 'drop': [d for d in kw.get('drop', ()) if d != DOWN]})
+
+
+def wall_with_windows(part, x0, x1, y0, y1, z0, z1, sill, head, windows, material, **kw):
+    """A wall along x from z0 to z1 with windows (centre, half width) cut through it from sill to head."""
+    part.box(x0, x1, y0, y1, z0, sill, material, **kw)
+    walls_with_openings(part, x0, x1, y0, y1, sill, z1, [(xc, hw, head - sill) for xc, hw in windows], material, **kw)
 
 
 # --- the ground: land with a shore, bake-only water
@@ -590,7 +605,10 @@ for sx in (-1, 1):
 upper_doors = [(x, OPEN_W, OPEN_H) for slug, x, st in DOORS if st == 1]
 walls_with_openings(house, -HX1, HX1, YB, YB + 0.4, FL1, CE1, upper_doors, CONCRETE, drop=[DOWN, UP, NORTH, SOUTH])
 # The rear wing behind the back wall, two storeys, where the four Rooms are (each Room's asset holds its inside): its outside only
-house.box(-FX, FX, YB + 0.4, YW, TERR, ROOF, CONCRETE, drop=[DOWN, SOUTH, UP], top=ROOF)
+house.box(-FX, FX, YB + 0.4, YW - 0.4, TERR, ROOF, CONCRETE, drop=[DOWN, SOUTH, UP, NORTH], top=ROOF)
+# its back wall, with a ribbon window high in each Room (WING_WIN), so the dusk shows in the Rooms
+for z0, z1, st in ((TERR, FL1, 0), (FL1, ROOF, 1)):
+    wall_with_windows(house, -FX, FX, YW - 0.4, YW, z0, z1, *WING_WIN[st], WING_RIBBONS, CONCRETE, drop=[SOUTH], top=ROOF)
 # The roof, over the House and the wing: a parapet round its edge, gravel inside it, two flat rooflights
 for a, b, c, d in ((-FX, FX, BAL, BAL + 0.25), (-FX, FX, YW - 0.25, YW), (-FX, -FX + 0.25, BAL, YW), (FX - 0.25, FX, BAL, YW)):
     house.box(a, b, c, d, ROOF, ROOF + 0.3, CONCRETE, drop=[DOWN])
@@ -672,6 +690,17 @@ def glaze(frame, glass, z0, z1, half):
 
 glaze(frames, glass_f, FL0, CE0, HX0)
 glaze(frames, glass_u, FL1, CE1, HX1)
+# the Rooms' ribbon windows: glass set back in the wing's back wall, a steel frame with a mullion about every 1.2 m
+glass_wing = Part('glass_wing', 0)
+for sill, head in WING_WIN.values():
+    for xc, hw in WING_RIBBONS:
+        glass_wing.box(xc - hw, xc + hw, YW - 0.16, YW - 0.15, sill, head, GLASS, keep=NORTH)
+        n = round(2 * hw / 1.2)
+        for i in range(n + 1):
+            x = xc - hw + 2 * hw * i / n
+            frames.box(max(x - 0.03, xc - hw), min(x + 0.03, xc + hw), YW - 0.18, YW - 0.12, sill, head, FRAME)
+        for z in (sill, head - 0.04):
+            frames.box(xc - hw, xc + hw, YW - 0.18, YW - 0.12, z, z + 0.04, FRAME)
 # door frames inside, on the doorways
 for slug, x, st in DOORS:
     z0 = FL1 if st else FL0
@@ -898,7 +927,7 @@ for x in np.arange(-6.3, 6.4, 1.8):
 for x in (-5.4, -1.8, 1.8, 5.4):
     terrace_lights.cyl(x, -0.2, CE1 - 0.03, CE1, 0.06, GLOW_SOFFIT, seg=10, caps=(True, False))
 
-parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r, side_glow, side_glass]
+parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r, glass_wing, side_glow, side_glass]
 objects = [p.build() for p in parts] + [d.build() for d in doors]
 
 for slug, x, st in DOORS:

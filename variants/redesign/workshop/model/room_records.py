@@ -35,7 +35,7 @@ shell.box(X0, X1, Y0, Y1, FL0 - 0.02, FL0, VINYL, keep=UP)
 shell.box(X0, X1, Y0, Y1, CE0, CE0 + 0.02, WHITE, keep=DOWN)
 shell.box(X0 - 0.02, X0, Y0, Y1, FL0, CE0, SAGE, keep=EAST)
 shell.box(X1, X1 + 0.02, Y0, Y1, FL0, CE0, SAGE, keep=WEST)
-shell.box(X0, X1, Y1, Y1 + 0.02, FL0, CE0, SAGE, keep=SOUTH)
+wall_with_windows(shell, X0, X1, Y1, Y1 + 0.02, FL0, CE0, *WING_WIN[0], [ribbon(X0, X1)], SAGE, keep=SOUTH)  # the ribbon window to the dusk
 walls_with_openings(shell, X0, X1, Y0 - 0.02, Y0, FL0, CE0, [(DOOR_X, OPEN_W, OPEN_H)], SAGE, keep=NORTH)
 for a, b, c, d, k in ((X0, X1, Y0, Y0 + 0.012, NORTH), (X0, X0 + 0.012, Y0, Y1, EAST), (X1 - 0.012, X1, Y0, Y1, WEST), (X0, X1, Y1 - 0.012, Y1, SOUTH)):
     shell.box(a, b, c, d, FL0, FL0 + 0.1, STEEL, keep=k)  # kick plates

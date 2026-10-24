@@ -31,7 +31,7 @@ shell.box(X0, X1, Y0, Y1, F - 0.02, F, OAK_FLOOR, keep=UP)
 shell.box(X0, X1, Y0, Y1, CE1, CE1 + 0.02, PLASTER, keep=DOWN)
 shell.box(X0 - 0.02, X0, Y0, Y1, F, CE1, PLASTER, keep=EAST)
 shell.box(X1, X1 + 0.02, Y0, Y1, F, CE1, PLASTER, keep=WEST)
-shell.box(X0, X1, Y1, Y1 + 0.02, F, CE1, PLASTER, keep=SOUTH)
+wall_with_windows(shell, X0, X1, Y1, Y1 + 0.02, F, CE1, *WING_WIN[1], [ribbon(X0, X1)], PLASTER, keep=SOUTH)  # the ribbon window to the dusk
 walls_with_openings(shell, X0, X1, Y0 - 0.02, Y0, F, CE1, [(DOOR_X, OPEN_W, OPEN_H)], PLASTER, keep=NORTH)
 for a, b, c, d, k in ((X0, X1, Y0, Y0 + 0.015, NORTH), (X0, X0 + 0.015, Y0, Y1, EAST), (X1 - 0.015, X1, Y0, Y1, WEST), (X0, X1, Y1 - 0.015, Y1, SOUTH)):
     shell.box(a, b, c, d, F, F + 0.08, OAK_DARK, keep=k)  # skirting
