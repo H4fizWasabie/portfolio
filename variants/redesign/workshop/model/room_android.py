@@ -36,7 +36,7 @@ walls_with_openings(shell, X0, X1, Y0 - 0.02, Y0, F, CE1, [(DOOR_X, OPEN_W, OPEN
 for a, b, c, d, k in ((X0, X1, Y0, Y0 + 0.015, NORTH), (X0, X0 + 0.015, Y0, Y1, EAST), (X1 - 0.015, X1, Y0, Y1, WEST), (X0, X1, Y1 - 0.015, Y1, SOUTH)):
     shell.box(a, b, c, d, F, F + 0.08, OAK_DARK, keep=k)  # skirting
 
-FLUSH = mat('flush_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('FLUSH', 30.0)), emit_color=(1.0, 0.78, 0.56))  # round opal ceiling lights, 3500 K (not glow_: no 2000 K Blackbody)
+FLUSH = mat('flush_light', None, color=(1, 1, 1), rough=0.5, emit=float(os.environ.get('FLUSH', 30.0)), emit_color=(1.0, 0.78, 0.56))  # round opal ceiling lights, 3500 K
 FLUSH['panel'] = True  # dimmed in the night bake
 lights = part('glow_android_panels', weight=1.0)
 for x, y in ((1.6, 14.6), (3.0, 17.0)):
@@ -47,8 +47,17 @@ soft = part('android_soft', weight=1.1, smooth=True)
 hard = part('android_hard', weight=1.1)
 soft.box(1.0, 4.4, 15.4, 18.5, F, F + 0.012, RUG)
 soft.box(1.06, 4.34, 15.46, 18.44, F + 0.012, F + 0.014, FABRIC_OAT, keep=UP)
-furn, fx = soft, hard  # sofa() builds into these (the House's own furniture parts are built by now)
-sofa(2.9, 3.9, 17.1, 18.05, F, RUST, seats=1)
+# the armchair, facing the door: an upholstered body on four short tapered oak legs, slim arms lower than its padded back
+AX0, AX1, AY0, AY1 = 2.9, 3.75, 17.15, 18.0
+for x in (AX0 + 0.07, AX1 - 0.07):
+    for y in (AY0 + 0.07, AY1 - 0.07):
+        hard.cyl(x, y, F, F + 0.16, 0.014, OAK_DARK, seg=10, r_top=0.022)
+soft.box(AX0, AX1, AY0 + 0.02, AY1, F + 0.16, F + 0.3, RUST, bevel=0.03, segments=3)                    # the body
+soft.box(AX0 + 0.11, AX1 - 0.11, AY0 + 0.03, AY1 - 0.16, F + 0.3, F + 0.44, RUST, bevel=0.05, segments=4)  # the seat cushion
+for a, b in ((AX0, AX0 + 0.11), (AX1 - 0.11, AX1)):
+    soft.box(a, b, AY0 + 0.05, AY1, F + 0.3, F + 0.6, RUST, bevel=0.04, segments=4)                       # the arms
+soft.box(AX0, AX1, AY1 - 0.17, AY1, F + 0.3, F + 0.9, RUST, bevel=0.05, segments=4)                       # the back
+soft.box(AX0 + 0.12, AX1 - 0.12, AY1 - 0.31, AY1 - 0.16, F + 0.44, F + 0.82, RUST, bevel=0.06, segments=4)  # its cushion
 hard.cyl(4.4, 18.6, F, F + 0.02, 0.17, FRAME, seg=14)
 hard.cyl(4.4, 18.6, F, F + 1.5, 0.012, FRAME, seg=6)
 lamp = part('glow_android_lamp')
