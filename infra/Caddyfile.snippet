@@ -2,7 +2,7 @@
 # Live source of truth: /etc/caddy/Caddyfile. Release pointer is replaced atomically.
 # Legacy dist remains in place for existing asset/video writers.
 portfolio.wasabietech.com {
-	bind 169.58.63.110
+	bind 13.140.65.183
 	encode zstd gzip
 	handle_path /variant-product-launch/* {
 		redir https://portfolio.wasabietech.com{uri} 308

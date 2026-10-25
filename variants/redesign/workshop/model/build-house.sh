@@ -5,7 +5,8 @@
 # lighting house-light-night.webp, and for each Room (room_<slug>.py, which build_house.py runs) room-<slug>.glb and
 # room-<slug>-light.webp (under 2 MB each) with room-<slug>-light-night.webp.
 # Usage: BLENDER=/path/to/blender ./build-house.sh        (HOUSE_DRAFT=1 for a quick, noisy bake while iterating;
-#        HOUSE_ROOMS=ai,android to rebuild only those Rooms, leaving the House, the backdrop and the water as they are)
+#        HOUSE_ROOMS=ai,android to rebuild only those Rooms, leaving the House, the backdrop and the water as they are;
+#        CUDA_VISIBLE_DEVICES= to bake on the CPU, which beats a laptop GPU its firmware holds at a low power limit)
 set -e
 cd "$(dirname "$0")"
 # kloofendal_overcast_puresky, 2k, by Greg Zaal (polyhaven.com, CC0). Used at bake time only; it is not shipped.

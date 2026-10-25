@@ -7,8 +7,8 @@
 # forms in real materials (CC0 textures from Poly Haven, see textures/, and the concrete made here), lit by a bake in Cycles.
 # The bake goes into a second UV set (TEXCOORD_1) as a lighting texture, which room.js applies as three's lightMap
 # (irradiance, so it is stored as E / (pi * LIGHT_RANGE)); there are no dynamic lights. The outside is lit by a cool
-# overcast sky (the CC0 HDRI below, only at bake time, white-balanced cooler) and the inside by lamps at 2700 K (a Blackbody
-# node), so warm light spills out through the glass onto the terrace, the plinth edge and the cantilever's underside.
+# overcast sky (the CC0 HDRI below, only at bake time, white-balanced cooler) and the inside by warm lamps (LAMP and STRIP,
+# two colours), so warm light spills out through the glass onto the terrace, the plinth edge and the cantilever's underside.
 # The lake and the backdrop (mountain, mist) are not in the glb: room.js makes the water, build_backdrop.py renders the
 # backdrop. A second bake, at night (a faint overcast glow, the lamps on), goes into house-light-night-raw.png beside the glb; the
 # page swaps it in with the desk-lamp switch.
@@ -327,15 +327,17 @@ GRAVEL = mat('gravel', 'floor', 1.2, (0.3, 0.31, 0.31), 0.95, size=384)
 CHARCOAL = mat('charcoal', None, color=(0.05, 0.052, 0.055), rough=0.8)
 CANVAS_DARK = mat('canvas_dark', None, color=(0.22, 0.27, 0.3), rough=0.9)  # book cloth
 WARM = (1.0, 0.46, 0.14)
-# Blender's Blackbody node is paler than the CIE colour at the same temperature (its 2700 K is a pale peach), and the tone
-# mapping in the page pales a bright amber further: 2000 K in the node is the deep amber of a 2700 K lamp as photographed.
-LAMP_K = float(os.environ.get('LAMP_K', 2000))
-LAMP_RGB = (1.0, 0.363, 0.069)  # what the node gives at LAMP_K (measured, linear rgb): the glb carries it as the emission colour, the bake drives the same emission from the node
-LAMP = tuple(c ** (1 / 2.2) for c in LAMP_RGB)
+# Two lamp colours (linear rgb), the same in the bake and in the glb. LAMP is the deep amber of a 2700 K lamp as photographed
+# (the page's tone mapping pales a bright amber): the downlights, shades and soffits. STRIP is a paler warm white, the LED
+# strips that wash the walls and the floor, so the lobby has two colours of light, not one. Set here, not by Blackbody,
+# whose colour at a given temperature changes between Blender versions (5.2's 2000 K has a fifth of this blue).
+LAMP_RGB = (1.0, 0.363, 0.069)
+STRIP_RGB = (1.0, 0.54, 0.18)
+LAMP, STRIP = (tuple(c ** (1 / 2.2) for c in rgb) for rgb in (LAMP_RGB, STRIP_RGB))
 GLOW = mat('glow', None, color=WARM, rough=0.5, emit=28.0, emit_color=LAMP)
 GLOW_FLAME = mat('glow_flame', None, color=WARM, rough=0.5, emit=150.0, emit_color=LAMP)
-GLOW_WASH = mat('glow_wash', None, color=WARM, rough=0.5, emit=8.0, emit_color=LAMP)  # the strips along the ceiling that wash the back walls
-GLOW_COVE = mat('glow_cove', None, color=WARM, rough=0.5, emit=float(os.environ.get('COVE', 10.0)), emit_color=LAMP)  # the strip behind the glass head of each floor: it washes the floor and spills out onto the terrace and the balcony
+GLOW_WASH = mat('glow_wash', None, color=WARM, rough=0.5, emit=float(os.environ.get('WASH', 5.0)), emit_color=STRIP)  # the strips along the ceiling that wash the back walls: kept low, so the downlights' pools show on them
+GLOW_COVE = mat('glow_cove', None, color=WARM, rough=0.5, emit=float(os.environ.get('COVE', 10.0)), emit_color=STRIP)  # the strip behind the glass head of each floor: it washes the floor and spills out onto the terrace and the balcony
 GLOW_SHADE = mat('glow_shade', None, color=WARM, rough=0.5, emit=9.0, emit_color=LAMP)  # a linen lampshade lit from inside
 GLOW_SOFFIT = mat('glow_soffit', None, color=WARM, rough=0.5, emit=45.0, emit_color=LAMP)  # downlights under the cantilever
 GLOW_SIDE = mat('glow_side', None, color=WARM, rough=0.5, emit=14.0, emit_color=LAMP)  # the strip at the head of each side window upstairs: it washes the curtain behind the glass
@@ -385,7 +387,10 @@ class Part:
             f[self.wetk] = wet
         if bevel:
             edges = list({e for v in verts for e in v.link_edges})
-            bmesh.ops.bevel(bm, geom=edges, offset=bevel, segments=segments, affect='EDGES')
+            for f in bmesh.ops.bevel(bm, geom=edges, offset=bevel, segments=segments, affect='EDGES')['faces']:
+                f.material_index = mi  # bevel gives its new faces slot 0: the part's first material, not the box's
+                f[self.top] = z1 if top is None else top
+                f[self.wetk] = wet
             return self
         gone = [f for f in faces if (keep is not None and tuple(round(c) for c in f.normal) != tuple(keep)) or tuple(round(c) for c in f.normal) in [tuple(d) for d in drop]]
         if gone:
@@ -499,6 +504,15 @@ HX0, HX1, FX = 7.2, 7.4, 8.6   # inner half widths (ground, upstairs) and the co
 BAL = -1.4                  # the balcony's front edge
 DOORS = [('stock', -3.8, 0), ('records', 1.0, 0), ('ai', -3.8, 1), ('android', 1.0, 1)]  # slug, x, storey
 OPEN_W, OPEN_H = 0.65, 2.55  # half width and height of a doorway
+WING_WIN = {0: (FL0 + 2.45, CE0 - 0.1), 1: (FL1 + 2.45, CE1 - 0.08)}  # sill and head of the Rooms' ribbon windows, per storey: over their furniture
+
+
+def ribbon(x0, x1):
+    """The ribbon window (centre, half width) in the back wall of a Room that runs from x0 to x1."""
+    return (x0 + x1) / 2, (x1 - x0) / 2 - 0.3
+
+
+WING_RIBBONS = [ribbon(-FX + 0.4, -0.5), ribbon(-0.3, 5.0)]  # the Rooms' spans: stock and ai on the left, records and android on the right
 STAIR_X0, STAIR_X1, STAIR_Y0, RISE, GOING = 5.7, 7.2, 6.0, 0.18, 0.27
 NORTH, SOUTH, EAST, WEST, UP, DOWN = (0, 1, 0), (0, -1, 0), (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)
 STAIR_TOP_Y = STAIR_Y0 + 19 * GOING  # the 20th riser lands on the upstairs floor here
@@ -515,6 +529,12 @@ def walls_with_openings(part, x0, x1, y0, y1, z0, z1, openings, material, **kw):
         part.box(a, b, y0, y1, z0, z1, material, **kw)
     for xc, hw, h in openings:  # the lintel keeps its underside: the tour walks under it
         part.box(xc - hw, xc + hw, y0, y1, z0 + h, z1, material, **{**kw, 'drop': [d for d in kw.get('drop', ()) if d != DOWN]})
+
+
+def wall_with_windows(part, x0, x1, y0, y1, z0, z1, sill, head, windows, material, **kw):
+    """A wall along x from z0 to z1 with windows (centre, half width) cut through it from sill to head."""
+    part.box(x0, x1, y0, y1, z0, sill, material, **kw)
+    walls_with_openings(part, x0, x1, y0, y1, sill, z1, [(xc, hw, head - sill) for xc, hw in windows], material, **kw)
 
 
 # --- the ground: land with a shore, bake-only water
@@ -590,7 +610,10 @@ for sx in (-1, 1):
 upper_doors = [(x, OPEN_W, OPEN_H) for slug, x, st in DOORS if st == 1]
 walls_with_openings(house, -HX1, HX1, YB, YB + 0.4, FL1, CE1, upper_doors, CONCRETE, drop=[DOWN, UP, NORTH, SOUTH])
 # The rear wing behind the back wall, two storeys, where the four Rooms are (each Room's asset holds its inside): its outside only
-house.box(-FX, FX, YB + 0.4, YW, TERR, ROOF, CONCRETE, drop=[DOWN, SOUTH, UP], top=ROOF)
+house.box(-FX, FX, YB + 0.4, YW - 0.4, TERR, ROOF, CONCRETE, drop=[DOWN, SOUTH, UP, NORTH], top=ROOF)
+# its back wall, with a ribbon window high in each Room (WING_WIN), so the dusk shows in the Rooms
+for z0, z1, st in ((TERR, FL1, 0), (FL1, ROOF, 1)):
+    wall_with_windows(house, -FX, FX, YW - 0.4, YW, z0, z1, *WING_WIN[st], WING_RIBBONS, CONCRETE, drop=[SOUTH], top=ROOF)
 # The roof, over the House and the wing: a parapet round its edge, gravel inside it, two flat rooflights
 for a, b, c, d in ((-FX, FX, BAL, BAL + 0.25), (-FX, FX, YW - 0.25, YW), (-FX, -FX + 0.25, BAL, YW), (FX - 0.25, FX, BAL, YW)):
     house.box(a, b, c, d, ROOF, ROOF + 0.3, CONCRETE, drop=[DOWN])
@@ -672,6 +695,17 @@ def glaze(frame, glass, z0, z1, half):
 
 glaze(frames, glass_f, FL0, CE0, HX0)
 glaze(frames, glass_u, FL1, CE1, HX1)
+# the Rooms' ribbon windows: glass set back in the wing's back wall, a steel frame with a mullion about every 1.2 m
+glass_wing = Part('glass_wing', 0)
+for sill, head in WING_WIN.values():
+    for xc, hw in WING_RIBBONS:
+        glass_wing.box(xc - hw, xc + hw, YW - 0.16, YW - 0.15, sill, head, GLASS, keep=NORTH)
+        n = round(2 * hw / 1.2)
+        for i in range(n + 1):
+            x = xc - hw + 2 * hw * i / n
+            frames.box(max(x - 0.03, xc - hw), min(x + 0.03, xc + hw), YW - 0.18, YW - 0.12, sill, head, FRAME)
+        for z in (sill, head - 0.04):
+            frames.box(xc - hw, xc + hw, YW - 0.18, YW - 0.12, z, z + 0.04, FRAME)
 # door frames inside, on the doorways
 for slug, x, st in DOORS:
     z0 = FL1 if st else FL0
@@ -898,7 +932,7 @@ for x in np.arange(-6.3, 6.4, 1.8):
 for x in (-5.4, -1.8, 1.8, 5.4):
     terrace_lights.cyl(x, -0.2, CE1 - 0.03, CE1, 0.06, GLOW_SOFFIT, seg=10, caps=(True, False))
 
-parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r, side_glow, side_glass]
+parts = [land, plinth, house, inside, frames, stairs, furn, fx, sheer, glows, down, wash, cove, terrace_lights, glass_f, glass_u, glass_r, glass_wing, side_glow, side_glass]
 objects = [p.build() for p in parts] + [d.build() for d in doors]
 
 for slug, x, st in DOORS:
@@ -1224,7 +1258,7 @@ def lightmap_uvs(objs):
 
 lightmap_uvs(bake_objs)
 
-# Overcast dusk: a soft, cool sky (a CC0 HDRI, white-balanced cooler) and the warm lamps of the House (a Blackbody node).
+# Overcast dusk: a soft, cool sky (a CC0 HDRI, white-balanced cooler) and the warm lamps of the House (LAMP and STRIP).
 SKY_LEVEL = float(os.environ.get('SKY', 2.0))  # the sky's mean radiance above the horizon
 SKY_TINT = (0.96, 1.0, 1.06)                  # its white balance: cool against the 2700 K lamps, the feel of 6000-6500 K daylight at dusk
 sky_img = bpy.data.images.load(hdri)
@@ -1266,13 +1300,6 @@ nt.links.new(ramp.outputs['Color'], ground.inputs[7])
 nt.links.new(ground.outputs[2], bg.inputs['Color'])
 bg.inputs['Strength'].default_value = 1.0
 scene.world = world
-lamp_nodes = []
-for m in materials.values():
-    if m.name.startswith('glow'):
-        bb = m.node_tree.nodes.new('ShaderNodeBlackbody')
-        bb.inputs['Temperature'].default_value = LAMP_K
-        m.node_tree.links.new(bb.outputs['Color'], m.node_tree.nodes['Principled BSDF'].inputs['Emission Color'])
-        lamp_nodes.append((m, bb))
 
 scene.render.engine = 'CYCLES'
 scene.cycles.samples = SAMPLES
@@ -1369,8 +1396,6 @@ for o in glass_users:
     o.data.materials[0] = GLASS
 for m in baked:
     m.node_tree.nodes.remove(m.node_tree.nodes['bake'])
-for m, bb in lamp_nodes:  # the glb carries the emission colour that Blackbody gave, as a plain value
-    m.node_tree.nodes.remove(bb)
 
 # Where the concrete is damp or worn, found in the same UV set: red is damp (rain running down from each ledge in streaks of
 # varying length, the waterline on the plinth, pools on the roof), green is wear (a pale chip along every convex corner).

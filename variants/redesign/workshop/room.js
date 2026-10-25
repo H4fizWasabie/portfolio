@@ -125,7 +125,7 @@ const PHONE_OY = 0.17; // phones: the subject sits above the card at the bottom 
 // Where the camera rests, in glTF axes (x right, y up, z towards the lake; the House's depth runs along -z). A stop's
 // data-look names one (page.cjs). pos and at: the camera and what it looks at; hfov: horizontal field of view in
 // degrees; off: on wide screens how far the picture is pushed right of the panel, as a share of the screen's width; exp:
-// exposure. A stop with near names a node of the House (doorway_<slug>, poster_<step>): the camera stands from that far away
+// exposure, and night: its exposure at night (exp if not given). A stop with near names a node of the House (doorway_<slug>, poster_<step>): the camera stands from that far away
 // and looks at it plus look. .phone overrides on phones, where the card sits at the bottom and up lifts the picture
 // clear of it (a share of the screen's height). via lists waypoints (pos, at: in the House's axes) the camera passes on its way
 // to that stop from the one before, to keep the path clear of walls and slabs.
@@ -192,7 +192,7 @@ const STOPS = {
   // Out on the balcony, past the table, looking back in at the lit rooms through the glass.
   teach: { pos: [-5.6, 6.15, 0.95], at: [-0.8, 5.5, -1.8], hfov: 62, off: 0.12, exp: 1.1, phone: { pos: [-5.2, 6.2, 1.0], hfov: 56, up: 0.2 },
     via: [...DOORS.android.out([0, 6.0, -3]), { pos: [0, 6.2, -3.0], at: [0, 6.0, 2] }, { pos: [0, 6.2, 0.1], at: [-3, 5.8, 1] }] },
-  end: { via: [{ pos: [0.3, 6.5, 2.8], at: [0, 6, 20] }], pos: [18, 17, 62], at: [0, 4, -8], hfov: 38, off: 0, up: 0.2, exp: 1.0, phone: { pos: [14, 13, 52], at: [0, 4, -8], hfov: 30 } }
+  end: { via: [{ pos: [0.3, 6.5, 2.8], at: [0, 6, 20] }], pos: [18, 17, 62], at: [0, 4, -8], hfov: 38, off: 0, up: 0.2, exp: 1.0, night: 3.2, phone: { pos: [14, 13, 52], at: [0, 4, -8], hfov: 30 } }
 };
 
 // The sky dome: the backdrop plate by direction, mist below and around it, a darker overcast above it.
@@ -404,6 +404,8 @@ function startHouse(stage, { root }) {
     return a;
   }
   const nightMist = new THREE.Color(SKY.mist).multiply(new THREE.Color(...NIGHT.sky));
+  let eye = [1, 1]; // the exposure where the camera is, by day and at night; the lamp switch fades between them
+  const expose = () => { r.toneMappingExposure = eye[0] + (eye[1] - eye[0]) * nightMix.value; };
   function setNight(t) {
     nightMix.value = t;
     dome.material.uniforms.night.value = t;
@@ -412,6 +414,7 @@ function startHouse(stage, { root }) {
     for (const [m, day, night] of unlit) m.color.copy(day).lerp(night, t);
     for (const [m, day] of shiny) m.envMapIntensity = day * (1 + (NIGHT.env - 1) * t);
     for (const [m, day] of panels) m.emissiveIntensity = day * (1 + (NIGHT.panels - 1) * t);
+    expose();
     dirty = true;
   }
   addEventListener('themechange', () => {
@@ -595,7 +598,7 @@ function startHouse(stage, { root }) {
       at = new THREE.Vector3(...t.at);
     }
     const via = (t.via || []).map(w => ({ pos: new THREE.Vector3(...w.pos), at: new THREE.Vector3(...w.at) }));
-    return { pos, target: at, via, hfov: t.hfov || 50, exp: t.exp || 1, ox: phone ? 0 : t.off || 0, oy: t.up ?? (phone ? PHONE_OY : 0) };
+    return { pos, target: at, via, hfov: t.hfov || 50, exp: t.exp || 1, night: t.night || t.exp || 1, ox: phone ? 0 : t.off || 0, oy: t.up ?? (phone ? PHONE_OY : 0) };
   }
   function lens(hfov) {
     camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(hfov) / 2) / camera.aspect));
@@ -610,7 +613,8 @@ function startHouse(stage, { root }) {
     aim.copy(v.target);
     camera.lookAt(aim);
     lens(v.hfov);
-    r.toneMappingExposure = v.exp;
+    eye = [v.exp, v.night];
+    expose();
     setGoal({ x: v.ox * size[0], y: v.oy * size[1] }, true);
     frame();
   }
@@ -717,7 +721,8 @@ function startHouse(stage, { root }) {
     aim.lerp(tourAim, a);
     camera.lookAt(aim);
     lens(hfov);
-    r.toneMappingExposure = from.exp + (to.exp - from.exp) * g; // the eye adjusts to the daylight outside and the lights inside
+    eye = [from.exp + (to.exp - from.exp) * g, from.night + (to.night - from.night) * g]; // the eye adjusts to the light outside and the lights inside
+    expose();
     frame();
     snap = false;
     stage.closest('.bench').classList.toggle('is-touring', i + f > 0.35);
