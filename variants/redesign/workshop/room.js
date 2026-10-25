@@ -52,6 +52,7 @@ function bakedMaterial(m, day, night, nightMix) {
 // model/room_<slug>.py) behind the House's doorway_<slug>. A Room's project objects are obj_<slug> (a click opens the case study)
 // and their screens screen_<slug> (or screen_<slug>_<which>), which show the project's screenshots.
 const ROOMS = { stock: ['procura', 'pims'], records: ['dd-drugs-register'], ai: ['theoses', '89lab', 'yen'], android: ['map'] };
+const roomOf = look => Object.keys(ROOMS).find(room => ROOMS[room].some(slug => look?.startsWith(`${slug}-`))); // the Room a stop is in
 const screenOf = (o, room) => { const name = [o, o.parent].find(p => p?.name.startsWith('screen_'))?.name; return name && ROOMS[room].find(s => name.startsWith(`screen_${s}`)); };
 
 // A project without approved screenshots shows its workflow outline on its screen, labelled as one: its steps drawn to the
@@ -405,7 +406,8 @@ function startHouse(stage, { root }) {
   }
   const nightMist = new THREE.Color(SKY.mist).multiply(new THREE.Color(...NIGHT.sky));
   let eye = [1, 1]; // the exposure where the camera is, by day and at night; the lamp switch fades between them
-  const expose = () => { r.toneMappingExposure = eye[0] + (eye[1] - eye[0]) * nightMix.value; };
+  let veil = 1; // 0 while the camera is in a Room that has not arrived yet: dark, not the empty wing and the trees beyond it
+  const expose = () => { r.toneMappingExposure = (eye[0] + (eye[1] - eye[0]) * nightMix.value) * veil; };
   function setNight(t) {
     nightMix.value = t;
     dome.material.uniforms.night.value = t;
@@ -421,7 +423,7 @@ function startHouse(stage, { root }) {
     if (!isNight()) { nightGoal = 0; return; }
     Promise.all(lights.map(loadNight)).then(() => { if (isNight()) nightGoal = 1; }); // the fade starts once the night lighting is in
   });
-  const rooms = {}, roomScenes = [], screens = [];
+  const rooms = {}, roomScenes = [], screens = [], ready = new Set();
   // A Room, once: its asset dressed like the House, its screens given their screenshots, its door taken away.
   function fetchRoom(room) {
     return (rooms[room] ||= Promise.all([loader.loadAsync(`${root}static/room-${room}.glb`), textures.loadAsync(`${root}static/room-${room}-light.webp`)]).then(([g, light]) => {
@@ -441,6 +443,7 @@ function startHouse(stage, { root }) {
       setNight(nightT);
       house.getObjectByName(`door_${room}`).visible = false;
       roomScenes.push(g.scene);
+      ready.add(room);
       dirty = true;
       return g.scene;
     }).catch(err => console.warn(`The ${room} Room failed to load.`, err)));
@@ -755,6 +758,12 @@ function startHouse(stage, { root }) {
       setNight(nightT);
     }
     if (tour && stepTour(dt)) dirty = true;
+    const waitFor = tour && roomOf(tour.here), clear = waitFor && !ready.has(waitFor) ? 0 : 1;
+    if (veil !== clear) { // a jump into a Room still on its way: the picture waits in the dark, then fades up
+      veil = reduced ? clear : clear > veil ? Math.min(clear, veil + dt / 400) : Math.max(clear, veil - dt / 250);
+      expose();
+      dirty = true;
+    }
     turnScreens(now);
     if (!dirty) return;
     composer.render();
