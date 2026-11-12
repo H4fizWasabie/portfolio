@@ -298,3 +298,12 @@ fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
 }
 @keyframes settle{from{translate:-8px -12px;rotate:1deg}}
 @keyframes thunk{from{scale:1.15;opacity:.6}}
+
+/* #127 project pages */
+.hood .cell>p{font-family:"Courier Prime",ui-monospace,monospace;font-size:1rem;line-height:1.55;color:var(--type);max-width:68ch}
+.shots.two .shot:last-child:nth-child(odd){grid-column:1/-1}
+.sheet.project .wasnow.solo .shots{max-width:none}
+.onward{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.6rem;width:min(1100px,calc(100% - 2*var(--gutter)));margin:0 auto var(--gap);font-weight:600}
+.onward .next{display:inline-flex;align-items:center;gap:.6rem;border:1.5px solid var(--desk-ink);padding:.6rem 1rem .65rem;font:700 .9rem/1.2 "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
+.onward .next:hover{background:var(--desk-ink);color:var(--desk)}
+.onward :focus-visible{outline-color:var(--canary)}

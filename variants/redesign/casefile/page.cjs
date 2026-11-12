@@ -59,7 +59,7 @@ const now = inner => `<div class="cells">\n  <div class="cell"><p class="wn">Now
 
 // What each system's Sheet holds besides the shared body: the printed form with its sample entries.
 const sheets = {
-  pims: (p, { esc, root }) => `<div class="cells slipside">
+  pims: (p, { esc, root, full }) => `<div class="cells slipside">
   <div class="cell">
    <h3 class="lab">Stock requisition slip</h3>
    ${table(esc, {
@@ -73,7 +73,7 @@ const sheets = {
   <div class="cell"><p class="wn">Was</p>${D.pimsWas}<p class="cap2"><b>Diagram:</b> the paper process this replaced.</p></div>
  </div>
  ${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'])}
- ${now(shots(root, p, esc, 2))}`,
+ ${now(shots(root, p, esc, full ? p.scenes.length : 2))}`,
 
   'dd-drugs-register': (p, { esc }) => `<div class="cells">
   <div class="cell">
@@ -89,7 +89,7 @@ const sheets = {
  </div>
  ${body(p, esc, ['problem', 'built', 'limits', 'how', 'diag', 'stack', 'facts'], 'dd')}`,
 
-  procura: (p, { esc, root }) => `<div class="cells two po">
+  procura: (p, { esc, root, full }) => `<div class="cells two po">
   <div class="cell"><h3 class="lab">Vendor</h3><p class="val">Sample Medical Supplies Sdn Bhd (fictional)</p></div>
   <div class="cell"><h3 class="lab">Ship to</h3><p class="val">Veterinary hospital store</p></div>
  </div>
@@ -107,7 +107,7 @@ const sheets = {
  ${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], 'pair')}
  <div class="cells wasnow">
   <div class="cell wasnow-was"><p class="wn">Was</p>${D.procuraWas}<p class="cap2"><b>Diagram:</b> the setup this replaced.</p></div>
-  <div class="cell wasnow-now"><p class="wn">Now</p>${shots(root, p, esc, 1)}</div>
+  <div class="cell wasnow-now"><p class="wn">Now</p>${shots(root, p, esc, full ? p.scenes.length : 1)}</div>
  </div>`,
 
   cavelms: (p, { esc }) => `<div class="cells">
@@ -131,15 +131,15 @@ const sheets = {
 part.diag = (p, esc) => `<div class="cell a-diag"><p class="wn">Now</p><figure class="shot">${D.ddNow}<figcaption><b>Diagram:</b> workflow outline, not the hospital interface.</figcaption></figure></div>`;
 
 const sheet = (p, n, count, ctx) => {
-  const f = forms[p.slug], { esc, root } = ctx;
-  const cls = ['sheet', f.color, 'perf', 'case', !p.problem && 'noproblem', !p.facts && 'nofacts'].filter(Boolean).join(' ');
-  const foot = p.slug === 'cavelms'
+  const f = forms[p.slug], { esc, root, full } = ctx;
+  const cls = ['sheet', f.color, 'perf', 'case', full && 'project', !p.problem && 'noproblem', !p.facts && 'nofacts'].filter(Boolean).join(' ');
+  const foot = full ? `<span class="links">${extLinks(p, esc).join('')}</span>` : p.slug === 'cavelms'
     ? `${btn(p.url, 'Visit CaveLMS', ' rel="noopener"')} ${btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"')}`
     : btn(`${root}work/${p.slug}/`, 'Full case study');
   return `<section class="${cls}" id="${p.slug}" aria-labelledby="${p.slug}-h">
- ${sheetHead(esc, { id: `${p.slug}-h`, title: `${f.title} · ${p.title}`, sub: p.category, serial: serial(n, `item ${n} of ${count}`) })}
+ ${sheetHead(esc, { tag: full ? 'h1' : 'h2', id: `${p.slug}-h`, title: `${f.title} · ${p.title}`, sub: p.category, serial: serial(n, `item ${n} of ${count}`) })}
  ${fieldCells(esc, [['Department', f.dept], ['Status', f.status]])}
- ${sheets[p.slug](p, ctx)}
+ ${sheets[p.slug](p, ctx)}${full ? underHood(p, esc) : ''}
  <div class="foot">${foot}${stampOf(f.stamp)}</div>
 </section>`;
 };
@@ -248,8 +248,26 @@ ${about(root, site, esc)}
 ${request(site, esc)}` });
 }
 
+// #127 The four systems in production have their homepage Sheet as a page of their own: the same rendering with all the
+// screens, the implementation notes, the external links, and a way on to the next project, the Request form and the résumé.
+const extLinks = (p, esc) => [p.url && btn(p.url, `Visit ${esc(p.title)}`, ' rel="noopener"'), p.cavetext && btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"'),
+  p.source && btn(p.source, 'Source on GitHub', ' rel="noopener"'), p.releases && btn(p.releases, 'APK releases on GitHub', ' rel="noopener"')].filter(Boolean);
+const underHood = (p, esc) => p.implementation ? `\n <div class="cells hood"><div class="cell"><h3 class="lab">Under the hood</h3><p>${esc(p.implementation)}</p></div></div>` : '';
+
+function systemPage({ p, next, projects, site, esc, root }) {
+  const made = projects.filter(q => forms[q.slug]);
+  return shell({ title: `${p.title} | ${site.name}`, description: p.description, route: `/work/${p.slug}/`, root, site, esc, main: `${sheet(p, made.indexOf(p) + 1, made.length, { esc, root, full: true })}
+<nav class="onward" aria-label="After ${esc(p.title)}">
+ <a class="next" href="${root}work/${next.slug}/">Next: ${esc(next.title)} ${arr}</a>
+ <a href="${root}#request">${esc(site.requestSend)}</a>
+ <a href="${root}resume/">Read the résumé</a>
+ <a href="${root}projects/">All work</a>
+</nav>` });
+}
+
 // A minimal Sheet per project until the Case File pages are built out: the project's facts and links.
-function project({ p, next, site, esc, root }) {
+function project({ p, next, projects, site, esc, root }) {
+  if (forms[p.slug]) return systemPage({ p, next, projects, site, esc, root });
   const links = [p.url && btn(p.url, `Visit ${esc(p.title)}`, ' rel="noopener"'), p.cavetext && btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"'),
     p.source && btn(p.source, 'Source on GitHub', ' rel="noopener"'), p.releases && btn(p.releases, 'APK releases on GitHub', ' rel="noopener"')].filter(Boolean);
   return shell({ title: `${p.title} | ${site.name}`, description: p.description, route: `/work/${p.slug}/`, root, site, esc, main: `<section class="sheet ${forms[p.slug]?.color || 'white'} perf narrow" aria-labelledby="project-h">
