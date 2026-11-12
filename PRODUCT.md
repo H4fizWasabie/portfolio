@@ -18,13 +18,15 @@ Help a visitor understand Hafiz's work through real projects, inspect individual
 
 Owner-approved selection (2026-10-14): Procura, PIMS, DD Drugs Register, Theoses, 89lab content pipelines, MAP and Yen. Hill's AI Content Lab was removed from the site and the résumé. Theoses is described as built on the pi coding agent, forked to suit Hafiz's workflow; never as written from scratch. 89lab covers every daily content pipeline (2026-10-15), and AI teaching and coaching is offered as a service.
 
-Impeccable critique and the madewithjev slop check (2026-10-15) drove a pass: the homepage leads with the veterinary-hospital software, services and projects share one set of shelves (no separate services list or numbered process), one small radius site-wide with solid surfaces, and the résumé reader uses the site's type and colours. "In use" facts come from the résumé source; the résumé's own figures stay on the résumé.
+Added 2026-11-12: CaveLMS (online courses, exams and certificates for The Cave Consult, a freelance client; live at cavelms.com) and, on the same Sheet, CaveText (a Chrome extension built for The Cave Consult and published under their name on the Chrome Web Store). Both are client work: never claim them as Hafiz's own products, and claim no user numbers or results. The DD Drugs Register replaced an A4 paper count form.
 
-Project pages include small in-browser demos of each workflow on fictional sample data. They are labelled as demos and are not the real applications. Code changes go through a feature-branch PR.
+The homepage leads with the systems in production (PIMS, DD Drugs Register, Procura, CaveLMS), each a full Sheet; Theoses, 89lab, MAP and Yen follow on a shorter continuation Sheet. The résumé reader uses the site's type and colours. "In use" facts come from the résumé source; the résumé's own figures stay on the résumé.
+
+Each Sheet's sample form is a small in-browser demo of that workflow on fictional sample data. Demos are labelled "Sample entries, fictional", are not the real applications, and the page reads the same without JavaScript. Code changes go through a feature-branch PR.
 
 ## Brand Commitments
 
-Hafiz selected the Workshop (2026-10-14): a small clay room modelled in Blender where every object is a project, with day and night switched by the desk lamp. See `variants/redesign/README.md`. It replaced Product Launch B and the waterfall homepage, which stay in the repo as archived designs. Projects must not be casually labelled experimental. A personal-use project does not imply public adoption; a self-directed campaign does not imply a paid client relationship.
+Hafiz selected the Case File (2026-11-12): the portfolio is a book of carbonless duplicate forms on a desk, each system filed on the kind of form it replaced (see `docs/adr/0003-the-portfolio-is-a-book-of-carbon-copy-forms.md` and the design system in the live variant's DESIGN.md). It replaced the Workshop and its House tour, which Hafiz chose not to share publicly; the Workshop, Product Launch B and the waterfall homepage stay in the repo as archived designs. Projects must not be casually labelled experimental. A personal-use project does not imply public adoption; a self-directed campaign does not imply a paid client relationship.
 
 ## Evidence on Hand
 
