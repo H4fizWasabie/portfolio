@@ -109,7 +109,7 @@ async function procuraDemo(page) {
         for (const p of made) assert.equal(await page.locator(`#${p.slug} .btn.primary[href="#request"]`).count(), 1, `${p.slug}: the Request is the Sheet's one filled button`);
         assert.equal(await page.locator('#pims .more-rows').isVisible(), width === 390, 'the homepage slips show two sample lines on phones only');
         await procuraDemo(page);
-        await page.locator('#procura a[href$="work/procura/"]').first().click();
+        await page.locator('#procura .foot a[href$="work/procura/"]').click();
         await page.waitForURL(base + '/work/procura/');
       }
       if (route === '/work/procura/') {
