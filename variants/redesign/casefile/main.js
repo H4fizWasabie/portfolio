@@ -2,3 +2,4 @@
 // enhancement; without them the page reads as filled-in forms and the Request form opens the mail app.
 import './forms.js';
 import './request.js';
+import './more.js';

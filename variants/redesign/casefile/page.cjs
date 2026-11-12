@@ -5,6 +5,7 @@
 // Each project page is a minimal Sheet for now (tickets #127 to #129 build the pages out).
 const B = require('../blocks.cjs');
 const D = require('./diagrams.cjs');
+const pages = require('./more.cjs');
 
 const fonts = ['archivo-latin-wdth-normal.woff2', 'courier-prime-latin-400-normal.woff2', 'courier-prime-latin-700-normal.woff2'];
 const licenses = ['OFL-archivo.txt', 'OFL-courier-prime.txt'];
@@ -271,9 +272,13 @@ function systemPage({ p, next, projects, site, esc, root }) {
 </nav>` });
 }
 
+// The pieces more.cjs builds its Sheets from.
+const kit = { shell, sheetHead, serial, fieldCells, table, body, btn, stampOf, sampleNote };
+
 // A minimal Sheet per project until the Case File pages are built out: the project's facts and links.
 function project({ p, next, projects, site, esc, root }) {
   if (forms[p.slug]) return systemPage({ p, next, projects, site, esc, root });
+  if (pages.slugs.includes(p.slug)) return pages.project({ p, next, projects, site, esc, root }, kit);
   const links = [p.url && btn(p.url, `Visit ${esc(p.title)}`, ' rel="noopener"'), p.cavetext && btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"'),
     p.source && btn(p.source, 'Source on GitHub', ' rel="noopener"'), p.releases && btn(p.releases, 'APK releases on GitHub', ' rel="noopener"')].filter(Boolean);
   return shell({ title: `${p.title} | ${site.name}`, description: p.description, route: `/work/${p.slug}/`, root, site, esc, main: `<section class="sheet ${forms[p.slug]?.color || 'white'} perf narrow" aria-labelledby="project-h">
