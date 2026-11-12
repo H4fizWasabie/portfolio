@@ -4,7 +4,7 @@ The live site is the **Case File** (GLOSSARY.md, ADR 0003): a book of carbonless
 "Record of work" **Sheet**, whose **Register** lists the four systems in production; each of them follows on a Sheet shaped like the form it
 replaced (PIMS a stock requisition slip, the DD Drugs Register a daily count ledger, Procura a purchase order, CaveLMS a course
 certificate with CaveText attached), each with a **Sample demo** (fictional data, progressive enhancement). Where a system replaced a
-paper process, lifting the top sheet shows it as a diagram on the **Copy** underneath. Theoses, 89lab, MAP and Yen follow on a
+paper process, "See the paper process underneath" lifts the top sheet to show it as a diagram on the **Copy** underneath. A Sheet on the homepage is the short version (the form, its demo, one line of what was built and the facts on record); the full case study is on the system's `/work/<slug>/` page. Theoses, 89lab, MAP and Yen follow on a
 continuation Sheet, then Particulars and the Request form. Every project keeps its page under `/work/<slug>/`, `/projects/` is the
 full Register and `/resume/` is the résumé reader in the same look. Without JavaScript the page reads as filled-in sample forms and
 the Request form opens the visitor's mail app. The design system is `casefile/DESIGN.md`.

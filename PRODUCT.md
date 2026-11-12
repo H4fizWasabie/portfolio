@@ -20,7 +20,7 @@ Owner-approved selection (2026-10-14): Procura, PIMS, DD Drugs Register, Theoses
 
 Added 2026-11-12: CaveLMS (online courses, exams and certificates for The Cave Consult, a freelance client; live at cavelms.com) and, on the same Sheet, CaveText (a Chrome extension built for The Cave Consult and published under their name on the Chrome Web Store). Both are client work: never claim them as Hafiz's own products, and claim no user numbers or results. The DD Drugs Register replaced an A4 paper count form.
 
-The homepage leads with the systems in production (PIMS, DD Drugs Register, Procura, CaveLMS), each a full Sheet; Theoses, 89lab, MAP and Yen follow on a shorter continuation Sheet. The résumé reader uses the site's type and colours. "In use" facts come from the résumé source; the résumé's own figures stay on the résumé.
+The homepage leads with the systems in production (PIMS, DD Drugs Register, Procura, CaveLMS), each a Sheet with its form and Sample demo, the full case study being on its `/work/<slug>/` page; Theoses, 89lab, MAP and Yen follow on a shorter continuation Sheet. The résumé reader uses the site's type and colours. "In use" facts come from the résumé source; the résumé's own figures stay on the résumé.
 
 Each Sheet's sample form is a small in-browser demo of that workflow on fictional sample data. Demos are labelled "Sample entries, fictional", are not the real applications, and the page reads the same without JavaScript. Code changes go through a feature-branch PR.
 

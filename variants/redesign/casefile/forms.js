@@ -1,20 +1,22 @@
 // Sample forms as small working demos. Every entry is fictional; nothing here talks to a system.
 // Without this script each sheet shows its filled-in sample (and the "Was" diagram) as printed by page.cjs.
-import { $, reduced, h, typer, stamper, liveRegion, button, setLabel, again, flag } from './kit.js';
+import { $, reduced, h, typer, stamper, liveRegion, button, setLabel, again, flag, cellHead } from './kit.js';
 
 const TODAY = '05 Oct'; // the fictional "today" of the sample ledger
 
 // Lift the top sheet: the top form sits over a pink carbon copy holding the "Was" diagram.
 // Lifted, the sheet hinges at its top edge and tilts back under a perspective (keep FOLD in step with .lift-stage in style.css).
 // footprint() is the height that tilted sheet covers, so the copy leaves that much room above its diagram.
+// The button names what is underneath: the paper process the system replaced.
 const FOLD = { deg: 64, persp: 1200 };
+const LIFT = 'See the paper process underneath';
 const footprint = H => {
   const a = FOLD.deg * Math.PI / 180;
   return Math.ceil(H * Math.cos(a) * FOLD.persp / (FOLD.persp + H * Math.sin(a))) + 6;
 };
 
 function makeLift(heading, formNodes, copyNodes, say) {
-  const btn = h('button', { type: 'button', className: 'btn lift-btn', 'aria-pressed': 'false' }, 'Lift the top sheet');
+  const btn = h('button', { type: 'button', className: 'btn lift-btn', 'aria-pressed': 'false' }, LIFT);
   const form = h('div', { className: 'lift-form' }, ...formNodes);
   const copy = h('div', { className: 'lift-copy' }, ...copyNodes);
   const stage = h('div', { className: 'lift-stage' }, copy, form);
@@ -27,11 +29,11 @@ function makeLift(heading, formNodes, copyNodes, say) {
     el.classList.toggle('lifted', on);
     form.inert = on;
     btn.setAttribute('aria-pressed', on);
-    btn.textContent = on ? 'Put it back' : 'Lift the top sheet';
+    btn.textContent = on ? 'Put it back' : LIFT;
     // The stage closes up around the copy when lifted and opens again when put back.
     const to = stage.offsetHeight;
     if (!reduced() && from !== to) slide = stage.animate({ height: [`${from}px`, `${to}px`] }, { duration: 450, easing: 'cubic-bezier(.16,1,.3,1)' });
-    say(on ? 'Top sheet lifted. The diagram underneath is showing.' : 'Top sheet laid back.');
+    say(on ? 'Top sheet lifted. The paper process underneath is showing.' : 'Top sheet laid back.');
   };
   btn.addEventListener('click', () => set(!el.classList.contains('lifted')));
   el.addEventListener('keydown', e => {
@@ -43,7 +45,7 @@ function makeLift(heading, formNodes, copyNodes, say) {
 function pims() {
   const sheet = $('#pims'), say = liveRegion(sheet), st = stamper(sheet), t = typer();
   const row = $(sheet, '.slipside'), [slipCell, wasCell] = row.children;
-  const heading = $(slipCell, 'h3'), sign = $(slipCell, '.sign');
+  const heading = $(slipCell, '.lab'), sign = $(slipCell, '.sign');
 
   // Signature line: blank until each step types into it.
   const [, apprLn, recvLn] = sign.querySelectorAll('.ln');
@@ -57,6 +59,7 @@ function pims() {
   const track = h('ol', { className: 'track', 'aria-label': 'Request status' }, ...stages);
   const log = h('ul', { className: 'lines log' });
   const go = button('Approve request'), reset = again();
+  const hint = h('p', { className: 'hint' }, 'Approve the request, then follow it through ordering and receipt.');
 
   const steps = [
     { label: 'Create order', type: () => [[apprLn, 'M.T.']], entry: 'Procurement approved the requisition.', stamp: 'Approved', tell: 'Approved. M.T. signed the slip.' },
@@ -95,14 +98,14 @@ function pims() {
   });
   reset.addEventListener('click', () => { start(); say('Demo reset to the requested step.'); go.focus(); });
 
-  const lift = makeLift(heading, [track, ...[...slipCell.children].filter(c => c !== heading), h('div', { className: 'demo-bar' }, go, reset), log], wasCell.childNodes, say);
+  const lift = makeLift(heading, [track, ...[...slipCell.children].filter(c => c !== heading), hint, h('div', { className: 'demo-bar' }, go, reset), log], wasCell.childNodes, say);
   row.replaceWith(lift);
 }
 
 function dd() {
   const sheet = $('#dd-drugs-register'), say = liveRegion(sheet), st = stamper(sheet), t = typer();
   const tbody = $(sheet, 'tbody'), added = [];
-  const input = h('input', { type: 'text', inputMode: 'numeric', id: 'dd-count', name: 'count', value: '12', autocomplete: 'off' });
+  const input = h('input', { type: 'text', className: 'write', inputMode: 'numeric', id: 'dd-count', name: 'count', value: '12', autocomplete: 'off' });
   // Each reason corrects the count it explains: a recount fixes the physical count, the others bring the system in line with the shelf.
   const reasons = {
     'Breakage recorded on the ward': n => `system count reduced from 14 to ${n}; breakage recorded on the ward.`,
@@ -119,7 +122,7 @@ function dd() {
     h('label', { className: 'cell field' }, h('span', { className: 'lab' }, 'Physical count of Item A'), input, h('span', { className: 'err', id: 'err-count' })),
     h('div', { className: 'cell' }, h('p', { className: 'lab' }, 'System count of Item A'), h('p', { className: 'val' }, '14')),
     reasonCell,
-    h('div', { className: 'cell full' }, h('div', { className: 'demo-bar' }, submit, correct, reset)));
+    h('div', { className: 'cell full' }, h('p', { className: 'hint' }, 'The system expects 14 of Item A. Type what is on the shelf, then submit the count.'), h('div', { className: 'demo-bar' }, submit, correct, reset)));
   $(sheet, '.fields').after(form);
   input.addEventListener('input', () => flag(input, ''));
 
@@ -248,12 +251,14 @@ function procura() {
   });
 
   // The reorder check comes first, as it drafts the order lines; the lifted sheet is the purchase order form alone.
-  const was = $(sheet, '.wasnow-was'), before = po.previousElementSibling;
-  const stock = h('div', { className: 'cells' }, h('div', { className: 'cell' }, h('h3', { className: 'lab' }, 'Reorder check'), table,
+  const was = $(sheet, '.wasnow-was'), before = po.previousElementSibling, head = cellHead(sheet);
+  const stock = h('div', { className: 'cells' }, h('div', { className: 'cell' }, h(head, { className: 'lab' }, 'Reorder check'), table,
     h('p', { className: 'hint' }, 'Lower a count to its reorder point or below, then draft the purchase order.'), h('div', { className: 'demo-bar' }, draftBtn, reset), msg));
-  const lift = makeLift(h('h3', { className: 'lab' }, 'Purchase order'), [po, orderCells], was.childNodes, say);
-  $(sheet, '.wasnow').classList.add('solo');
+  const lift = makeLift(h(head, { className: 'lab' }, 'Purchase order'), [po, orderCells], was.childNodes, say);
+  const wasnow = $(sheet, '.wasnow');
+  wasnow.classList.add('solo');
   was.remove();
+  if (!wasnow.firstElementChild) wasnow.remove(); // the homepage Sheet has no screens beside the Was diagram
   before.after(stock, lift);
 }
 
@@ -265,7 +270,7 @@ function cave() {
     { q: 'A stock card shows 10 on hand, 20 received and 5 issued. What is the balance?', opts: ['15', '25', '35'], ans: '25' },
     { q: 'Which document records that goods arrived?', opts: ['Purchase order', 'Goods received note', 'Invoice'], ans: 'Goods received note' },
   ];
-  const name = h('input', { type: 'text', id: 'exam-name', name: 'name', maxLength: 40, autocomplete: 'off' });
+  const name = h('input', { type: 'text', className: 'write', id: 'exam-name', name: 'name', maxLength: 40, autocomplete: 'off' });
   const sets = questions.map((q, i) => {
     const err = h('span', { className: 'err', id: `err-q${i + 1}` });
     const fs = h('fieldset', { className: 'cell q' }, h('legend', { className: 'lab' }, `${i + 1}. ${q.q}`),
@@ -276,7 +281,7 @@ function cave() {
   const result = h('p', { className: 'val msg' });
   const submit = button('Submit exam', 'submit'), reset = again();
   const form = h('form', { className: 'cells two', noValidate: true },
-    h('div', { className: 'cell full' }, h('h3', { className: 'lab' }, `Sample exam: ${course}`), h('p', { className: 'sample' }, 'Sample entries, fictional')),
+    h('div', { className: 'cell full' }, h(cellHead(sheet), { className: 'lab' }, `Sample exam: ${course}`), h('p', { className: 'sample' }, 'Sample entries, fictional')),
     h('label', { className: 'cell field full' }, h('span', { className: 'lab' }, 'Your name'), name, h('span', { className: 'err', id: 'err-exam-name' })),
     ...sets.map(s => s.fs),
     h('div', { className: 'cell full' }, h('div', { className: 'demo-bar' }, submit, reset), result));

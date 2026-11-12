@@ -2,6 +2,8 @@
 // buttons and error flags. Every entry the demos make is fictional; nothing here talks to a system.
 export const $ = (root, sel) => sel ? root.querySelector(sel) : document.querySelector(root);
 export const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+// The level of a cell label: h3 under a homepage Sheet's h2, h2 under a project page's h1 (page.cjs).
+export const cellHead = sheet => (sheet.classList.contains('project') ? 'h2' : 'h3');
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 export function h(tag, props = {}, ...kids) {

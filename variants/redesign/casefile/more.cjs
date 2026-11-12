@@ -1,7 +1,7 @@
 // The Case File pages for Theoses, 89lab, MAP and Yen (#128): one Sheet each, on a form of its own, carrying that
 // project's demo restyled in the form vocabulary. Each Sheet prints its finished sample, so the page reads
 // completely without JavaScript; more.js turns the sample into the working demo. Project facts, including each project's status, come from projects.cjs.
-// page.cjs hands in its shared pieces (kit) so there is one copy of the Sheet markup.
+// page.cjs hands in its shared pieces (kit) so there is one copy of the Sheet markup. Every page here is a project page, so its cell labels are h2 under the h1.
 const B = require('../blocks.cjs');
 
 // What each form is called and says about its project. The stamp is [word, rotation, mask x, mask y].
@@ -19,9 +19,9 @@ const done = label => `<li class="done"><span class="box" aria-hidden="true">×<
 // The printed sample inside each Sheet. A tick box is a typed ×; entries are typed black (style.css).
 const demos = {
   theoses: (p, { esc }, k) => `<div class="cells ticket">
-  <div class="cell"><h3 class="lab">Task</h3><p class="val">Draft this week’s stock report</p></div>
-  <div class="cell"><h3 class="lab">Steps</h3><ol class="checks" data-steps>${['Read the inventory export', 'Compare with last week', 'Draft the report'].map(s => done(esc(s))).join('')}</ol></div>
-  <div class="cell" data-draft><h3 class="lab">Draft for review</h3><p class="val">${esc(draft)}</p></div>
+  <div class="cell"><h2 class="lab">Task</h2><p class="val">Draft this week’s stock report</p></div>
+  <div class="cell"><h2 class="lab">Steps</h2><ol class="checks" data-steps>${['Read the inventory export', 'Compare with last week', 'Draft the report'].map(s => done(esc(s))).join('')}</ol></div>
+  <div class="cell" data-draft><h2 class="lab">Draft for review</h2><p class="val">${esc(draft)}</p></div>
   <div class="cell">
    <p class="sign"><span>Requested by <span class="ln">A.R.</span></span><span>Reviewed by <span class="ln"></span></span></p>
    ${k.sampleNote}
@@ -30,9 +30,9 @@ const demos = {
  </div>`,
 
   '89lab': (p, { esc }, k) => `<div class="cells run">
-  <div class="cell"><h3 class="lab">Stages of a run</h3><ol class="track stages" data-stages>${stageNames.map(s => done(esc(s))).join('')}</ol></div>
+  <div class="cell"><h2 class="lab">Stages of a run</h2><ol class="track stages" data-stages>${stageNames.map(s => done(esc(s))).join('')}</ol></div>
   <div class="cell">
-   <h3 class="lab">Run sheet, today</h3>
+   <h2 class="lab">Run sheet, today</h2>
    ${k.table(esc, {
      caption: 'Run sheet, sample entries', cls: 'register slip', head: ['Run', 'Channel', 'Topic', 'Result'],
      rows: [['AI news', 'A lab releases a smaller open model', 'Published to 89lab on Facebook.'], ['GitHub repo', 'A terminal coding agent', 'Published to YouTube Shorts and Threads.'], ['AI concept', 'What a context window is', 'Published to 89lab on Facebook.']]
@@ -45,7 +45,7 @@ const demos = {
 
   map: (p, { esc, root }, k) => `<div class="cells">
   <div class="cell">
-   <h3 class="lab">Screens, pasted on this page</h3>
+   <h2 class="lab">Screens, pasted on this page</h2>
    <div class="screens" data-screens>${p.scenes.map(([name, file, caption], i) => `<figure class="screen" id="screen-p${i}" data-name="${esc(name)}"><a href="${root}static/${file}">${B.img(root, file, `${p.title}: ${name}. ${caption}`, 'decoding="async"')}</a><figcaption><b>${esc(name)}.</b> ${esc(caption)}</figcaption></figure>`).join('')}</div>
    ${k.sampleNote}
    <p class="hint">${esc(p.disclosure)}</p>
@@ -56,7 +56,7 @@ const demos = {
     const li = (who, text, cls = '') => `<li${cls ? ` class="${cls}"` : ''}><span class="who">${who}</span><span>${esc(text)}</span></li>`;
     return `<div class="cells" data-ticks>
   <div class="cell">
-   <h3 class="lab">While you were out</h3>
+   <h2 class="lab">While you were out</h2>
    <p class="val">One conversation and one memory, whichever channel you use</p>
    <p class="lab ticks-lab">Message taken on</p>
    <ul class="ticks">${['Terminal', 'Telegram', 'Browser'].map(c => `<li><span class="box" aria-hidden="true">×</span>${c}</li>`).join('')}</ul>
@@ -64,7 +64,7 @@ const demos = {
  </div>
  <div class="cells">
   <div class="cell">
-   <h3 class="lab">Message</h3>
+   <h2 class="lab">Message</h2>
    <ul class="lines thread" aria-label="The conversation">${[
      li('Terminal', 'Remind me to check the gauze order on Friday.'), li('Yen', 'Noted for Friday.', 'is-agent'),
      li('Telegram', 'Did the gauze order go out?'), li('Yen', 'Not yet. It is still a draft waiting for your approval.', 'is-agent'),
@@ -84,9 +84,9 @@ function project({ p, next, projects, site, esc, root }, k) {
   return k.shell({ title: `${p.title} | ${site.name}`, description: p.description, route: `/work/${p.slug}/`, root, site, esc, main: `<section class="${cls}" id="sheet" data-form="${p.slug}" aria-labelledby="project-h">
  ${k.sheetHead(esc, { tag: 'h1', id: 'project-h', title: `${f.title} · ${p.title}`, sub: p.category, serial: k.serial(n, `item ${n} of ${projects.length}`) })}
  ${k.fieldCells(esc, [['Department', f.dept], ['Status', p.listing.status]])}
- <div class="cells"><div class="cell"><h3 class="lab">What it is</h3><p class="val">${esc(p.description)}</p></div></div>
+ <div class="cells"><div class="cell"><h2 class="lab">What it is</h2><p class="val">${esc(p.description)}</p></div></div>
  ${demos[p.slug](p, { esc, root }, k)}
- ${k.body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'])}
+ ${k.body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], '', {}, 'h2')}
  <div class="foot"><span class="links">${links}</span>${k.stampOf(f.stamp)}</div>
 </section>
 <p class="more-link"><a href="${root}work/${next.slug}/">Next: ${esc(next.title)}</a></p>` });

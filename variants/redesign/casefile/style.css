@@ -168,8 +168,8 @@ img,svg{max-width:100%}
 .arr{flex:none}
 .plain{font-weight:600}
 
-/* Stamps: bordered violet ink, uneven. */
-.stamp{display:inline-block;position:relative;flex:none;color:var(--stamp);border:3px solid currentColor;padding:.2em .7em .25em;font-weight:900;font-stretch:72%;font-size:clamp(1.15rem,.9rem + 1vw,1.7rem);line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+/* Stamps: bordered violet ink, uneven. Never under 1.2rem at weight 900, which is large text: 3:1 is enough and the violet gives 4:1 or better on every copy. */
+.stamp{display:inline-block;position:relative;flex:none;color:var(--stamp);border:3px solid currentColor;padding:.2em .7em .25em;font-weight:900;font-stretch:72%;font-size:clamp(1.2rem,.9rem + 1vw,1.7rem);line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
   rotate:var(--rot,-6deg);opacity:.92;pointer-events:none;user-select:none;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 0 0 0 -1.1'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") var(--mx,0px) var(--my,0px)/160px 160px;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 0 0 0 -1.1'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") var(--mx,0px) var(--my,0px)/160px 160px}
@@ -182,7 +182,7 @@ img,svg{max-width:100%}
 .about .cells{margin-top:0}
 /* Printed PHOTO box on the form, portrait inside it. */
 .portrait{margin:0;border:1px solid var(--navy);padding:.4rem .6rem .8rem}
-.portrait .lab{margin:0 0 .5rem;font-size:.68rem}
+.portrait .lab{margin:0 0 .5rem}
 .portrait img{display:block;width:calc(100% - 8px);aspect-ratio:1;height:auto;object-fit:cover;object-position:50% 12%;margin:4px;rotate:-1.5deg;border:1px solid rgb(27 42 107/.4)}
 
 /* Résumé reader and next-project link, on the desk below a Sheet */
@@ -217,6 +217,11 @@ form.sent .cells,form.sent .send{display:none}
 .again{border:0;background:none;padding:.4rem 0;color:var(--navy);font:600 .95rem/1.2 "Archivo",sans-serif;text-decoration:underline;text-underline-offset:.2em;cursor:pointer}
 .again:hover{text-decoration-thickness:2px}
 .field select{appearance:auto;border-radius:0;cursor:pointer}
+/* A field to type in (the DD count, the exam name): a dotted writing line under the typed entry, boxed in navy on hover and focus. */
+.field .write{padding:.25rem .5rem .2rem;border:1.5px solid transparent;border-bottom:2px dotted var(--navy);background:rgb(255 255 255/.45)}
+.field .write:read-write:hover,.field .write:read-write:focus{border-color:var(--navy)}
+.field .write:read-only{background:none;border-bottom-color:transparent}
+.field .write[inputmode=numeric]{max-width:8rem}
 .msg{margin:.8rem 0 0}
 .demo-bar+.msg:empty{margin:0}
 .hint{margin:.5rem 0 0;font-size:.82rem}
@@ -378,3 +383,8 @@ fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
   .register td.none{display:block;padding:.18rem 0}
   .register td.none::before{content:none}
 }
+
+/* The homepage Sheet's short body: what was built in a line beside the facts on record, or alone across the Sheet. */
+.case .body.short{grid-template-areas:none}
+.case .body.short>.cell{grid-area:auto}
+.case .body.short>.cell:only-child{grid-column:1/-1}
