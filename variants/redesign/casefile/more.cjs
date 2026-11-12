@@ -87,6 +87,7 @@ function project({ p, next, projects, site, esc, root }, k) {
  <div class="cells"><div class="cell"><h2 class="lab">What it is</h2><p class="val">${esc(p.description)}</p></div></div>
  ${demos[p.slug](p, { esc, root }, k)}
  ${k.body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], '', {}, 'h2')}
+ ${p.slug === 'theoses' ? k.now(k.shots(root, p, esc, p.scenes.length)) : ''}
  <div class="foot"><span class="links">${links}</span>${k.stampOf(f.stamp)}</div>
 </section>
 <p class="more-link"><a href="${root}work/${next.slug}/">Next: ${esc(next.title)}</a></p>` });

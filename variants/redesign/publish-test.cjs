@@ -61,7 +61,7 @@ for (const p of rest) assert.ok(home.includes(`href="work/${p.slug}/"`), `/: the
 // (problem, the full account, how it works, limits, stack, screens, Under the hood) is on /work/<slug>/ and only there.
 const firstSentence = s => s.match(/^.*?\.(?=\s|$)/)[0];
 const sheetWords = [
-  words.statement, words.hiring, words.formSub, words.replaces, words.where, words.requestTitle, words.requestSub, ...words.particulars.map(r => r[1]),
+  words.statement, words.hiring, words.formSub, words.replaces, words.where, words.requestTitle, words.requestSub, words.requestNote, ...words.particulars.map(r => r[1]),
   ...made.flatMap(p => [p.title, p.category, p.register.note, p.register.was, p.register.now, p.summary, ...(p.facts || []), ...(p.cavetext ? [firstSentence(p.cavetext.built)] : [])]),
   ...rest.flatMap(p => [p.title, p.entry])
 ].filter(Boolean);
@@ -79,6 +79,25 @@ assert.match(caveText, /CaveText/, '/work/cavelms/ carries CaveText');
 assert.match(caveText, /href="https:\/\/chromewebstore\.google\.com\/detail\/cavetext\//, '/work/cavelms/ links the Chrome Web Store listing');
 const theoses = fs.readFileSync(path.join(site, 'work/theoses/index.html'), 'utf8');
 assert.match(theoses, /built on the pi coding agent/, 'Theoses is described as a fork of pi');
+
+// Labels fit their content: the homepage Sheets say what the system is for (the slogan), the /work/ pages what was built (the full account).
+assert.doesNotMatch(home, /What I built/, '/: the homepage does not call a slogan "What I built"');
+assert.equal((home.match(/What it’s for/g) || []).length, made.length, '/: each system Sheet labels its line "What it’s for"');
+for (const p of made) assert.match(fs.readFileSync(path.join(site, `work/${p.slug}/index.html`), 'utf8'), /What I built/, `/work/${p.slug}/ keeps "What I built"`);
+// "What it doesn’t do" holds real limits; how the screens were made is in their captions (the disclosure).
+for (const [slug, sentence] of [['pims', 'These are genuine interface captures'], ['theoses', 'The images are staged sample conversations'], ['map', 'These owner-approved phone captures']]) {
+  const page = fs.readFileSync(path.join(site, `work/${slug}/index.html`), 'utf8'), p = projects.find(q => q.slug === slug);
+  assert.ok(!page.includes(sentence) && !p.limits.includes(sentence), `/work/${slug}/: the limits no longer repeat the screenshot provenance`);
+  assert.ok(p.limits.length > 60 && page.includes(esc(p.limits)), `/work/${slug}/: the real limits remain`);
+  assert.ok(page.includes(esc(p.disclosure)), `/work/${slug}/: the disclosure caption carries the provenance`);
+}
+// The Register is in operational terms: tech belongs in "Built with" and "Under the hood".
+const techTerms = /\bGo\b|Python|Apps Script|binary|parity|local-first/;
+const homeRegister = home.match(/<table class="register">[\s\S]*?<\/table>/)[0];
+assert.doesNotMatch(homeRegister, techTerms, '/: the Register has no tech terms');
+const procuraReg = projects.find(p => p.slug === 'procura').register;
+assert.deepEqual([procuraReg.was, procuraReg.now], ['A spreadsheet-and-script setup', 'Inventory, suppliers and orders in one system'], 'Procura’s Register row is in operational terms');
+assert.equal(words.requestNote, 'It comes straight to me, Hafiz. I reply by email from hafizwasabie@gmail.com.', 'the Request form’s one factual line');
 
 const sitemap = fs.readFileSync(path.join(site, 'sitemap.xml'), 'utf8');
 assert.deepEqual([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]), routes.map(r => origin + r));
@@ -254,6 +273,10 @@ async function demoChecks(browser, url) {
   const down = name => page.getByRole('button', { name: `One fewer ${name}` });
   await down('Gauze swab 10×10').click(); // 51 to 50: at the reorder point is time to reorder
   assert.match(await text(page, '#procura .stock tbody tr:first-child'), /50.*50.*reorder/s, 'Procura: on hand at the reorder point is flagged');
+  await button('procura', 'Draft purchase order').click(); // the flag and the draft agree: exactly at the reorder point drafts a line, 2 x 50 - 50
+  await until(page, stamp('procura'), 'Drafted');
+  assert.deepEqual(await lines(), ['1|Gauze swab 10×10|50|pack'], 'Procura: an item exactly at its reorder point is drafted');
+  assert.equal(await text(page, '#procura .msg'), '1 order line drafted from items at or below their reorder point.');
   await down('Gauze swab 10×10').click();
   assert.match(await text(page, '#procura .stock tbody tr:first-child'), /49.*50.*reorder/s);
   await button('procura', 'Draft purchase order').click();
@@ -378,6 +401,7 @@ async function requestChecks(browser, url) {
     assert.ok(!(await page.locator('[data-request] button[type=submit]').isDisabled()), `Request form: the button works again after ${what}`);
     assert.equal(await text(page, '[data-request] button[type=submit] span'), 'Send request');
     assert.ok(!(await visible(page, '[data-request] .done')), `Request form: ${what} is not a confirmation`);
+    assert.equal(await page.evaluate(() => document.activeElement.className), 'fail', `Request form: focus moves to the failure message after ${what}, not the page`);
     assert.equal(await page.inputValue('[data-request] [name=message]'), ok.message, 'Request form: the message is kept');
   }
   await page.close();
@@ -435,6 +459,7 @@ async function projectsPageChecks(browser, base) {
     for (const [i, p] of projects.entries()) {
       const r = p.register || p.listing;
       for (const t of [r.label || p.title, r.was, r.now]) assert.ok(rows[i].text.includes(t), `/projects/: ${what}: the ${p.slug} row says "${t}"`);
+      assert.doesNotMatch(rows[i].text, techTerms, `/projects/: ${what}: the ${p.slug} row is in operational terms`);
       assert.ok(rows[i].status, `/projects/: ${what}: the ${p.slug} row has a status`);
     }
     if (options.javaScriptEnabled === false) assert.equal(await page.locator('main button, main input').count(), 0, '/projects/: reads without controls');
@@ -564,6 +589,17 @@ async function continuationReadingChecks(browser, base) {
       assert.ok(await visible(page, 'main a[href$="#request"]') && await visible(page, 'main a[href$="resume/"]'), `${route}: ${what}: links the Request form and the résumé`);
       assert.equal(await page.getAttribute(`main a[href$="work/${next.slug}/"]`, 'href'), `../../work/${next.slug}/`, `${route}: ${what}: links the next project`);
       if (p.slug === 'theoses') assert.match(main, /pi coding agent/, `${route}: ${what}: built on the pi coding agent`);
+      if (p.slug === 'theoses') {
+        const shots = await page.$$eval('main .shot', fs => fs.map(f => { const i = f.querySelector('img'); return { src: i.getAttribute('src').split('/').pop(), loading: i.getAttribute('loading'), size: [i.getAttribute('width'), i.getAttribute('height')].map(Number), alt: i.alt, caption: f.querySelector('figcaption').textContent.replace(/\s+/g, ' ') }; }));
+        assert.deepEqual(shots.map(s => s.src), p.scenes.map(s => s[1]), `${route}: ${what}: both staged dashboard screens are on the page`);
+        shots.forEach((s, i) => {
+          assert.equal(s.loading, 'lazy', `${route}: ${what}: ${s.src} is lazy-loaded`);
+          assert.ok(s.size.every(n => n > 0), `${route}: ${what}: ${s.src} has width and height`);
+          assert.ok(s.alt.includes(p.scenes[i][2]), `${route}: ${what}: ${s.src} has real alt text`);
+          assert.equal(s.caption, `${p.scenes[i][0]}. ${p.disclosure}`, `${route}: ${what}: ${s.src} carries the disclosure caption`);
+        });
+        assert.equal(norm(await text(page, 'main .cell .wn')), 'Now', `${route}: ${what}: the screens are the Sheet’s Now`);
+      }
       if (p.slug === 'map') {
         const srcs = await page.$$eval('main img', is => is.map(i => i.getAttribute('src').split('/').pop()));
         assert.deepEqual(srcs, approvedMap, `${route}: ${what}: only the four approved screens`);
@@ -705,9 +741,130 @@ async function continuationChecks(browser, base) {
   console.log('PASS continuation pages: Theoses, 89lab, MAP and Yen read complete without JavaScript or with reduced motion; each demo runs end to end at 390 and 1440px with no sideways scroll; MAP shows only its four approved screens');
 }
 
+// The Request moment: one filled button per Sheet, the system carried to the form, one factual line on where the request goes.
+async function requestMomentChecks(browser, base) {
+  const navy = 'rgb(27, 42, 107)', paper = 'rgb(251, 251, 246)', clear = 'rgba(0, 0, 0, 0)';
+  const look = (page, sel) => page.$eval(sel, el => { const cs = getComputedStyle(el); return { bg: cs.backgroundColor, ink: cs.color, box: [cs.borderTopWidth, cs.borderTopColor, cs.paddingTop, cs.paddingLeft, cs.fontSize, cs.fontWeight].join(' ') }; });
+  let page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce' });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+
+  for (const p of made) {
+    const ask = await look(page, `#${p.slug} .foot a[href="#request"]`), outlined = await look(page, `#${p.slug} .foot a.btn:not(.primary)`);
+    assert.equal(await page.locator(`#${p.slug} .btn.primary`).count(), 1, `/: ${p.title} has one filled button`);
+    assert.equal(norm(await text(page, `#${p.slug} .btn.primary`)), 'Request one like this', `/: ${p.title}: the filled button is the Request`);
+    assert.deepEqual([ask.bg, ask.ink], [navy, paper], `/: ${p.title}: the Request is navy with paper-white text`);
+    assert.deepEqual([outlined.bg, outlined.ink], [clear, navy], `/: ${p.title}: the other buttons stay outlined`);
+    assert.equal(ask.box, outlined.box, `/: ${p.title}: the filled button is the same box as the outlined ones`);
+    assert.equal(await page.locator(`#${p.slug} [data-about]`).count(), 1, `/: ${p.title} carries its name to the form`);
+  }
+  assert.deepEqual([await page.locator('.first .btn.primary').count(), norm(await text(page, '.first .btn.primary'))], [1, 'Request work'], '/: the first Sheet’s Request work is filled');
+  assert.deepEqual([(await look(page, '.first .btn.primary')).bg, (await look(page, '.first .btn.primary')).ink], [navy, paper]);
+  const bar = await look(page, '.deskbar .req');
+  assert.deepEqual([bar.bg, bar.ink], [navy, paper], 'the desk bar’s Request work is filled');
+  await page.hover('#pims .btn.primary');
+  assert.equal((await look(page, '#pims .btn.primary')).bg, await page.$eval('#pims', el => getComputedStyle(el).backgroundColor), 'hover turns the filled button to the Sheet’s own ground');
+  await page.mouse.move(0, 0);
+
+  // "Request one like this" carries its system: the message is prefilled once, only into an empty box, and focused at the end.
+  const message = '[data-request] [name=message]';
+  const state = () => page.evaluate(m => { const t = document.querySelector(m); return { value: t.value, focused: document.activeElement === t, caret: t.selectionStart === t.value.length && t.selectionEnd === t.value.length }; }, message);
+  await page.click('#pims .btn.primary');
+  // The focus lands just after the jump to #request (request.js defers it a tick), so wait for it rather than racing it.
+  await page.waitForFunction(m => document.activeElement === document.querySelector(m), message, { timeout: 2000 }).catch(() => {});
+  assert.deepEqual(await state(), { value: 'Something like PIMS: ', focused: true, caret: true }, 'Request: PIMS prefills the message and focuses it at the end');
+  assert.ok(page.url().endsWith('#request'), 'Request: it still goes to the form');
+  await page.keyboard.type('replaces our paper slips');
+  await page.click('#dd-drugs-register .btn.primary');
+  assert.equal((await state()).value, 'Something like PIMS: replaces our paper slips', 'Request: a message already started is kept');
+  await page.fill(message, '');
+  await page.click('#dd-drugs-register .btn.primary');
+  assert.equal((await state()).value, 'Something like DD Drugs Register: ', 'Request: an empty box takes the next system');
+  await page.fill(message, '');
+  await page.click('#cavelms .btn.primary');
+  assert.equal((await state()).value, 'Something like CaveLMS: ');
+  await page.close();
+
+  // From a /work/ page the system travels in the address, and only a system on the page is believed.
+  page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce' });
+  await page.goto(`${base}/work/procura/`, { waitUntil: 'networkidle' });
+  assert.equal(await page.locator('main .btn.primary').count(), 1, '/work/procura/: one filled button');
+  assert.deepEqual([(await look(page, 'main .foot .btn.primary')).bg, norm(await text(page, 'main .foot .btn.primary'))], [navy, 'Request one like this'], '/work/procura/: the Request is filled');
+  assert.equal(await page.getAttribute('main .foot .btn.primary', 'href'), '../../?about=Procura#request', '/work/procura/: the Request carries its system');
+  await page.click('main .foot .btn.primary');
+  await page.waitForURL(`${base}/?about=Procura#request`);
+  await page.waitForFunction(m => document.activeElement === document.querySelector(m), message, { timeout: 2000 }).catch(() => {});
+  assert.deepEqual(await state(), { value: 'Something like Procura: ', focused: true, caret: true }, '/work/procura/: the form arrives prefilled and focused');
+  await page.goto(`${base}/?about=Evil%20link%20http%3A%2F%2Fspam.example#request`, { waitUntil: 'networkidle' });
+  assert.equal((await state()).value, '', 'Request: an unknown ?about= prefills nothing');
+  await page.close();
+
+  // Without JavaScript the link is a plain jump to the form.
+  page = await browser.newPage({ viewport: phone, javaScriptEnabled: false });
+  await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+  await page.click('#pims .btn.primary');
+  assert.ok(page.url().endsWith('/#request'), 'Request: without JavaScript it still goes to the form');
+  assert.equal(await page.inputValue(message), '', 'Request: without JavaScript nothing is prefilled');
+  await page.close();
+  assert.deepEqual(errors, []);
+}
+
+// Phones see two sample lines of each slip on the homepage and a note that links the rest; desktop, /work/ pages and every line a demo adds show everything.
+async function sampleLinesChecks(browser, base) {
+  const slips = { pims: 4, 'dd-drugs-register': 4, procura: 3 };
+  const rows = (page, id) => page.$$eval(`#${id} table.slip:not(.stock) tbody tr`, trs => trs.filter(tr => tr.getBoundingClientRect().height > 0).map(tr => tr.textContent.replace(/\s+/g, ' ').trim()));
+  const note = (page, id) => page.locator(`#${id} .more-rows`);
+  for (const js of [false, true]) {
+    const page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce', javaScriptEnabled: js });
+    await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+    for (const [id, n] of Object.entries(slips)) {
+      const hidden = n - 2, where = `/: ${id}${js ? '' : ' without JavaScript'} at 390px`;
+      assert.equal((await rows(page, id)).length, 2, `${where}: two sample lines show`);
+      assert.equal(norm(await text(page, `#${id} .more-rows`)), `+${hidden} more ${hidden > 1 ? 'lines' : 'line'} on the full case study`, `${where}: the note counts the rest`);
+      assert.equal(await page.getAttribute(`#${id} .more-rows a`, 'href'), `work/${id}/`, `${where}: the note links the case study`);
+      assert.ok(await note(page, id).isVisible(), `${where}: the note shows`);
+      assert.equal(await page.locator(`#${id} table.slip:not(.stock) tbody tr`).count(), n, `${where}: every line is still in the page`);
+    }
+    assert.ok((await rows(page, 'dd-drugs-register')).every(r => r.startsWith('04 Oct')) && (await rows(page, 'dd-drugs-register')).some(r => /discrepancy/.test(r)), '/: the DD ledger keeps its discrepancy among the two lines');
+    if (js) {
+      // Rows a demo adds are never hidden.
+      await page.fill('#dd-count', '12');
+      await page.locator('#dd-drugs-register').getByRole('button', { name: 'Submit count' }).click();
+      await page.locator('#dd-drugs-register').getByRole('button', { name: 'Record correction' }).click();
+      await until(page, '#dd-drugs-register .foot .stamp', 'Corrected');
+      assert.equal((await rows(page, 'dd-drugs-register')).length, 4, '/: DD’s added count and correction show beside the two sample lines');
+      assert.match((await rows(page, 'dd-drugs-register')).at(-1), /Correction to entry of today/);
+      for (const name of ['Gauze swab 10×10', 'Syringe 3 ml', 'Bandage, 5 cm']) await page.getByRole('button', { name: `One fewer ${name}` }).click({ clickCount: 2 });
+      await page.locator('#procura').getByRole('button', { name: 'Draft purchase order' }).click();
+      await until(page, '#procura .foot .stamp', 'Drafted');
+      assert.equal((await rows(page, 'procura')).length, 3, '/: every drafted Procura line shows');
+      assert.ok(!(await note(page, 'procura').isVisible()), '/: a drafted order has no note about hidden sample lines');
+      await page.locator('#procura').getByRole('button', { name: 'Start again' }).click();
+      assert.equal((await rows(page, 'procura')).length, 2, '/: Start again returns to two sample lines');
+      assert.ok(await note(page, 'procura').isVisible(), '/: Start again brings the note back');
+    }
+    await page.close();
+  }
+  let page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+  for (const [id, n] of Object.entries(slips)) {
+    assert.equal((await rows(page, id)).length, n, `/: ${id} shows every sample line at 1440px`);
+    assert.ok(!(await note(page, id).isVisible()), `/: ${id} has no note at 1440px`);
+  }
+  await page.close();
+  page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce' });
+  for (const [id, n] of Object.entries(slips)) {
+    await page.goto(`${base}/work/${id}/`, { waitUntil: 'networkidle' });
+    assert.equal((await rows(page, id)).length, n, `/work/${id}/ shows every sample line at 390px`);
+    assert.equal(await page.locator('.more-rows').count(), 0, `/work/${id}/ has no note`);
+  }
+  await page.close();
+}
+
 // Weight and legibility at 390px: the homepage Sheets are the short version, the Stamp is large text with the contrast to match,
 // and the Photo label of the Particulars is the Label size.
-const phoneHomeCeiling = 13300; // px; measured 12,091 after the Sheets were cut from 17,001 (~10% headroom)
+const phoneHomeCeiling = 12600; // px; measured 11,420 after two sample lines per slip (12,091 before, 17,001 with the full Sheets; ~10% headroom)
 const luminance = ([r, g, b]) => { const c = [r, g, b].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
 const contrast = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + .05) / (lo + .05); };
 const rgb = css => css.match(/[\d.]+/g).slice(0, 3).map(Number);
@@ -717,7 +874,7 @@ async function phoneHomeChecks(browser, url) {
   await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += innerHeight / 2) { scrollTo(0, y); await new Promise(r => setTimeout(r, 30)); } scrollTo(0, 0); });
   await page.waitForLoadState('networkidle');
   const height = await page.evaluate(() => document.documentElement.scrollHeight);
-  console.log(`homepage at ${phone.width}px is ${height}px tall (ceiling ${phoneHomeCeiling}px; was 17001px with the full Sheets)`);
+  console.log(`homepage at ${phone.width}px is ${height}px tall (ceiling ${phoneHomeCeiling}px; was 12091px before the slips were cut to two lines, 17001px with the full Sheets)`);
   assert.ok(height < phoneHomeCeiling, `/: the homepage at 390px is ${height}px tall, over the ${phoneHomeCeiling}px ceiling`);
 
   const stamps = await page.$$eval('.stamp:not([hidden])', els => els.map(el => { const cs = getComputedStyle(el); return { word: el.textContent, size: parseFloat(cs.fontSize), weight: Number(cs.fontWeight), ink: cs.color, opacity: Number(cs.opacity), ground: getComputedStyle(el.closest('.sheet')).backgroundColor }; }));
@@ -751,6 +908,8 @@ async function browserChecks() {
     await demoChecks(browser, `${base}/`);
     await liftChecks(browser, `${base}/`);
     await requestChecks(browser, `${base}/`);
+    await requestMomentChecks(browser, base);
+    await sampleLinesChecks(browser, base);
     await projectPageChecks(browser, base);
 
     await continuationChecks(browser, base);
@@ -765,4 +924,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots/llms.txt; ${manifest.length} manifest hashes; the Case File homepage says every Sheet's words; résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: without JavaScript or with reduced motion the homepage reads complete with no demo controls; the PIMS, DD Drugs Register, Procura and CaveLMS demos and the lift run end to end at 390px; each of their four /work/ pages reads complete without JavaScript, shows every approved screen, runs its demo and lift, and links the next project, the Request form and the résumé; the first screen holds the Hiring line at 390px and the whole Register and Request work button at 1440px; the CaveLMS Sheet links its page; the Request form validates, sends {name, email, message, website} and reports 400, 429, 500 and network failures; every route has one h1 with no skipped heading level, no sideways scroll and no request to another host at 390 and 1440px; the homepage Sheets are the short version (the long one is only on /work/) and stay under the phone height ceiling; the PIMS and DD demos say how to play, their entries look like fill-in fields and the lift button says what is underneath; the Stamp is large text with enough contrast at 390px'));
+browserChecks().then(() => console.log('PASS browser step: without JavaScript or with reduced motion the homepage reads complete with no demo controls; the PIMS, DD Drugs Register, Procura and CaveLMS demos and the lift run end to end at 390px; each of their four /work/ pages reads complete without JavaScript, shows every approved screen, runs its demo and lift, and links the next project, the Request form and the résumé; the first screen holds the Hiring line at 390px and the whole Register and Request work button at 1440px; the CaveLMS Sheet links its page; the Request form validates, sends {name, email, message, website} and reports 400, 429, 500 and network failures; every route has one h1 with no skipped heading level, no sideways scroll and no request to another host at 390 and 1440px; the homepage Sheets are the short version (the long one is only on /work/), show two sample lines per slip on phones and stay under the phone height ceiling; “Request one like this” is each Sheet’s one filled button, carries its system into the Request form and the form says where the request goes; a failed send moves focus to the failure message; the PIMS and DD demos say how to play, their entries look like fill-in fields and the lift button says what is underneath; the Stamp is large text with enough contrast at 390px'));

@@ -35,7 +35,7 @@ img,svg{max-width:100%}
 .deskbar nav{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem 1.4rem;font-weight:600;font-size:.95rem}
 .deskbar nav a{padding:.3rem 0;border-bottom:1px solid transparent}
 .deskbar nav a:hover{border-bottom-color:currentColor}
-.deskbar nav .req{border:1.5px solid var(--desk-ink);padding:.3rem .75rem}
+.deskbar nav .req{border:1.5px solid var(--desk-ink);padding:.3rem .75rem;background:var(--navy);color:var(--white)}
 .deskbar nav .req:hover{background:var(--desk-ink);color:var(--desk)}
 .deskfoot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem 2rem;padding:1.5rem 0 3rem;font-size:.9rem;color:rgb(235 235 223/.85)}
 .deskfoot p{margin:0}
@@ -165,6 +165,9 @@ img,svg{max-width:100%}
 /* Buttons are fields too */
 .btn{display:inline-flex;align-items:center;gap:.6rem;border:var(--rule);padding:.65rem 1rem .7rem;background:transparent;color:var(--navy);font:700 .9rem/1.2 "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;cursor:pointer;border-radius:0}
 .btn:hover{background:var(--navy);color:var(--ground)}
+/* The one filled button of a Sheet: the Request. Hover swaps the ink (the Sheet's ground, navy text); focus is the violet ring. */
+.btn.primary{background:var(--navy);color:var(--white)}
+.btn.primary:hover{background:var(--ground);color:var(--navy)}
 .arr{flex:none}
 .plain{font-weight:600}
 
@@ -275,8 +278,14 @@ fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
 .slipside.solo,.wasnow.solo{grid-template-columns:1fr}
 .wasnow.solo .shots{max-width:62%}
 
+/* The note under a homepage slip that cuts its sample lines on phones (page.cjs trim). */
+p.more-rows{display:none}
+
 /* Phones: field rows stack; registers become stacked rows. */
 @media (max-width:760px){
+  .sheet:not(.project) .slip tbody tr.extra{display:none}
+  .sheet:not(.project) .slip tbody tr.extra+tr:not(.extra){border-top:0}
+  p.more-rows{display:block;margin-top:.5rem;font-size:.82rem;font-weight:600}
   .cells.two,.wasnow,.slipside,.shots.two{grid-template-columns:1fr}
   .shots.two{gap:1.1rem}
   .case .body,.case .body.pair,.case .body.dd,.case.noproblem .body.pair{grid-template-areas:none}

@@ -9,9 +9,10 @@ const projects = order.map(slug => {
   return p;
 });
 
+const email = 'hafizwasabie@gmail.com';
 const site = {
   name: 'Hafiz Jamali',
-  email: 'hafizwasabie@gmail.com',
+  email,
   mailto: 'mailto:hafizwasabie@gmail.com?subject=Project%20enquiry',
   github: 'https://github.com/H4fizWasabie',
   resume: 'https://portfolio.wasabietech.com/resume/',
@@ -37,7 +38,8 @@ const site = {
   replaces: 'Paper stock requests, approvals, stock checks, scattered spreadsheets',
   where: 'A veterinary hospital in Selangor, Malaysia, and a training company',
   requestTitle: 'Request for work',
-  requestSub: 'Tell me what your team does by hand today. I reply by email.',
+  requestSub: 'Tell me what your team does by hand today.',
+  requestNote: `It comes straight to me, Hafiz. I reply by email from ${email}.`,
   requestSend: 'Request work',
   requestDone: 'Received. I’ll reply by email.',
   particulars: [

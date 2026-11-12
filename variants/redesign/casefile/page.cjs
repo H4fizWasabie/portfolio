@@ -26,9 +26,10 @@ const forms = {
 const sampleNote = '<p class="sample">Sample entries, fictional</p>';
 const stampOf = ([text, rot, mx, my]) => `<span class="stamp" style="--rot:${rot}deg;--mx:${mx}px;--my:${my}px" aria-hidden="true">${text}</span>`;
 
-const btn = (href, label, attrs = '') => `<a class="btn" href="${href}"${attrs}>${label} ${arr}</a>`;
-const sheetHead = (esc, { tag = 'h2', id, title, sub, serial = '' }) => `<div class="head">
-  <div><${tag}${id ? ` id="${id}"` : ''} class="form-title">${esc(title)}</${tag}><p class="sub">${esc(sub)}</p></div>${serial}
+// primary is the one filled button of a Sheet: the Request (DESIGN.md, Buttons).
+const btn = (href, label, attrs = '', primary = false) => `<a class="btn${primary ? ' primary' : ''}" href="${href}"${attrs}>${label} ${arr}</a>`;
+const sheetHead = (esc, { tag = 'h2', id, title, sub, note = '', serial = '' }) => `<div class="head">
+  <div><${tag}${id ? ` id="${id}"` : ''} class="form-title">${esc(title)}</${tag}><p class="sub">${esc(sub)}</p>${note && `<p class="sub">${esc(note)}</p>`}</div>${serial}
  </div>`;
 const serial = (no, cap) => `\n  <p class="serial"><span class="no">No. ${pad(no)}</span><span class="cap">${cap}</span></p>`;
 const fieldCells = (esc, pairs) => `<div class="cells two fields">${pairs.map(([l, v]) => `<div class="cell"><p class="lab">${l}</p><p class="val">${esc(v)}</p></div>`).join('')}</div>`;
@@ -39,6 +40,11 @@ const table = (esc, { caption, cls = 'register slip', head, rows }) => `<table c
     <thead><tr>${head.map(h => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>
     <tbody>${rows.map(r => `<tr${r.cls ? ` class="${r.cls}"` : ''}>${r.cells.map(([label, v, cls], i) => `<td data-label="${esc(label)}"${cls ? ` class="${cls}"` : ''}>${v && v.html ? v.html : esc(v)}</td>`).join('')}</tr>`).join('\n     ')}</tbody>
    </table>`;
+// On phones the homepage Sheet shows SHOWN lines of a sample table: style.css hides the rows marked "extra", and a printed note links the rest.
+// Lines a demo adds carry no mark, so they always show. A project page (full) shows every line.
+const SHOWN = 2;
+const trim = (rows, full, latest = false) => rows.map((r, i) => (!full && (latest ? i < rows.length - SHOWN : i >= SHOWN) ? { ...r, cls: [r.cls, 'extra'].filter(Boolean).join(' ') } : r));
+const moreRows = (root, p, full, n) => (full || n <= SHOWN ? '' : `<p class="more-rows"><a href="${root}work/${p.slug}/">+${n - SHOWN} more ${n - SHOWN > 1 ? 'lines' : 'line'} on the full case study</a></p>`);
 const lines = (esc, items, cls) => `<ul class="${cls}">${items.map(s => `<li>${esc(s)}</li>`).join('')}</ul>`;
 
 // The sections of a Sheet's body, from the project's facts. Areas are laid out by style.css on the homepage.
@@ -55,7 +61,7 @@ const body = (p, esc, order, cls, heads = {}, h = 'h3') => `<div class="cells tw
   ${order.map(k => part[k](p, esc, heads[k], h)).filter(Boolean).join('\n  ')}
  </div>`;
 // The homepage Sheet is the short version: one line of what was built and the facts on record. The rest is on the project page.
-const shortBody = (p, esc) => body({ ...p, built: p.summary }, esc, ['built', 'facts'], 'short');
+const shortBody = (p, esc) => body({ ...p, built: p.summary }, esc, ['built', 'facts'], 'short', { built: 'What it’s for' });
 const firstSentence = s => s.match(/^.*?\.(?=\s|$)/)[0];
 
 const shot = (root, p, esc, [name, file, caption]) => `<figure class="shot">${B.img(root, file, `${p.title}: ${name}. ${caption}`, 'loading="lazy" decoding="async"')}<figcaption><b>${esc(name)}.</b> ${esc(p.disclosure)}</figcaption></figure>`;
@@ -69,9 +75,10 @@ const sheets = {
    <${h} class="lab">Stock requisition slip</${h}>
    ${table(esc, {
      caption: 'Stock requisition slip, sample lines', head: ['Item', 'Description', 'Qty', 'Unit', 'Dept'],
-     rows: [['Surgical gloves, M', 10, 'box', 'Theatre'], ['Syringe 3 ml', 5, 'box', 'Ward'], ['Gauze swab 10×10', 12, 'pack', 'Ward'], ['Bandage, 5 cm', 8, 'roll', 'Theatre']]
-       .map((r, i) => ({ cells: [['Item', String(i + 1), 'n'], ['Description', r[0]], ['Qty', String(r[1])], ['Unit', r[2]], ['Dept', r[3]]] }))
+     rows: trim([['Surgical gloves, M', 10, 'box', 'Theatre'], ['Syringe 3 ml', 5, 'box', 'Ward'], ['Gauze swab 10×10', 12, 'pack', 'Ward'], ['Bandage, 5 cm', 8, 'roll', 'Theatre']]
+       .map((r, i) => ({ cells: [['Item', String(i + 1), 'n'], ['Description', r[0]], ['Qty', String(r[1])], ['Unit', r[2]], ['Dept', r[3]]] })), full)
    })}
+   ${moreRows(root, p, full, 4)}
    ${sampleNote}
    <p class="sign"><span>Requested by <span class="ln">A.R.</span></span><span>Approved by <span class="ln">M.T.</span></span><span>Received by <span class="ln"></span></span></p>
   </div>
@@ -80,15 +87,16 @@ const sheets = {
  ${full ? `${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], '', {}, h)}
  ${now(shots(root, p, esc, p.scenes.length))}` : shortBody(p, esc)}`,
 
-  'dd-drugs-register': (p, { esc, full, h }) => `<div class="cells">
+  'dd-drugs-register': (p, { esc, root, full, h }) => `<div class="cells">
   <div class="cell">
    <${h} class="lab">Daily count ledger</${h}>
    ${table(esc, {
      caption: 'Daily count ledger, sample entries', head: ['Date', 'Item', 'Physical count', 'System count', 'Difference', 'Initials'],
-     rows: [['03 Oct', 'Item A', 40, 40, 0, 'A.R.'], ['03 Oct', 'Item B', 12, 12, 0, 'A.R.'], ['04 Oct', 'Item A', 38, 38, 0, 'M.T.'], ['04 Oct', 'Item B', 11, 12, '−1', 'M.T.']]
+     rows: trim([['03 Oct', 'Item A', 40, 40, 0, 'A.R.'], ['03 Oct', 'Item B', 12, 12, 0, 'A.R.'], ['04 Oct', 'Item A', 38, 38, 0, 'M.T.'], ['04 Oct', 'Item B', 11, 12, '−1', 'M.T.']]
        .map(r => ({ cls: r[4] === '−1' ? 'flag' : '', cells: [['Date', r[0]], ['Item', r[1]], ['Physical count', String(r[2])], ['System count', String(r[3])],
-         ['Difference', r[4] === '−1' ? { html: '<span><b>−1</b> <span class="mark">discrepancy</span></span>' } : String(r[4])], ['Initials', r[5]]] }))
+         ['Difference', r[4] === '−1' ? { html: '<span><b>−1</b> <span class="mark">discrepancy</span></span>' } : String(r[4])], ['Initials', r[5]]] })), full, true)
    })}
+   ${moreRows(root, p, full, 4)}
    ${sampleNote}
   </div>
  </div>
@@ -103,9 +111,10 @@ const sheets = {
    <${h} class="lab">Order lines</${h}>
    ${table(esc, {
      caption: 'Purchase order lines, sample', head: ['Line', 'Description', 'Qty', 'Unit'],
-     rows: [['Gauze swab 10×10', 15, 'pack'], ['Syringe 3 ml', 10, 'box'], ['Bandage, 5 cm', 24, 'roll']]
-       .map((r, i) => ({ cells: [['Line', String(i + 1), 'n'], ['Description', r[0]], ['Qty', String(r[1])], ['Unit', r[2]]] }))
+     rows: trim([['Gauze swab 10×10', 15, 'pack'], ['Syringe 3 ml', 10, 'box'], ['Bandage, 5 cm', 24, 'roll']]
+       .map((r, i) => ({ cells: [['Line', String(i + 1), 'n'], ['Description', r[0]], ['Qty', String(r[1])], ['Unit', r[2]]] })), full)
    })}
+   ${moreRows(root, p, full, 3)}
    ${sampleNote}
   </div>
  </div>
@@ -141,7 +150,8 @@ const sheet = (p, n, count, ctx) => {
   const f = forms[p.slug], { esc, root, full } = ctx, h = full ? 'h2' : 'h3';
   const cls = ['sheet', f.color, 'perf', 'case', full && 'project', !p.problem && 'noproblem', !p.facts && 'nofacts'].filter(Boolean).join(' ');
   // Every system Sheet ends at the Request form, the moment a visitor is most convinced.
-  const ask = btn(`${root}#request`, 'Request one like this');
+  // The system travels with the click: on the homepage as data-about (request.js prefills the message), from a /work/ page in the address.
+  const ask = full ? btn(`${root}?about=${encodeURIComponent(p.title)}#request`, 'Request one like this', '', true) : btn(`${root}#request`, 'Request one like this', ` data-about="${esc(p.title)}"`, true);
   const foot = full ? `<span class="links">${ask}${extLinks(p, esc).join('')}</span>` : p.slug === 'cavelms'
     ? `<span class="links">${btn(`${root}work/cavelms/`, 'Full case study')}${ask}${btn(p.url, 'Visit CaveLMS', ' rel="noopener"')}${btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"')}</span>`
     : `<span class="links">${btn(`${root}work/${p.slug}/`, 'Full case study')}${ask}</span>`;
@@ -175,7 +185,7 @@ const first = (made, site, esc) => `<div id="top" class="stack">
    })}
    <span class="stamp over" style="--mx:30px;--my:100px" aria-hidden="true">In use</span>
   </div>
-  <div class="foot"><a class="plain" href="resume/">Read the résumé</a>${btn('#request', 'Request work')}</div>
+  <div class="foot"><a class="plain" href="resume/">Read the résumé</a>${btn('#request', 'Request work', '', true)}</div>
  </section>
 </div>`;
 
@@ -203,7 +213,7 @@ const about = (root, site, esc) => `<section class="sheet canary perf narrow" id
 </section>`;
 
 const request = (site, esc) => `<section class="sheet white perf narrow" id="request" aria-labelledby="request-h">
- ${sheetHead(esc, { id: 'request-h', title: site.requestTitle, sub: site.requestSub, serial: serial(5, 'next in line') })}
+ ${sheetHead(esc, { id: 'request-h', title: site.requestTitle, sub: site.requestSub, note: site.requestNote, serial: serial(5, 'next in line') })}
  <form action="mailto:${site.email}" method="post" enctype="text/plain" data-request>
   <div class="cells">
    <label class="cell field"><span class="lab">What does your team do today, and what gets repeated?</span><textarea name="message" rows="5" required autocomplete="off"></textarea><span class="err" id="err-message">Tell me a little about what your team does today.</span></label>
@@ -213,7 +223,7 @@ const request = (site, esc) => `<section class="sheet white perf narrow" id="req
    <label class="cell field"><span class="lab">Your email</span><input type="email" name="email" required autocomplete="email" inputmode="email"><span class="err" id="err-email">Add an email address I can reply to, like name@example.com.</span></label>
   </div>
   <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
-  <p class="fail" role="alert" hidden><span class="why"></span> Email <a href="mailto:${site.email}">${site.email}</a> instead.</p>
+  <p class="fail" role="alert" tabindex="-1" hidden><span class="why"></span> Email <a href="mailto:${site.email}">${site.email}</a> instead.</p>
   <div class="foot">
    <div class="send"><button class="btn" type="submit"><span>Send request</span> ${arr}</button><p>Or email <a href="mailto:${site.email}">${site.email}</a></p></div>
    <p class="done" tabindex="-1" hidden>${esc(site.requestDone)}</p>
@@ -282,7 +292,7 @@ function systemPage({ p, next, projects, site, esc, root }) {
 }
 
 // The pieces more.cjs builds its Sheets from.
-const kit = { shell, sheetHead, serial, fieldCells, table, body, btn, stampOf, sampleNote };
+const kit = { shell, sheetHead, serial, fieldCells, table, body, btn, stampOf, sampleNote, shots, now };
 
 // A project's page: the four systems in production are rendered here, the rest by more.cjs.
 const project = args => forms[args.p.slug] ? systemPage(args) : pages.project(args, kit);
