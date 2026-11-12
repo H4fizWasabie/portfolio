@@ -5,19 +5,22 @@
 const fs = require('fs');
 const path = require('path');
 const esbuild = require('esbuild');
-const { projects, site, esc } = require('./content.cjs');
+const { projects: all, site, esc } = require('./content.cjs');
 
 const here = __dirname;
 const images = path.join(here, '..', 'product-launch');
 const resumeDir = path.join(here, '..', '..', 'resume');
-const variants = ['workflow', 'turntable', 'workshop'];
+const variants = ['workflow', 'turntable', 'workshop', 'casefile'];
+// The archived previews predate CaveLMS: no demo, device or Room for it.
+const archived = ['workflow', 'turntable', 'workshop'];
 
 const copy = (from, to) => { fs.mkdirSync(path.dirname(to), { recursive: true }); fs.copyFileSync(from, to); };
 const write = (to, text) => { fs.mkdirSync(path.dirname(to), { recursive: true }); fs.writeFileSync(to, text); };
 
-const projectImages = [...new Set(projects.flatMap(p => [p.preview, ...p.scenes.map(s => s[1])]).filter(Boolean))];
+const projectImages = [...new Set(all.flatMap(p => [p.preview, ...p.scenes.map(s => s[1])]).filter(Boolean))];
 
 function build(name, { out = path.join(here, 'dist', name), publish = false } = {}) {
+  const projects = archived.includes(name) ? all.filter(p => p.slug !== 'cavelms') : all;
   if (!variants.includes(name)) throw new Error(`unknown variant ${name}`);
   const dir = path.join(here, name);
   const page = require(path.join(dir, 'page.cjs'));

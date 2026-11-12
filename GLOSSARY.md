@@ -1,26 +1,30 @@
 # Portfolio
 
-Hafiz Jamali's portfolio: a homepage that tours a house of his projects, room by room, then tells who he is and how to reach him.
+Hafiz Jamali's portfolio: a book of carbon-copy forms, one filed for each system he built, followed by who he is and how to reach him.
 
 ## Language
 
-### The homepage
+### The pages
 
-**House**:
-The 3D lakeside villa behind the homepage: seen from across the water first, then entered and walked through, Room by Room.
-_Avoid_: building, scene, workshop (the Workshop is the design's name, not the scene)
+**Sheet**:
+One paper form on the page. Each project is filed on its own Sheet, laid out as the kind of form that project replaced.
+_Avoid_: card, section, panel
 
-**Room**:
-One themed space in the House for one service Hafiz offers, holding an object for each project that proves it. A project's case study is told at its object.
-_Avoid_: shelf, level, section
+**Copy**:
+The coloured carbon copy under a Sheet (pink, canary, blue or green). Where a project replaced a paper process, the Copy holds the diagram of that process.
+_Avoid_: layer, background, underlay
 
-**Stop**:
-One screen of the room tour, showing one thing in the room with its caption.
-_Avoid_: step, slide
+**Register**:
+The table of systems on the first Sheet, and the full list of all work on `/projects/`: one row per project, each linking to its Sheet.
+_Avoid_: list, index, grid
 
-**Chapter**:
-One of the two panels in About: Background and Now. (How I work moved to the stair wall: a poster per step, each a Stop.)
-_Avoid_: tab, column
+**Stamp**:
+The approval mark on a Sheet that says what state the project or a demo is in.
+_Avoid_: badge, tag, label
+
+**Sample demo**:
+A form on a Sheet that a visitor can fill in to see the system's workflow, on fictional data. It is never the real application.
+_Avoid_: simulator, live demo
 
 **Hiring line**:
 The sentence that invites employers to read the résumé.
@@ -28,9 +32,9 @@ The sentence that invites employers to read the résumé.
 ### Getting in touch
 
 **Enquiry**:
-A message a visitor sends to Hafiz from the Contact section.
+A message a visitor sends to Hafiz from the Request form.
 _Avoid_: contact message, lead, submission
 
-**Enquiry form**:
-The questions in the Contact section that a visitor answers to send an Enquiry.
-_Avoid_: brief, contact form
+**Request form**:
+The last Sheet, titled "Request for work" and reached by the "Request work" links, which a visitor fills in to send an Enquiry.
+_Avoid_: enquiry form, contact form, brief

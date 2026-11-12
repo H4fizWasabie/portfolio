@@ -10,7 +10,7 @@ const licenses = ['OFL-schibsted-grotesk.txt'];
 const thumbs = ['procura', 'pims', 'dd-drugs-register', 'theoses', '89lab', 'map', 'yen'].flatMap(s => [`model/thumb-${s}.webp`, `model/thumb-${s}-night.webp`]);
 // The Rooms (room.js ROOMS), each its own asset with its day and night lighting.
 const roomFiles = ['stock', 'records', 'ai', 'android'].flatMap(s => [`model/room-${s}.glb`, `model/room-${s}-light.webp`, `model/room-${s}-light-night.webp`]);
-const statics = [...roomFiles, 'model/house.glb', 'model/house-light.webp', 'model/house-light-night.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', 'photo/hafiz-portrait.webp', ...thumbs];
+const statics = [...roomFiles, 'model/house.glb', 'model/house-light.webp', 'model/house-light-night.webp', 'model/backdrop.webp', 'model/house-wet.webp', 'model/water-normal.webp', 'model/poster.webp', 'model/poster-phone.webp', '../photo/hafiz-portrait.webp', ...thumbs];
 
 // What each project is in its Room, so /projects/ can name the object.
 const objectName = { procura: 'Workstation', pims: 'Wall tablet', 'dd-drugs-register': 'Drugs cabinet and terminal', theoses: 'Monitors and home server', '89lab': 'Camera, ring light and microphone', map: 'Phone on its stand', yen: 'Puck, laptop and phone' };

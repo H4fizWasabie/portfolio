@@ -4,8 +4,8 @@ Hafiz Jamali's portfolio, live at https://portfolio.wasabietech.com.
 
 ## What is live
 
-- `variants/redesign/` is the live site (the Workshop). Its README covers the layout; `resume/DEPLOYMENT.md` covers releases.
-  The other `variants/*` folders are archived previews, as is `variants/redesign`'s `turntable` and `workflow`.
+- `variants/redesign/` is the live site (the Case File). Its README covers the layout; `resume/DEPLOYMENT.md` covers releases.
+  The other `variants/*` folders are archived previews, as are `variants/redesign`'s `workshop`, `turntable` and `workflow`.
 - `apps/api` is live: systemd unit `portfolio-api` behind Caddy at `/api/*`, built in place from the VPS clone at
   `/var/www/portfolio-app`. It serves `POST /api/contact` and the `contact_messages` table (`infra/schema.sql`).
   Its release is separate from the static site: see "API release" in `resume/DEPLOYMENT.md`.
@@ -18,8 +18,8 @@ Verify behaviour in the source, not in this file or a README: status lines drift
 
 ## Commands
 
-- Live site: `npm ci --prefix variants/redesign`, then `node variants/redesign/build.cjs workshop` for a noindex
-  preview in `variants/redesign/dist/workshop/`, or `node variants/redesign/publish-test.cjs` for the production
+- Live site: `npm ci --prefix variants/redesign`, then `node variants/redesign/build.cjs casefile` for a noindex
+  preview in `variants/redesign/dist/casefile/`, or `node variants/redesign/publish-test.cjs` for the production
   build and its checks (needs the résumé fonts; CI runs it).
 - Rebuild scaffold: `npm run typecheck`, `npm run build`, `npm run lint` from the root.
 - API release runs on the VPS too, and is a separate step: see "API release" in `resume/DEPLOYMENT.md`. Never release unless asked.

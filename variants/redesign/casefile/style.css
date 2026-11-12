@@ -1,0 +1,380 @@
+/* Case File: the portfolio as a book of carbonless duplicate forms (DESIGN.md). One stylesheet; request.js only wires the form. */
+@font-face{font-family:"Archivo";src:url(archivo-latin-wdth-normal.woff2) format("woff2");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+@font-face{font-family:"Courier Prime";src:url(courier-prime-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Courier Prime";src:url(courier-prime-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  --desk:#2f3b33; --desk-ink:#ebebdf;
+  --white:#fbfbf6; --pink:#f4c3cf; --canary:#f3e38a; --blue:#c9ddef; --green:#cfe6c8;
+  --navy:#1b2a6b; --red:#c4262e; --type:#16181c; --stamp:#5b3fa8;
+  --ground:var(--white);
+  --rule:1.5px solid var(--navy);
+  --gutter:10px; --gap:clamp(34px,5vw,60px); --pad:clamp(14px,3vw,36px);
+  color-scheme:light; accent-color:var(--navy); caret-color:var(--navy);
+}
+@media (min-width:600px){:root{--gutter:20px}}
+
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--desk);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--desk);color:var(--desk-ink);font:400 clamp(1rem,.96rem + .2vw,1.0625rem)/1.55 "Archivo",system-ui,sans-serif;font-stretch:100%}
+::selection{background:var(--stamp);color:#fff}
+a{color:inherit;text-decoration-line:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}
+.deskbar :focus-visible,.deskfoot :focus-visible,.skip:focus-visible{outline-color:var(--canary)}
+img,svg{max-width:100%}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.skip{position:absolute;left:10px;top:-60px;z-index:10;background:var(--canary);color:var(--navy);padding:.5rem .9rem;font-weight:700}
+.skip:focus{top:10px}
+
+/* Desk: header and footer sit on the desk, not on a sheet. */
+.deskbar,.deskfoot{width:min(1100px,calc(100% - 2*var(--gutter)));margin-inline:auto}
+.deskbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.4rem 1.5rem;padding:1rem 0 .9rem}
+.deskbar a{text-decoration:none}
+.mark{font-weight:900;font-stretch:72%;text-transform:uppercase;font-size:1.5rem;line-height:1;letter-spacing:.01em}
+.deskbar nav{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem 1.4rem;font-weight:600;font-size:.95rem}
+.deskbar nav a{padding:.3rem 0;border-bottom:1px solid transparent}
+.deskbar nav a:hover{border-bottom-color:currentColor}
+.deskbar nav .req{border:1.5px solid var(--desk-ink);padding:.3rem .75rem}
+.deskbar nav .req:hover{background:var(--desk-ink);color:var(--desk)}
+.deskfoot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem 2rem;padding:1.5rem 0 3rem;font-size:.9rem;color:rgb(235 235 223/.85)}
+.deskfoot p{margin:0}
+
+/* Sheets */
+.sheet{position:relative;background:var(--ground);color:var(--navy);padding:var(--pad);width:min(1100px,calc(100% - 2*var(--gutter)));margin:0 auto var(--gap);
+  box-shadow:0 1px 2px rgb(0 0 0/.3),0 14px 34px rgb(0 0 0/.34)}
+.sheet.narrow{width:min(880px,calc(100% - 2*var(--gutter)))}
+.white{--ground:var(--white)}
+/* Serial red darkened on every coloured copy: 4.5:1 or better on each ground. */
+.pink{--ground:var(--pink);--red:#a81d25}
+.canary{--ground:var(--canary);--red:#a81d25}
+.blue{--ground:var(--blue);--red:#a81d25}
+.green{--ground:var(--green);--red:#a81d25}
+
+/* Perforation: a tear line of short cut slits, desk showing through. */
+.perf{padding-top:calc(var(--pad) + 22px)}
+.perf::before{content:"";position:absolute;inset:0 0 auto 0;height:20px;
+  background:repeating-linear-gradient(90deg,var(--desk) 0 7px,transparent 7px 13px) 0 100%/100% 2px no-repeat}
+
+/* First sheet and the copies under it */
+.stack{position:relative;width:min(1100px,80%);margin:0 auto calc(var(--gap) + 22px);--o1:9px;--o2:18px}
+.stack .sheet.first{width:auto;margin:0}
+.copy{position:absolute;inset:0;background:var(--ground);box-shadow:0 1px 2px rgb(0 0 0/.3),0 8px 22px rgb(0 0 0/.25)}
+.copy.pink{translate:var(--o1) var(--o1);rotate:.35deg}
+.copy.canary{translate:var(--o2) calc(var(--o2) - 1px);rotate:-.3deg}
+@media (max-width:1100px){.stack{width:calc(100% - 2*var(--gutter));--o1:8px;--o2:14px}}
+@media (max-width:599px){.stack{--o1:3px;--o2:6px}}
+
+/* Title band */
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding-bottom:.8rem;border-bottom:4px double var(--navy)}
+.form-title{margin:0;font-weight:900;font-stretch:70%;text-transform:uppercase;font-size:clamp(1.5rem,1rem + 2.2vw,2.6rem);line-height:.96;letter-spacing:.01em;word-spacing:.14em;text-wrap:balance}
+.sub{margin:.4rem 0 0;font-size:.88rem;font-weight:500;max-width:60ch}
+.serial{margin:0;display:flex;flex-direction:column;align-items:flex-end;flex:none;text-align:right}
+.serial .no{color:var(--red);font-weight:800;font-size:clamp(1.2rem,1rem + .9vw,1.75rem);line-height:1;letter-spacing:.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.serial .cap{font-size:.74rem;font-weight:600;margin-top:.3rem}
+.statement{margin:clamp(.8rem,1.6vw,1.3rem) 0 clamp(.5rem,1vw,.8rem);font-weight:900;font-stretch:70%;text-transform:uppercase;font-size:clamp(1.75rem,.9rem + 3.1vw,4.1rem);line-height:1;letter-spacing:.005em;word-spacing:.14em;text-wrap:balance}
+
+.hiring{margin:0 0 clamp(.5rem,1.2vw,1rem);font-size:.88rem;font-weight:600}
+/* The first screen holds the whole Register and the Request work button at 1440x900. */
+.first .cells{margin-top:.8rem}
+.first .register-wrap{margin-top:.9rem}
+.first .foot{margin-top:1rem}
+@media (min-width:761px){.first .register td{padding-block:.4rem}}
+
+/* Boxed fields: cells share their rules like a printed form */
+.cells{display:grid;grid-template-columns:1fr;border-top:var(--rule);border-left:var(--rule);margin-top:1rem}
+.cells+.cells{margin-top:0;border-top:0}
+.cells.two{grid-template-columns:1fr 1fr}
+.cell{border-right:var(--rule);border-bottom:var(--rule);padding:.4rem .7rem .6rem;min-width:0}
+.cell p{margin:0;max-width:68ch;text-wrap:pretty}
+.lab{display:block;word-spacing:.12em;margin:0 0 .3rem;font-size:.74rem;font-weight:700;font-stretch:100%;line-height:1.25;letter-spacing:.07em;text-transform:uppercase}
+.val{font-family:"Courier Prime",ui-monospace,monospace;font-size:.98rem;line-height:1.4;color:var(--type);overflow-wrap:anywhere}
+.cell .full,.cells .full{grid-column:1/-1}
+
+/* Registers and line items */
+.register-wrap{position:relative;margin-top:1.1rem}
+.register{width:100%;border-collapse:collapse;border:var(--rule);font-variant-numeric:tabular-nums}
+.register th{padding:.35rem .7rem;text-align:left;font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:var(--rule)}
+.register td{padding:.5rem .7rem;vertical-align:top;border-top:1px solid var(--navy);font-family:"Courier Prime",ui-monospace,monospace;font-size:.92rem;line-height:1.35;color:var(--type)}
+.register tbody tr:first-child td{border-top:0}
+.register th+th,.register td+td{border-left:1px solid var(--navy)}
+.register tr{position:relative}
+.register:not(.slip) tbody tr:hover{background:rgb(27 42 107/.07)}
+.register .n{width:3.4rem;font-weight:700}
+.register .sys a{font:800 clamp(1.6rem,1.2rem + 1.1vw,2rem)/1.05 "Archivo",sans-serif;font-stretch:72%;letter-spacing:.01em;color:var(--navy);text-decoration-thickness:2px;text-underline-offset:.16em}
+.register .sys a:hover{text-decoration-thickness:4px}
+.register .sys a::after{content:"";position:absolute;inset:0}
+.register .sys a:focus-visible{outline:0}
+.register .sys a:focus-visible::after{outline:3px solid var(--stamp);outline-offset:-3px}
+.register .note{display:block;font-size:.82rem}
+.register:not(.more):not(.slip) .sys{width:34%}
+.more .sys{width:27%}
+.more td:last-child{font-size:.9rem}
+
+/* Case sheets */
+.fields .val{font-size:1rem}
+/* Filled-in entries are typed: black Courier. Printed labels stay navy Archivo. */
+.body .cell>p:not(.wn){font-family:"Courier Prime",ui-monospace,monospace;font-size:1rem;line-height:1.55;color:var(--type);max-width:68ch}
+.case .body{grid-template-areas:"problem built" "how how" "limits stack" "limits facts"}
+.case .body.pair{grid-template-areas:"problem built" "how limits" "stack facts"}
+.case.noproblem .body.pair{grid-template-areas:"built how" "limits stack"}
+.case .body.dd{grid-template-areas:"problem built" "limits diag" "how diag" "stack facts"}
+.a-diag{grid-area:diag}
+.a-problem{grid-area:problem}.a-built{grid-area:built}.a-how{grid-area:how}.a-limits{grid-area:limits}.a-stack{grid-area:stack}.a-facts{grid-area:facts}
+.items{list-style:none;counter-reset:s;margin:0;padding:0}
+.items li{counter-increment:s;display:grid;grid-template-columns:2rem 1fr;align-items:baseline;border-top:1px solid var(--navy);padding:.35rem 0;font-family:"Courier Prime",ui-monospace,monospace;font-size:1rem;line-height:1.5;color:var(--type)}
+.items li::before{content:counter(s) ".";font-family:"Archivo",sans-serif;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.chips,.lines{list-style:none;margin:0;padding:0;font-family:"Courier Prime",ui-monospace,monospace;font-size:1rem;line-height:1.5;color:var(--type)}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.chips li{border:1px solid var(--navy);padding:.1rem .55rem}
+.lines li{border-top:1px solid var(--navy);padding:.35rem 0}
+.lines li:first-child{border-top:1px solid var(--navy)}
+
+.wasnow{grid-template-columns:5fr 7fr}
+.slipside{grid-template-columns:7fr 5fr}
+.shots.two{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.shots.two .shot+.shot{margin-top:0}
+.slip{--lw:8.4rem}
+.slip td.n{font-weight:400}
+.sample{margin:.5rem 0 0;font-size:.8rem;font-weight:600;font-style:italic}
+.sign{display:flex;flex-wrap:wrap;gap:.7rem 1.4rem;margin:.9rem 0 .2rem;font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.sign>span{white-space:nowrap;display:flex;align-items:flex-end;gap:.4rem;flex:1 1 9rem}
+.ln{flex:1;min-width:3.5rem;min-height:1.6rem;border-bottom:1px solid var(--navy);font:400 1rem/1.4 "Courier Prime",ui-monospace,monospace;letter-spacing:0;text-transform:none;color:var(--type);padding-left:.3rem}
+.slip tr.flag td{background:rgb(27 42 107/.07)}
+.slip .flag b{outline:1.5px solid var(--navy);outline-offset:2px;padding:0 .15rem}
+.slip .mark{display:block;font:700 .72rem/1.2 "Archivo",sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--navy);margin-top:.3rem}
+.cert{border:4px double var(--navy);padding:clamp(1rem,3vw,1.8rem);text-align:center;background:rgb(255 255 255/.35)}
+.cert .pre{margin:.2rem auto;font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.cert .pre:first-child{margin:0 auto .8rem;font-weight:900;font-stretch:70%;font-size:clamp(1.5rem,1rem + 2vw,2.4rem);line-height:1;letter-spacing:.02em}
+.cert .who{margin:.2rem auto .8rem;max-width:30rem;border-bottom:1.5px solid var(--navy);padding:0 1rem .2rem;font-size:1.25rem}
+.cert .sample{margin:1rem auto 0}
+.wn{margin:0 0 .6rem;font-weight:900;font-stretch:70%;text-transform:uppercase;font-size:1.5rem;line-height:1;letter-spacing:.01em}
+.wasnow .dash{font-size:1.4rem}
+.cap2{font-size:.82rem;margin-top:.6rem}
+.shot{margin:0}
+.shot+.shot{margin-top:1.1rem}
+.shot img{display:block;width:100%;height:auto;border:var(--rule)}
+.shot figcaption{margin-top:.4rem;font-size:.82rem}
+.diagram{display:block;width:100%;max-width:380px;height:auto;fill:none;stroke:var(--navy);stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter}
+.diagram .p{fill:var(--white)}
+.diagram text{fill:var(--navy);stroke:none;font:600 15px "Archivo",sans-serif;font-stretch:92%}
+
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;margin-top:1.3rem}
+.links{display:flex;flex-wrap:wrap;gap:.8rem}
+
+/* Buttons are fields too */
+.btn{display:inline-flex;align-items:center;gap:.6rem;border:var(--rule);padding:.65rem 1rem .7rem;background:transparent;color:var(--navy);font:700 .9rem/1.2 "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;cursor:pointer;border-radius:0}
+.btn:hover{background:var(--navy);color:var(--ground)}
+.arr{flex:none}
+.plain{font-weight:600}
+
+/* Stamps: bordered violet ink, uneven. */
+.stamp{display:inline-block;position:relative;flex:none;color:var(--stamp);border:3px solid currentColor;padding:.2em .7em .25em;font-weight:900;font-stretch:72%;font-size:clamp(1.15rem,.9rem + 1vw,1.7rem);line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+  rotate:var(--rot,-6deg);opacity:.92;pointer-events:none;user-select:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 0 0 0 -1.1'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") var(--mx,0px) var(--my,0px)/160px 160px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 0 0 0 -1.1'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") var(--mx,0px) var(--my,0px)/160px 160px}
+.stamp::after{content:"";position:absolute;inset:2px;border:1px solid currentColor}
+.stamp[hidden]{display:none}
+.stamp.over{position:absolute;right:26%;bottom:-2rem;--rot:-8deg}
+
+/* Particulars */
+.about{display:grid;grid-template-columns:minmax(140px,190px) 1fr;gap:clamp(1rem,3vw,2rem);align-items:start;margin-top:1.2rem}
+.about .cells{margin-top:0}
+/* Printed PHOTO box on the form, portrait inside it. */
+.portrait{margin:0;border:1px solid var(--navy);padding:.4rem .6rem .8rem}
+.portrait .lab{margin:0 0 .5rem;font-size:.68rem}
+.portrait img{display:block;width:calc(100% - 8px);aspect-ratio:1;height:auto;object-fit:cover;object-position:50% 12%;margin:4px;rotate:-1.5deg;border:1px solid rgb(27 42 107/.4)}
+
+/* Résumé reader and next-project link, on the desk below a Sheet */
+.resume-wrap,.more-link{width:min(880px,calc(100% - 2*var(--gutter)));margin:0 auto var(--gap)}
+.resume-wrap .resume-paper{margin-top:0}
+.more-link a{font-weight:600}
+
+/* Request form */
+.field{display:block;cursor:text}
+.field:focus-within{outline:3px solid var(--stamp);outline-offset:2px;position:relative}
+.field input,.field textarea,.field select{display:block;width:100%;margin:0;padding:.25rem 0 0;border:0;border-radius:0;outline:0;background:transparent;color:var(--type);caret-color:var(--navy);font:400 1rem/1.45 "Courier Prime",ui-monospace,monospace}
+.field textarea{min-height:7.5rem;resize:vertical}
+.err{display:none;margin:.3rem 0 0;font-size:.85rem;font-weight:600;color:var(--red)}
+.field:has([aria-invalid=true],:user-invalid){outline:2px solid var(--red);outline-offset:-2px}
+.field:has([aria-invalid=true],:user-invalid) .lab{color:var(--red)}
+.field:has([aria-invalid=true]) .err{display:block}
+.field:focus-within:has([aria-invalid=true],:user-invalid){outline:3px solid var(--stamp);outline-offset:2px}
+.fail{margin:1rem 0 0;color:var(--red);font-weight:600}
+.fail[hidden],.done[hidden]{display:none}
+.done{margin:0;font:400 1.1rem/1.5 "Courier Prime",ui-monospace,monospace;color:var(--type)}
+form.sent .cells,form.sent .send{display:none}
+.btn:disabled{opacity:.6;cursor:progress}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.send{display:flex;flex-direction:column;align-items:flex-start;gap:.7rem}
+.send p{margin:0;font-size:.92rem}
+.office{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:.4rem;min-width:13rem;min-height:5.5rem;border:2px dashed rgb(27 42 107/.6);padding:.5rem 1rem .8rem;user-select:none}
+.office .lab{margin:0;font-stretch:72%;font-size:.95rem;letter-spacing:.08em;color:rgb(27 42 107/.75)}
+
+/* Demos (forms.js): controls are part of the form. */
+[hidden]{display:none!important}
+.demo-bar{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem 1.4rem}
+.again{border:0;background:none;padding:.4rem 0;color:var(--navy);font:600 .95rem/1.2 "Archivo",sans-serif;text-decoration:underline;text-underline-offset:.2em;cursor:pointer}
+.again:hover{text-decoration-thickness:2px}
+.field select{appearance:auto;border-radius:0;cursor:pointer}
+.msg{margin:.8rem 0 0}
+.demo-bar+.msg:empty{margin:0}
+.hint{margin:.5rem 0 0;font-size:.82rem}
+.lift-form>.demo-bar,.hint+.demo-bar{margin-top:1rem}
+.stock td{vertical-align:middle}
+.lines.log{margin-top:1rem}
+.lines.log li{min-height:2.1rem}
+/* Status track: printed boxes, a typed X for each step done. */
+.track{list-style:none;margin:0 0 1rem;padding:0;display:grid;grid-template-columns:repeat(4,1fr);border-top:var(--rule);border-left:var(--rule)}
+.track li{display:flex;align-items:center;gap:.5rem;min-width:0;border-right:var(--rule);border-bottom:var(--rule);padding:.45rem .6rem;font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;line-height:1.25}
+.track [aria-current]{background:rgb(27 42 107/.09);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.25em}
+.track .box{flex:none;display:grid;place-content:center;width:1.1rem;height:1.1rem;border:1.5px solid var(--navy);font:700 1rem/1 "Courier Prime",ui-monospace,monospace;color:var(--type);text-decoration:none}
+/* Reorder check */
+.stepper{display:inline-flex;align-items:center;gap:.4rem}
+.stepbtn{width:2.3rem;height:2.3rem;border:var(--rule);border-radius:0;background:transparent;color:var(--navy);font:700 1.15rem/1 "Archivo",sans-serif;cursor:pointer}
+.stepbtn:hover{background:var(--navy);color:var(--ground)}
+.num{min-width:2.8ch;text-align:center;font-variant-numeric:tabular-nums}
+.low{color:var(--navy);font:700 .72rem/1.2 "Archivo",sans-serif;letter-spacing:.07em;text-transform:uppercase}
+/* Sample exam */
+fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
+.q legend{float:left;width:100%;padding:0;margin:0 0 .3rem;font-size:.95rem;font-weight:600;letter-spacing:0;text-transform:none;line-height:1.35}
+.q legend+*{clear:both}
+.opt{display:flex;align-items:center;gap:.6rem;padding:.3rem 0;font-weight:500;cursor:pointer}
+.opt input{appearance:none;flex:none;display:grid;place-content:center;width:1.2rem;height:1.2rem;margin:0;border:1.5px solid var(--navy);border-radius:0;background:transparent;cursor:pointer}
+.opt input:checked::before{content:"×";font:700 1.15rem/1 "Courier Prime",ui-monospace,monospace;color:var(--type)}
+.q.wrong{outline:2px solid var(--red);outline-offset:-2px}
+.q.wrong legend{color:var(--red)}
+.q.wrong .err{display:block}
+/* Lift the top sheet: the white top form over a pink carbon copy holding the "Was" diagram. */
+.lift{margin-top:1rem}
+.lift-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem 1rem;margin-bottom:.6rem}
+.lift-bar .lab{margin:0}
+.lift-btn{padding:.4rem .7rem .45rem;font-size:.78rem}
+/* Perspective and tilt: keep 1200px and 64deg in step with FOLD in forms.js, which sizes the room the copy leaves for the lifted sheet. */
+.lift-stage{position:relative;display:grid;padding:0 6px 6px 0;overflow:clip;overflow-clip-margin:20px;perspective:1200px;perspective-origin:50% 0}
+.lift-stage>*{grid-area:1/1}
+.lift-copy{position:relative;translate:6px 6px;background:var(--pink);--red:#a81d25;border:var(--rule);padding:clamp(.6rem,2vw,1rem)}
+/* Shadow the lifted sheet casts on the copy, fading out below the hinge. */
+.lift-copy::before{content:"";position:absolute;inset:0 0 auto;height:calc(var(--fp,0px) + 22px);background:linear-gradient(rgb(27 42 107/.32),rgb(27 42 107/.14) 60%,transparent);opacity:0}
+.lift.lifted .lift-copy{padding-top:calc(var(--fp) + 1rem)}
+.lift.lifted .lift-copy::before{opacity:1}
+.lift-form{position:relative;background:var(--white);padding:clamp(.6rem,2vw,1rem);box-shadow:0 1px 2px rgb(0 0 0/.3),0 6px 14px rgb(0 0 0/.16);transform-origin:50% 0}
+.lift-form>:first-child{margin-top:0}
+/* Lifted, the sheet leaves the flow so the stage closes up around the copy. */
+.lift.lifted .lift-form{position:absolute;inset:0 6px auto 0;transform:rotateX(-64deg) rotate(1.2deg);pointer-events:none}
+.diagram.wide{display:none}
+@media (min-width:761px){
+  .lift-copy .diagram.tall{display:none}
+  .lift-copy .diagram.wide{display:block;max-width:none}
+}
+.slipside.solo,.wasnow.solo{grid-template-columns:1fr}
+.wasnow.solo .shots{max-width:62%}
+
+/* Phones: field rows stack; registers become stacked rows. */
+@media (max-width:760px){
+  .cells.two,.wasnow,.slipside,.shots.two{grid-template-columns:1fr}
+  .shots.two{gap:1.1rem}
+  .case .body,.case .body.pair,.case .body.dd,.case.noproblem .body.pair{grid-template-areas:none}
+  .case .body>.cell{grid-area:auto}
+  .about{grid-template-columns:1fr}
+  .portrait{width:190px}
+  .register thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .register,.register tbody,.register tr,.register td{display:block;width:100%}
+  .register tr{padding:.55rem .7rem}
+  .register tbody tr+tr{border-top:1px solid var(--navy)}
+  .register td,.register td+td{display:grid;grid-template-columns:var(--lw,4.2rem) 1fr;gap:.5rem;border:0;padding:.18rem 0}
+  .register tbody tr:first-child td{border:0}
+  .register td::before{content:attr(data-label);font:700 .72rem/1.9 "Archivo",sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--navy)}
+  .register .n,.register:not(.more):not(.slip) .sys,.more .sys{width:100%}
+  .register .note{display:inline}
+  .stamp.over{position:relative;right:auto;bottom:auto;display:table;margin:1rem 0 0 auto}
+  .track{grid-template-columns:1fr 1fr}
+  .wasnow.solo .shots{max-width:none}
+  .stepbtn{width:2.6rem;height:2.6rem}
+}
+@media (max-width:420px){.serial .no{font-size:1.1rem}}
+
+/* Motion: one authored moment, on load. Content is visible without it. */
+@media (prefers-reduced-motion:no-preference){
+  html{scroll-behavior:smooth}
+  .sheet.first{animation:settle .6s cubic-bezier(.16,1,.3,1)}
+  .stamp.over{animation:thunk .4s cubic-bezier(.16,1,.3,1) .55s backwards}
+  .stamp.thunk{animation:thunk .4s cubic-bezier(.16,1,.3,1)}
+  .lift-form{transition:transform .45s cubic-bezier(.16,1,.3,1)}
+  .lift-copy::before{transition:opacity .45s cubic-bezier(.16,1,.3,1)}
+}
+@keyframes settle{from{translate:-8px -12px;rotate:1deg}}
+@keyframes thunk{from{scale:1.15;opacity:.6}}
+
+/* #129 register and résumé */
+/* /projects/: the full Register adds a Status column. */
+@media (min-width:761px){
+  .register.all:not(.more):not(.slip) .sys{width:22%}
+  .register.all td:last-child{width:19%;font-size:.88rem}
+  .register.all .sys a{font-size:clamp(1.35rem,1.05rem + .7vw,1.7rem)}
+}
+
+/* /resume/: the reader is a typed form on the Sheet, in Case File type and colours (the source's own print styles are untouched). */
+.resume-sheet .resume-wrap{width:auto;margin:1.3rem 0 0}
+.resume-sheet .resume-paper{background:transparent;color:var(--type);font-family:"Archivo",system-ui,sans-serif;font-stretch:100%;max-width:none;margin:0;border:var(--rule);border-radius:0}
+.resume-sheet .resume-paper .mono{font-family:"Courier Prime",ui-monospace,monospace}
+.resume-sheet .resume-paper h2.mono{font:900 clamp(1.7rem,1.1rem + 2.4vw,2.6rem)/1 "Archivo",sans-serif;font-stretch:70%;letter-spacing:.01em;word-spacing:.14em;color:var(--navy)}
+.resume-sheet .resume-paper .role{color:var(--type)}
+.resume-sheet .resume-paper .meta,.resume-sheet .resume-paper td.sysurl,.resume-sheet .resume-paper td.jd,.resume-sheet .resume-paper .tags,.resume-sheet .resume-paper .jloc{color:#3b4262}
+.resume-sheet .resume-paper .idtop{border-top-color:var(--navy)}
+.resume-sheet .resume-paper .certline{border-color:var(--navy)}
+.resume-sheet .resume-paper .certline b,.resume-sheet .resume-paper td.sysname .kind,.resume-sheet .resume-paper td.sklabel{color:var(--navy)}
+.resume-sheet .resume-paper .sechead{border-bottom:var(--rule)}
+.resume-sheet .resume-paper .sectitle.mono{font:700 .74rem/1.25 "Archivo",sans-serif;letter-spacing:.07em;color:var(--navy)}
+.resume-sheet .resume-paper td.sysname,.resume-sheet .resume-paper td.jt{color:var(--navy)}
+.resume-sheet .resume-paper ::selection{background:var(--stamp);color:#fff}
+
+/* #127 project pages */
+.hood .cell>p{font-family:"Courier Prime",ui-monospace,monospace;font-size:1rem;line-height:1.55;color:var(--type);max-width:68ch}
+.shots.two .shot:last-child:nth-child(odd){grid-column:1/-1}
+.sheet.project .wasnow.solo .shots{max-width:none}
+.onward{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.6rem;width:min(1100px,calc(100% - 2*var(--gutter)));margin:0 auto var(--gap);font-weight:600}
+.onward .next{display:inline-flex;align-items:center;gap:.6rem;border:1.5px solid var(--desk-ink);padding:.6rem 1rem .65rem;font:700 .9rem/1.2 "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
+.onward .next:hover{background:var(--desk-ink);color:var(--desk)}
+.onward :focus-visible{outline-color:var(--canary)}
+
+/* #128 continuation pages: Theoses, 89lab, MAP and Yen (more.cjs, more.js) */
+.cell .sample,.cell .hint{margin-top:.5rem}
+.foot .links{align-items:center}
+.checks,.ticks{list-style:none;margin:0;padding:0}
+.checks .box,.ticks .box{flex:none;display:grid;place-content:center;width:1.1rem;height:1.1rem;border:1.5px solid var(--navy);font:700 1rem/1 "Courier Prime",ui-monospace,monospace;color:var(--type)}
+/* Work ticket: the steps as typed lines with a tick box. */
+.checks li{display:flex;align-items:center;gap:.7rem;border-top:1px solid var(--navy);padding:.4rem .3rem;font:400 1rem/1.5 "Courier Prime",ui-monospace,monospace;color:var(--type)}
+.checks li:first-child{border-top:0}
+.checks [aria-current]{background:rgb(27 42 107/.09)}
+/* Run sheet: the stages of a run, then its ledger. */
+.stages{margin-bottom:0}
+.register td.none{border-left:0}
+.register .skipped td{font-style:italic}
+/* Message slip: printed options, a typed X in the one taken; the thread is ruled lines. */
+.ticks{display:flex;flex-wrap:wrap;gap:.5rem 1.6rem}
+.ticks li{display:flex;align-items:center;gap:.5rem;font-weight:500}
+.ticks-lab{margin-top:1rem}
+.thread li{display:grid;grid-template-columns:6.5rem 1fr;gap:.6rem;align-items:baseline;padding-inline:.4rem}
+.thread .who{font-weight:700}
+.thread .is-agent{background:rgb(27 42 107/.07)}
+/* MAP: the approved screens, each pasted into a ruled box on the form. */
+.screens{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.screen{margin:0;border:var(--rule);padding:.6rem .6rem .7rem}
+.screen img{display:block;width:100%;height:auto;border:1px solid rgb(27 42 107/.4);rotate:-.8deg}
+.screen:nth-child(even) img{rotate:.7deg}
+.screen figcaption{margin-top:.6rem;font-size:.82rem}
+.screens.tabbed{grid-template-columns:1fr;justify-items:center}
+.screens.tabbed .screen{width:min(100%,340px)}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem}
+.tab{border:var(--rule);border-radius:0;background:transparent;color:var(--navy);padding:.55rem .9rem;font:700 .8rem/1.2 "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.tab:hover,.tab[aria-selected=true]{background:var(--navy);color:var(--ground)}
+.pick legend{float:left;width:100%;padding:0;margin:0 0 .3rem}
+.pick legend+*{clear:both}
+@media (min-width:761px){.case.nofacts .body{grid-template-areas:"problem built" "how how" "limits stack"}}
+@media (max-width:760px){
+  .screens{grid-template-columns:1fr 1fr;gap:.7rem}
+  .thread li{grid-template-columns:5rem 1fr}
+  .register td.none{display:block;padding:.18rem 0}
+  .register td.none::before{content:none}
+}

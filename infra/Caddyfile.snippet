@@ -1,4 +1,4 @@
-# Approved canonical Workshop deployment; archive variant handlers omitted.
+# Approved canonical Case File deployment; archive variant handlers omitted.
 # Live source of truth: /etc/caddy/Caddyfile. Release pointer is replaced atomically.
 # Legacy dist remains in place for existing asset/video writers.
 portfolio.wasabietech.com {
@@ -10,9 +10,9 @@ portfolio.wasabietech.com {
 	redir /variant-product-launch / 308
 	@archivedVariants path_regexp archived ^/variant-(alpha|bravo|charlie|delta|epsilon|zeta|eta|flight|ledger|rawgrid|workshop|turntable|workflow)(/|$)
 	header @archivedVariants X-Robots-Tag "noindex, nofollow"
-	@htmlIndex path_regexp htmlIndex ^/(|projects/|resume/|work/(?:procura|pims|dd-drugs-register|theoses|yen|map|89lab)/)index\.html$
+	@htmlIndex path_regexp htmlIndex ^/(|projects/|resume/|work/(?:procura|pims|dd-drugs-register|cavelms|theoses|yen|map|89lab)/)index\.html$
 	redir @htmlIndex /{re.htmlIndex.1} 308
-	@canonicalDirectories path /resume /projects /work/procura /work/pims /work/dd-drugs-register /work/theoses /work/yen /work/map /work/89lab
+	@canonicalDirectories path /resume /projects /work/procura /work/pims /work/dd-drugs-register /work/cavelms /work/theoses /work/yen /work/map /work/89lab
 	redir @canonicalDirectories {path}/ 308
 	root * /var/www/portfolio-releases/current
 	redir /ai-content-lab.html / 301

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Production build of the Workshop into dist/site: prints the résumé PDF, builds indexable pages,
+// Production build of the Case File into dist/site: prints the résumé PDF, builds indexable pages,
 // then writes favicon, robots, sitemap, llms.txt and runtime-manifest.json (every file the release
 // copies, with its hash). Never deploys; release.sh does that.
 const fs = require('fs');
@@ -15,7 +15,7 @@ execFileSync(process.execPath, [path.join(here, '../../resume/pdf.cjs')], { stdi
 process.env.PORTFOLIO_PUBLISH = '1';
 const { build } = require('./build.cjs');
 const { projects } = require('./content.cjs');
-build('workshop', { out, publish: true });
+build('casefile', { out, publish: true });
 
 const routes = ['/', '/projects/', '/resume/', ...projects.map(p => `/work/${p.slug}/`)];
 const day = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kuala_Lumpur' });

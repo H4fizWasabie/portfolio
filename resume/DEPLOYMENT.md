@@ -1,6 +1,6 @@
 # Deployment
 
-The canonical site is served by Caddy from `/var/www/portfolio-releases/current`, a symlink to an immutable release directory. Résumé changes ship like any other site change: merge to `main`, then release.
+The canonical site, the Case File (`variants/redesign/casefile/`), is served by Caddy from `/var/www/portfolio-releases/current`, a symlink to an immutable release directory. The Workshop, `turntable` and `workflow` are archived: they are not in the release and the server's archive handler serves their noindex previews at `/variant-workshop/`, `/variant-turntable/` and `/variant-workflow/`. Résumé changes ship like any other site change: merge to `main`, then release.
 
 ## Release
 
@@ -13,6 +13,22 @@ cd /root/portfolio-release && git pull --ff-only origin main && variants/redesig
 If it is missing, recreate it with `git clone https://github.com/H4fizWasabie/portfolio /root/portfolio-release`.
 
 It runs `npm ci` (repo root and `variants/redesign`) and `variants/redesign/publish-test.cjs` (which prints the résumé PDF and builds both the noindex preview and the production site), refuses to continue if the checkout is dirty, copies the production runtime manifest into `/var/www/portfolio-releases/<name>-<timestamp>-<commit>`, verifies every file hash, switches `current` atomically, then runs `variants/redesign/verify-public.cjs` against `https://portfolio.wasabietech.com`. If public verification fails it switches `current` back to the previous release.
+
+## Server config at release time
+
+The live Caddyfile is `/etc/caddy/Caddyfile`; `infra/Caddyfile.snippet` is the approved copy. The Case File adds one project path, `/work/cavelms/`, which the live server does not know yet. Before the first Case File release, add `cavelms` to both of these rules in the live Caddyfile (the snippet already has them), then reload Caddy (`caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy`):
+
+- `@htmlIndex`: the `work/(?:procura|pims|dd-drugs-register|cavelms|theoses|yen|map|89lab)/` alternation, so `/work/cavelms/index.html` redirects to `/work/cavelms/`.
+- `@canonicalDirectories`: add `/work/cavelms`, so `/work/cavelms` redirects to `/work/cavelms/`.
+
+Without them `verify-public.cjs` fails on the `index.html` alias of `/work/cavelms/` and `release.sh` rolls the release back.
+
+After the release (`verify-public.cjs` covers the first three), check:
+
+- `/work/cavelms/` serves (200) with CaveText and its Chrome Web Store link.
+- `/work/cavelms` redirects (308) to `/work/cavelms/`.
+- `/work/cavelms/index.html` redirects (308) to `/work/cavelms/`.
+- `/variant-workshop/` still serves (200) with `X-Robots-Tag: noindex, nofollow`. The archive handler lives outside the release, so a release must not remove it.
 
 ## API release
 
@@ -44,7 +60,9 @@ There is no automatic rollback for the API. To roll back, check out the previous
 
 ## Review build
 
-`node variants/redesign/publish-test.cjs` builds and checks the production site locally without touching the live one (it needs the résumé fonts; see `resume/README.md`). `node variants/redesign/build.cjs` builds the noindex previews.
+`node variants/redesign/publish-test.cjs` builds and checks the production site locally without touching the live one (it needs the résumé fonts; see `resume/README.md`). `node variants/redesign/build.cjs` builds the noindex previews, the archived ones included.
+
+`verify-public.cjs` takes its base from `BASE_URL` (default: the live site). Pointed at a local static server of `variants/redesign/dist/site` it checks the pages, demos and files, but its redirect, `X-Robots-Tag`, archived-preview and `/api/contact` checks only pass behind Caddy and the API.
 
 The previous design (`variants/product-launch` with the waterfall homepage) is archived; its `release.sh`, `publish-test.cjs`, `qa.cjs` and `resume/qa.cjs` still describe that design and are not part of the current release.
 

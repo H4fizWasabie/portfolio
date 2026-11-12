@@ -1,50 +1,58 @@
-# Redesign: the Workshop (production) and two archived candidates
+# Redesign: the Case File (production) and archived candidates
 
-The live site is the **Workshop**. Its homepage tours a **House** (see GLOSSARY.md and ADR 0002; it was called the Building
-before) where it once toured a small clay room: the hero sees a two-storey concrete house on the edge of a still lake at
-dusk, its glass walls warm with light, and the scroll glides the camera over the water, onto the terrace, in through the
-sliding glass, through a Room per service and up the stairs. The House is the background
-of the whole homepage: the canvas is fixed behind the page and the scroll flies the camera through it. The page is a run
-of steps about a screen tall (the hero, the sliding glass, a doorway per service followed by four stops for each of its projects at
-its object in the Room (what it is, what it solves, its screens or its workflow outline, in use), the climb between the floors (a stop at each of the three How I work posters on the stair wall, which `room.js` draws in the page's type), the balcony for teaching, then the goodbye
-where the camera lifts out over the lake; About and Contact are plain page below it), each a `[data-stop]` in `page.cjs` whose `data-look`
-names what the House shows (a key of `STOPS` in `room.js`); its panel sits at the bottom on phones and to one side on
-wide screens, and native scroll snapping (`y mandatory`) rests each step in place. `room.js` (`STOPS`, `measure`,
-`stepTour`) keys the camera to that same scroll position, so the view on screen is the one the panel names; the
-`[data-room]` block at the end of `workshop/style.css` lays it out. About and Contact are stops too: each is at least a
-screen tall (`100lvh`), has `scroll-snap-stop: always`, and rests with its top at the top of the screen, the navigation bar
-covering its own top padding (no `scroll-margin`: a margin would leave the end of the section above showing, most
-visibly while the bar is tucked away). A section taller than the screen (About and Contact on phones) can rest anywhere
-inside itself, never beside its neighbour. Without JavaScript, with reduced motion, without WebGL or in `?still=` renders
-the page keeps its static layout. The camera's path between stops is a smooth curve through them, with waypoints (`via` in
-`STOPS`) that take it through the doorways, up the stairs and out onto the balcony; `?probe` (`houseProbe()`, run by publish-test
-at both layouts) checks it never passes through or close to a wall, floor, ceiling or pane. The desk-lamp switch crossfades the
-House and its Rooms to their night lighting, fetched on the first switch to night. Each project page shows its object from its
-Room's asset in the same baked light.
+The live site is the **Case File** (GLOSSARY.md, ADR 0003): a book of carbonless duplicate forms on a desk. The homepage is the
+"Record of work" **Sheet**, whose **Register** lists the four systems in production; each of them follows on a Sheet shaped like the form it
+replaced (PIMS a stock requisition slip, the DD Drugs Register a daily count ledger, Procura a purchase order, CaveLMS a course
+certificate with CaveText attached), each with a **Sample demo** (fictional data, progressive enhancement). Where a system replaced a
+paper process, lifting the top sheet shows it as a diagram on the **Copy** underneath. Theoses, 89lab, MAP and Yen follow on a
+continuation Sheet, then Particulars and the Request form. Every project keeps its page under `/work/<slug>/`, `/projects/` is the
+full Register and `/resume/` is the résumé reader in the same look. Without JavaScript the page reads as filled-in sample forms and
+the Request form opens the visitor's mail app. The design system is `casefile/DESIGN.md`.
 
-`turntable` and `workflow` are the other two candidates. They are archived: still served,
-like the earlier variants, at `/variant-turntable/` and `/variant-workflow/` (plus the
-`/variant-workshop/` preview), all noindex.
+The **Workshop** (the House tour), `turntable` and `workflow` are archived: still in the repo and built as noindex previews, served
+by the live server at `/variant-workshop/`, `/variant-turntable/` and `/variant-workflow/` (see "Archived: the Workshop" below).
 
 ## Layout
 
 - `content.cjs` site wording and project order; project facts come from `../product-launch/projects.cjs`.
 - `blocks.cjs` markup shared by all variants (head with production SEO, galleries, case-study body).
-- `demos.cjs` / `demos.js` the playable demos (fictional sample data), used by `workflow` and the Workshop project pages.
-- `workshop/` page templates, styles, `main.js` (small entry: day/night, About columns, demos; it loads `room.js` once the page has painted), `room.js` (three.js: the House's tour, and the project pages' object viewer), `theme.js` (lamp switch).
-- `workshop/model/` the House: `build_house.py` (Blender: models it from CC0 textures in `textures/`, bakes the lighting in Cycles into a second UV set: a cool CC0 overcast sky HDRI, fetched into a cache by `build-house.sh` and not shipped, outside, and warm lamps in two colours inside (`LAMP`, the downlights' deep amber, and `STRIP`, the paler LED strips) so warm light spills out through the glass; a second bake finds where rain runs down from the ledges, where the plinth is wet and where corners wear), `build_backdrop.py` (renders the mountain-in-cloud plate in Cycles: one broad displaced mountain flank under a thick cloud blanket, tens of thousands of real conifers, volumetric cloud and mist) and `build_water.py` (the lake's ripple normal map, from noise), run by `build-house.sh` (then gltfpack and webp), produce `house.glb`, `house-light.webp`, `house-wet.webp` (the concrete's roughness: damp where it rained), `backdrop.webp` and `water-normal.webp`, which stay under 2.5 MB together (publish-test checks), no texture over 2048 px. The sky dome shows the plate by azimuth and elevation (`BACKDROP` in `room.js` repeats its constants) and the lake is a planar reflection (three's `Reflector`) pushed about by the drifting ripple map (`WATER`), neither in the glb; the forest on the hill is part of the plate, the trees near the House (spruces and firs: a dark core of ragged skirts carrying drooping branch cards, cut out of a branch texture drawn in `branch_card`) and the boulders (moss on top, wet at the waterline) are unlit meshes shaded by vertex colours, with a leafy mottling added in `foliageMaterial`. The page renders through a short post chain in `room.js`: bloom on the lamps (desktop), then tone mapping and `GRADE` (a colour grade and a vignette; film grain on desktop). The concrete is made here in `board_formed` (boards with their own tone and grain, seams, an even grid of tie holes with runoff, the pitting of a CC0 concrete photograph in `textures/concrete-pores.jpg`), not photographed. The House names its doorways `doorway_<slug>` (stock and records on the ground floor, ai and android upstairs). A second bake, at night, gives `house-light-night.webp`. The Rooms are `room_stock.py`, `room_records.py`, `room_ai.py` and `room_android.py`, each run by `build_house.py` (so a Room and the House light each other) and baked into its own day and night lighting textures: `room-<slug>.glb`, `room-<slug>-light.webp` and `room-<slug>-light-night.webp`, under 2 MB a Room with its day lighting; their objects are `obj_<project>` and their screens `screen_<project>`. `HOUSE_ROOMS=ai ./build-house.sh` rebuilds only the named Rooms (the House, backdrop and water stay as they are). At night a Room's ceiling lights stay on, dimmed (`NIGHT_PANELS` in `build_house.py`, `NIGHT.panels` in `room.js`). `render-stills.cjs` renders `poster.webp` (wide), `poster-phone.webp` and every project's day and night thumbnail (`thumb-*.webp`, its object from its first stop) from a built page. All outputs are committed.
-- `workshop/photo/hafiz-portrait.webp` owner-supplied portrait, cropped, EXIF removed.
+- `build.cjs` builds a variant into `dist/<variant>/`; `publish.cjs` builds the Case File as the production site into `dist/site`; `publish-test.cjs` is the production test; `verify-public.cjs` checks the live site; `release.sh` ships it.
+- `casefile/` the live design:
+  - `page.cjs` the page templates: homepage, the four systems' Sheets and pages, `/projects/`, `/resume/`, and what is only about a form (rows, department, status). It hands its shared Sheet pieces (`kit`) to `more.cjs`.
+  - `more.cjs` the Theoses, 89lab, MAP and Yen pages, each on a form of its own.
+  - `diagrams.cjs` the "Was" and workflow diagrams.
+  - `main.js` the one script (bundled by the build); it loads `forms.js` (the four systems' Sample demos and the lift control), `more.js` (the demos on `more.cjs`'s pages), and `request.js` (the Request form: posts JSON to the contact API, falls back to mail). `kit.js` holds what `forms.js` and `more.js` share (typed entries, Stamp, live region, buttons, error flags).
+  - `style.css` the stylesheet; `DESIGN.md` the design system.
+- `photo/hafiz-portrait.webp` owner-supplied portrait, cropped, EXIF removed (used by the Case File and the Workshop).
+- `fonts/` self-hosted fonts and licences; `demos.cjs` / `demos.js` the demos of the archived previews.
+- Pages use `static/` for their files because Caddy serves `/assets/` from the legacy app.
 
 ## Commands
 
 ```sh
 npm ci                                   # in this directory
-node build.cjs [variant...]              # noindex previews (incl. the archived candidates) into dist/<variant>/
+node build.cjs [variant...]              # noindex previews (incl. the archived ones) into dist/<variant>/
 node publish-test.cjs                    # production build into dist/site + checks (needs résumé fonts)
-BLENDER=/path/to/blender workshop/model/build-house.sh            # after editing the House (HOUSE_DRAFT=1 for a quick, noisy bake; a full bake takes several minutes)
-CHROME=/path/to/chrome node workshop/model/render-stills.cjs URL  # after House or camera changes, against a served preview
+BASE_URL=http://127.0.0.1:PORT node verify-public.cjs   # the public checks against any server (default: the live site)
 ```
 
 Release: `release.sh` on the VPS (see `resume/DEPLOYMENT.md`); `verify-public.cjs` checks the live site.
 
-Pages use `static/` for their files because Caddy serves `/assets/` from the legacy app.
+## Archived: the Workshop
+
+Nothing in the production build or its checks uses it. Its homepage tours a **House** (ADR 0002): a two-storey concrete house on the edge of a still
+lake at dusk, with a Room per service. The House is the background of the whole homepage: the canvas is fixed behind the page and the
+scroll flies the camera through it, across a run of `[data-stop]` steps in `workshop/page.cjs` whose `data-look` names a key of `STOPS`
+in `room.js`, snapped by native scroll snapping. Without JavaScript, with reduced motion or without WebGL the page keeps its static
+layout. `?probe` (`houseProbe()`) checks the camera never passes through or close to a wall, floor, ceiling or pane. Each project page
+shows its object from its Room's asset in the same baked light.
+
+- `workshop/` page templates, styles, `main.js` (small entry; it loads `room.js` once the page has painted), `room.js` (three.js: the House's tour and the project pages' object viewer), `theme.js` (day/night lamp switch).
+- `workshop/model/` the House, all outputs committed: `build_house.py` (Blender: models it from CC0 textures in `textures/` and bakes the lighting in Cycles into a second UV set), `room_<slug>.py` (a Room each, baked day and night), `build_backdrop.py` (the mountain-in-cloud plate) and `build_water.py` (the lake's ripple normal map), run by `build-house.sh` (then gltfpack and webp). They produce `house.glb`, the `house-light*.webp` and `house-wet.webp` bakes, `backdrop.webp`, `water-normal.webp` and `room-<slug>*.glb` / `-light*.webp`. `HOUSE_ROOMS=ai ./build-house.sh` rebuilds only the named Rooms. `render-stills.cjs` renders `poster.webp`, `poster-phone.webp` and every project's day and night thumbnail from a built page.
+
+```sh
+BLENDER=/path/to/blender workshop/model/build-house.sh            # after editing the House (HOUSE_DRAFT=1 for a quick, noisy bake)
+CHROME=/path/to/chrome node workshop/model/render-stills.cjs URL  # after House or camera changes, against a served preview
+```
+
+`turntable` (a photo-studio sweep with a turntable of devices) and `workflow` are the other two archived candidates. The archived previews predate CaveLMS: `build.cjs` leaves it out of them.
