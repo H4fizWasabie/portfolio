@@ -94,6 +94,7 @@ assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
 assert.match(reader, /MAP — Android Productivity App/);
 assert.doesNotMatch(reader, /<iframe|<object|<embed/);
+resume129Static(); // #129
 
 // ---- Browser step: the production site served locally, driven at phone width (390x844) and desktop (1440x900).
 const phone = { width: 390, height: 844 };
@@ -335,6 +336,66 @@ async function pageChecks(browser, base) {
   }
 }
 
+// #129 The résumé PDF carries the two changed facts and still prints on one A4 page; /projects/ is the full Register and /resume/ wears the Case File.
+function resume129Static() {
+  const pdf = path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf');
+  assert.match(execFileSync('pdfinfo', [pdf], { encoding: 'utf8' }), /Pages:\s+1\b/, 'résumé PDF: one page');
+  const pdfText = norm(execFileSync('pdftotext', [pdf, '-'], { encoding: 'utf8' }));
+  assert.ok(pdfText.includes('cavelms.com'), 'résumé PDF: CaveLMS is at cavelms.com');
+  assert.ok(!pdfText.includes('lms.wasabietech.com'), 'résumé PDF: the old CaveLMS address is gone');
+  assert.match(pdfText, /CaveText.*Chrome extension.*The Cave Consult.*Chrome Web Store/, 'résumé PDF: a CaveText line');
+  assert.equal((pdfText.match(/CaveText/g) || []).length, 1, 'résumé PDF: CaveText is one line');
+  assert.match(reader, /cavelms\.com/, 'résumé reader: CaveLMS is at cavelms.com');
+  assert.doesNotMatch(reader, /lms\.wasabietech\.com/, 'résumé reader: the old CaveLMS address is gone');
+}
+
+async function register129Checks(browser, base) {
+  for (const [what, options] of [['no JavaScript', { javaScriptEnabled: false }], ['JavaScript', {}]]) {
+    const page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce', ...options });
+    await page.goto(`${base}/projects/`, { waitUntil: 'networkidle' });
+    assert.equal(await text(page, 'main h1'), 'Register of work', `/projects/: ${what}: the Sheet is the Register of work`);
+    assert.match(await text(page, 'main .serial .no'), /^No\. 0008$/, `/projects/: ${what}: the serial counts the eight projects`);
+    assert.ok(await visible(page, 'main .stamp'), `/projects/: ${what}: the Stamp shows`);
+    const rows = await page.$$eval('main table.register tbody tr', trs => trs.map(tr => ({ href: tr.querySelector('.sys a')?.href, text: tr.textContent.replace(/\s+/g, ' '), status: tr.querySelector('td[data-label=Status]')?.textContent.trim() })));
+    assert.deepEqual(rows.map(r => r.href), projects.map(p => `${base}/work/${p.slug}/`), `/projects/: ${what}: eight rows in site order, each linking its page`);
+    for (const [i, p] of projects.entries()) {
+      const r = p.register || p.listing;
+      for (const t of [r.label || p.title, r.was, r.now]) assert.ok(rows[i].text.includes(t), `/projects/: ${what}: the ${p.slug} row says "${t}"`);
+      assert.ok(rows[i].status, `/projects/: ${what}: the ${p.slug} row has a status`);
+    }
+    if (options.javaScriptEnabled === false) assert.equal(await page.locator('main button, main input').count(), 0, '/projects/: reads without controls');
+    // Phones stack each row into labelled lines, as the homepage Register does.
+    const labels = await page.$eval('main table.register tbody tr', tr => [...tr.cells].map(td => getComputedStyle(td, '::before').content.replaceAll('"', '')));
+    assert.deepEqual(labels, ['Item', 'System', 'Was', 'Now', 'Status'], `/projects/: ${what}: phone rows carry their labels`);
+    await page.close();
+  }
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  await page.goto(`${base}/projects/`, { waitUntil: 'networkidle' });
+  assert.deepEqual(await page.$$eval('main table.register thead th', ths => ths.map(t => t.textContent)), ['Item', 'System', 'Was', 'Now', 'Status'], '/projects/: desktop Register columns');
+  await page.close();
+}
+
+async function resume129Checks(browser, base) {
+  for (const viewport of [phone, { width: 1440, height: 900 }]) {
+    const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
+    await page.goto(`${base}/resume/`, { waitUntil: 'networkidle' });
+    const look = await page.evaluate(() => {
+      const css = (s, p) => getComputedStyle(document.querySelector(s))[p];
+      return { sheet: !!document.querySelector('main .sheet .resume-paper'), h1: css('main h1', 'fontFamily'), name: css('.resume-paper h2', 'color'), nameFont: css('.resume-paper h2', 'fontFamily'), body: css('.resume-paper .profile', 'fontFamily'), bg: css('.resume-paper', 'backgroundColor') };
+    });
+    assert.ok(look.sheet, `/resume/: the reader sits on a Sheet at ${viewport.width}px`);
+    assert.ok(look.h1.includes('Archivo') && look.nameFont.includes('Archivo') && look.body.includes('Archivo'), `/resume/: Case File type at ${viewport.width}px`);
+    assert.equal(look.name, 'rgb(27, 42, 107)', `/resume/: the name is in Case File navy at ${viewport.width}px`);
+    assert.notEqual(look.bg, 'rgb(255, 255, 255)', `/resume/: no separate white page at ${viewport.width}px`);
+    const dl = await page.getAttribute('main a[download]', 'href');
+    assert.equal(dl, 'Resume-Hafiz-Jamali.pdf', '/resume/: the PDF download is offered');
+    const res = await page.request.get(`${base}/resume/${dl}`);
+    assert.ok(res.ok() && (await res.body()).subarray(0, 4).toString() === '%PDF', '/resume/: the PDF download works');
+    assert.match(norm(await page.locator('.resume-paper').textContent()), /cavelms\.com/);
+    await page.close();
+  }
+}
+
 async function browserChecks() {
   const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2', '.pdf': 'application/pdf' };
   const server = http.createServer((req, res) => {
@@ -351,6 +412,9 @@ async function browserChecks() {
     await liftChecks(browser, `${base}/`);
     await requestChecks(browser, `${base}/`);
     await pageChecks(browser, base);
+    await register129Checks(browser, base); // #129
+    await resume129Checks(browser, base); // #129
+    console.log('PASS #129: /projects/ is the full Register (eight rows in site order, each linking its page, stacking into labelled rows at 390px, no JavaScript needed); /resume/ is the reader on a Sheet in Case File type and colours with the PDF download; the PDF is one page with cavelms.com and the CaveText line');
   } finally {
     await browser.close();
     server.close();

@@ -86,6 +86,7 @@ module.exports = [
     limits:'The images are staged sample conversations in the genuine dashboard, not live AI execution. The portfolio sends no messages, creates no orders and changes no files. The agent itself is not a filesystem or network sandbox.',
     stack:['Node.js','TypeScript','Tool integrations'],
     entry:'A self-hosted personal assistant and coding agent, built on the pi coding agent and forked to suit my own workflow.',
+    listing:{note:'(personal AI agent)',was:'Research, files and reports scattered across separate conversations',now:'A self-hosted assistant and coding agent with memory, reviewed before it acts',status:'In daily use'},
     source:'https://github.com/H4fizWasabie/theoses2',
     featured:true, preview:'theoses-report.webp', previewAlt:'Genuine Theoses dashboard showing an explicitly staged fictional conversation',
     disclosure:'Actual Theoses dashboard; staged sample conversation, not live execution.',
@@ -103,6 +104,7 @@ module.exports = [
     limits:'Yen is a separate Go implementation, not a claim that it has replaced Theoses or achieved complete feature parity. This page shows an architecture outline, not a running agent or an invented chat.',
     stack:['Go','Conversation persistence','Shared memory'],
     entry:'One assistant that keeps the conversation as you switch apps.',
+    listing:{note:'(Go AI agent)',was:'A conversation that restarts when you switch between terminal, Telegram and browser',now:'One conversation and its memory across all three',status:'A separate Go build, not yet at full parity with Theoses'},
     source:'https://github.com/H4fizWasabie/yen',
     disclosure:'Architecture outline; no live agent session shown.', scenes:[],
     evidence:['H4fizWasabie/yen AGENTS.md and CONTEXT.md at b50c94a0efba4658c76e878654ee98b10ca0f388','Yen M10 parity report and handoff']
@@ -119,6 +121,7 @@ module.exports = [
     limits:'These owner-approved phone captures have fictional text substituted for private activity, filenames and music details. They are edited screenshots, not a populated demo installation. APK releases are debug-signed; this is personal-use software, not a claimed Play Store release or public-adoption result.',
     stack:['Kotlin','Android','On-device data'],
     entry:'Tasks, calendar, documents, scan-to-PDF and local music in one personal Android utility.',
+    listing:{note:'(Android app)',was:'Several separate apps for tasks, calendar, documents and music',now:'One local-first Android app, no account',status:'In daily use on my own phone'},
     facts:['In daily use on my own phone','Reminders with Done and Snooze actions','Weekly on-device backup'],
     source:'https://github.com/H4fizWasabie/map-android', releases:'https://github.com/H4fizWasabie/map-android/releases',
     featured:true, preview:'map-overview.webp', previewAlt:'Composite of three genuine MAP phone screenshots: Home, Tasks and Tools, with fictional text',
@@ -138,6 +141,7 @@ module.exports = [
     limits:'This page explains the pipelines without running them. No posts are published from the portfolio, no account credentials are exposed and no follower, view or growth numbers are claimed. Some series wait for my approval before they publish.',
     stack:['Python & shell','Cron','Kokoro TTS','Remotion & FFmpeg','Telegram','Platform APIs'],
     entry:'Daily AI news, lessons and videos, made and published on schedule.',
+    listing:{note:'(content pipelines)',was:'Posting AI news and lessons by hand, every day',now:'Pipelines that research, write, voice, render and publish on schedule',status:'Publishing daily'},
     facts:['AI news shorts and AI concept explainers on the 89lab Facebook page, every day','A trending GitHub repo on YouTube Shorts and Threads, every day','A build with AI series on YouTube Shorts','A practical AI lesson on Instagram, every day','One AI concept researched and added to the library, every day'],
     disclosure:'Workflow outline; no publishing action is triggered.', scenes:[],
     evidence:['ai-agent-shorts/AGENTS.md, read 2026-10-03','Owner-approved grouping of publishing/video workflows as 89lab','Owner-approved expansion to all content pipelines and AI teaching, 2026-10-15','Content workspace AGENTS.md files and live crontabs, read 2026-10-15']

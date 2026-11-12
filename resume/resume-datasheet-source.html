@@ -13,7 +13,7 @@
   .mono { font-family: "IBM Plex Mono", "DejaVu Sans Mono", monospace; }
   .page { padding: 34px 40px 30px 40px; }
   /* Scale the datasheet onto one A4 page in the Chromium PDF build (resume/pdf.cjs). */
-  @media print { .page { zoom: 0.78; padding: 36px 80px 24px; } }
+  @media print { .page { zoom: 0.75; padding: 36px 80px 24px; } }
   a { color: inherit; text-decoration: none; }
 
   /* ---------- header ---------- */
@@ -103,7 +103,7 @@
 
     <table class="sys"><tr>
       <td class="sysname">CAVELMS — Learning Platform <span class="kind mono">· FREELANCE CLIENT · LIVE</span></td>
-      <td class="sysurl mono">lms.wasabietech.com</td>
+      <td class="sysurl mono">cavelms.com</td>
     </tr></table>
     <div class="tags mono">GO · POSTGRESQL · AUTH · FILE STORAGE · CADDY · SYSTEMD</div>
     <p class="sysdesc">Online courses, exams and certificates for The Cave Consult, a training company; built to spec with the client from requirements to deployment.</p>
@@ -111,6 +111,7 @@
       <li>Learner registration with email verification and password reset; Admin role created only from the CLI, never through sign-up.</li>
       <li>Course builder from ordered lessons, exams with PDF certificates, and a media gallery (uploads up to 2 GB) with per-course visibility rules.</li>
       <li>Embedded database migrations, integration tests against a throwaway Postgres, nightly encrypted backups to off-site storage.</li>
+      <li>CaveText, a Chrome extension built for The Cave Consult, published under their name on the Chrome Web Store.</li>
     </ul>
 
     <table class="sys"><tr>

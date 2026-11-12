@@ -144,6 +144,12 @@ const sheet = (p, n, count, ctx) => {
 </section>`;
 };
 
+// One line of the Register: the homepage links it to the system's Sheet, /projects/ to its page and adds a Status cell.
+const registerRow = (esc, p, i, href, status) => {
+  const r = p.register || p.listing;
+  return { cells: [['Item', String(i + 1), 'n'], ['System', { html: `<span><a href="${href}">${esc(r.label || p.title)}</a> <span class="note">${esc(r.note)}</span></span>` }, 'sys'], ['Was', r.was], ['Now', r.now], ...(status ? [['Status', status]] : [])] };
+};
+
 // The first Sheet: what Hafiz does, and the Register of systems in production.
 const first = (made, site, esc) => `<div id="top" class="stack">
  <div class="copy canary" aria-hidden="true"></div>
@@ -155,7 +161,7 @@ const first = (made, site, esc) => `<div id="top" class="stack">
   <div class="register-wrap">
    ${table(esc, {
      caption: 'Systems in production, with what each replaced', cls: 'register', head: ['Item', 'System', 'Was', 'Now'],
-     rows: made.map((p, i) => ({ cells: [['Item', String(i + 1), 'n'], ['System', { html: `<span><a href="#${p.slug}">${esc(p.register.label || p.title)}</a> <span class="note">${esc(p.register.note)}</span></span>` }, 'sys'], ['Was', p.register.was], ['Now', p.register.now]] }))
+     rows: made.map((p, i) => registerRow(esc, p, i, `#${p.slug}`))
    })}
    <span class="stamp over" style="--mx:30px;--my:100px" aria-hidden="true">In use</span>
   </div>
@@ -261,25 +267,29 @@ function project({ p, next, site, esc, root }) {
 <p class="more-link"><a href="${root}work/${next.slug}/">Next: ${esc(next.title)}</a></p>` });
 }
 
+// #129 /projects/: the full Register, one Sheet with every project as a row linking its page.
 function projectsPage({ projects, site, esc, root }) {
   return shell({ title: `All work | ${site.name}`, description: 'Every project: internal tools and AI automation that replace paper forms and spreadsheets.', route: '/projects/', root, site, esc, main: `<section class="sheet white perf" aria-labelledby="all-h">
- ${sheetHead(esc, { tag: 'h1', id: 'all-h', title: 'Register of work', sub: 'every project, one line each' })}
- ${table(esc, {
-   caption: 'All projects', cls: 'register more', head: ['Item', 'Project', 'Entry'],
-   rows: projects.map((p, i) => ({ cells: [['Item', String(i + 1), 'n'], ['Project', { html: `<a href="${root}work/${p.slug}/">${esc(p.title)}</a>` }, 'sys'], ['Entry', p.entry || p.summary]] }))
- })}
- <div class="foot">${btn(root, 'Back to the Record of work')}</div>
+ ${sheetHead(esc, { tag: 'h1', id: 'all-h', title: 'Register of work', sub: 'every project, what it replaced and where it stands', serial: serial(projects.length, 'projects on record') })}
+ <div class="register-wrap">
+  ${table(esc, {
+    caption: 'All projects, with what each replaced and where it stands', cls: 'register all', head: ['Item', 'System', 'Was', 'Now', 'Status'],
+    rows: projects.map((p, i) => registerRow(esc, p, i, `${root}work/${p.slug}/`, forms[p.slug]?.status || p.listing.status))
+  })}
+  <span class="stamp over" style="--mx:0px;--my:0px" aria-hidden="true">On file</span>
+ </div>
+ <div class="foot">${btn(root, 'Back to the Record of work')}${btn(`${root}resume/`, 'Résumé')}</div>
 </section>` });
 }
 
-// The résumé reader is derived from the approved source by resume/preview.cjs (needs the built PDF).
+// #129 /resume/: the reader on a Sheet. The reader is derived from the approved source by resume/preview.cjs (needs the built PDF).
 function resumePage({ site, esc, root }, reader) {
   return shell({ title: `Résumé | ${site.name}`, description: 'Hafiz Jamali’s résumé: internal tools developer and AI automation for operations.', route: '/resume/', root, site, esc,
-    extra: `<link rel="stylesheet" href="${root}static/resume.css">`, main: `<section class="sheet white perf narrow" aria-labelledby="resume-h">
+    extra: `<link rel="stylesheet" href="${root}static/resume.css">`, main: `<section class="sheet white perf resume-sheet" aria-labelledby="resume-h">
  ${sheetHead(esc, { tag: 'h1', id: 'resume-h', title: 'Résumé', sub: 'My experience and the systems I’ve built.' })}
  <div class="foot"><span class="links"><a class="btn" href="${reader.filename}" download="${reader.filename}">Download PDF ${arr}</a>${btn(root, 'Back to the Record of work')}</span></div>
-</section>
-<div class="resume-wrap">${reader.html}</div>` });
+ <div class="resume-wrap">${reader.html}</div>
+</section>` });
 }
 
 module.exports = { fonts, licenses, static: statics, home, project, projectsPage, resumePage };

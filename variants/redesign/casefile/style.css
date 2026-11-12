@@ -298,3 +298,26 @@ fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
 }
 @keyframes settle{from{translate:-8px -12px;rotate:1deg}}
 @keyframes thunk{from{scale:1.15;opacity:.6}}
+
+/* #129 register and résumé */
+/* /projects/: the full Register adds a Status column. */
+@media (min-width:761px){
+  .register.all:not(.more):not(.slip) .sys{width:22%}
+  .register.all td:last-child{width:19%;font-size:.88rem}
+  .register.all .sys a{font-size:clamp(1.35rem,1.05rem + .7vw,1.7rem)}
+}
+
+/* /resume/: the reader is a typed form on the Sheet, in Case File type and colours (the source's own print styles are untouched). */
+.resume-sheet .resume-wrap{width:auto;margin:1.3rem 0 0}
+.resume-sheet .resume-paper{background:transparent;color:var(--type);font-family:"Archivo",system-ui,sans-serif;font-stretch:100%;max-width:none;margin:0;border:var(--rule);border-radius:0}
+.resume-sheet .resume-paper .mono{font-family:"Courier Prime",ui-monospace,monospace}
+.resume-sheet .resume-paper h2.mono{font:900 clamp(1.7rem,1.1rem + 2.4vw,2.6rem)/1 "Archivo",sans-serif;font-stretch:70%;letter-spacing:.01em;word-spacing:.14em;color:var(--navy)}
+.resume-sheet .resume-paper .role{color:var(--type)}
+.resume-sheet .resume-paper .meta,.resume-sheet .resume-paper td.sysurl,.resume-sheet .resume-paper td.jd,.resume-sheet .resume-paper .tags,.resume-sheet .resume-paper .jloc{color:#3b4262}
+.resume-sheet .resume-paper .idtop{border-top-color:var(--navy)}
+.resume-sheet .resume-paper .certline{border-color:var(--navy)}
+.resume-sheet .resume-paper .certline b,.resume-sheet .resume-paper td.sysname .kind,.resume-sheet .resume-paper td.sklabel{color:var(--navy)}
+.resume-sheet .resume-paper .sechead{border-bottom:var(--rule)}
+.resume-sheet .resume-paper .sectitle.mono{font:700 .74rem/1.25 "Archivo",sans-serif;letter-spacing:.07em;color:var(--navy)}
+.resume-sheet .resume-paper td.sysname,.resume-sheet .resume-paper td.jt{color:var(--navy)}
+.resume-sheet .resume-paper ::selection{background:var(--stamp);color:#fff}
