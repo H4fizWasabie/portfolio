@@ -771,6 +771,8 @@ async function requestMomentChecks(browser, base) {
   const message = '[data-request] [name=message]';
   const state = () => page.evaluate(m => { const t = document.querySelector(m); return { value: t.value, focused: document.activeElement === t, caret: t.selectionStart === t.value.length && t.selectionEnd === t.value.length }; }, message);
   await page.click('#pims .btn.primary');
+  // The focus lands just after the jump to #request (request.js defers it a tick), so wait for it rather than racing it.
+  await page.waitForFunction(m => document.activeElement === document.querySelector(m), message, { timeout: 2000 }).catch(() => {});
   assert.deepEqual(await state(), { value: 'Something like PIMS: ', focused: true, caret: true }, 'Request: PIMS prefills the message and focuses it at the end');
   assert.ok(page.url().endsWith('#request'), 'Request: it still goes to the form');
   await page.keyboard.type('replaces our paper slips');
@@ -792,6 +794,7 @@ async function requestMomentChecks(browser, base) {
   assert.equal(await page.getAttribute('main .foot .btn.primary', 'href'), '../../?about=Procura#request', '/work/procura/: the Request carries its system');
   await page.click('main .foot .btn.primary');
   await page.waitForURL(`${base}/?about=Procura#request`);
+  await page.waitForFunction(m => document.activeElement === document.querySelector(m), message, { timeout: 2000 }).catch(() => {});
   assert.deepEqual(await state(), { value: 'Something like Procura: ', focused: true, caret: true }, '/work/procura/: the form arrives prefilled and focused');
   await page.goto(`${base}/?about=Evil%20link%20http%3A%2F%2Fspam.example#request`, { waitUntil: 'networkidle' });
   assert.equal((await state()).value, '', 'Request: an unknown ?about= prefills nothing');
