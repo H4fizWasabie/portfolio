@@ -38,5 +38,5 @@ build time (`resume/pdf.cjs`) and is not committed. See `resume/README.md`.
 ## Deploy
 
 The canonical site is served from `/var/www/portfolio-releases/current`, a symlink to an
-immutable release built from `variants/redesign` (the Workshop design). Ship with
+immutable release built from `variants/redesign` (the Case File design). Ship with
 `variants/redesign/release.sh` on the VPS; see `resume/DEPLOYMENT.md`.

@@ -1,72 +1,10 @@
 // Sample demos on the Theoses, 89lab, MAP and Yen pages (#128). Every entry is fictional; nothing here talks to a system.
 // Without this script each Sheet shows its finished sample, as printed by more.cjs. Typed entries, the Stamp, "Start again"
-// and the live region follow forms.js; the small helpers below are copies of its, so the two files can change apart.
+// and the live region follow forms.js; both build them from kit.js.
 import { initGalleries } from '../gallery.js';
+import { $, reduced, sleep, h, typer, stamper, liveRegion, button, setLabel, again, flag } from './kit.js';
 
-const $ = (root, sel) => root.querySelector(sel);
-const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const pause = ms => (reduced() ? Promise.resolve() : sleep(ms));
-
-function h(tag, props = {}, ...kids) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) k in n ? (n[k] = v) : n.setAttribute(k, v);
-  n.append(...kids);
-  return n;
-}
-
-// Typed entries: the finished text holds the layout from the first keystroke, so nothing reflows while it types.
-function typer() {
-  let run = 0;
-  return {
-    stop: () => run++,
-    async type(node, text) {
-      const mine = run;
-      if (reduced()) { node.textContent = text; return; }
-      const typed = h('span'), rest = h('span', { style: 'visibility:hidden' }, text);
-      node.replaceChildren(typed, rest);
-      for (const ch of text) {
-        await sleep(25);
-        if (mine !== run) return;
-        typed.textContent += ch;
-        rest.textContent = rest.textContent.slice(1);
-      }
-      node.textContent = text;
-    },
-  };
-}
-
-// The Sheet's one stamp: change its word and let it thunk.
-function stamper(sheet) {
-  const s = $(sheet, '.foot .stamp');
-  return (text, thunk = true) => {
-    s.textContent = text;
-    s.classList.remove('thunk');
-    if (thunk) { void s.offsetWidth; s.classList.add('thunk'); }
-  };
-}
-
-function liveRegion(sheet) {
-  const p = h('p', { className: 'sr', 'aria-live': 'polite' });
-  sheet.append(p);
-  return text => { p.textContent = text; };
-}
-
-const arrow = '<svg class="arr" width="16" height="16" aria-hidden="true"><use href="#arr"/></svg>';
-function button(label, type = 'button') {
-  const b = h('button', { type, className: 'btn' });
-  b.innerHTML = `<span></span> ${arrow}`;
-  b.firstElementChild.textContent = label;
-  return b;
-}
-const setLabel = (b, text) => { b.firstElementChild.textContent = text; };
-const again = () => h('button', { type: 'button', className: 'again', hidden: true }, 'Start again');
-
-function flag(field, msg) {
-  const err = field.parentNode.querySelector('.err');
-  if (msg) { err.textContent = msg; field.setAttribute('aria-invalid', 'true'); field.setAttribute('aria-describedby', err.id); }
-  else { field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby'); }
-}
 
 // A printed tick box with a typed X: '' (open), 'done' or 'fail' (refused).
 function mark(li, state) {
@@ -78,7 +16,7 @@ function mark(li, state) {
 const current = li => li.setAttribute('aria-current', 'step');
 
 function theoses(sheet) {
-  const say = liveRegion(sheet), stamp = stamper(sheet), t = typer();
+  const say = liveRegion(sheet), stamp = stamper(sheet).set, t = typer();
   const steps = [...sheet.querySelectorAll('[data-steps] li')];
   const draftCell = $(sheet, '[data-draft]'), draft = $(draftCell, '.val'), draftLab = $(draftCell, '.lab');
   const first = draft.textContent, firstLab = draftLab.textContent;
@@ -128,7 +66,7 @@ function theoses(sheet) {
 }
 
 function lab(sheet) {
-  const say = liveRegion(sheet), stamp = stamper(sheet), t = typer();
+  const say = liveRegion(sheet), stamp = stamper(sheet).set, t = typer();
   const stages = [...sheet.querySelectorAll('[data-stages] li')], log = $(sheet, 'tbody');
   const lanes = {
     news: ['AI news', '89lab on Facebook', ['A lab releases a smaller open model', 'An editor adds agent mode', 'A new speech model runs on a laptop']],
@@ -195,7 +133,7 @@ function map(sheet) {
 }
 
 function yen(sheet) {
-  const say = liveRegion(sheet), stamp = stamper(sheet), t = typer();
+  const say = liveRegion(sheet), stamp = stamper(sheet).set, t = typer();
   const thread = $(sheet, '.thread'), seed = [...thread.children].slice(0, 2).map(li => li.cloneNode(true));
   const replies = ['Not yet. It is still a draft waiting for your approval.', 'Done. I will remind you here on Friday.', 'Yes, same conversation. Ask me anything about it.'];
   const prompts = ['Did the gauze order go out?', 'Remind me again from here.', 'Is this still the same conversation?', ''];

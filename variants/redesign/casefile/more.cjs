@@ -11,7 +11,6 @@ const forms = {
   map: { color: 'green', title: 'Screen capture sheet', dept: 'Android · personal utility', status: 'In daily use on my own phone', stamp: ['In daily use', -4, 0, 80] },
   yen: { color: 'pink', title: 'While you were out', dept: 'Go · AI agent', status: 'Architecture demo, not a running agent', stamp: ['Same thread', 5, 100, 50] }
 };
-const slugs = Object.keys(forms);
 
 const stageNames = ['Pick topic', 'Check sources', 'Write script', 'Voiceover', 'Captions', 'Render', 'Publish', 'Record'];
 const draft = 'Gauze swabs dropped below the reorder point on Tuesday. Two purchase orders are ready for Tanjung Clinical and Meridian Medical. Glove use is up on last week.';
@@ -93,4 +92,4 @@ function project({ p, next, projects, site, esc, root }, k) {
 <p class="more-link"><a href="${root}work/${next.slug}/">Next: ${esc(next.title)}</a></p>` });
 }
 
-module.exports = { slugs, project };
+module.exports = { project };

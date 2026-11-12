@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ships the committed Workshop site to portfolio.wasabietech.com.
+# Ships the committed Case File site to portfolio.wasabietech.com.
 # Run on the VPS as root from a clean checkout of main: variants/redesign/release.sh [release-name]
 # Builds and tests (publish-test.cjs prints the résumé PDF), copies the manifest into a new
 # immutable release, switches /var/www/portfolio-releases/current to it, then verifies the public
@@ -9,7 +9,7 @@ cd "$(dirname "$0")/../.."
 [ -z "$(git status --porcelain)" ] || { echo "Uncommitted changes; release committed source only." >&2; exit 1; }
 export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-/home/theoses/.cache/ms-playwright}"
 releases=/var/www/portfolio-releases
-name="${1:-workshop}-$(TZ=Asia/Kuala_Lumpur date +%Y%m%d-%H%M%S)-$(git rev-parse --short=12 HEAD)"
+name="${1:-casefile}-$(TZ=Asia/Kuala_Lumpur date +%Y%m%d-%H%M%S)-$(git rev-parse --short=12 HEAD)"
 dist=variants/redesign/dist/site
 
 npm ci --ignore-scripts --no-audit --no-fund

@@ -2,7 +2,7 @@
 // The homepage is the "Record of work" Sheet, a Sheet for each system in production (each shaped like the form it replaced, with a
 // Sample demo that forms.js turns on), a continuation Sheet, Particulars and the Request form. Project facts come from
 // projects.cjs, site wording from content.cjs; what is only about a form (its rows, its department and status) is here.
-// Each project page is a minimal Sheet for now (tickets #127 to #129 build the pages out).
+// Each project has a page of its own under /work/: the four systems here, the rest in more.cjs.
 const B = require('../blocks.cjs');
 const D = require('./diagrams.cjs');
 const pages = require('./more.cjs');
@@ -10,7 +10,7 @@ const pages = require('./more.cjs');
 const fonts = ['archivo-latin-wdth-normal.woff2', 'courier-prime-latin-400-normal.woff2', 'courier-prime-latin-700-normal.woff2'];
 const licenses = ['OFL-archivo.txt', 'OFL-courier-prime.txt'];
 const preload = fonts.slice(0, 2); // the bold Courier is fetched when a sheet needs it
-const statics = ['../workshop/photo/hafiz-portrait.webp'];
+const statics = ['../photo/hafiz-portrait.webp'];
 
 const arr = '<svg class="arr" width="16" height="16" aria-hidden="true"><use href="#arr"/></svg>';
 const symbol = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="arr" viewBox="0 0 16 16"><path d="M1.5 8h12M9 3.5 13.5 8 9 12.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol></svg>`;
@@ -43,15 +43,15 @@ const lines = (esc, items, cls) => `<ul class="${cls}">${items.map(s => `<li>${e
 
 // The sections of a Sheet's body, from the project's facts. Areas are laid out by style.css on the homepage.
 const part = {
-  problem: (p, esc, areas) => p.problem && `<div class="cell${areas ? ' a-problem' : ''}"><h3 class="lab">The problem</h3><p>${esc(p.problem)}</p></div>`,
-  built: (p, esc, areas, label = 'What I built') => `<div class="cell${areas ? ' a-built' : ''}"><h3 class="lab">${label}</h3><p>${esc(p.built)}</p></div>`,
-  how: (p, esc, areas) => `<div class="cell${areas ? ' a-how' : ''}"><h3 class="lab">How it works</h3><ol class="items">${p.workflow.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`,
-  limits: (p, esc, areas) => `<div class="cell${areas ? ' a-limits' : ''}"><h3 class="lab">What it doesn’t do</h3><p>${esc(p.limits)}</p></div>`,
-  stack: (p, esc, areas) => `<div class="cell${areas ? ' a-stack' : ''}"><h3 class="lab">Built with</h3>${lines(esc, p.stack, 'chips')}</div>`,
-  facts: (p, esc, areas) => p.facts && `<div class="cell${areas ? ' a-facts' : ''}"><h3 class="lab">On record</h3>${lines(esc, p.facts, 'lines')}</div>`
+  problem: (p, esc) => p.problem && `<div class="cell a-problem"><h3 class="lab">The problem</h3><p>${esc(p.problem)}</p></div>`,
+  built: (p, esc) => `<div class="cell a-built"><h3 class="lab">What I built</h3><p>${esc(p.built)}</p></div>`,
+  how: (p, esc) => `<div class="cell a-how"><h3 class="lab">How it works</h3><ol class="items">${p.workflow.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`,
+  limits: (p, esc) => `<div class="cell a-limits"><h3 class="lab">What it doesn’t do</h3><p>${esc(p.limits)}</p></div>`,
+  stack: (p, esc) => `<div class="cell a-stack"><h3 class="lab">Built with</h3>${lines(esc, p.stack, 'chips')}</div>`,
+  facts: (p, esc) => p.facts && `<div class="cell a-facts"><h3 class="lab">On record</h3>${lines(esc, p.facts, 'lines')}</div>`
 };
-const body = (p, esc, order, cls, areas = true, extra = '') => `<div class="cells two body${cls ? ' ' + cls : ''}">
-  ${order.map(k => part[k](p, esc, areas)).filter(Boolean).join('\n  ')}${extra}
+const body = (p, esc, order, cls) => `<div class="cells two body${cls ? ' ' + cls : ''}">
+  ${order.map(k => part[k](p, esc)).filter(Boolean).join('\n  ')}
  </div>`;
 
 const shot = (root, p, esc, [name, file, caption]) => `<figure class="shot">${B.img(root, file, `${p.title}: ${name}. ${caption}`, 'loading="lazy" decoding="async"')}<figcaption><b>${esc(name)}.</b> ${esc(p.disclosure)}</figcaption></figure>`;
@@ -275,20 +275,8 @@ function systemPage({ p, next, projects, site, esc, root }) {
 // The pieces more.cjs builds its Sheets from.
 const kit = { shell, sheetHead, serial, fieldCells, table, body, btn, stampOf, sampleNote };
 
-// A minimal Sheet per project until the Case File pages are built out: the project's facts and links.
-function project({ p, next, projects, site, esc, root }) {
-  if (forms[p.slug]) return systemPage({ p, next, projects, site, esc, root });
-  if (pages.slugs.includes(p.slug)) return pages.project({ p, next, projects, site, esc, root }, kit);
-  const links = [p.url && btn(p.url, `Visit ${esc(p.title)}`, ' rel="noopener"'), p.cavetext && btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"'),
-    p.source && btn(p.source, 'Source on GitHub', ' rel="noopener"'), p.releases && btn(p.releases, 'APK releases on GitHub', ' rel="noopener"')].filter(Boolean);
-  return shell({ title: `${p.title} | ${site.name}`, description: p.description, route: `/work/${p.slug}/`, root, site, esc, main: `<section class="sheet ${forms[p.slug]?.color || 'white'} perf narrow" aria-labelledby="project-h">
- ${sheetHead(esc, { tag: 'h1', id: 'project-h', title: p.title, sub: p.category })}
- <div class="cells"><div class="cell"><p class="lab">What it is</p><p class="val">${esc(p.description)}</p></div></div>
- ${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], '', false, p.cavetext ? `\n  ${part.built(p.cavetext, esc, false, 'Attached: CaveText')}\n  ${part.how(p.cavetext, esc, false)}\n  ${part.limits(p.cavetext, esc, false)}\n  ${part.stack(p.cavetext, esc, false)}` : '')}
- <div class="foot"><span class="links">${btn(`${root}#${p.slug}`, 'Back to the Record of work')}${links.join('')}</span></div>
-</section>
-<p class="more-link"><a href="${root}work/${next.slug}/">Next: ${esc(next.title)}</a></p>` });
-}
+// A project's page: the four systems in production are rendered here, the rest by more.cjs.
+const project = args => forms[args.p.slug] ? systemPage(args) : pages.project(args, kit);
 
 // #129 /projects/: the full Register, one Sheet with every project as a row linking its page.
 function projectsPage({ projects, site, esc, root }) {

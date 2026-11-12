@@ -1,73 +1,8 @@
 // Sample forms as small working demos. Every entry is fictional; nothing here talks to a system.
 // Without this script each sheet shows its filled-in sample (and the "Was" diagram) as printed by page.cjs.
-const $ = (root, sel) => sel ? root.querySelector(sel) : document.querySelector(root);
-const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+import { $, reduced, h, typer, stamper, liveRegion, button, setLabel, again, flag } from './kit.js';
+
 const TODAY = '05 Oct'; // the fictional "today" of the sample ledger
-
-function h(tag, props = {}, ...kids) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) k in n ? (n[k] = v) : n.setAttribute(k, v);
-  n.append(...kids);
-  return n;
-}
-
-// Typed entries: the finished text holds the layout from the first keystroke, so nothing reflows while it types.
-function typer() {
-  let run = 0;
-  return {
-    stop: () => run++,
-    async type(node, text) {
-      const mine = run;
-      if (reduced()) { node.textContent = text; return; }
-      const done = h('span'), rest = h('span', { style: 'visibility:hidden' }, text);
-      node.replaceChildren(done, rest);
-      for (const ch of text) {
-        await sleep(25);
-        if (mine !== run) return;
-        done.textContent += ch;
-        rest.textContent = rest.textContent.slice(1);
-      }
-      node.textContent = text;
-    },
-  };
-}
-
-// The sheet's one stamp: change its word and let it thunk.
-function stamper(sheet) {
-  const s = $(sheet, '.foot .stamp'), first = s.textContent;
-  return {
-    set(text, thunk = true) {
-      s.textContent = text;
-      s.classList.remove('thunk');
-      if (thunk) { void s.offsetWidth; s.classList.add('thunk'); }
-    },
-    restore() { this.set(first, false); },
-  };
-}
-
-function liveRegion(sheet) {
-  const p = h('p', { className: 'sr', 'aria-live': 'polite' });
-  sheet.append(p);
-  return text => { p.textContent = text; };
-}
-
-const arrow = '<svg class="arr" width="16" height="16" aria-hidden="true"><use href="#arr"/></svg>';
-function button(label, type = 'button') {
-  const b = h('button', { type, className: 'btn' });
-  b.innerHTML = `<span></span> ${arrow}`;
-  b.firstElementChild.textContent = label;
-  return b;
-}
-const setLabel = (b, text) => { b.firstElementChild.textContent = text; };
-const again = () => h('button', { type: 'button', className: 'again', hidden: true }, 'Start again');
-
-// Input flags an error the way the request form does: red outline, label and message via aria-invalid.
-function flag(field, msg) {
-  const err = field.parentNode.querySelector('.err');
-  if (msg) { err.textContent = msg; field.setAttribute('aria-invalid', 'true'); field.setAttribute('aria-describedby', err.id); }
-  else { field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby'); }
-}
 
 // Lift the top copy: the top form sits over a pink carbon copy holding the "Was" diagram.
 // Lifted, the sheet hinges at its top edge and tilts back under a perspective (keep FOLD in step with .lift-stage in style.css).

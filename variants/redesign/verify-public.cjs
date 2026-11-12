@@ -12,7 +12,16 @@ const origin = 'https://portfolio.wasabietech.com';
 const site = process.env.BUILD_ROOT || path.join(__dirname, 'dist', 'site');
 const { projects } = require('./content.cjs');
 const routes = ['/', '/projects/', '/resume/', ...projects.map(p => `/work/${p.slug}/`)];
+const made = projects.filter(p => p.register); // the systems in production: a Sheet each on the homepage, with a Sample demo
 let browser;
+
+// The Case File's Sample demos run in the page and send nothing, so driving one stays non-mutating.
+const button = (page, id, name) => page.locator(`#${id}`).getByRole('button', { name });
+async function procuraDemo(page) {
+  await page.getByRole('button', { name: 'One fewer Gauze swab 10×10' }).click({ clickCount: 2 }); // 51, reorder at 50
+  await button(page, 'procura', 'Draft purchase order').click();
+  await page.waitForFunction(() => document.querySelector('#procura .foot .stamp')?.textContent === 'Drafted');
+}
 
 (async () => {
   for (const route of routes) {
@@ -23,6 +32,14 @@ let browser;
     assert.ok(html.includes(`<link rel="canonical" href="${origin}${route}">`), route);
     assert.match(html, /name="robots" content="index,follow"/, route);
     if (route === '/') assert.ok(html.includes(fs.readFileSync(path.join(__dirname, '../../apps/web/index.html'), 'utf8').match(/<meta\b[^>]*name="google-site-verification"[^>]*>/)[0]), 'Search Console verification missing');
+    if (route === '/') {
+      assert.match(html, /name="portfolio-surface" content="casefile"/, 'the homepage is the Case File');
+      for (const p of made) assert.ok(html.includes(`id="${p.slug}"`) && html.includes(`href="#${p.slug}"`), `/: ${p.slug} has a Sheet and the Register links to it`);
+    }
+    if (route === '/work/cavelms/') {
+      assert.match(html, /CaveText/, route);
+      assert.match(html, /href="https:\/\/chromewebstore\.google\.com\/detail\/cavetext\//, `${route} links the Chrome Web Store listing`);
+    }
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);
     assert.equal(ld['@graph'][2].url, origin + route);
     const alias = await fetch(base + route + 'index.html', { redirect: 'manual' });
@@ -77,15 +94,27 @@ let browser;
       assert.equal(await page.locator('h1').count(), 1, route);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route}: no sideways scroll at ${width}px`);
       if (route === '/') {
-        assert.equal(await page.locator('meta[name="portfolio-surface"]').getAttribute('content'), 'workshop');
-        assert.equal(await page.evaluate(() => new Set([...document.querySelectorAll('[data-project]')].map(e => e.dataset.project)).size), projects.length);
-        assert.ok(await page.locator('[data-stage] canvas, .bench-poster').first().isVisible(), 'room or its still image shows');
-        await page.locator('[data-project="procura"] a[href$="work/procura/"]').first().click();
+        assert.equal(await page.locator('meta[name="portfolio-surface"]').getAttribute('content'), 'casefile');
+        assert.equal(await page.locator('main section.sheet').count(), 1 + made.length + 3, 'first Sheet, one per system, continuation, Particulars, Request form');
+        for (const p of made) {
+          assert.ok(await page.locator(`#${p.slug}`).isVisible(), `${p.slug} Sheet shows`);
+          assert.equal(await page.locator(`.register a[href="#${p.slug}"]`).count(), 1, `the Register links ${p.slug}`);
+        }
+        assert.equal(await page.locator('canvas').count(), 0, 'no canvas: the House is gone');
+        for (const [id, name] of [['pims', 'Approve request'], ['dd-drugs-register', 'Submit count'], ['procura', 'Draft purchase order'], ['cavelms', 'Submit exam']]) {
+          assert.ok(await button(page, id, name).isVisible(), `${id}: the Sample demo has its control`);
+        }
+        assert.equal(await page.locator('.lift-btn').count(), 2, 'PIMS and Procura offer to lift the top copy');
+        await procuraDemo(page);
+        await page.locator('#procura a[href$="work/procura/"]').first().click();
         await page.waitForURL(base + '/work/procura/');
       }
       if (route === '/work/procura/') {
-        await page.locator('[data-demo=procura] [data-action=draft]').click();
-        assert.equal(await page.locator('[data-demo=procura] [data-status]').textContent(), 'Order drafted');
+        await procuraDemo(page);
+      }
+      if (route === '/work/cavelms/') {
+        assert.ok(await button(page, 'cavelms', 'Submit exam').isVisible(), 'CaveLMS: the Sample exam has its control');
+        assert.ok(await page.getByText('Attached: CaveText').isVisible(), 'CaveText is attached to the CaveLMS Sheet');
       }
       if (route === '/work/map/') {
         await page.locator('[role=tab]').nth(3).click();
@@ -97,7 +126,7 @@ let browser;
     }
     assert.deepEqual(errors, []);
     await context.close();
-    console.log(`PASS browser ${width}px: every route renders one h1 without overflow or errors; bench links, Procura demo, MAP gallery and résumé work`);
+    console.log(`PASS browser ${width}px: every route renders one h1 without overflow or errors; the Record of work, its Sheets and Sample demos, /work/cavelms/, MAP gallery and résumé work`);
   }
   await browser.close();
   console.log('PASS public verification complete');
