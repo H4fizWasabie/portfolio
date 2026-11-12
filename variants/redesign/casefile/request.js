@@ -16,6 +16,18 @@ if (form) {
   };
   fields.forEach(f => f.addEventListener('input', () => flag(f, false)));
 
+  // "Request one like this" names its system: an empty message starts "Something like PIMS: " and takes focus at the end.
+  // The name comes from the page's own data-about links (here on a click, or in ?about= from a /work/ page), so no other text is accepted.
+  const about = [...document.querySelectorAll('[data-about]')].map(a => a.dataset.about);
+  const prefill = name => {
+    if (!about.includes(name)) return;
+    const message = fields[0];
+    if (!message.value) message.value = `Something like ${name}: `;
+    setTimeout(() => message.focus({ preventScroll: true })); // after the jump to #request, which would clear the focus
+  };
+  document.addEventListener('click', e => { const a = e.target.closest('[data-about]'); if (a) prefill(a.dataset.about); });
+  addEventListener('load', () => prefill(new URLSearchParams(location.search).get('about')));
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const [message, name, email] = fields.map(f => f.value.trim());
@@ -45,6 +57,7 @@ if (form) {
     if (why) {
       $('.why').textContent = why;
       fail.hidden = false;
+      fail.focus();
       return;
     }
     form.classList.add('sent');

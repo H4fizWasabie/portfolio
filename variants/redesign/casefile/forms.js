@@ -184,7 +184,7 @@ function dd() {
 
 function procura() {
   const sheet = $('#procura'), say = liveRegion(sheet), st = stamper(sheet), t = typer();
-  const po = $(sheet, '.po'), orderCells = po.nextElementSibling, orderBody = $(orderCells, 'tbody');
+  const po = $(sheet, '.po'), orderCells = po.nextElementSibling, orderBody = $(orderCells, 'tbody'), more = $(orderCells, '.more-rows');
   const sampleLines = [...orderBody.children].map(r => r.cloneNode(true));
 
   const items = [['Gauze swab 10×10', 51, 50, 'pack'], ['Syringe 3 ml', 7, 6, 'box'], ['Bandage, 5 cm', 25, 24, 'roll'], ['Surgical gloves, M', 21, 20, 'box']];
@@ -223,18 +223,20 @@ function procura() {
     if (!drafted) return;
     t.stop(); drafted = false;
     orderBody.replaceChildren(...sampleLines.map(r => r.cloneNode(true)));
+    if (more) more.hidden = false;
     reset.hidden = true; st.restore();
   }
   draftBtn.addEventListener('click', async () => {
     if (busy) return;
     undraft();
-    const low = rows.filter(r => r.have < r.at);
+    const low = rows.filter(r => r.have <= r.at);
     busy = true;
     if (!low.length) {
       const text = 'Nothing is at or below its reorder point, so there is nothing to order.';
       say(text); await t.type(msg, text); busy = false; return;
     }
     const jobs = [];
+    if (more) more.hidden = true; // the note is about the sample lines, which the draft replaces
     orderBody.replaceChildren(...low.map((r, i) => {
       const d = h('td', { 'data-label': 'Description' }), q = h('td', { 'data-label': 'Qty' }), u = h('td', { 'data-label': 'Unit' });
       jobs.push([d, r.name], [q, String(2 * r.at - r.have)], [u, r.unit]);

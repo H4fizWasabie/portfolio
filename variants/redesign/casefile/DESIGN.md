@@ -90,9 +90,18 @@ components:
   button-hover:
     backgroundColor: "{colors.printed-navy}"
     textColor: "{colors.copy-white}"
+  button-primary:
+    backgroundColor: "{colors.printed-navy}"
+    textColor: "{colors.copy-white}"
+    typography: "{typography.button}"
+    rounded: "{rounded.none}"
+    padding: ".65rem 1rem .7rem"
+  button-primary-hover:
+    backgroundColor: "the Sheet's own ground"
+    textColor: "{colors.printed-navy}"
   nav-request:
-    backgroundColor: "transparent"
-    textColor: "{colors.desk-ink}"
+    backgroundColor: "{colors.printed-navy}"
+    textColor: "{colors.copy-white}"
     rounded: "{rounded.none}"
     padding: ".3rem .75rem"
   nav-request-hover:
@@ -191,7 +200,7 @@ Office stationery under desk light: five pastel copy grounds, three inks, and on
 
 Sheets stack in a single column centred on the desk at up to 1100px wide (880px for the continuation, particulars and request sheets), with a 10px desk gutter on phones and 20px from 600px. Sheets are separated by a fluid gap (34 to 60px) and padded fluidly (14 to 36px). The first sheet is narrower (80% of the column) so its two offset copies show at the right and bottom edges; the offsets shrink from 9/18px to 8/14px under 1100px and 3/6px under 600px.
 
-Inside a sheet the grid is the form's own: a title band (title and subtitle left, serial right) closed by a 4px double navy rule, then rows of boxed cells in one or two columns that share borders, then registers, then a foot row with the action button and the stamp. Case sheets place their fields by named areas (problem, built, how, limits, stack, facts, diagram) and collapse to one column at 760px. A homepage Sheet is the short version: the title band, the fields, the form with its Sample demo, one line of what was built beside the facts on record (CaveText is one line under CaveLMS), and the foot. The problem, the full account, how it works, the limits, the stack, the screens and the implementation notes are only on the system's `/work/<slug>/` page, where the cell labels are h2 under the page's h1 (h3 under a homepage Sheet's h2, so no heading level is skipped). Registers become stacked label/value rows under 760px, with the column head printed as a small label beside each value.
+Inside a sheet the grid is the form's own: a title band (title and subtitle left, serial right) closed by a 4px double navy rule, then rows of boxed cells in one or two columns that share borders, then registers, then a foot row with the action button and the stamp. Case sheets place their fields by named areas (problem, built, how, limits, stack, facts, diagram) and collapse to one column at 760px. A homepage Sheet is the short version: the title band, the fields, the form with its Sample demo, one line of what the system is for ("What it’s for", the project's summary; the `/work/` page says "What I built" with the full account) beside the facts on record (CaveText is one line under CaveLMS), and the foot. The problem, the full account, how it works, the limits, the stack, the screens and the implementation notes are only on the system's `/work/<slug>/` page, where the cell labels are h2 under the page's h1 (h3 under a homepage Sheet's h2, so no heading level is skipped). Registers become stacked label/value rows under 760px, with the column head printed as a small label beside each value. On phones a homepage Sheet's sample table (the PIMS slip, the DD ledger, the Procura order) shows two lines and a printed note, "+2 more lines on the full case study", linking the project page; rows a demo adds always show, and desktop and `/work/` pages show every line. The Register is in operational terms (what was replaced, what it does now); technology belongs in "Built with" and "Under the hood".
 
 The wordmark and navigation sit on the desk above the first sheet, not on a sheet; the footer sits on the desk below the last.
 
@@ -215,8 +224,9 @@ Every corner is square (0 radius), including buttons, inputs, chips and the phot
 ### Buttons
 Buttons are fields too: a ruled box with a printed label.
 - **Shape:** square (0), 1.5px navy border.
-- **Primary:** transparent on the sheet, navy uppercase label (700, .9rem, .06em tracking), padded .65rem 1rem .7rem, followed by a 16px inline-SVG arrow.
-- **Hover / Focus:** fills navy and the label turns the sheet's own ground colour; focus is the violet 3px ring. Disabled (sending) drops to 60% opacity with a progress cursor.
+- **Default:** transparent on the sheet, navy uppercase label (700, .9rem, .06em tracking), padded .65rem 1rem .7rem, followed by a 16px inline-SVG arrow.
+- **Primary action:** the Request is the one filled button, the same box in navy ground with paper-white (copy-white) text. One per Sheet: "Request one like this" on each system Sheet (homepage and `/work/`), "Request work" on the first Sheet and in the desk bar. Every other button stays outlined, so the Request is the first thing a visitor's eye finds. Hover swaps the ink (the Sheet's own ground, navy text); focus is the violet ring.
+- **Hover / Focus (default buttons):** fills navy and the label turns the sheet's own ground colour; focus is the violet 3px ring. Disabled (sending) drops to 60% opacity with a progress cursor.
 - **Plain link:** a 600-weight underlined text link beside the button for the secondary action ("Read the résumé").
 
 ### Chips
@@ -234,7 +244,7 @@ Buttons are fields too: a ruled box with a printed label.
 - **Error:** the cell takes a 2px red inset outline, its label turns red, and a red 600-weight message appears under the input. Focus still wins over error with the violet ring.
 
 ### Navigation
-- **Style:** on the desk in desk ink, Archivo 600 at .95rem. Links underline with a 1px rule on hover; "Request work" is a boxed field-button with a 1.5px desk-ink border that fills desk ink on hover. Focus rings on the desk are canary, not violet. On phones the links wrap under the wordmark.
+- **Style:** on the desk in desk ink, Archivo 600 at .95rem. Links underline with a 1px rule on hover; "Request work" is the primary action: a boxed field-button, navy ground and paper-white text inside a 1.5px desk-ink border, which fills desk ink on hover. Focus rings on the desk are canary, not violet. On phones the links wrap under the wordmark.
 
 ### Register
 A line-item table printed on the form: uppercase label heads, typed Courier rows, a navy item number, and the system name as a condensed underlined link whose hit area covers the whole row. Rows tint navy at 7% on hover; a flagged row in a sample slip keeps that tint and rings its value with a 1.5px navy outline and a small uppercase note.
@@ -244,6 +254,9 @@ The violet rubber stamp: a condensed 900 uppercase word, never under 1.2rem so i
 
 ### Signature Lines and Office Box
 Printed captions with a 1px navy line to sign on, initials typed in Courier; and a dashed "For office use" box that receives the stamp.
+
+### Request form (request.js)
+The last Sheet. Under its intro one factual line says where the request goes ("It comes straight to me, Hafiz. I reply by email from" the address), with no promise of reply time or price. "Request one like this" names its system: with JavaScript an empty message starts "Something like PIMS: " and takes focus at the end (the name rides in `data-about` on the homepage and in `?about=` from a `/work/` page, and only a system the page lists is believed); without it the link is a plain jump to the form. After a send, focus moves to the confirmation, or to the red failure message when it fails (`tabindex="-1"`), never back to the page.
 
 ### Sample demos (forms.js and more.js)
 With JavaScript each case sheet becomes a small working demo on fictional data; without it the sheet shows its filled-in sample. Controls are field vocabulary: boxed `.btn` buttons, the request form's boxed inputs, square tick-boxes for choices, a text "Start again" link. Entries are typed on in Courier Prime (about 25ms a character); each completed step changes the sheet's stamp word and thunks it; every change is announced in a visually hidden `aria-live` region. Each demo says how to play in a one-line printed `.hint` (Procura, PIMS, DD), shown only when the script runs. PIMS and Procura keep their "Was" diagram on a pink carbon copy under the top form: "See the paper process underneath" ("Put it back" once lifted) hinges the form at its top edge and tilts it back about 64 degrees under a 1200px perspective, so it stays a foreshortened trapezoid of paper that casts a soft shadow on the copy (inert while lifted). The stage closes up around the copy, which lays the diagram out horizontally on desktop and as a vertical stack on phones, below the sheet's footprint. On Procura the Reorder check sits above the purchase order, as it drafts the order lines; only the purchase order form lifts. All of it is instant under `prefers-reduced-motion`.
