@@ -396,6 +396,82 @@ async function resume129Checks(browser, base) {
   }
 }
 
+// #127 Project pages of the four systems in production: the homepage Sheet with the fuller case study, all screens, the Sample demo,
+// the lift where it applies, and links to the next project, the Request form and the résumé.
+async function projectPageChecks(browser, base) {
+  const system = made.map(p => p.slug);
+  const stamp = id => `#${id} .foot .stamp`;
+  for (const p of made) {
+    const next = projects[(projects.indexOf(p) + 1) % projects.length], url = `${base}/work/${p.slug}/`, where = `/work/${p.slug}/`;
+    const click = (page, name) => page.locator(`#${p.slug}`).getByRole('button', { name }).click();
+
+    // Without JavaScript: one complete Sheet, every screen with its disclosure, the diagrams, no demo controls, and the three onward links.
+    const plain = await browser.newPage({ viewport: phone, javaScriptEnabled: false });
+    await plain.goto(url, { waitUntil: 'networkidle' });
+    const main = norm(await plain.locator('main').textContent());
+    const cave = p.cavetext ? [p.cavetext.built, p.cavetext.limits, ...p.cavetext.workflow, ...p.cavetext.stack] : [];
+    for (const t of [p.title, p.category, p.problem, p.built, p.implementation, p.limits, ...p.workflow, ...p.stack, ...(p.facts || []), ...cave, p.scenes.length && p.disclosure].filter(Boolean)) assert.ok(main.includes(norm(t)), `${where}: the page says "${t}"`);
+    assert.equal(await plain.locator('main section.sheet').count(), 1, `${where}: one Sheet`);
+    assert.equal(await plain.locator('main h1').count(), 1, `${where}: one h1`);
+    assert.ok((await text(plain, 'main h1')).includes(p.title), `${where}: the h1 names the project`);
+    assert.equal(await plain.locator('main .shot img').count(), p.scenes.length, `${where}: every approved screen is shown`);
+    for (const [name, file] of p.scenes) assert.ok(await plain.locator(`main .shot img[src$="static/${file}"][alt*="${name}"]`).count(), `${where}: the ${name} screen`);
+    assert.equal(await plain.locator('main button, main input, main select').count(), 0, `${where}: no demo controls without JavaScript`);
+    if (p.slug !== 'cavelms') assert.ok(await visible(plain, 'main .diagram'), `${where}: the diagram shows`);
+    for (const href of [`../../work/${next.slug}/`, '../../#request', '../../resume/']) assert.ok(await plain.locator(`main a[href="${href}"]`).count(), `${where}: links ${href}`);
+    if (p.slug === 'cavelms') {
+      assert.ok(await plain.locator(`main a[href="${p.url}"]`).count(), `${where}: links CaveLMS`);
+      assert.ok(await plain.locator(`main a[href="${p.cavetext.store}"]`).count(), `${where}: links the Chrome Web Store listing`);
+    }
+    await plain.close();
+
+    // With JavaScript: the Sample demo runs on the page, and the lift where there is a paper process to show.
+    const page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(url, { waitUntil: 'networkidle' });
+    if (p.slug === 'pims') {
+      await until(page, stamp('pims'), 'Requested');
+      for (const [label, s] of [['Approve request', 'Approved'], ['Create order', 'Ordered'], ['Record receipt', 'Received']]) { await click(page, label); await until(page, stamp('pims'), s); }
+      assert.ok(await visible(page, '#pims .again'), 'PIMS page: Start again offered at the end');
+    } else if (p.slug === 'dd-drugs-register') {
+      await page.fill('#dd-count', '14');
+      await click(page, 'Submit count');
+      await until(page, stamp(p.slug), 'Balanced');
+      await click(page, 'Start again');
+      await page.fill('#dd-count', '12');
+      await click(page, 'Submit count');
+      await page.selectOption('#dd-reason', 'Recount: counting error');
+      await click(page, 'Record correction');
+      await until(page, stamp(p.slug), 'Corrected');
+    } else if (p.slug === 'procura') {
+      await page.getByRole('button', { name: 'One fewer Gauze swab 10×10' }).click({ clickCount: 2 });
+      await click(page, 'Draft purchase order');
+      await until(page, stamp('procura'), 'Drafted');
+    } else {
+      await page.fill('#exam-name', 'Ada Lovelace');
+      await page.check('input[name=q1][value="25"]');
+      await page.check('input[name=q2][value="Goods received note"]');
+      await click(page, 'Submit exam');
+      await until(page, stamp('cavelms'), 'Issued');
+      assert.equal(await text(page, '#cavelms .cert .who'), 'Ada Lovelace', `${where}: the certificate is issued in the name entered`);
+    }
+    if (['pims', 'procura'].includes(p.slug)) {
+      for (const [width, diagram] of [[390, 'tall'], [1440, 'wide']]) {
+        await page.setViewportSize({ width, height: 900 });
+        const lift = `#${p.slug} .lift`;
+        await page.click(`${lift} .lift-btn`);
+        assert.ok(await visible(page, `${lift} .lift-copy .diagram.${diagram}`), `${where}: lifting shows the Was diagram at ${width}px`);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.getAttribute(`${lift} .lift-btn`, 'aria-pressed'), 'false', `${where}: Escape puts the copy back at ${width}px`);
+      }
+    }
+    assert.deepEqual(errors, [], `${where}: the demo raised no script errors`);
+    await page.close();
+  }
+  assert.deepEqual(system, ['pims', 'dd-drugs-register', 'procura', 'cavelms'], 'the four systems in production have project pages');
+}
+
 async function browserChecks() {
   const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2', '.pdf': 'application/pdf' };
   const server = http.createServer((req, res) => {
@@ -411,6 +487,7 @@ async function browserChecks() {
     await demoChecks(browser, `${base}/`);
     await liftChecks(browser, `${base}/`);
     await requestChecks(browser, `${base}/`);
+    await projectPageChecks(browser, base); // #127
     await pageChecks(browser, base);
     await register129Checks(browser, base); // #129
     await resume129Checks(browser, base); // #129
@@ -422,4 +499,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots/llms.txt; ${manifest.length} manifest hashes; the Case File homepage says every Sheet's words; résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: without JavaScript or with reduced motion the homepage reads complete with no demo controls; the PIMS, DD Drugs Register, Procura and CaveLMS demos and the lift run end to end at 390px; the Request form validates, sends {name, email, message, website} and reports 400, 429, 500 and network failures; every route has one h1, no sideways scroll and no request to another host at 390 and 1440px'));
+browserChecks().then(() => console.log('PASS browser step: without JavaScript or with reduced motion the homepage reads complete with no demo controls; the PIMS, DD Drugs Register, Procura and CaveLMS demos and the lift run end to end at 390px; each of their four /work/ pages reads complete without JavaScript, shows every approved screen, runs its demo and lift, and links the next project, the Request form and the résumé; the Request form validates, sends {name, email, message, website} and reports 400, 429, 500 and network failures; every route has one h1, no sideways scroll and no request to another host at 390 and 1440px'));
