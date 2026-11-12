@@ -335,6 +335,165 @@ async function pageChecks(browser, base) {
   }
 }
 
+// #128: the Theoses, 89lab, MAP and Yen pages. Each is one Sheet on a form of its own; its demo is progressive enhancement.
+const continuation = ['theoses', '89lab', 'map', 'yen'].map(slug => projects.find(p => p.slug === slug));
+const approvedMap = ['map-home-demo.webp', 'map-calendar-demo.webp', 'map-tasks-demo.webp', 'map-tools-demo.webp'];
+
+async function continuationReadingChecks(browser, base) {
+  for (const [what, options] of [['no JavaScript', { javaScriptEnabled: false }], ['reduced motion', { reducedMotion: 'reduce' }]]) {
+    for (const p of continuation) {
+      const route = `/work/${p.slug}/`, next = projects[(projects.indexOf(p) + 1) % projects.length];
+      const page = await browser.newPage({ viewport: phone, ...options });
+      await page.goto(base + route, { waitUntil: 'networkidle' });
+      const main = norm(await page.locator('main').textContent());
+      for (const t of [p.description, p.problem, p.built, p.limits, ...p.workflow, ...p.stack, ...(p.facts || [])]) assert.ok(main.includes(norm(t)), `${route}: ${what}: the page says "${t}"`);
+      assert.equal(await page.locator('main .sheet').count(), 1, `${route}: ${what}: one Sheet`);
+      assert.ok(await visible(page, '[data-form] .foot .stamp'), `${route}: ${what}: the Sheet carries its Stamp`);
+      assert.ok(await visible(page, '[data-form] .sample'), `${route}: ${what}: the sample entries are labelled`);
+      assert.ok(await visible(page, 'main a[href$="#request"]') && await visible(page, 'main a[href$="resume/"]'), `${route}: ${what}: links the Request form and the résumé`);
+      assert.equal(await page.getAttribute(`main a[href$="work/${next.slug}/"]`, 'href'), `../../work/${next.slug}/`, `${route}: ${what}: links the next project`);
+      if (p.slug === 'theoses') assert.match(main, /pi coding agent/, `${route}: ${what}: built on the pi coding agent`);
+      if (p.slug === 'map') {
+        const srcs = await page.$$eval('main img', is => is.map(i => i.getAttribute('src').split('/').pop()));
+        assert.deepEqual(srcs, approvedMap, `${route}: ${what}: only the four approved screens`);
+        assert.deepEqual(await page.$$eval('main img', (is, all) => is.map(i => i.naturalWidth > 0 && (!all || i.getBoundingClientRect().width > 100)), options.javaScriptEnabled === false), [true, true, true, true], `${route}: ${what}: all four screens arrive${options.javaScriptEnabled === false ? ' and show' : ''}`);
+      }
+      if (options.javaScriptEnabled === false) assert.equal(await page.locator('main button, main input, main select, main textarea').count(), 0, `${route}: ${what}: no demo controls`);
+      else {
+        assert.ok(await page.locator('main button').count() > 0, `${route}: ${what}: the demo is switched on`);
+        assert.equal(await page.evaluate(() => document.getAnimations().length), 0, `${route}: ${what}: nothing animates`);
+      }
+      await page.close();
+    }
+  }
+}
+
+// Each demo end to end (reduced motion makes the typed entries instant), at one width.
+async function continuationDemoChecks(browser, base, width) {
+  const page = await browser.newPage({ viewport: { width, height: width > 500 ? 900 : 844 }, reducedMotion: 'reduce' });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const stamp = '[data-form] .foot .stamp';
+  const button = name => page.locator('[data-form]').getByRole('button', { name });
+  const open = async slug => { await page.goto(`${base}/work/${slug}/`, { waitUntil: 'networkidle' }); };
+  const fits = async what => assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${what}: no sideways scroll at ${width}px`);
+  const live = () => text(page, '[data-form] [aria-live]');
+
+  // Theoses: a work ticket whose steps tick off, then stops for review.
+  await open('theoses');
+  await until(page, stamp, 'Open');
+  const ticked = () => page.$$eval('[data-steps] li', ls => ls.map(l => l.classList.contains('done')));
+  const signed = () => page.$$eval('[data-form] .sign .ln', ls => ls.map(l => l.textContent));
+  assert.deepEqual(await ticked(), [false, false, false], 'Theoses: no step is ticked at the start');
+  assert.ok(!(await visible(page, '[data-draft]')), 'Theoses: no draft before the task has run');
+  await button('Run task').click();
+  await until(page, stamp, 'For review');
+  assert.deepEqual(await ticked(), [true, true, true], 'Theoses: every step ticked');
+  assert.match(await text(page, '[data-draft]'), /Gauze swabs dropped below the reorder point/, 'Theoses: the draft is shown for review');
+  assert.match(await live(), /stopped for your review/, 'Theoses: the stop is announced');
+  assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'Approve', 'Theoses: focus moves to Approve');
+  assert.deepEqual(await signed(), ['A.R.', ''], 'Theoses: nobody has reviewed it yet');
+  await button('Ask for changes').click();
+  await until(page, stamp, 'Revised');
+  assert.match(await text(page, '[data-draft]'), /Revised draft for review[\s\S]*Revised: gauze swabs/, 'Theoses: Ask for changes revises the draft');
+  await button('Approve').focus();
+  await page.keyboard.press('Enter');
+  await until(page, stamp, 'Approved');
+  assert.deepEqual(await signed(), ['A.R.', 'M.T.'], 'Theoses: the reviewer signs');
+  assert.ok(!(await visible(page, '[data-form] button.btn')), 'Theoses: no review buttons after approval');
+  assert.match(await live(), /^Approved\./, 'Theoses: the approval is announced');
+  await fits('Theoses');
+  await button('Start again').click();
+  await until(page, stamp, 'Open');
+  assert.deepEqual(await ticked(), [false, false, false], 'Theoses: Start again unticks the steps');
+  assert.deepEqual(await signed(), ['A.R.', ''], 'Theoses: Start again clears the signature');
+  assert.ok(!(await visible(page, '[data-draft]')), 'Theoses: Start again clears the draft');
+
+  // 89lab: a run sheet; repeats are skipped; the upload limit hands off to Telegram.
+  await open('89lab');
+  await until(page, stamp, 'Ready');
+  const runs = () => page.$$eval('[data-form] tbody tr:not(.empty)', trs => trs.map(tr => [...tr.cells].map(c => c.textContent)));
+  const stages = () => page.$$eval('[data-stages] li', ls => ls.map(l => l.classList.contains('done') ? 'done' : l.classList.contains('fail') ? 'fail' : ''));
+  assert.deepEqual(await runs(), [], '89lab: the sheet starts with no runs');
+  assert.ok(await visible(page, '[data-form] tr.empty'), '89lab: an empty sheet says so');
+  await button('Run the sheet').click();
+  await until(page, stamp, 'Published');
+  assert.deepEqual(await runs(), [['1', 'AI news', 'A lab releases a smaller open model', 'Published to 89lab on Facebook.']], '89lab: one run logged');
+  assert.deepEqual(await stages(), Array(8).fill('done'), '89lab: every stage ticked');
+  await button('Run again').click();
+  await until(page, stamp, 'Published');
+  assert.deepEqual((await runs()).slice(1), [['', 'AI news', '“A lab releases a smaller open model”', 'Skipped: already posted, so the next topic was picked.'], ['2', 'AI news', 'An editor adds agent mode', 'Published to 89lab on Facebook.']], '89lab: a repeat is skipped');
+  await page.check('input[name=lane][value=repo]');
+  await page.check('input[name=limit]');
+  await button('Run again').click();
+  await until(page, stamp, 'Handed off');
+  assert.deepEqual((await runs()).at(-1), ['3', 'GitHub repo', 'A terminal coding agent', 'Upload refused: daily limit reached. The finished video went to Telegram for manual posting.'], '89lab: the limit hands off to Telegram');
+  assert.deepEqual(await stages(), ['done', 'done', 'done', 'done', 'done', 'done', 'fail', 'done'], '89lab: the Publish stage is the one refused');
+  assert.match(await live(), /Telegram/, '89lab: the hand-off is announced');
+  await page.uncheck('input[name=limit]');
+  await button('Run again').click();
+  await until(page, stamp, 'Published');
+  assert.deepEqual((await runs()).at(-1), ['4', 'GitHub repo', 'A terminal coding agent', 'Published to YouTube Shorts and Threads.'], '89lab: a handed-off topic is not counted as posted');
+  await fits('89lab');
+  await button('Start again').click();
+  await until(page, stamp, 'Ready');
+  assert.deepEqual(await runs(), [], '89lab: Start again clears the sheet');
+  assert.deepEqual(await stages(), Array(8).fill(''), '89lab: Start again clears the stages');
+  assert.equal(await text(page, '[data-form] button.btn span'), 'Run the sheet');
+
+  // MAP: the four approved screens, as tabs once the script runs.
+  await open('map');
+  const tabs = page.getByRole('tab');
+  assert.deepEqual(await tabs.allTextContents(), ['Home', 'Calendar', 'Tasks', 'Tools'], 'MAP: a tab for each approved screen');
+  const shown = () => page.$$eval('[data-form] figure', fs => fs.filter(f => f.getBoundingClientRect().width > 0).map(f => f.querySelector('img').getAttribute('src').split('/').pop()));
+  assert.deepEqual(await shown(), ['map-home-demo.webp'], 'MAP: the first screen shows');
+  await tabs.nth(1).click();
+  assert.deepEqual(await shown(), ['map-calendar-demo.webp'], 'MAP: a tab shows its screen');
+  assert.equal(await tabs.nth(1).getAttribute('aria-selected'), 'true');
+  await page.keyboard.press('ArrowRight');
+  assert.deepEqual(await shown(), ['map-tasks-demo.webp'], 'MAP: arrow keys move between tabs');
+  assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Tasks');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  assert.deepEqual(await shown(), ['map-home-demo.webp'], 'MAP: the tabs wrap round');
+  await fits('MAP');
+
+  // Yen: a message slip that keeps one thread across three channels.
+  await open('yen');
+  await until(page, stamp, 'Message taken');
+  const thread = () => page.$$eval('[data-form] .thread li', ls => ls.map(l => [...l.children].map(c => c.textContent)));
+  assert.deepEqual(await thread(), [['Terminal', 'Remind me to check the gauze order on Friday.'], ['Yen', 'Noted for Friday.']], 'Yen: the slip starts with one exchange');
+  assert.equal(await page.inputValue('#yen-say'), 'Did the gauze order go out?');
+  await page.check('input[name=channel][value=Telegram]');
+  await button('Send').click();
+  await until(page, stamp, 'Same thread');
+  assert.deepEqual((await thread()).slice(2), [['Telegram', 'Did the gauze order go out?'], ['Yen', 'Not yet. It is still a draft waiting for your approval.']], 'Yen: the reply keeps the same thread');
+  await page.check('input[name=channel][value=Browser]');
+  await page.press('#yen-say', 'Enter');
+  await page.waitForFunction(() => document.querySelectorAll('[data-form] .thread li').length === 6);
+  assert.deepEqual((await thread()).slice(4), [['Browser', 'Remind me again from here.'], ['Yen', 'Done. I will remind you here on Friday.']], 'Yen: keep talking on the third channel');
+  assert.match(await live(), /^Sent from Browser\./, 'Yen: the reply is announced');
+  await page.fill('#yen-say', '  ');
+  await button('Send').click();
+  assert.ok(await visible(page, '#err-say'), 'Yen: an empty message is flagged');
+  assert.equal(await page.getAttribute('#yen-say', 'aria-invalid'), 'true');
+  assert.equal((await thread()).length, 6, 'Yen: an empty message adds nothing');
+  await fits('Yen');
+  await button('Start again').click();
+  await until(page, stamp, 'Message taken');
+  assert.equal((await thread()).length, 2, 'Yen: Start again clears the thread');
+  assert.equal(await page.isChecked('input[name=channel][value=Terminal]'), true);
+
+  assert.deepEqual(errors, [], 'the continuation demos raised no script errors');
+  await page.close();
+}
+
+async function continuationChecks(browser, base) {
+  await continuationReadingChecks(browser, base);
+  for (const width of [390, 1440]) await continuationDemoChecks(browser, base, width);
+  console.log('PASS #128 continuation pages: Theoses, 89lab, MAP and Yen read complete without JavaScript or with reduced motion; each demo runs end to end at 390 and 1440px with no sideways scroll; MAP shows only its four approved screens');
+}
+
 async function browserChecks() {
   const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2', '.pdf': 'application/pdf' };
   const server = http.createServer((req, res) => {
@@ -350,6 +509,7 @@ async function browserChecks() {
     await demoChecks(browser, `${base}/`);
     await liftChecks(browser, `${base}/`);
     await requestChecks(browser, `${base}/`);
+    await continuationChecks(browser, base); // #128
     await pageChecks(browser, base);
   } finally {
     await browser.close();

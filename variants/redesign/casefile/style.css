@@ -298,3 +298,44 @@ fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
 }
 @keyframes settle{from{translate:-8px -12px;rotate:1deg}}
 @keyframes thunk{from{scale:1.15;opacity:.6}}
+
+/* #128 continuation pages: Theoses, 89lab, MAP and Yen (more.cjs, more.js) */
+.cell .sample,.cell .hint{margin-top:.5rem}
+.foot .links{align-items:center}
+.checks,.ticks{list-style:none;margin:0;padding:0}
+.checks .box,.ticks .box{flex:none;display:grid;place-content:center;width:1.1rem;height:1.1rem;border:1.5px solid var(--navy);font:700 1rem/1 "Courier Prime",ui-monospace,monospace;color:var(--type)}
+/* Work ticket: the steps as typed lines with a tick box. */
+.checks li{display:flex;align-items:center;gap:.7rem;border-top:1px solid var(--navy);padding:.4rem .3rem;font:400 1rem/1.5 "Courier Prime",ui-monospace,monospace;color:var(--type)}
+.checks li:first-child{border-top:0}
+.checks [aria-current]{background:rgb(27 42 107/.09)}
+/* Run sheet: the stages of a run, then its ledger. */
+.stages{margin-bottom:0}
+.register td.none{border-left:0}
+.register .skipped td{font-style:italic}
+/* Message slip: printed options, a typed X in the one taken; the thread is ruled lines. */
+.ticks{display:flex;flex-wrap:wrap;gap:.5rem 1.6rem}
+.ticks li{display:flex;align-items:center;gap:.5rem;font-weight:500}
+.ticks-lab{margin-top:1rem}
+.thread li{display:grid;grid-template-columns:6.5rem 1fr;gap:.6rem;align-items:baseline;padding-inline:.4rem}
+.thread .who{font-weight:700}
+.thread .is-agent{background:rgb(27 42 107/.07)}
+/* MAP: the approved screens, each pasted into a ruled box on the form. */
+.screens{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.screen{margin:0;border:var(--rule);padding:.6rem .6rem .7rem}
+.screen img{display:block;width:100%;height:auto;border:1px solid rgb(27 42 107/.4);rotate:-.8deg}
+.screen:nth-child(even) img{rotate:.7deg}
+.screen figcaption{margin-top:.6rem;font-size:.82rem}
+.screens.tabbed{grid-template-columns:1fr;justify-items:center}
+.screens.tabbed .screen{width:min(100%,340px)}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem}
+.tab{border:var(--rule);border-radius:0;background:transparent;color:var(--navy);padding:.55rem .9rem;font:700 .8rem/1.2 "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.tab:hover,.tab[aria-selected=true]{background:var(--navy);color:var(--ground)}
+.pick legend{float:left;width:100%;padding:0;margin:0 0 .3rem}
+.pick legend+*{clear:both}
+@media (min-width:761px){.case.nofacts .body{grid-template-areas:"problem built" "how how" "limits stack"}}
+@media (max-width:760px){
+  .screens{grid-template-columns:1fr 1fr;gap:.7rem}
+  .thread li{grid-template-columns:5rem 1fr}
+  .register td.none{display:block;padding:.18rem 0}
+  .register td.none::before{content:none}
+}
