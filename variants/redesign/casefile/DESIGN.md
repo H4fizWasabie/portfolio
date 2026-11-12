@@ -67,7 +67,7 @@ typography:
     letterSpacing: ".06em"
   stamp:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "clamp(1.15rem, .9rem + 1vw, 1.7rem)"
+    fontSize: "clamp(1.2rem, .9rem + 1vw, 1.7rem)"
     fontWeight: 900
     lineHeight: 1.1
     letterSpacing: ".06em"
@@ -191,7 +191,7 @@ Office stationery under desk light: five pastel copy grounds, three inks, and on
 
 Sheets stack in a single column centred on the desk at up to 1100px wide (880px for the continuation, particulars and request sheets), with a 10px desk gutter on phones and 20px from 600px. Sheets are separated by a fluid gap (34 to 60px) and padded fluidly (14 to 36px). The first sheet is narrower (80% of the column) so its two offset copies show at the right and bottom edges; the offsets shrink from 9/18px to 8/14px under 1100px and 3/6px under 600px.
 
-Inside a sheet the grid is the form's own: a title band (title and subtitle left, serial right) closed by a 4px double navy rule, then rows of boxed cells in one or two columns that share borders, then registers, then a foot row with the action button and the stamp. Case sheets place their fields by named areas (problem, built, how, limits, stack, facts, diagram) and collapse to one column at 760px. Registers become stacked label/value rows under 760px, with the column head printed as a small label beside each value.
+Inside a sheet the grid is the form's own: a title band (title and subtitle left, serial right) closed by a 4px double navy rule, then rows of boxed cells in one or two columns that share borders, then registers, then a foot row with the action button and the stamp. Case sheets place their fields by named areas (problem, built, how, limits, stack, facts, diagram) and collapse to one column at 760px. A homepage Sheet is the short version: the title band, the fields, the form with its Sample demo, one line of what was built beside the facts on record (CaveText is one line under CaveLMS), and the foot. The problem, the full account, how it works, the limits, the stack, the screens and the implementation notes are only on the system's `/work/<slug>/` page, where the cell labels are h2 under the page's h1 (h3 under a homepage Sheet's h2, so no heading level is skipped). Registers become stacked label/value rows under 760px, with the column head printed as a small label beside each value.
 
 The wordmark and navigation sit on the desk above the first sheet, not on a sheet; the footer sits on the desk below the last.
 
@@ -229,6 +229,7 @@ Buttons are fields too: a ruled box with a printed label.
 
 ### Inputs / Fields
 - **Style:** the whole cell is the field. Input and textarea are borderless and transparent inside the cell, typed black Courier 1rem, navy caret; the textarea starts at 7.5rem and resizes vertically.
+- **Fill-in entries in the demos** (the DD count, the CaveLMS exam name) read as something to write in: a faint white fill, a dotted 2px navy writing line under the typed value, and a navy 1.5px box on hover and focus; once the entry is locked, the box and line go.
 - **Focus:** violet 3px outline around the whole cell, 2px offset.
 - **Error:** the cell takes a 2px red inset outline, its label turns red, and a red 600-weight message appears under the input. Focus still wins over error with the violet ring.
 
@@ -239,13 +240,13 @@ Buttons are fields too: a ruled box with a printed label.
 A line-item table printed on the form: uppercase label heads, typed Courier rows, a navy item number, and the system name as a condensed underlined link whose hit area covers the whole row. Rows tint navy at 7% on hover; a flagged row in a sample slip keeps that tint and rings its value with a 1.5px navy outline and a small uppercase note.
 
 ### Stamp
-The violet rubber stamp: a condensed 900 uppercase word in a 3px border with a 1px inner border, at 92% opacity, rotated per instance and masked with fractal noise so the ink lands unevenly. One per sheet, placed in the foot row or over the register; decorative and hidden from assistive tech. The request form's "Received" stamp appears only when the request is sent.
+The violet rubber stamp: a condensed 900 uppercase word, never under 1.2rem so it stays large text (3:1 is enough, and the violet holds 4:1 or better on every copy), in a 3px border with a 1px inner border, at 92% opacity, rotated per instance and masked with fractal noise so the ink lands unevenly. One per sheet, placed in the foot row or over the register; decorative and hidden from assistive tech. The request form's "Received" stamp appears only when the request is sent.
 
 ### Signature Lines and Office Box
 Printed captions with a 1px navy line to sign on, initials typed in Courier; and a dashed "For office use" box that receives the stamp.
 
 ### Sample demos (forms.js and more.js)
-With JavaScript each case sheet becomes a small working demo on fictional data; without it the sheet shows its filled-in sample. Controls are field vocabulary: boxed `.btn` buttons, the request form's boxed inputs, square tick-boxes for choices, a text "Start again" link. Entries are typed on in Courier Prime (about 25ms a character); each completed step changes the sheet's stamp word and thunks it; every change is announced in a visually hidden `aria-live` region. PIMS and Procura keep their "Was" diagram on a pink carbon copy under the top form: "Lift the top sheet" hinges the form at its top edge and tilts it back about 64 degrees under a 1200px perspective, so it stays a foreshortened trapezoid of paper that casts a soft shadow on the copy (inert while lifted). The stage closes up around the copy, which lays the diagram out horizontally on desktop and as a vertical stack on phones, below the sheet's footprint. On Procura the Reorder check sits above the purchase order, as it drafts the order lines; only the purchase order form lifts. All of it is instant under `prefers-reduced-motion`.
+With JavaScript each case sheet becomes a small working demo on fictional data; without it the sheet shows its filled-in sample. Controls are field vocabulary: boxed `.btn` buttons, the request form's boxed inputs, square tick-boxes for choices, a text "Start again" link. Entries are typed on in Courier Prime (about 25ms a character); each completed step changes the sheet's stamp word and thunks it; every change is announced in a visually hidden `aria-live` region. Each demo says how to play in a one-line printed `.hint` (Procura, PIMS, DD), shown only when the script runs. PIMS and Procura keep their "Was" diagram on a pink carbon copy under the top form: "See the paper process underneath" ("Put it back" once lifted) hinges the form at its top edge and tilts it back about 64 degrees under a 1200px perspective, so it stays a foreshortened trapezoid of paper that casts a soft shadow on the copy (inert while lifted). The stage closes up around the copy, which lays the diagram out horizontally on desktop and as a vertical stack on phones, below the sheet's footprint. On Procura the Reorder check sits above the purchase order, as it drafts the order lines; only the purchase order form lifts. All of it is instant under `prefers-reduced-motion`.
 
 ## Do's and Don'ts
 

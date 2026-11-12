@@ -42,17 +42,21 @@ const table = (esc, { caption, cls = 'register slip', head, rows }) => `<table c
 const lines = (esc, items, cls) => `<ul class="${cls}">${items.map(s => `<li>${esc(s)}</li>`).join('')}</ul>`;
 
 // The sections of a Sheet's body, from the project's facts. Areas are laid out by style.css on the homepage.
+// h is the level of a cell label: h3 under a homepage Sheet's h2, h2 under a project page's h1.
 const part = {
-  problem: (p, esc) => p.problem && `<div class="cell a-problem"><h3 class="lab">The problem</h3><p>${esc(p.problem)}</p></div>`,
-  built: (p, esc, head = 'What I built') => `<div class="cell a-built"><h3 class="lab">${head}</h3><p>${esc(p.built)}</p></div>`,
-  how: (p, esc) => `<div class="cell a-how"><h3 class="lab">How it works</h3><ol class="items">${p.workflow.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`,
-  limits: (p, esc) => `<div class="cell a-limits"><h3 class="lab">What it doesn’t do</h3><p>${esc(p.limits)}</p></div>`,
-  stack: (p, esc) => `<div class="cell a-stack"><h3 class="lab">Built with</h3>${lines(esc, p.stack, 'chips')}</div>`,
-  facts: (p, esc) => p.facts && `<div class="cell a-facts"><h3 class="lab">On record</h3>${lines(esc, p.facts, 'lines')}</div>`
+  problem: (p, esc, _, h) => p.problem && `<div class="cell a-problem"><${h} class="lab">The problem</${h}><p>${esc(p.problem)}</p></div>`,
+  built: (p, esc, head = 'What I built', h) => `<div class="cell a-built"><${h} class="lab">${head}</${h}><p>${esc(p.built)}</p></div>`,
+  how: (p, esc, _, h) => `<div class="cell a-how"><${h} class="lab">How it works</${h}><ol class="items">${p.workflow.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`,
+  limits: (p, esc, _, h) => `<div class="cell a-limits"><${h} class="lab">What it doesn’t do</${h}><p>${esc(p.limits)}</p></div>`,
+  stack: (p, esc, _, h) => `<div class="cell a-stack"><${h} class="lab">Built with</${h}>${lines(esc, p.stack, 'chips')}</div>`,
+  facts: (p, esc, _, h) => p.facts && `<div class="cell a-facts"><${h} class="lab">On record</${h}>${lines(esc, p.facts, 'lines')}</div>`
 };
-const body = (p, esc, order, cls, heads = {}) => `<div class="cells two body${cls ? ' ' + cls : ''}">
-  ${order.map(k => part[k](p, esc, heads[k])).filter(Boolean).join('\n  ')}
+const body = (p, esc, order, cls, heads = {}, h = 'h3') => `<div class="cells two body${cls ? ' ' + cls : ''}">
+  ${order.map(k => part[k](p, esc, heads[k], h)).filter(Boolean).join('\n  ')}
  </div>`;
+// The homepage Sheet is the short version: one line of what was built and the facts on record. The rest is on the project page.
+const shortBody = (p, esc) => body({ ...p, built: p.summary }, esc, ['built', 'facts'], 'short');
+const firstSentence = s => s.match(/^.*?\.(?=\s|$)/)[0];
 
 const shot = (root, p, esc, [name, file, caption]) => `<figure class="shot">${B.img(root, file, `${p.title}: ${name}. ${caption}`, 'loading="lazy" decoding="async"')}<figcaption><b>${esc(name)}.</b> ${esc(p.disclosure)}</figcaption></figure>`;
 const shots = (root, p, esc, n) => `<div class="shots${n > 1 ? ' two' : ''}">${p.scenes.slice(0, n).map(s => shot(root, p, esc, s)).join('')}</div>`;
@@ -60,9 +64,9 @@ const now = inner => `<div class="cells">\n  <div class="cell"><p class="wn">Now
 
 // What each system's Sheet holds besides the shared body: the printed form with its sample entries.
 const sheets = {
-  pims: (p, { esc, root, full }) => `<div class="cells slipside">
+  pims: (p, { esc, root, full, h }) => `<div class="cells slipside">
   <div class="cell">
-   <h3 class="lab">Stock requisition slip</h3>
+   <${h} class="lab">Stock requisition slip</${h}>
    ${table(esc, {
      caption: 'Stock requisition slip, sample lines', head: ['Item', 'Description', 'Qty', 'Unit', 'Dept'],
      rows: [['Surgical gloves, M', 10, 'box', 'Theatre'], ['Syringe 3 ml', 5, 'box', 'Ward'], ['Gauze swab 10×10', 12, 'pack', 'Ward'], ['Bandage, 5 cm', 8, 'roll', 'Theatre']]
@@ -73,12 +77,12 @@ const sheets = {
   </div>
   <div class="cell"><p class="wn">Was</p>${D.pimsWas}<p class="cap2"><b>Diagram:</b> the paper process this replaced.</p></div>
  </div>
- ${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'])}
- ${now(shots(root, p, esc, full ? p.scenes.length : 2))}`,
+ ${full ? `${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], '', {}, h)}
+ ${now(shots(root, p, esc, p.scenes.length))}` : shortBody(p, esc)}`,
 
-  'dd-drugs-register': (p, { esc }) => `<div class="cells">
+  'dd-drugs-register': (p, { esc, full, h }) => `<div class="cells">
   <div class="cell">
-   <h3 class="lab">Daily count ledger</h3>
+   <${h} class="lab">Daily count ledger</${h}>
    ${table(esc, {
      caption: 'Daily count ledger, sample entries', head: ['Date', 'Item', 'Physical count', 'System count', 'Difference', 'Initials'],
      rows: [['03 Oct', 'Item A', 40, 40, 0, 'A.R.'], ['03 Oct', 'Item B', 12, 12, 0, 'A.R.'], ['04 Oct', 'Item A', 38, 38, 0, 'M.T.'], ['04 Oct', 'Item B', 11, 12, '−1', 'M.T.']]
@@ -88,15 +92,15 @@ const sheets = {
    ${sampleNote}
   </div>
  </div>
- ${body(p, esc, ['problem', 'built', 'limits', 'how', 'diag', 'stack', 'facts'], 'dd')}`,
+ ${full ? body(p, esc, ['problem', 'built', 'limits', 'how', 'diag', 'stack', 'facts'], 'dd', {}, h) : shortBody(p, esc)}`,
 
-  procura: (p, { esc, root, full }) => `<div class="cells two po">
-  <div class="cell"><h3 class="lab">Vendor</h3><p class="val">Sample Medical Supplies Sdn Bhd (fictional)</p></div>
-  <div class="cell"><h3 class="lab">Ship to</h3><p class="val">Veterinary hospital store</p></div>
+  procura: (p, { esc, root, full, h }) => `<div class="cells two po">
+  <div class="cell"><${h} class="lab">Vendor</${h}><p class="val">Sample Medical Supplies Sdn Bhd (fictional)</p></div>
+  <div class="cell"><${h} class="lab">Ship to</${h}><p class="val">Veterinary hospital store</p></div>
  </div>
  <div class="cells">
   <div class="cell">
-   <h3 class="lab">Order lines</h3>
+   <${h} class="lab">Order lines</${h}>
    ${table(esc, {
      caption: 'Purchase order lines, sample', head: ['Line', 'Description', 'Qty', 'Unit'],
      rows: [['Gauze swab 10×10', 15, 'pack'], ['Syringe 3 ml', 10, 'box'], ['Bandage, 5 cm', 24, 'roll']]
@@ -105,15 +109,15 @@ const sheets = {
    ${sampleNote}
   </div>
  </div>
- ${body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], 'pair')}
- <div class="cells wasnow">
-  <div class="cell wasnow-was"><p class="wn">Was</p>${D.procuraWas}<p class="cap2"><b>Diagram:</b> the setup this replaced.</p></div>
-  <div class="cell wasnow-now"><p class="wn">Now</p>${shots(root, p, esc, full ? p.scenes.length : 1)}</div>
+ ${full ? body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'], 'pair', {}, h) : shortBody(p, esc)}
+ <div class="cells wasnow${full ? '' : ' solo'}">
+  <div class="cell wasnow-was"><p class="wn">Was</p>${D.procuraWas}<p class="cap2"><b>Diagram:</b> the setup this replaced.</p></div>${full ? `
+  <div class="cell wasnow-now"><p class="wn">Now</p>${shots(root, p, esc, p.scenes.length)}</div>` : ''}
  </div>`,
 
-  cavelms: (p, { esc }) => `<div class="cells">
+  cavelms: (p, { esc, full, h }) => `<div class="cells">
   <div class="cell">
-   <h3 class="lab">PDF certificate, as issued</h3>
+   <${h} class="lab">PDF certificate, as issued</${h}>
    <div class="cert">
     <p class="pre">Certificate of completion</p>
     <p class="pre">Awarded to</p>
@@ -124,15 +128,17 @@ const sheets = {
    </div>
   </div>
  </div>
- ${body(p, esc, ['built', 'how', 'limits', 'stack'], 'pair')}
- ${body(p.cavetext, esc, ['built', 'how', 'limits', 'stack'], 'pair', { built: 'Attached: CaveText' })}`
+ ${full ? `${body(p, esc, ['built', 'how', 'limits', 'stack'], 'pair', {}, h)}
+ ${body(p.cavetext, esc, ['built', 'how', 'limits', 'stack'], 'pair', { built: 'Attached: CaveText' }, h)}`
+   : `${shortBody(p, esc)}
+ ${body({ built: firstSentence(p.cavetext.built) }, esc, ['built'], 'short', { built: 'Attached: CaveText' })}`}`
 };
 
 // The dd body places the diagram between the facts it sits beside (style.css, .body.dd).
 part.diag = (p, esc) => `<div class="cell a-diag"><p class="wn">Now</p><figure class="shot">${D.ddNow}<figcaption><b>Diagram:</b> workflow outline, not the hospital interface.</figcaption></figure></div>`;
 
 const sheet = (p, n, count, ctx) => {
-  const f = forms[p.slug], { esc, root, full } = ctx;
+  const f = forms[p.slug], { esc, root, full } = ctx, h = full ? 'h2' : 'h3';
   const cls = ['sheet', f.color, 'perf', 'case', full && 'project', !p.problem && 'noproblem', !p.facts && 'nofacts'].filter(Boolean).join(' ');
   // Every system Sheet ends at the Request form, the moment a visitor is most convinced.
   const ask = btn(`${root}#request`, 'Request one like this');
@@ -142,7 +148,7 @@ const sheet = (p, n, count, ctx) => {
   return `<section class="${cls}" id="${p.slug}" aria-labelledby="${p.slug}-h">
  ${sheetHead(esc, { tag: full ? 'h1' : 'h2', id: `${p.slug}-h`, title: `${f.title} · ${p.title}`, sub: p.category, serial: serial(n, `item ${n} of ${count}`) })}
  ${fieldCells(esc, [['Department', f.dept], ['Status', f.status]])}
- ${sheets[p.slug](p, ctx)}${full ? underHood(p, esc) : ''}
+ ${sheets[p.slug](p, { ...ctx, h })}${full ? underHood(p, esc) : ''}
  <div class="foot">${foot}${stampOf(f.stamp)}</div>
 </section>`;
 };
@@ -262,7 +268,7 @@ ${request(site, esc)}` });
 // screens, the implementation notes, the external links, and a way on to the next project, the Request form and the résumé.
 const extLinks = (p, esc) => [p.url && btn(p.url, `Visit ${esc(p.title)}`, ' rel="noopener"'), p.cavetext && btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"'),
   p.source && btn(p.source, 'Source on GitHub', ' rel="noopener"'), p.releases && btn(p.releases, 'APK releases on GitHub', ' rel="noopener"')].filter(Boolean);
-const underHood = (p, esc) => p.implementation ? `\n <div class="cells hood"><div class="cell"><h3 class="lab">Under the hood</h3><p>${esc(p.implementation)}</p></div></div>` : '';
+const underHood = (p, esc) => p.implementation ? `\n <div class="cells hood"><div class="cell"><h2 class="lab">Under the hood</h2><p>${esc(p.implementation)}</p></div></div>` : '';
 
 function systemPage({ p, next, projects, site, esc, root }) {
   const made = projects.filter(q => forms[q.slug]);
