@@ -36,5 +36,5 @@ A message a visitor sends to Hafiz from the Request form.
 _Avoid_: contact message, lead, submission
 
 **Request form**:
-The last Sheet, shown to visitors as "Request work", which a visitor fills in to send an Enquiry.
+The last Sheet, titled "Request for work" and reached by the "Request work" links, which a visitor fills in to send an Enquiry.
 _Avoid_: enquiry form, contact form, brief

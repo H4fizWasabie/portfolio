@@ -104,7 +104,7 @@ async function procuraDemo(page) {
         for (const [id, name] of [['pims', 'Approve request'], ['dd-drugs-register', 'Submit count'], ['procura', 'Draft purchase order'], ['cavelms', 'Submit exam']]) {
           assert.ok(await button(page, id, name).isVisible(), `${id}: the Sample demo has its control`);
         }
-        assert.equal(await page.locator('.lift-btn').count(), 2, 'PIMS and Procura offer to lift the top copy');
+        assert.equal(await page.locator('.lift-btn').count(), 2, 'PIMS and Procura offer to lift the top sheet');
         await procuraDemo(page);
         await page.locator('#procura a[href$="work/procura/"]').first().click();
         await page.waitForURL(base + '/work/procura/');

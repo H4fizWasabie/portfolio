@@ -72,7 +72,14 @@ img,svg{max-width:100%}
 .serial{margin:0;display:flex;flex-direction:column;align-items:flex-end;flex:none;text-align:right}
 .serial .no{color:var(--red);font-weight:800;font-size:clamp(1.2rem,1rem + .9vw,1.75rem);line-height:1;letter-spacing:.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .serial .cap{font-size:.74rem;font-weight:600;margin-top:.3rem}
-.statement{margin:clamp(.8rem,1.6vw,1.3rem) 0 clamp(.8rem,1.6vw,1.3rem);font-weight:900;font-stretch:70%;text-transform:uppercase;font-size:clamp(1.75rem,.9rem + 3.1vw,4.1rem);line-height:1;letter-spacing:.005em;word-spacing:.14em;text-wrap:balance}
+.statement{margin:clamp(.8rem,1.6vw,1.3rem) 0 clamp(.5rem,1vw,.8rem);font-weight:900;font-stretch:70%;text-transform:uppercase;font-size:clamp(1.75rem,.9rem + 3.1vw,4.1rem);line-height:1;letter-spacing:.005em;word-spacing:.14em;text-wrap:balance}
+
+.hiring{margin:0 0 clamp(.5rem,1.2vw,1rem);font-size:.88rem;font-weight:600}
+/* The first screen holds the whole Register and the Request work button at 1440x900. */
+.first .cells{margin-top:.8rem}
+.first .register-wrap{margin-top:.9rem}
+.first .foot{margin-top:1rem}
+@media (min-width:761px){.first .register td{padding-block:.4rem}}
 
 /* Boxed fields: cells share their rules like a printed form */
 .cells{display:grid;grid-template-columns:1fr;border-top:var(--rule);border-left:var(--rule);margin-top:1rem}
@@ -227,7 +234,7 @@ form.sent .cells,form.sent .send{display:none}
 .stepbtn{width:2.3rem;height:2.3rem;border:var(--rule);border-radius:0;background:transparent;color:var(--navy);font:700 1.15rem/1 "Archivo",sans-serif;cursor:pointer}
 .stepbtn:hover{background:var(--navy);color:var(--ground)}
 .num{min-width:2.8ch;text-align:center;font-variant-numeric:tabular-nums}
-.low{color:var(--red);font:700 .72rem/1.2 "Archivo",sans-serif;letter-spacing:.07em;text-transform:uppercase}
+.low{color:var(--navy);font:700 .72rem/1.2 "Archivo",sans-serif;letter-spacing:.07em;text-transform:uppercase}
 /* Sample exam */
 fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
 .q legend{float:left;width:100%;padding:0;margin:0 0 .3rem;font-size:.95rem;font-weight:600;letter-spacing:0;text-transform:none;line-height:1.35}
@@ -238,7 +245,7 @@ fieldset.cell{margin:0;border-top:0;border-left:0;min-inline-size:0}
 .q.wrong{outline:2px solid var(--red);outline-offset:-2px}
 .q.wrong legend{color:var(--red)}
 .q.wrong .err{display:block}
-/* Lift the top copy: the white top form over a pink carbon copy holding the "Was" diagram. */
+/* Lift the top sheet: the white top form over a pink carbon copy holding the "Was" diagram. */
 .lift{margin-top:1rem}
 .lift-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem 1rem;margin-bottom:.6rem}
 .lift-bar .lab{margin:0}

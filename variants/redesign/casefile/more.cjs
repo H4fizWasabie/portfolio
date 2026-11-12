@@ -1,15 +1,15 @@
 // The Case File pages for Theoses, 89lab, MAP and Yen (#128): one Sheet each, on a form of its own, carrying that
 // project's demo restyled in the form vocabulary. Each Sheet prints its finished sample, so the page reads
-// completely without JavaScript; more.js turns the sample into the working demo. Project facts come from projects.cjs.
+// completely without JavaScript; more.js turns the sample into the working demo. Project facts, including each project's status, come from projects.cjs.
 // page.cjs hands in its shared pieces (kit) so there is one copy of the Sheet markup.
 const B = require('../blocks.cjs');
 
 // What each form is called and says about its project. The stamp is [word, rotation, mask x, mask y].
 const forms = {
-  theoses: { color: 'blue', title: 'Work ticket', dept: 'Self-hosted · assistant and coding agent', status: 'In daily use for scheduled work', stamp: ['For review', -6, 20, 40] },
-  '89lab': { color: 'canary', title: 'Daily run sheet', dept: 'Content pipelines · AI news, lessons and videos', status: 'Publishing every day', stamp: ['Published', 4, 70, 20] },
-  map: { color: 'green', title: 'Screen capture sheet', dept: 'Android · personal utility', status: 'In daily use on my own phone', stamp: ['In daily use', -4, 0, 80] },
-  yen: { color: 'pink', title: 'While you were out', dept: 'Go · AI agent', status: 'Architecture demo, not a running agent', stamp: ['Same thread', 5, 100, 50] }
+  theoses: { color: 'blue', title: 'Work ticket', dept: 'Self-hosted · assistant and coding agent', stamp: ['For review', -6, 20, 40] },
+  '89lab': { color: 'canary', title: 'Daily run sheet', dept: 'Content pipelines · AI news, lessons and videos', stamp: ['Published', 4, 70, 20] },
+  map: { color: 'green', title: 'Screen capture sheet', dept: 'Android · personal utility', stamp: ['In daily use', -4, 0, 80] },
+  yen: { color: 'pink', title: 'While you were out', dept: 'Go · AI agent', stamp: ['Same thread', 5, 100, 50] }
 };
 
 const stageNames = ['Pick topic', 'Check sources', 'Write script', 'Voiceover', 'Captions', 'Render', 'Publish', 'Record'];
@@ -83,7 +83,7 @@ function project({ p, next, projects, site, esc, root }, k) {
     `<a class="plain" href="${root}resume/">Read the résumé</a>`, `<a class="plain" href="${root}projects/">All work</a>`].filter(Boolean).join('');
   return k.shell({ title: `${p.title} | ${site.name}`, description: p.description, route: `/work/${p.slug}/`, root, site, esc, main: `<section class="${cls}" id="sheet" data-form="${p.slug}" aria-labelledby="project-h">
  ${k.sheetHead(esc, { tag: 'h1', id: 'project-h', title: `${f.title} · ${p.title}`, sub: p.category, serial: k.serial(n, `item ${n} of ${projects.length}`) })}
- ${k.fieldCells(esc, [['Department', f.dept], ['Status', f.status]])}
+ ${k.fieldCells(esc, [['Department', f.dept], ['Status', p.listing.status]])}
  <div class="cells"><div class="cell"><h3 class="lab">What it is</h3><p class="val">${esc(p.description)}</p></div></div>
  ${demos[p.slug](p, { esc, root }, k)}
  ${k.body(p, esc, ['problem', 'built', 'how', 'limits', 'stack', 'facts'])}

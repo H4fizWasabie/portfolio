@@ -4,7 +4,7 @@ import { $, reduced, h, typer, stamper, liveRegion, button, setLabel, again, fla
 
 const TODAY = '05 Oct'; // the fictional "today" of the sample ledger
 
-// Lift the top copy: the top form sits over a pink carbon copy holding the "Was" diagram.
+// Lift the top sheet: the top form sits over a pink carbon copy holding the "Was" diagram.
 // Lifted, the sheet hinges at its top edge and tilts back under a perspective (keep FOLD in step with .lift-stage in style.css).
 // footprint() is the height that tilted sheet covers, so the copy leaves that much room above its diagram.
 const FOLD = { deg: 64, persp: 1200 };
@@ -14,7 +14,7 @@ const footprint = H => {
 };
 
 function makeLift(heading, formNodes, copyNodes, say) {
-  const btn = h('button', { type: 'button', className: 'btn lift-btn', 'aria-pressed': 'false' }, 'Lift the top copy');
+  const btn = h('button', { type: 'button', className: 'btn lift-btn', 'aria-pressed': 'false' }, 'Lift the top sheet');
   const form = h('div', { className: 'lift-form' }, ...formNodes);
   const copy = h('div', { className: 'lift-copy' }, ...copyNodes);
   const stage = h('div', { className: 'lift-stage' }, copy, form);
@@ -27,11 +27,11 @@ function makeLift(heading, formNodes, copyNodes, say) {
     el.classList.toggle('lifted', on);
     form.inert = on;
     btn.setAttribute('aria-pressed', on);
-    btn.textContent = on ? 'Put it back' : 'Lift the top copy';
+    btn.textContent = on ? 'Put it back' : 'Lift the top sheet';
     // The stage closes up around the copy when lifted and opens again when put back.
     const to = stage.offsetHeight;
     if (!reduced() && from !== to) slide = stage.animate({ height: [`${from}px`, `${to}px`] }, { duration: 450, easing: 'cubic-bezier(.16,1,.3,1)' });
-    say(on ? 'Top copy lifted. The diagram underneath is showing.' : 'Top copy laid back.');
+    say(on ? 'Top sheet lifted. The diagram underneath is showing.' : 'Top sheet laid back.');
   };
   btn.addEventListener('click', () => set(!el.classList.contains('lifted')));
   el.addEventListener('keydown', e => {

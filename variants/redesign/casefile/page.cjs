@@ -14,7 +14,7 @@ const statics = ['../photo/hafiz-portrait.webp'];
 
 const arr = '<svg class="arr" width="16" height="16" aria-hidden="true"><use href="#arr"/></svg>';
 const symbol = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="arr" viewBox="0 0 16 16"><path d="M1.5 8h12M9 3.5 13.5 8 9 12.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol></svg>`;
-const two = (n, w = 4) => String(n).padStart(w, '0');
+const pad = (n, w = 4) => String(n).padStart(w, '0');
 
 // The four systems in production, each on the form it replaced. Sheet order is content.cjs order.
 const forms = {
@@ -30,7 +30,7 @@ const btn = (href, label, attrs = '') => `<a class="btn" href="${href}"${attrs}>
 const sheetHead = (esc, { tag = 'h2', id, title, sub, serial = '' }) => `<div class="head">
   <div><${tag}${id ? ` id="${id}"` : ''} class="form-title">${esc(title)}</${tag}><p class="sub">${esc(sub)}</p></div>${serial}
  </div>`;
-const serial = (no, cap) => `\n  <p class="serial"><span class="no">No. ${two(no)}</span><span class="cap">${cap}</span></p>`;
+const serial = (no, cap) => `\n  <p class="serial"><span class="no">No. ${pad(no)}</span><span class="cap">${cap}</span></p>`;
 const fieldCells = (esc, pairs) => `<div class="cells two fields">${pairs.map(([l, v]) => `<div class="cell"><p class="lab">${l}</p><p class="val">${esc(v)}</p></div>`).join('')}</div>`;
 
 // A printed table: rows of [label, value] pairs (the label shows as a caption on phones). A value is escaped unless it is {html}.
@@ -44,14 +44,14 @@ const lines = (esc, items, cls) => `<ul class="${cls}">${items.map(s => `<li>${e
 // The sections of a Sheet's body, from the project's facts. Areas are laid out by style.css on the homepage.
 const part = {
   problem: (p, esc) => p.problem && `<div class="cell a-problem"><h3 class="lab">The problem</h3><p>${esc(p.problem)}</p></div>`,
-  built: (p, esc) => `<div class="cell a-built"><h3 class="lab">What I built</h3><p>${esc(p.built)}</p></div>`,
+  built: (p, esc, head = 'What I built') => `<div class="cell a-built"><h3 class="lab">${head}</h3><p>${esc(p.built)}</p></div>`,
   how: (p, esc) => `<div class="cell a-how"><h3 class="lab">How it works</h3><ol class="items">${p.workflow.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`,
   limits: (p, esc) => `<div class="cell a-limits"><h3 class="lab">What it doesn’t do</h3><p>${esc(p.limits)}</p></div>`,
   stack: (p, esc) => `<div class="cell a-stack"><h3 class="lab">Built with</h3>${lines(esc, p.stack, 'chips')}</div>`,
   facts: (p, esc) => p.facts && `<div class="cell a-facts"><h3 class="lab">On record</h3>${lines(esc, p.facts, 'lines')}</div>`
 };
-const body = (p, esc, order, cls) => `<div class="cells two body${cls ? ' ' + cls : ''}">
-  ${order.map(k => part[k](p, esc)).filter(Boolean).join('\n  ')}
+const body = (p, esc, order, cls, heads = {}) => `<div class="cells two body${cls ? ' ' + cls : ''}">
+  ${order.map(k => part[k](p, esc, heads[k])).filter(Boolean).join('\n  ')}
  </div>`;
 
 const shot = (root, p, esc, [name, file, caption]) => `<figure class="shot">${B.img(root, file, `${p.title}: ${name}. ${caption}`, 'loading="lazy" decoding="async"')}<figcaption><b>${esc(name)}.</b> ${esc(p.disclosure)}</figcaption></figure>`;
@@ -125,7 +125,7 @@ const sheets = {
   </div>
  </div>
  ${body(p, esc, ['built', 'how', 'limits', 'stack'], 'pair')}
- ${body(p.cavetext, esc, ['built', 'how', 'limits', 'stack'], 'pair').replace('<h3 class="lab">What I built</h3>', '<h3 class="lab">Attached: CaveText</h3>')}`
+ ${body(p.cavetext, esc, ['built', 'how', 'limits', 'stack'], 'pair', { built: 'Attached: CaveText' })}`
 };
 
 // The dd body places the diagram between the facts it sits beside (style.css, .body.dd).
@@ -135,7 +135,7 @@ const sheet = (p, n, count, ctx) => {
   const f = forms[p.slug], { esc, root, full } = ctx;
   const cls = ['sheet', f.color, 'perf', 'case', full && 'project', !p.problem && 'noproblem', !p.facts && 'nofacts'].filter(Boolean).join(' ');
   const foot = full ? `<span class="links">${extLinks(p, esc).join('')}</span>` : p.slug === 'cavelms'
-    ? `${btn(p.url, 'Visit CaveLMS', ' rel="noopener"')} ${btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"')}`
+    ? `${btn(`${root}work/cavelms/`, 'Full case study')} ${btn(p.url, 'Visit CaveLMS', ' rel="noopener"')} ${btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"')}`
     : btn(`${root}work/${p.slug}/`, 'Full case study');
   return `<section class="${cls}" id="${p.slug}" aria-labelledby="${p.slug}-h">
  ${sheetHead(esc, { tag: full ? 'h1' : 'h2', id: `${p.slug}-h`, title: `${f.title} · ${p.title}`, sub: p.category, serial: serial(n, `item ${n} of ${count}`) })}
@@ -158,6 +158,7 @@ const first = (made, site, esc) => `<div id="top" class="stack">
  <section class="sheet white first" aria-labelledby="statement">
   ${sheetHead(esc, { tag: 'p', title: site.formTitle, sub: site.formSub, serial: serial(made.length, 'systems in production') })}
   <h1 id="statement" class="statement">${esc(site.statement)}</h1>
+  <p class="hiring">${esc(site.hiring)} <a href="resume/">Read the résumé</a></p>
   ${fieldCells(esc, [['Replaces', site.replaces], ['Where', site.where]])}
   <div class="register-wrap">
    ${table(esc, {

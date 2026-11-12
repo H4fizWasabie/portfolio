@@ -21,6 +21,7 @@ const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const norm = s => s.replace(/\s+/g, ' ').trim();
 const made = projects.filter(p => p.register); // the systems in production, each with a Sheet on the homepage
 const rest = projects.filter(p => !p.register); // the continuation Sheet
+const cave = made.find(p => p.slug === 'cavelms');
 
 execFileSync(process.execPath, [path.join(here, 'publish.cjs')], { stdio: 'inherit' });
 execFileSync(process.execPath, [path.join(here, 'build.cjs'), 'casefile'], { stdio: 'inherit' });
@@ -58,7 +59,7 @@ for (const p of made) assert.ok(home.includes(`id="${p.slug}"`) && home.includes
 for (const p of rest) assert.ok(home.includes(`href="work/${p.slug}/"`), `/: the continuation Sheet links ${p.slug}`);
 // The homepage HTML holds every Sheet's words, so search engines and visitors without JavaScript read them.
 const sheetWords = [
-  words.statement, words.formSub, words.replaces, words.where, words.requestTitle, words.requestSub, ...words.particulars.map(r => r[1]),
+  words.statement, words.hiring, words.formSub, words.replaces, words.where, words.requestTitle, words.requestSub, ...words.particulars.map(r => r[1]),
   ...made.flatMap(p => [p.title, p.category, p.register.note, p.register.was, p.register.now, p.problem, p.built, p.limits, ...p.workflow, ...p.stack, ...(p.facts || []), ...(p.cavetext ? [p.cavetext.built, p.cavetext.limits, ...p.cavetext.workflow, ...p.cavetext.stack] : [])]),
   ...rest.flatMap(p => [p.title, p.entry])
 ].filter(Boolean);
@@ -94,7 +95,7 @@ assert.deepEqual(fs.readFileSync(path.join(site, 'resume/Resume-Hafiz-Jamali.pdf
 const reader = fs.readFileSync(path.join(site, 'resume/index.html'), 'utf8');
 assert.match(reader, /MAP — Android Productivity App/);
 assert.doesNotMatch(reader, /<iframe|<object|<embed/);
-resume129Static(); // #129
+resumeFileChecks();
 
 // ---- Browser step: the production site served locally, driven at phone width (390x844) and desktop (1440x900).
 const phone = { width: 390, height: 844 };
@@ -110,6 +111,8 @@ async function readingChecks(browser, url) {
     const main = norm(await page.locator('main').textContent());
     for (const t of sheetWords) assert.ok(main.includes(norm(t)), `/: ${what}: the page says "${t}"`);
     for (const p of made) assert.ok((await text(page, `#${p.slug}-h`)).includes(p.title), `/: ${what}: ${p.title} has its Sheet heading`);
+    for (const p of made) assert.equal(norm(await text(page, `#${p.slug} .foot a[href="work/${p.slug}/"]`)), 'Full case study', `/: ${what}: ${p.title} links its page`);
+    for (const href of [cave.url, cave.cavetext.store]) assert.equal(await page.locator(`#cavelms .foot a[href="${href}"]`).count(), 1, `/: ${what}: CaveLMS keeps its link to ${href}`);
     assert.equal(await page.locator('main h1, main h2').count(), 1 + made.length + 3, `/: ${what}: every Sheet has a heading`); // the statement, each system, then continuation, Particulars and Request
     if (options.javaScriptEnabled === false) {
       for (const id of ['pims', 'procura']) assert.ok(await page.evaluate(i => [...document.querySelectorAll(`#${i} .diagram`)].some(d => { const r = d.getBoundingClientRect(); return r.width > 100 && r.height > 100; }), id), `/: ${what}: the Was diagram of ${id} shows`);
@@ -120,6 +123,22 @@ async function readingChecks(browser, url) {
     }
     await page.close();
   }
+}
+
+// The first screen: the Hiring line is in view on a phone; on a desktop the whole Register and the Request work button are.
+async function firstScreenChecks(browser, url) {
+  const bottom = async (page, sel) => { const b = await page.locator(sel).first().boundingBox(); return b.y + b.height; };
+  let page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce' });
+  await page.goto(url, { waitUntil: 'networkidle' });
+  assert.equal(norm(await text(page, '.first .hiring')), `${words.hiring} Read the résumé`, 'first screen: the Hiring line says it');
+  assert.equal(await page.getAttribute('.first .hiring a', 'href'), 'resume/', 'first screen: the Hiring line links the résumé');
+  assert.ok(await bottom(page, '.first .hiring') <= phone.height, 'first screen: the Hiring line is visible without scrolling at 390x844');
+  await page.close();
+  page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  await page.goto(url, { waitUntil: 'networkidle' });
+  assert.ok(await bottom(page, '.first .register tbody tr:last-child') <= 900, 'first screen: the whole Register fits within 900px at 1440px');
+  assert.ok(await bottom(page, '.first .foot .btn') <= 900, 'first screen: the Request work button fits within 900px at 1440px');
+  await page.close();
 }
 
 // Sample demos, end to end. Reduced motion makes the typed entries instant.
@@ -234,22 +253,22 @@ async function demoChecks(browser, url) {
   await page.close();
 }
 
-// Lift the top copy on PIMS and Procura: the top form tilts back to show the Was diagram; put it back by button or Escape.
+// Lift the top sheet on PIMS and Procura: the top form tilts back to show the Was diagram; put it back by button or Escape.
 async function liftChecks(browser, url) {
   const page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce' });
   await page.goto(url, { waitUntil: 'networkidle' });
   for (const id of ['pims', 'procura']) {
     const lift = `#${id} .lift`, btn = `${lift} .lift-btn`;
     const state = () => page.evaluate(([b, f]) => [document.querySelector(b).getAttribute('aria-pressed'), document.querySelector(b).textContent, document.querySelector(f).inert], [btn, `${lift} .lift-form`]);
-    assert.deepEqual(await state(), ['false', 'Lift the top copy', false], `${id}: the form starts on top`);
+    assert.deepEqual(await state(), ['false', 'Lift the top sheet', false], `${id}: the form starts on top`);
     await page.click(btn);
     assert.deepEqual(await state(), ['true', 'Put it back', true], `${id}: lifting shows the copy and parks the form`);
     assert.ok(await visible(page, `${lift} .lift-copy .diagram`), `${id}: the Was diagram is showing under the lifted copy`);
     await page.click(btn);
-    assert.deepEqual(await state(), ['false', 'Lift the top copy', false], `${id}: put back by button`);
+    assert.deepEqual(await state(), ['false', 'Lift the top sheet', false], `${id}: put back by button`);
     await page.click(btn);
     await page.keyboard.press('Escape');
-    assert.deepEqual(await state(), ['false', 'Lift the top copy', false], `${id}: put back with Escape`);
+    assert.deepEqual(await state(), ['false', 'Lift the top sheet', false], `${id}: put back with Escape`);
     assert.equal(await page.evaluate(b => document.activeElement === document.querySelector(b), btn), true, `${id}: focus returns to the lift button`);
   }
   await page.close();
@@ -336,8 +355,8 @@ async function pageChecks(browser, base) {
   }
 }
 
-// #129 The résumé PDF carries the two changed facts and still prints on one A4 page; /projects/ is the full Register and /resume/ wears the Case File.
-function resume129Static() {
+// The résumé PDF carries the two changed facts and still prints on one A4 page; /projects/ is the full Register and /resume/ wears the Case File.
+function resumeFileChecks() {
   const pdf = path.join(here, '../../resume/Resume-Hafiz-Jamali.pdf');
   assert.match(execFileSync('pdfinfo', [pdf], { encoding: 'utf8' }), /Pages:\s+1\b/, 'résumé PDF: one page');
   const pdfText = norm(execFileSync('pdftotext', [pdf, '-'], { encoding: 'utf8' }));
@@ -349,7 +368,7 @@ function resume129Static() {
   assert.doesNotMatch(reader, /lms\.wasabietech\.com/, 'résumé reader: the old CaveLMS address is gone');
 }
 
-async function register129Checks(browser, base) {
+async function projectsPageChecks(browser, base) {
   for (const [what, options] of [['no JavaScript', { javaScriptEnabled: false }], ['JavaScript', {}]]) {
     const page = await browser.newPage({ viewport: phone, reducedMotion: 'reduce', ...options });
     await page.goto(`${base}/projects/`, { waitUntil: 'networkidle' });
@@ -375,7 +394,7 @@ async function register129Checks(browser, base) {
   await page.close();
 }
 
-async function resume129Checks(browser, base) {
+async function resumeReaderChecks(browser, base) {
   for (const viewport of [phone, { width: 1440, height: 900 }]) {
     const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
     await page.goto(`${base}/resume/`, { waitUntil: 'networkidle' });
@@ -396,7 +415,7 @@ async function resume129Checks(browser, base) {
   }
 }
 
-// #127 Project pages of the four systems in production: the homepage Sheet with the fuller case study, all screens, the Sample demo,
+// Project pages of the four systems in production: the homepage Sheet with the fuller case study, all screens, the Sample demo,
 // the lift where it applies, and links to the next project, the Request form and the résumé.
 async function projectPageChecks(browser, base) {
   const system = made.map(p => p.slug);
@@ -472,7 +491,7 @@ async function projectPageChecks(browser, base) {
   assert.deepEqual(system, ['pims', 'dd-drugs-register', 'procura', 'cavelms'], 'the four systems in production have project pages');
 }
 
-// #128: the Theoses, 89lab, MAP and Yen pages. Each is one Sheet on a form of its own; its demo is progressive enhancement.
+// The Theoses, 89lab, MAP and Yen pages. Each is one Sheet on a form of its own; its demo is progressive enhancement.
 const continuation = ['theoses', '89lab', 'map', 'yen'].map(slug => projects.find(p => p.slug === slug));
 const approvedMap = ['map-home-demo.webp', 'map-calendar-demo.webp', 'map-tasks-demo.webp', 'map-tools-demo.webp'];
 
@@ -628,7 +647,7 @@ async function continuationDemoChecks(browser, base, width) {
 async function continuationChecks(browser, base) {
   await continuationReadingChecks(browser, base);
   for (const width of [390, 1440]) await continuationDemoChecks(browser, base, width);
-  console.log('PASS #128 continuation pages: Theoses, 89lab, MAP and Yen read complete without JavaScript or with reduced motion; each demo runs end to end at 390 and 1440px with no sideways scroll; MAP shows only its four approved screens');
+  console.log('PASS continuation pages: Theoses, 89lab, MAP and Yen read complete without JavaScript or with reduced motion; each demo runs end to end at 390 and 1440px with no sideways scroll; MAP shows only its four approved screens');
 }
 
 async function browserChecks() {
@@ -643,16 +662,17 @@ async function browserChecks() {
   const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   try {
     await readingChecks(browser, `${base}/`);
+    await firstScreenChecks(browser, `${base}/`);
     await demoChecks(browser, `${base}/`);
     await liftChecks(browser, `${base}/`);
     await requestChecks(browser, `${base}/`);
-    await projectPageChecks(browser, base); // #127
+    await projectPageChecks(browser, base);
 
-    await continuationChecks(browser, base); // #128
+    await continuationChecks(browser, base);
     await pageChecks(browser, base);
-    await register129Checks(browser, base); // #129
-    await resume129Checks(browser, base); // #129
-    console.log('PASS #129: /projects/ is the full Register (eight rows in site order, each linking its page, stacking into labelled rows at 390px, no JavaScript needed); /resume/ is the reader on a Sheet in Case File type and colours with the PDF download; the PDF is one page with cavelms.com and the CaveText line');
+    await projectsPageChecks(browser, base);
+    await resumeReaderChecks(browser, base);
+    console.log('PASS /projects/ and /resume/: /projects/ is the full Register (eight rows in site order, each linking its page, stacking into labelled rows at 390px, no JavaScript needed); /resume/ is the reader on a Sheet in Case File type and colours with the PDF download; the PDF is one page with cavelms.com and the CaveText line');
   } finally {
     await browser.close();
     server.close();
@@ -660,4 +680,4 @@ async function browserChecks() {
 }
 
 console.log(`PASS publication regression: ${routes.length} indexable canonical pages with valid JSON-LD; same-origin links; sitemap/robots/llms.txt; ${manifest.length} manifest hashes; the Case File homepage says every Sheet's words; résumé present; preview stays noindex`);
-browserChecks().then(() => console.log('PASS browser step: without JavaScript or with reduced motion the homepage reads complete with no demo controls; the PIMS, DD Drugs Register, Procura and CaveLMS demos and the lift run end to end at 390px; each of their four /work/ pages reads complete without JavaScript, shows every approved screen, runs its demo and lift, and links the next project, the Request form and the résumé; the Request form validates, sends {name, email, message, website} and reports 400, 429, 500 and network failures; every route has one h1, no sideways scroll and no request to another host at 390 and 1440px'));
+browserChecks().then(() => console.log('PASS browser step: without JavaScript or with reduced motion the homepage reads complete with no demo controls; the PIMS, DD Drugs Register, Procura and CaveLMS demos and the lift run end to end at 390px; each of their four /work/ pages reads complete without JavaScript, shows every approved screen, runs its demo and lift, and links the next project, the Request form and the résumé; the first screen holds the Hiring line at 390px and the whole Register and Request work button at 1440px; the CaveLMS Sheet links its page; the Request form validates, sends {name, email, message, website} and reports 400, 429, 500 and network failures; every route has one h1, no sideways scroll and no request to another host at 390 and 1440px'));

@@ -129,7 +129,7 @@ The portfolio is a book of carbonless duplicate forms laid on a dark green-grey 
 
 Density is that of a real office form: boxed fields that share their rules, line-item registers, signature lines, a "for office use" box. Corners are square, rules run from hairline to 1.5px, and the only depth is paper lifting off the desk. The world refuses the dark developer portfolio and the grid of screenshot cards; the work is the form, not a card about the form.
 
-Motion is a single authored moment: the first sheet settles onto its copies on load, and its stamp lands a beat later. Content is fully visible without it.
+Motion on load is a single authored moment: the first sheet settles onto its copies, and its stamp lands a beat later. The Sample demos add their own (below). Content is fully visible without any of it.
 
 **Key Characteristics:**
 - Dark desk ground; sheets in the five carbonless copy colours.
@@ -244,8 +244,8 @@ The violet rubber stamp: a condensed 900 uppercase word in a 3px border with a 1
 ### Signature Lines and Office Box
 Printed captions with a 1px navy line to sign on, initials typed in Courier; and a dashed "For office use" box that receives the stamp.
 
-### Sample demos (forms.js)
-With JavaScript each case sheet becomes a small working demo on fictional data; without it the sheet shows its filled-in sample. Controls are field vocabulary: boxed `.btn` buttons, the request form's boxed inputs, square tick-boxes for choices, a text "Start again" link. Entries are typed on in Courier Prime (about 25ms a character); each completed step changes the sheet's stamp word and thunks it; every change is announced in a visually hidden `aria-live` region. PIMS and Procura keep their "Was" diagram on a pink carbon copy under the top form: "Lift the top copy" hinges the form at its top edge and tilts it back about 64 degrees under a 1200px perspective, so it stays a foreshortened trapezoid of paper that casts a soft shadow on the copy (inert while lifted). The stage closes up around the copy, which lays the diagram out horizontally on desktop and as a vertical stack on phones, below the sheet's footprint. On Procura the Reorder check sits above the purchase order, as it drafts the order lines; only the purchase order form lifts. All of it is instant under `prefers-reduced-motion`.
+### Sample demos (forms.js and more.js)
+With JavaScript each case sheet becomes a small working demo on fictional data; without it the sheet shows its filled-in sample. Controls are field vocabulary: boxed `.btn` buttons, the request form's boxed inputs, square tick-boxes for choices, a text "Start again" link. Entries are typed on in Courier Prime (about 25ms a character); each completed step changes the sheet's stamp word and thunks it; every change is announced in a visually hidden `aria-live` region. PIMS and Procura keep their "Was" diagram on a pink carbon copy under the top form: "Lift the top sheet" hinges the form at its top edge and tilts it back about 64 degrees under a 1200px perspective, so it stays a foreshortened trapezoid of paper that casts a soft shadow on the copy (inert while lifted). The stage closes up around the copy, which lays the diagram out horizontally on desktop and as a vertical stack on phones, below the sheet's footprint. On Procura the Reorder check sits above the purchase order, as it drafts the order lines; only the purchase order form lifts. All of it is instant under `prefers-reduced-motion`.
 
 ## Do's and Don'ts
 
@@ -255,7 +255,7 @@ With JavaScript each case sheet becomes a small working demo on fictional data; 
 - **Do** give every sheet one copy-colour ground, one serial or title band, and at most one violet stamp.
 - **Do** box related fields in a shared-rule cell grid (1.5px navy) instead of spacing them apart.
 - **Do** use the darker red (numbering-red-on-copy) on every coloured copy.
-- **Do** keep motion to the load settle and stamp landing, gated on prefers-reduced-motion.
+- **Do** keep motion to the load settle, the stamp landing and the Sample demos' own motion (typed entries, the stamp thunk on each step, the lift tilt), all gated on prefers-reduced-motion.
 
 ### Don't:
 - **Don't** round a corner anywhere.
