@@ -103,7 +103,15 @@ function dd() {
   const sheet = $('#dd-drugs-register'), say = liveRegion(sheet), st = stamper(sheet), t = typer();
   const tbody = $(sheet, 'tbody'), added = [];
   const input = h('input', { type: 'text', inputMode: 'numeric', id: 'dd-count', name: 'count', value: '12', autocomplete: 'off' });
-  const reasonSel = h('select', { id: 'dd-reason' }, ...['Breakage recorded on the ward', 'Recount: counting error', 'Dispensing not yet entered'].map(r => h('option', {}, r)));
+  // Each reason corrects the count it explains: a recount fixes the physical count, the others bring the system in line with the shelf.
+  const reasons = {
+    'Breakage recorded on the ward': n => `system count reduced from 14 to ${n}; breakage recorded on the ward.`,
+    'Dispensing not yet entered': n => `system count reduced from 14 to ${n}; dispensing entered.`,
+    'Receipt not yet entered': n => `system count raised from 14 to ${n}; receipt not yet entered.`,
+    'Recount: counting error': n => `recount found 14; physical count corrected from ${n} to 14.`
+  };
+  const reasonsFor = n => n < 14 ? ['Breakage recorded on the ward', 'Dispensing not yet entered', 'Recount: counting error'] : ['Receipt not yet entered', 'Recount: counting error'];
+  const reasonSel = h('select', { id: 'dd-reason' });
   const reasonCell = h('label', { className: 'cell field full', hidden: true }, h('span', { className: 'lab' }, 'Reason for the difference'), reasonSel);
   const submit = button('Submit count', 'submit'), correct = button('Record correction'), reset = again();
   correct.hidden = true;
@@ -145,6 +153,7 @@ function dd() {
         jobs.push([b, sign], [mark, 'discrepancy']);
         tr.append(td('Date', TODAY), td('Item', 'Item A'), td('Physical count', String(n)), td('System count', '14'), h('td', { 'data-label': 'Difference' }, h('span', {}, b, ' ', mark)), td('Initials', 'M.T.'));
       });
+      reasonSel.replaceChildren(...reasonsFor(n).map(r => h('option', {}, r)));
       reasonCell.hidden = false; correct.hidden = false;
       say(`Count of ${n} differs from the system count by ${sign}. A discrepancy row was added. Choose a reason, then record a correction.`);
       reasonSel.focus();
@@ -157,7 +166,7 @@ function dd() {
     const reason = reasonSel.value;
     reasonCell.hidden = true; correct.hidden = true;
     await addRow('', (tr, td) => tr.append(td('Date', TODAY), td('Item', 'Item A'),
-      td('Correction', `Correction to entry of today: system count set to ${n}. Reason: ${reason}.`, { colSpan: 3 }), td('Initials', 'M.T.')));
+      td('Correction', `Correction to entry of today: ${reasons[reason](n)}`, { colSpan: 3 }), td('Initials', 'M.T.')));
     st.set('Corrected'); say('Correction row added, referring to the flagged entry of today. The original entry is unchanged.');
     reset.hidden = false; reset.focus(); busy = false;
   });
@@ -186,7 +195,7 @@ function procura() {
         if (busy) return;
         r.have = Math.max(0, Math.min(999, r.have + d));
         paint(r); undraft();
-        say(`${name}: ${r.have} on hand, ${r.have < r.at ? 'below' : 'at or above'} the reorder point of ${r.at}.`);
+        say(`${name}: ${r.have} on hand, ${r.have <= r.at ? 'at or below' : 'above'} the reorder point of ${r.at}.`);
       });
       return b;
     };
@@ -194,10 +203,10 @@ function procura() {
     return r;
   });
   const paint = r => {
-    const low = r.have < r.at;
+    const low = r.have <= r.at;
     r.num.textContent = r.have;
     r.tr.classList.toggle('flag', low);
-    r.check.replaceChildren(low ? h('span', { className: 'low' }, 'below') : 'ok');
+    r.check.replaceChildren(low ? h('span', { className: 'low' }, 'reorder') : 'ok');
   };
   rows.forEach(paint);
   $(table, 'tbody').append(...rows.map(r => r.tr));
@@ -219,7 +228,7 @@ function procura() {
     const low = rows.filter(r => r.have < r.at);
     busy = true;
     if (!low.length) {
-      const text = 'Nothing is below its reorder point, so there is nothing to order.';
+      const text = 'Nothing is at or below its reorder point, so there is nothing to order.';
       say(text); await t.type(msg, text); busy = false; return;
     }
     const jobs = [];
@@ -228,7 +237,7 @@ function procura() {
       jobs.push([d, r.name], [q, String(2 * r.at - r.have)], [u, r.unit]);
       return h('tr', {}, h('td', { className: 'n', 'data-label': 'Line' }, String(i + 1)), d, q, u);
     }));
-    const text = `${low.length} order ${low.length > 1 ? 'lines' : 'line'} drafted from items below their reorder point.`;
+    const text = `${low.length} order ${low.length > 1 ? 'lines' : 'line'} drafted from items at or below their reorder point.`;
     await Promise.all([...jobs.map(([n, x]) => t.type(n, x)), t.type(msg, text)]);
     drafted = true; busy = false;
     st.set('Drafted'); say(text); reset.hidden = false; reset.focus();
@@ -241,7 +250,7 @@ function procura() {
   // The reorder check comes first, as it drafts the order lines; the lifted sheet is the purchase order form alone.
   const was = $(sheet, '.wasnow-was'), before = po.previousElementSibling;
   const stock = h('div', { className: 'cells' }, h('div', { className: 'cell' }, h('h3', { className: 'lab' }, 'Reorder check'), table,
-    h('p', { className: 'hint' }, 'Lower a count below its reorder point, then draft the purchase order.'), h('div', { className: 'demo-bar' }, draftBtn, reset), msg));
+    h('p', { className: 'hint' }, 'Lower a count to its reorder point or below, then draft the purchase order.'), h('div', { className: 'demo-bar' }, draftBtn, reset), msg));
   const lift = makeLift(h('h3', { className: 'lab' }, 'Purchase order'), [po, orderCells], was.childNodes, say);
   $(sheet, '.wasnow').classList.add('solo');
   was.remove();

@@ -112,6 +112,7 @@ async function readingChecks(browser, url) {
     for (const t of sheetWords) assert.ok(main.includes(norm(t)), `/: ${what}: the page says "${t}"`);
     for (const p of made) assert.ok((await text(page, `#${p.slug}-h`)).includes(p.title), `/: ${what}: ${p.title} has its Sheet heading`);
     for (const p of made) assert.equal(norm(await text(page, `#${p.slug} .foot a[href="work/${p.slug}/"]`)), 'Full case study', `/: ${what}: ${p.title} links its page`);
+    for (const p of made) assert.equal(norm(await text(page, `#${p.slug} .foot a[href="#request"]`)), 'Request one like this', `/: ${what}: ${p.title} leads to the Request form`);
     for (const href of [cave.url, cave.cavetext.store]) assert.equal(await page.locator(`#cavelms .foot a[href="${href}"]`).count(), 1, `/: ${what}: CaveLMS keeps its link to ${href}`);
     assert.equal(await page.locator('main h1, main h2').count(), 1 + made.length + 3, `/: ${what}: every Sheet has a heading`); // the statement, each system, then continuation, Particulars and Request
     if (options.javaScriptEnabled === false) {
@@ -191,8 +192,25 @@ async function demoChecks(browser, url) {
   await button('dd-drugs-register', 'Record correction').click();
   await until(page, stamp('dd-drugs-register'), 'Corrected');
   assert.equal(await rows(), 6);
-  assert.match(await text(page, '#dd-drugs-register tbody tr:last-child'), /Correction to entry of today: system count set to 12\. Reason: Recount: counting error\./);
+  assert.match(await text(page, '#dd-drugs-register tbody tr:last-child'), /Correction to entry of today: recount found 14; physical count corrected from 12 to 14\./, 'DD: a recount corrects the physical count, not the system');
   assert.match(await text(page, '#dd-drugs-register tbody tr:nth-child(5)'), /−2.*discrepancy/s, 'DD: the original entry is still in the ledger');
+  await button('dd-drugs-register', 'Start again').click();
+  await until(page, stamp('dd-drugs-register'), 'In daily use');
+  assert.equal(await rows(), 4);
+  await page.fill('#dd-count', '12');
+  await button('dd-drugs-register', 'Submit count').click();
+  await page.selectOption('#dd-reason', 'Breakage recorded on the ward');
+  await button('dd-drugs-register', 'Record correction').click();
+  await until(page, stamp('dd-drugs-register'), 'Corrected');
+  assert.match(await text(page, '#dd-drugs-register tbody tr:last-child'), /Correction to entry of today: system count reduced from 14 to 12; breakage recorded on the ward\./, 'DD: breakage corrects the system count');
+  await button('dd-drugs-register', 'Start again').click();
+  await page.fill('#dd-count', '16');
+  await button('dd-drugs-register', 'Submit count').click();
+  assert.deepEqual(await page.$$eval('#dd-reason option', o => o.map(x => x.textContent)), ['Receipt not yet entered', 'Recount: counting error'], 'DD: a count above the system offers only reasons that raise it');
+  await page.selectOption('#dd-reason', 'Receipt not yet entered');
+  await button('dd-drugs-register', 'Record correction').click();
+  await until(page, stamp('dd-drugs-register'), 'Corrected');
+  assert.match(await text(page, '#dd-drugs-register tbody tr:last-child'), /Correction to entry of today: system count raised from 14 to 16; receipt not yet entered\./);
   await button('dd-drugs-register', 'Start again').click();
   await until(page, stamp('dd-drugs-register'), 'In daily use');
   assert.equal(await rows(), 4);
@@ -202,16 +220,18 @@ async function demoChecks(browser, url) {
   const sample = await lines();
   assert.equal(sample.length, 3);
   await button('procura', 'Draft purchase order').click();
-  await page.waitForFunction(() => /^Nothing is below its reorder point/.test(document.querySelector('#procura .msg').textContent));
+  await page.waitForFunction(() => /^Nothing is at or below its reorder point/.test(document.querySelector('#procura .msg').textContent));
   assert.deepEqual(await lines(), sample, 'Procura: nothing low leaves the sample lines');
   assert.equal(await text(page, stamp('procura')), 'In production');
   const down = name => page.getByRole('button', { name: `One fewer ${name}` });
-  await down('Gauze swab 10×10').click({ clickCount: 2 }); // 51, reorder at 50: two steps down
-  assert.match(await text(page, '#procura .stock tbody tr:first-child'), /49.*50.*below/s);
+  await down('Gauze swab 10×10').click(); // 51 to 50: at the reorder point is time to reorder
+  assert.match(await text(page, '#procura .stock tbody tr:first-child'), /50.*50.*reorder/s, 'Procura: on hand at the reorder point is flagged');
+  await down('Gauze swab 10×10').click();
+  assert.match(await text(page, '#procura .stock tbody tr:first-child'), /49.*50.*reorder/s);
   await button('procura', 'Draft purchase order').click();
   await until(page, stamp('procura'), 'Drafted');
   assert.deepEqual(await lines(), ['1|Gauze swab 10×10|51|pack'], 'Procura: one line, 2 x reorder point - on hand');
-  assert.equal(await text(page, '#procura .msg'), '1 order line drafted from items below their reorder point.');
+  assert.equal(await text(page, '#procura .msg'), '1 order line drafted from items at or below their reorder point.');
   await down('Syringe 3 ml').click({ clickCount: 2 }); // 7 to 5, reorder at 6
   await until(page, stamp('procura'), 'In production');
   assert.deepEqual(await lines(), sample, 'Procura: changing a count withdraws the draft');

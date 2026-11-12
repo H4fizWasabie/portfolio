@@ -134,9 +134,11 @@ part.diag = (p, esc) => `<div class="cell a-diag"><p class="wn">Now</p><figure c
 const sheet = (p, n, count, ctx) => {
   const f = forms[p.slug], { esc, root, full } = ctx;
   const cls = ['sheet', f.color, 'perf', 'case', full && 'project', !p.problem && 'noproblem', !p.facts && 'nofacts'].filter(Boolean).join(' ');
-  const foot = full ? `<span class="links">${extLinks(p, esc).join('')}</span>` : p.slug === 'cavelms'
-    ? `${btn(`${root}work/cavelms/`, 'Full case study')} ${btn(p.url, 'Visit CaveLMS', ' rel="noopener"')} ${btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"')}`
-    : btn(`${root}work/${p.slug}/`, 'Full case study');
+  // Every system Sheet ends at the Request form, the moment a visitor is most convinced.
+  const ask = btn(`${root}#request`, 'Request one like this');
+  const foot = full ? `<span class="links">${ask}${extLinks(p, esc).join('')}</span>` : p.slug === 'cavelms'
+    ? `<span class="links">${btn(`${root}work/cavelms/`, 'Full case study')}${ask}${btn(p.url, 'Visit CaveLMS', ' rel="noopener"')}${btn(p.cavetext.store, 'CaveText on the Chrome Web Store', ' rel="noopener"')}</span>`
+    : `<span class="links">${btn(`${root}work/${p.slug}/`, 'Full case study')}${ask}</span>`;
   return `<section class="${cls}" id="${p.slug}" aria-labelledby="${p.slug}-h">
  ${sheetHead(esc, { tag: full ? 'h1' : 'h2', id: `${p.slug}-h`, title: `${f.title} · ${p.title}`, sub: p.category, serial: serial(n, `item ${n} of ${count}`) })}
  ${fieldCells(esc, [['Department', f.dept], ['Status', f.status]])}
